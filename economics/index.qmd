@@ -60,7 +60,8 @@ try:
                     dict(count=10, label="10Y", step="year", stepmode="backward"),
                     dict(count=20, label="20Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
-                ]
+                ],
+                x=1, xanchor="right", y=1.15,
             ),
         ),
         yaxis=dict(gridcolor="#e0e0e0", autorange=True, fixedrange=False),
@@ -140,7 +141,8 @@ try:
                     dict(count=10, label="10Y", step="year", stepmode="backward"),
                     dict(count=15, label="15Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
-                ]
+                ],
+                x=1, xanchor="right", y=1.15,
             ),
         ),
         yaxis=dict(gridcolor="#e0e0e0"),

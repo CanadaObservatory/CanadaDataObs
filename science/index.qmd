@@ -87,6 +87,7 @@ fig.update_layout(
                 dict(count=15, label="15Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
+            x=1, xanchor="right", y=1.15,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),

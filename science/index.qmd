@@ -75,7 +75,6 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    title="Gross Domestic Expenditure on R&D (GERD) as % of GDP",
     xaxis_title="Year",
     yaxis_title="R&D Expenditure (% of GDP)",
     plot_bgcolor="white",
@@ -90,7 +89,7 @@ fig.update_layout(
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.22,
+            x=0, xanchor="left", y=1.01,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
@@ -100,7 +99,7 @@ fig.update_layout(
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=140, t=120),
+    margin=dict(b=140, t=40),
     annotations=[dict(
         text=f"Source: OECD Main Science and Technology Indicators (MSTI) | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.42,
@@ -133,7 +132,6 @@ fig.add_trace(go.Bar(
 ))
 
 fig.update_layout(
-    title=f"R&D Expenditure as % of GDP ({latest_year})",
     xaxis_title="% of GDP",
     yaxis_title="",
     plot_bgcolor="white",

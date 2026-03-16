@@ -70,13 +70,14 @@ try:
     y_max = max(visible.max(), 3.5) + 0.5
 
     fig.update_layout(
-        title=dict(text="Canada Inflation Rate (CPI Year-over-Year Change)", font=dict(size=16)),
         xaxis_title="",
         yaxis_title="Inflation (%)",
         plot_bgcolor="white",
         xaxis=dict(
             gridcolor="#e0e0e0",
             range=[one_year_ago, x_end],
+            dtick="M1",
+            tickformat="%b<br>%Y",
             rangeselector=dict(
                 buttons=[
                     dict(count=1, label="1Y", step="year", stepmode="backward"),
@@ -86,7 +87,7 @@ try:
                     dict(count=20, label="20Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
                 ],
-                x=0, xanchor="left", y=1.22,
+                x=0, xanchor="left", y=1.01,
             ),
         ),
         yaxis=dict(
@@ -94,7 +95,7 @@ try:
             range=[y_min, y_max],
         ),
         showlegend=False,
-        margin=dict(b=100, t=120),
+        margin=dict(b=100, t=40, r=80),
         annotations=[
             dict(
                 text="2% target",
@@ -234,7 +235,6 @@ try:
     ))
 
     fig.update_layout(
-        title="GDP per Capita (PPP, Current USD)",
         xaxis_title="Year",
         yaxis_title="USD (PPP)",
         yaxis_tickformat="$,.0f",
@@ -250,7 +250,7 @@ try:
                     dict(count=20, label="20Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
                 ],
-                x=0, xanchor="left", y=1.22,
+                x=0, xanchor="left", y=1.01,
             ),
         ),
         yaxis=dict(gridcolor="#e0e0e0"),
@@ -260,7 +260,7 @@ try:
             xanchor="center", x=0.5,
             itemclick="toggle", itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=140, t=120),
+        margin=dict(b=140, t=40),
         annotations=[dict(
             text=f"Source: OECD National Accounts | Data as of: {DATA_DATE}",
             xref="paper", yref="paper", x=0, y=-0.42,
@@ -296,7 +296,6 @@ try:
     ))
 
     fig.update_layout(
-        title=f"GDP per Capita, PPP ({latest_year})",
         xaxis_title="USD (PPP)",
         xaxis_tickformat="$,.0f",
         yaxis_title="",

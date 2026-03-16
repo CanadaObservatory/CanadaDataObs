@@ -34,7 +34,6 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    title="Canada Total Population (Quarterly Estimates)",
     xaxis_title="",
     yaxis_title="Population",
     yaxis_tickformat=",",
@@ -51,12 +50,12 @@ fig.update_layout(
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.22,
+            x=0, xanchor="left", y=1.01,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
     showlegend=False,
-    margin=dict(b=80, t=120),
+    margin=dict(b=80, t=40),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.15,
@@ -100,7 +99,6 @@ for i, geo in enumerate(top_provinces):
     ))
 
 fig.update_layout(
-    title="Population by Province (Top 10 by Current Population)",
     xaxis_title="",
     yaxis_title="Population",
     yaxis_tickformat=",",
@@ -117,7 +115,7 @@ fig.update_layout(
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.22,
+            x=0, xanchor="left", y=1.01,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
@@ -127,7 +125,7 @@ fig.update_layout(
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=140, t=120),
+    margin=dict(b=140, t=40),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.42,

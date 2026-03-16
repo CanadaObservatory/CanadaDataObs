@@ -11,7 +11,8 @@ from pipeline.config import (
 )
 
 
-def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True):
+def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
+                  has_legend=True):
     """Standard layout for all DataCan charts."""
     xaxis_config = dict(title=xaxis_title, gridcolor="#e0e0e0")
     if range_slider:
@@ -20,9 +21,20 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True):
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
-            ]
+            ],
+            x=0, y=1.15,  # position above chart, left-aligned to avoid title overlap
         )
-        xaxis_config["rangeslider"] = dict(visible=True)
+        xaxis_config["rangeslider"] = dict(visible=True, thickness=0.08)
+
+    # Spacing depends on whether there's a legend below the chart
+    if has_legend:
+        legend_y = -0.45
+        source_y = -0.62
+        bottom_margin = 180
+    else:
+        legend_y = -0.3
+        source_y = -0.3
+        bottom_margin = 120
 
     return go.Layout(
         title=dict(text=title, font=dict(size=18)),
@@ -33,18 +45,18 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True):
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=-0.3,
+            y=legend_y,
             xanchor="center",
             x=0.5,
             itemclick="toggle",
             itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=120),
+        margin=dict(b=bottom_margin, t=80),
         annotations=[
             dict(
                 text=f"Data as of: {DATA_DATE}",
                 xref="paper", yref="paper",
-                x=1, y=-0.45,
+                x=1, y=source_y,
                 showarrow=False,
                 font=dict(size=10, color="#999"),
             )

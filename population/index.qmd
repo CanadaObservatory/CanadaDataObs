@@ -47,15 +47,17 @@ fig.update_layout(
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
-            ]
+            ],
+            x=0, y=1.15,
         ),
-        rangeslider=dict(visible=True),
+        rangeslider=dict(visible=True, thickness=0.08),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
     showlegend=False,
+    margin=dict(t=80, b=100),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
-        xref="paper", yref="paper", x=0, y=-0.15,
+        xref="paper", yref="paper", x=0, y=-0.2,
         showarrow=False, font=dict(size=10, color="#999"),
     )],
 )
@@ -109,21 +111,22 @@ fig.update_layout(
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
-            ]
+            ],
+            x=0, y=1.15,
         ),
-        rangeslider=dict(visible=True),
+        rangeslider=dict(visible=True, thickness=0.08),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
     hovermode="x unified",
     legend=dict(
-        orientation="h", yanchor="bottom", y=-0.4,
+        orientation="h", yanchor="bottom", y=-0.5,
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=150),
+    margin=dict(t=80, b=200),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
-        xref="paper", yref="paper", x=0, y=-0.55,
+        xref="paper", yref="paper", x=0, y=-0.65,
         showarrow=False, font=dict(size=10, color="#999"),
     )],
 )

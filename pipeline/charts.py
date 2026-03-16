@@ -25,7 +25,7 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.18,
+            x=0, xanchor="left", y=1.22,
         )
 
     # Spacing depends on whether there's a legend below the chart
@@ -53,7 +53,7 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
             itemclick="toggle",
             itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=bottom_margin, t=100),
+        margin=dict(b=bottom_margin, t=120),
         annotations=[
             dict(
                 text=f"Data as of: {DATA_DATE}",

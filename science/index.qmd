@@ -90,7 +90,7 @@ fig.update_layout(
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.18,
+            x=0, xanchor="left", y=1.22,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
@@ -100,7 +100,7 @@ fig.update_layout(
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=140, t=100),
+    margin=dict(b=140, t=120),
     annotations=[dict(
         text=f"Source: OECD Main Science and Technology Indicators (MSTI) | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.42,

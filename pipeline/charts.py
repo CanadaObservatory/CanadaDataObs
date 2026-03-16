@@ -11,11 +11,22 @@ from pipeline.config import (
 )
 
 
-def _base_layout(title, yaxis_title, xaxis_title="Year"):
+def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True):
     """Standard layout for all DataCan charts."""
+    xaxis_config = dict(title=xaxis_title, gridcolor="#e0e0e0")
+    if range_slider:
+        xaxis_config["rangeselector"] = dict(
+            buttons=[
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All"),
+            ]
+        )
+        xaxis_config["rangeslider"] = dict(visible=True)
+
     return go.Layout(
         title=dict(text=title, font=dict(size=18)),
-        xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0"),
+        xaxis=xaxis_config,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
         plot_bgcolor="white",
         hovermode="x unified",

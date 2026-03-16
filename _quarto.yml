@@ -11,6 +11,8 @@ website:
         text: Home
       - href: population/index.qmd
         text: Population
+      - href: economics/index.qmd
+        text: Economics
       - href: science/index.qmd
         text: Science & Innovation
       - href: about.qmd

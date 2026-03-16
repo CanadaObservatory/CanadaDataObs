@@ -103,5 +103,45 @@ def fetch_rd_expenditure():
     return df
 
 
+def fetch_gdp_per_capita():
+    """
+    Fetch GDP per capita (current prices, PPP, USD) for OECD peers.
+    Uses SNA_TABLE1 — GDP per head of population.
+    Dimensions: REF_AREA.MEASURE.ACTIVITY.PRICE_BASE.TRANSFORMATION.UNIT_MEASURE
+    """
+    logger.info("Fetching OECD GDP per capita (PPP, current prices)...")
+
+    country_str = "+".join(PEER_CODES)
+    df = _fetch_oecd_csv(
+        dataflow="OECD.SDD.NAD,DSD_NAMAIN1@DF_TABLE1_EXPENDITURE_HCPC,1.0",
+        key=f"{country_str}.A.B1GQ_POP.V.N.USD_PPP",
+        start_period=2000,
+    )
+
+    if df is None:
+        return None
+
+    df = df[["REF_AREA", "TIME_PERIOD", "OBS_VALUE"]].copy()
+    df = df.rename(columns={
+        "REF_AREA": "country_code",
+        "TIME_PERIOD": "year",
+        "OBS_VALUE": "gdp_per_capita",
+    })
+
+    df["country_name"] = df["country_code"].map(PEER_COUNTRIES)
+    df["year"] = df["year"].astype(int)
+    df["gdp_per_capita"] = pd.to_numeric(df["gdp_per_capita"], errors="coerce")
+    df = df.dropna(subset=["gdp_per_capita"])
+    df = df.sort_values(["country_code", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "oecd_gdp_per_capita.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    logger.info(f"Saved {len(df)} rows to {out_path}")
+
+    return df
+
+
 if __name__ == "__main__":
     fetch_rd_expenditure()
+    fetch_gdp_per_capita()

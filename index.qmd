@@ -1,20 +1,49 @@
 ---
-title: "DataCan"
-subtitle: "Interactive metrics about Canada — population, economics, science & innovation"
+title: "Canada Data Observatory"
+subtitle: "Interactive metrics for informed civic conversation"
 ---
 
-DataCan provides interactive, regularly updated charts and downloadable data about Canada's key metrics. The goal is to make official statistics accessible, comparable, and useful for informed civic conversation.
+Canada Data Observatory provides interactive, regularly updated charts and downloadable data on Canada's key metrics. All data comes from official sources — primarily [Statistics Canada](https://www.statcan.gc.ca/) and the [OECD](https://data.oecd.org/) — and is updated automatically each week.
 
-All data comes from official sources — primarily [Statistics Canada](https://www.statcan.gc.ca/) and the [OECD](https://data.oecd.org/) — and is updated automatically. Where possible, Canada is shown alongside a broad set of OECD peer countries (not just the G7) to provide meaningful international context.
+Where possible, Canada is shown alongside a broad set of 20 OECD peer countries (not just the G7) to provide meaningful international context.
+
+This is an open, non-partisan project. It presents data without policy advocacy. Data files are freely downloadable for anyone to use — students, journalists, researchers, and anyone who wants accessible Canadian data.
+
+---
 
 ## Topics
 
-### [Population](population/)
-How many people live in Canada? How has the population been changing, and why? National and provincial estimates from Statistics Canada.
+::::{.columns}
 
+:::{.column width="33%"}
+### [Population](population/)
+How many people live in Canada? How has the population changed, and why? National and provincial quarterly estimates.
+
+*Source: Statistics Canada*
+:::
+
+:::{.column width="33%"}
+### [Economics](economics/)
+GDP per capita compared to peers. Inflation trends and the Bank of Canada's 2% target. How does Canada's economy measure up?
+
+*Sources: Statistics Canada, OECD*
+:::
+
+:::{.column width="33%"}
 ### [Science & Innovation](science/)
-How much does Canada invest in research and development? How does this compare to peer countries? GERD as % of GDP from OECD MSTI data.
+How much does Canada invest in R&D? How does this compare to peer countries? A key measure of long-term competitiveness.
+
+*Source: OECD MSTI*
+:::
+
+::::
 
 ---
 
-*This is an open, non-partisan project. It presents data without policy advocacy. Data files are freely downloadable for anyone to use.*
+## Principles
+
+- **Official sources only** — Statistics Canada, OECD, and other authoritative agencies
+- **Broad peer comparisons** — 20 OECD countries, not just the G7
+- **Automatically updated** — data pipelines run weekly
+- **Open and downloadable** — all cleaned data available as CSV
+- **No policy advocacy** — the data speaks for itself

@@ -10,8 +10,8 @@ from pathlib import Path
 # Ensure project root is on path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pipeline.fetch_statcan import fetch_population_quarterly, fetch_population_components
-from pipeline.fetch_oecd import fetch_rd_expenditure
+from pipeline.fetch_statcan import fetch_population_quarterly, fetch_population_components, fetch_cpi
+from pipeline.fetch_oecd import fetch_rd_expenditure, fetch_gdp_per_capita
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -39,6 +39,13 @@ def run_all():
         logger.error(f"population_components: {e}")
         results["population_components"] = "ERROR"
 
+    try:
+        df = fetch_cpi()
+        results["cpi"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"cpi: {e}")
+        results["cpi"] = "ERROR"
+
     # OECD
     logger.info("=" * 50)
     logger.info("OECD")
@@ -50,6 +57,13 @@ def run_all():
     except Exception as e:
         logger.error(f"rd_expenditure: {e}")
         results["rd_expenditure"] = "ERROR"
+
+    try:
+        df = fetch_gdp_per_capita()
+        results["gdp_per_capita"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"gdp_per_capita: {e}")
+        results["gdp_per_capita"] = "ERROR"
 
     # Summary
     logger.info("=" * 50)

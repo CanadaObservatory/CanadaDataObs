@@ -39,7 +39,18 @@ fig.update_layout(
     yaxis_title="Population",
     yaxis_tickformat=",",
     plot_bgcolor="white",
-    xaxis=dict(gridcolor="#e0e0e0"),
+    xaxis=dict(
+        gridcolor="#e0e0e0",
+        rangeselector=dict(
+            buttons=[
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(count=50, label="50Y", step="year", stepmode="backward"),
+                dict(step="all", label="All"),
+            ]
+        ),
+        rangeslider=dict(visible=True),
+    ),
     yaxis=dict(gridcolor="#e0e0e0"),
     showlegend=False,
     annotations=[dict(
@@ -90,7 +101,18 @@ fig.update_layout(
     yaxis_title="Population",
     yaxis_tickformat=",",
     plot_bgcolor="white",
-    xaxis=dict(gridcolor="#e0e0e0"),
+    xaxis=dict(
+        gridcolor="#e0e0e0",
+        rangeselector=dict(
+            buttons=[
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(count=50, label="50Y", step="year", stepmode="backward"),
+                dict(step="all", label="All"),
+            ]
+        ),
+        rangeslider=dict(visible=True),
+    ),
     yaxis=dict(gridcolor="#e0e0e0"),
     hovermode="x unified",
     legend=dict(

@@ -40,4 +40,4 @@ All cleaned data files are freely available for download in CSV format. They are
 
 ## Code
 
-The source code for this project is open and available on [GitHub](https://github.com/danweaver/DataCan).
+The source code for this project is open and available on [GitHub](https://github.com/CanadaObservatory/CanadaDataObs).

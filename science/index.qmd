@@ -71,7 +71,17 @@ fig.update_layout(
     xaxis_title="Year",
     yaxis_title="R&D Expenditure (% of GDP)",
     plot_bgcolor="white",
-    xaxis=dict(gridcolor="#e0e0e0"),
+    xaxis=dict(
+        gridcolor="#e0e0e0",
+        rangeselector=dict(
+            buttons=[
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=15, label="15Y", step="year", stepmode="backward"),
+                dict(step="all", label="All"),
+            ]
+        ),
+        rangeslider=dict(visible=True),
+    ),
     yaxis=dict(gridcolor="#e0e0e0"),
     hovermode="x unified",
     legend=dict(

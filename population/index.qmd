@@ -43,17 +43,20 @@ fig.update_layout(
         gridcolor="#e0e0e0",
         rangeselector=dict(
             buttons=[
+                dict(count=1, label="1Y", step="year", stepmode="backward"),
+                dict(count=2, label="2Y", step="year", stepmode="backward"),
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.15,
+            x=0, xanchor="left", y=1.18,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
     showlegend=False,
-    margin=dict(b=80, t=80),
+    margin=dict(b=80, t=100),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.15,
@@ -106,12 +109,15 @@ fig.update_layout(
         gridcolor="#e0e0e0",
         rangeselector=dict(
             buttons=[
+                dict(count=1, label="1Y", step="year", stepmode="backward"),
+                dict(count=2, label="2Y", step="year", stepmode="backward"),
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, xanchor="left", y=1.15,
+            x=0, xanchor="left", y=1.18,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
@@ -121,7 +127,7 @@ fig.update_layout(
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=140, t=80),
+    margin=dict(b=140, t=100),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.42,

@@ -18,11 +18,14 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
     if range_slider:
         xaxis_config["rangeselector"] = dict(
             buttons=[
+                dict(count=1, label="1Y", step="year", stepmode="backward"),
+                dict(count=2, label="2Y", step="year", stepmode="backward"),
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=1, xanchor="right", y=1.15,
+            x=0, xanchor="left", y=1.18,
         )
 
     # Spacing depends on whether there's a legend below the chart
@@ -50,7 +53,7 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
             itemclick="toggle",
             itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=bottom_margin, t=80),
+        margin=dict(b=bottom_margin, t=100),
         annotations=[
             dict(
                 text=f"Data as of: {DATA_DATE}",

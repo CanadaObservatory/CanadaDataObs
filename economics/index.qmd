@@ -57,7 +57,7 @@ try:
 
     # Bank of Canada 2% midpoint target
     fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.7,
-                  annotation_text="2% target", annotation_position="top left")
+                  annotation_text="2% target", annotation_position="top right")
 
     # Default to most recent 1 year — compute y-range from visible data
     from datetime import timedelta
@@ -79,17 +79,18 @@ try:
             rangeselector=dict(
                 buttons=[
                     dict(count=1, label="1Y", step="year", stepmode="backward"),
+                    dict(count=2, label="2Y", step="year", stepmode="backward"),
                     dict(count=5, label="5Y", step="year", stepmode="backward"),
                     dict(count=10, label="10Y", step="year", stepmode="backward"),
                     dict(count=20, label="20Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
                 ],
-                x=0, xanchor="left", y=1.15,
+                x=0, xanchor="left", y=1.18,
             ),
         ),
         yaxis=dict(gridcolor="#e0e0e0", range=[y_min, y_max]),
         showlegend=False,
-        margin=dict(b=100, t=80),
+        margin=dict(b=100, t=100),
         annotations=[
             dict(
                 text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {DATA_DATE}",
@@ -117,8 +118,36 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!plots.length) return;
     var cpiPlot = plots[0]; // CPI chart is first on the page
 
+    // Find the bar trace (type === 'bar')
+    var barIdx = 0;
+    for (var t = 0; t < cpiPlot.data.length; t++) {
+      if (cpiPlot.data[t].type === 'bar') { barIdx = t; break; }
+    }
+
+    function rescaleY(xMin, xMax) {
+      var xData = cpiPlot.data[barIdx].x;
+      var yData = cpiPlot.data[barIdx].y;
+      var visibleY = [];
+      for (var i = 0; i < xData.length; i++) {
+        var t = new Date(xData[i]).getTime();
+        if (t >= xMin && t <= xMax) {
+          visibleY.push(yData[i]);
+        }
+      }
+      if (visibleY.length > 0) {
+        var yMin = Math.min.apply(null, visibleY);
+        var yMax = Math.max.apply(null, visibleY);
+        // Pad and ensure target band (0-3.5%) is always visible
+        yMin = Math.min(yMin, 0) - 0.5;
+        yMax = Math.max(yMax, 3.5) + 0.5;
+        Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]});
+      }
+    }
+
     cpiPlot.on('plotly_relayout', function(ed) {
-      // Get the new x-range from the event
+      // Ignore our own relayout calls (yaxis.range only)
+      if (ed['yaxis.range'] && !ed['xaxis.range[0]'] && !ed['xaxis.range'] && !ed['xaxis.autorange']) return;
+
       var xMin, xMax;
       if (ed['xaxis.range[0]'] !== undefined) {
         xMin = new Date(ed['xaxis.range[0]']).getTime();
@@ -128,34 +157,15 @@ document.addEventListener('DOMContentLoaded', function() {
         xMax = new Date(ed['xaxis.range'][1]).getTime();
       } else if (ed['xaxis.autorange']) {
         // "All" button — use full data range
-        var allY = cpiPlot.data[0].y;
+        var allY = cpiPlot.data[barIdx].y;
         var minY = Math.min.apply(null, allY);
         var maxY = Math.max.apply(null, allY);
         Plotly.relayout(cpiPlot, {'yaxis.range': [minY - 1, maxY + 1]});
         return;
       } else {
-        return; // Not an x-range change
+        return;
       }
-
-      // Find y-values within the visible x-range
-      var xData = cpiPlot.data[0].x;
-      var yData = cpiPlot.data[0].y;
-      var visibleY = [];
-      for (var i = 0; i < xData.length; i++) {
-        var t = new Date(xData[i]).getTime();
-        if (t >= xMin && t <= xMax) {
-          visibleY.push(yData[i]);
-        }
-      }
-
-      if (visibleY.length > 0) {
-        var yMin = Math.min.apply(null, visibleY);
-        var yMax = Math.max.apply(null, visibleY);
-        // Pad and ensure target band (0-3.5%) is always visible
-        yMin = Math.min(yMin, 0) - 0.5;
-        yMax = Math.max(yMax, 3.5) + 0.5;
-        Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]});
-      }
+      rescaleY(xMin, xMax);
     });
   }, 2000);
 });
@@ -222,11 +232,14 @@ try:
             gridcolor="#e0e0e0",
             rangeselector=dict(
                 buttons=[
+                    dict(count=1, label="1Y", step="year", stepmode="backward"),
+                    dict(count=2, label="2Y", step="year", stepmode="backward"),
+                    dict(count=5, label="5Y", step="year", stepmode="backward"),
                     dict(count=10, label="10Y", step="year", stepmode="backward"),
-                    dict(count=15, label="15Y", step="year", stepmode="backward"),
+                    dict(count=20, label="20Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
                 ],
-                x=0, xanchor="left", y=1.15,
+                x=0, xanchor="left", y=1.18,
             ),
         ),
         yaxis=dict(gridcolor="#e0e0e0"),
@@ -236,7 +249,7 @@ try:
             xanchor="center", x=0.5,
             itemclick="toggle", itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=140, t=80),
+        margin=dict(b=140, t=100),
         annotations=[dict(
             text=f"Source: OECD National Accounts | Data as of: {DATA_DATE}",
             xref="paper", yref="paper", x=0, y=-0.42,

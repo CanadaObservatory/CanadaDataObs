@@ -48,19 +48,19 @@ fig.update_layout(
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=1, xanchor="right", y=1.15,
+            x=0, xanchor="left", y=1.15,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
     showlegend=False,
-    margin=dict(b=80),
+    margin=dict(b=80, t=80),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.15,
         showarrow=False, font=dict(size=10, color="#999"),
     )],
 )
-fig.show()
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
 ## Population by Province and Territory
@@ -111,7 +111,7 @@ fig.update_layout(
                 dict(count=50, label="50Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=1, xanchor="right", y=1.15,
+            x=0, xanchor="left", y=1.15,
         ),
     ),
     yaxis=dict(gridcolor="#e0e0e0"),
@@ -121,14 +121,14 @@ fig.update_layout(
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=140),
+    margin=dict(b=140, t=80),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.42,
         showarrow=False, font=dict(size=10, color="#999"),
     )],
 )
-fig.show()
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
 ## Download Data

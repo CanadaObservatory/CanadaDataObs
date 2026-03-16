@@ -59,13 +59,17 @@ try:
     fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.7,
                   annotation_text="2% target", annotation_position="top left")
 
-    # Default to most recent 1 year
+    # Default to most recent 1 year — compute y-range from visible data
     from datetime import timedelta
     latest = cpi["date"].max()
     one_year_ago = latest - timedelta(days=365)
 
+    visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
+    y_min = min(visible.min(), 0) - 0.5
+    y_max = max(visible.max(), 3.5) + 0.5
+
     fig.update_layout(
-        title="Canada Inflation Rate (CPI Year-over-Year Change)",
+        title=dict(text="Canada Inflation Rate (CPI Year-over-Year Change)", font=dict(size=16)),
         xaxis_title="",
         yaxis_title="Inflation (%)",
         plot_bgcolor="white",
@@ -80,12 +84,12 @@ try:
                     dict(count=20, label="20Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
                 ],
-                x=1, xanchor="right", y=1.15,
+                x=0, xanchor="left", y=1.15,
             ),
         ),
-        yaxis=dict(gridcolor="#e0e0e0"),
+        yaxis=dict(gridcolor="#e0e0e0", range=[y_min, y_max]),
         showlegend=False,
-        margin=dict(b=100),
+        margin=dict(b=100, t=80),
         annotations=[
             dict(
                 text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {DATA_DATE}",
@@ -99,9 +103,63 @@ try:
             ),
         ],
     )
-    fig.show()
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 except FileNotFoundError:
     print("CPI data not yet available. Run the data pipeline to fetch it.")
+```
+
+```{=html}
+<script>
+// Auto-scale y-axis when CPI chart x-range changes (e.g., via range selector buttons)
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var plots = document.querySelectorAll('.js-plotly-plot');
+    if (!plots.length) return;
+    var cpiPlot = plots[0]; // CPI chart is first on the page
+
+    cpiPlot.on('plotly_relayout', function(ed) {
+      // Get the new x-range from the event
+      var xMin, xMax;
+      if (ed['xaxis.range[0]'] !== undefined) {
+        xMin = new Date(ed['xaxis.range[0]']).getTime();
+        xMax = new Date(ed['xaxis.range[1]']).getTime();
+      } else if (ed['xaxis.range'] !== undefined) {
+        xMin = new Date(ed['xaxis.range'][0]).getTime();
+        xMax = new Date(ed['xaxis.range'][1]).getTime();
+      } else if (ed['xaxis.autorange']) {
+        // "All" button — use full data range
+        var allY = cpiPlot.data[0].y;
+        var minY = Math.min.apply(null, allY);
+        var maxY = Math.max.apply(null, allY);
+        Plotly.relayout(cpiPlot, {'yaxis.range': [minY - 1, maxY + 1]});
+        return;
+      } else {
+        return; // Not an x-range change
+      }
+
+      // Find y-values within the visible x-range
+      var xData = cpiPlot.data[0].x;
+      var yData = cpiPlot.data[0].y;
+      var visibleY = [];
+      for (var i = 0; i < xData.length; i++) {
+        var t = new Date(xData[i]).getTime();
+        if (t >= xMin && t <= xMax) {
+          visibleY.push(yData[i]);
+        }
+      }
+
+      if (visibleY.length > 0) {
+        var yMin = Math.min.apply(null, visibleY);
+        var yMax = Math.max.apply(null, visibleY);
+        // Pad and ensure target band (0-3.5%) is always visible
+        yMin = Math.min(yMin, 0) - 0.5;
+        yMax = Math.max(yMax, 3.5) + 0.5;
+        Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]});
+      }
+    });
+  }, 2000);
+});
+</script>
 ```
 
 ## GDP per Capita (PPP, Current USD)
@@ -168,7 +226,7 @@ try:
                     dict(count=15, label="15Y", step="year", stepmode="backward"),
                     dict(step="all", label="All"),
                 ],
-                x=1, xanchor="right", y=1.15,
+                x=0, xanchor="left", y=1.15,
             ),
         ),
         yaxis=dict(gridcolor="#e0e0e0"),
@@ -178,14 +236,14 @@ try:
             xanchor="center", x=0.5,
             itemclick="toggle", itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=140),
+        margin=dict(b=140, t=80),
         annotations=[dict(
             text=f"Source: OECD National Accounts | Data as of: {DATA_DATE}",
             xref="paper", yref="paper", x=0, y=-0.42,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
-    fig.show()
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 except FileNotFoundError:
     print("GDP per capita data not yet available. Run the data pipeline to fetch it.")
 ```

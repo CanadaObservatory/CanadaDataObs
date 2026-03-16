@@ -16,6 +16,8 @@ permissions:
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    # Only fetch fresh data on schedule or manual trigger, not on every push
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +30,7 @@ jobs:
 
       - name: Run data pipeline
         run: python pipeline/run_pipeline.py
+        timeout-minutes: 5
         continue-on-error: true  # Don't fail deploy if one source is down
 
       - name: Commit updated data
@@ -40,6 +43,8 @@ jobs:
 
   deploy:
     needs: update-data
+    # Run deploy even if update-data was skipped (on push) or failed
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

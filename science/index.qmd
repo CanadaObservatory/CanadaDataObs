@@ -19,6 +19,10 @@ from pipeline.config import (
 
 Gross Domestic Expenditure on R&D (GERD) as a percentage of GDP is a standard measure of a nation's investment in research and development. This chart shows Canada alongside its OECD peers.
 
+::: {.callout-note}
+**Data lag:** R&D expenditure statistics are compiled nationally and reported to the OECD with a significant delay — typically 2–3 years. Countries report at different speeds, so the most recent year may not have full coverage. The OECD updates the MSTI database twice per year (March and September). The peer average line is only shown for years where at least half of peer countries have reported.
+:::
+
 Click any country name in the legend to toggle it on/off. Double-click to isolate one country.
 
 ```{python}

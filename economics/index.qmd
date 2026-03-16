@@ -17,7 +17,7 @@ from pipeline.config import (
 
 ## Inflation (CPI Year-over-Year)
 
-Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The Bank of Canada targets 2% inflation (shown as a dashed line).
+Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
 
 ```{python}
 #| echo: false
@@ -32,10 +32,22 @@ try:
     cpi["inflation_yoy"] = cpi["cpi_value"].pct_change(periods=12) * 100
     cpi = cpi.dropna(subset=["inflation_yoy"])
 
-    # Color bars: red above target, blue below
-    colors = [CANADA_COLOR if v >= 2 else "#1f77b4" for v in cpi["inflation_yoy"]]
+    # Color bars: red above 3% (above target range), blue below 1% (below range), dark grey in range
+    colors = []
+    for v in cpi["inflation_yoy"]:
+        if v > 3:
+            colors.append(CANADA_COLOR)
+        elif v < 1:
+            colors.append("#1f77b4")
+        else:
+            colors.append("#555555")
 
     fig = go.Figure()
+
+    # Target range band (1-3%)
+    fig.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.4,
+                  line_width=0, layer="below")
+
     fig.add_trace(go.Bar(
         x=cpi["date"],
         y=cpi["inflation_yoy"],
@@ -43,9 +55,14 @@ try:
         hovertemplate="<b>%{x|%b %Y}</b><br>Inflation: %{y:.1f}%<extra></extra>",
     ))
 
-    # Bank of Canada 2% target
-    fig.add_hline(y=2, line_dash="dash", line_color="#1f77b4", opacity=0.7,
+    # Bank of Canada 2% midpoint target
+    fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.7,
                   annotation_text="2% target", annotation_position="top left")
+
+    # Default to most recent 1 year
+    from datetime import timedelta
+    latest = cpi["date"].max()
+    one_year_ago = latest - timedelta(days=365)
 
     fig.update_layout(
         title="Canada Inflation Rate (CPI Year-over-Year Change)",
@@ -54,8 +71,10 @@ try:
         plot_bgcolor="white",
         xaxis=dict(
             gridcolor="#e0e0e0",
+            range=[one_year_ago, latest],
             rangeselector=dict(
                 buttons=[
+                    dict(count=1, label="1Y", step="year", stepmode="backward"),
                     dict(count=5, label="5Y", step="year", stepmode="backward"),
                     dict(count=10, label="10Y", step="year", stepmode="backward"),
                     dict(count=20, label="20Y", step="year", stepmode="backward"),
@@ -64,14 +83,21 @@ try:
                 x=1, xanchor="right", y=1.15,
             ),
         ),
-        yaxis=dict(gridcolor="#e0e0e0", autorange=True, fixedrange=False),
+        yaxis=dict(gridcolor="#e0e0e0"),
         showlegend=False,
-        margin=dict(b=80),
-        annotations=[dict(
-            text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {DATA_DATE}",
-            xref="paper", yref="paper", x=0, y=-0.15,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
+        margin=dict(b=100),
+        annotations=[
+            dict(
+                text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {DATA_DATE}",
+                xref="paper", yref="paper", x=0, y=-0.15,
+                showarrow=False, font=dict(size=10, color="#999"),
+            ),
+            dict(
+                text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
+                xref="paper", yref="paper", x=0, y=-0.22,
+                showarrow=False, font=dict(size=10, color="#999"),
+            ),
+        ],
     )
     fig.show()
 except FileNotFoundError:

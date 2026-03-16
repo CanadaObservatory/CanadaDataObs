@@ -1,0 +1,5 @@
+pandas
+plotly
+stats-can
+pandasdmx
+kaleido

@@ -1,0 +1,20 @@
+---
+title: "DataCan"
+subtitle: "Interactive metrics about Canada — population, economics, science & innovation"
+---
+
+DataCan provides interactive, regularly updated charts and downloadable data about Canada's key metrics. The goal is to make official statistics accessible, comparable, and useful for informed civic conversation.
+
+All data comes from official sources — primarily [Statistics Canada](https://www.statcan.gc.ca/) and the [OECD](https://data.oecd.org/) — and is updated automatically. Where possible, Canada is shown alongside a broad set of OECD peer countries (not just the G7) to provide meaningful international context.
+
+## Topics
+
+### [Population](population/)
+How many people live in Canada? How has the population been changing, and why? National and provincial estimates from Statistics Canada.
+
+### [Science & Innovation](science/)
+How much does Canada invest in research and development? How does this compare to peer countries? GERD as % of GDP from OECD MSTI data.
+
+---
+
+*This is an open, non-partisan project. It presents data without policy advocacy. Data files are freely downloadable for anyone to use.*

@@ -1,0 +1,43 @@
+---
+title: "About DataCan"
+---
+
+## Purpose
+
+DataCan is a neutral, evidence-focused project that provides Canadians with easy access to key metrics about their country. It aims to inform civic conversation with objective, quantified data — without policy advocacy or partisan framing.
+
+## Data Sources
+
+- **Statistics Canada** — Population estimates, economic indicators, CPI. Accessed via the [Statistics Canada Web Data Service](https://www.statcan.gc.ca/en/developers/wds) (REST API).
+- **OECD** — International comparisons including R&D spending, GDP metrics. Accessed via the [OECD SDMX API](https://sdmx.oecd.org/).
+
+## Methodology
+
+- All data comes from official, publicly available sources
+- Data is fetched and cleaned by automated Python scripts
+- Charts use consistent styling: Canada is highlighted in red, peer countries in grey
+- International comparisons use a broad OECD peer group (20 countries), not just the G7
+- Each chart notes its data source and the date the data was last updated
+- Raw data files are available for download on each topic page
+
+## Peer Group
+
+For international comparisons, DataCan uses a set of 20 comparable OECD economies:
+
+**G7:** Canada, United States, United Kingdom, Germany, France, Italy, Japan
+
+**Extended peers:** Australia, South Korea, Netherlands, Sweden, Switzerland, Norway, Denmark, Finland, Israel, Austria, Belgium, Ireland, New Zealand
+
+This broader set provides more meaningful context than the G7 alone, which excludes important peers.
+
+## Update Schedule
+
+Data is updated weekly via automated scripts. Some data sources (e.g., population estimates) are updated quarterly by their source agency; others (e.g., OECD R&D data) are updated annually.
+
+## Open Data
+
+All cleaned data files are freely available for download in CSV format. They are intended to be usable by students, journalists, researchers, and anyone else who wants to work with Canadian data in a simple, accessible format.
+
+## Code
+
+The source code for this project is open and available on [GitHub](https://github.com/danweaver/DataCan).

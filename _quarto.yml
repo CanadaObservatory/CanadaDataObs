@@ -1,0 +1,29 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "DataCan"
+  description: "Interactive metrics about Canada — population, economics, science & innovation"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: population/index.qmd
+        text: Population
+      - href: science/index.qmd
+        text: Science & Innovation
+      - href: about.qmd
+        text: About
+    right:
+      - icon: github
+        href: https://github.com/danweaver/DataCan
+  page-footer:
+    center: "DataCan — Open data for informed civic conversation"
+
+format:
+  html:
+    theme: flatly
+    toc: true
+    code-fold: true
+    code-summary: "Show code"

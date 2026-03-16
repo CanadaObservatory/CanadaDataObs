@@ -1,0 +1,113 @@
+---
+title: "Population"
+description: "Canada's population trends, growth components, and provincial breakdown"
+---
+
+```{python}
+#| echo: false
+import sys
+sys.path.insert(0, "..")
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, DATA_DATE
+```
+
+## Canada's Population Over Time
+
+Canada's population has grown steadily since the mid-20th century. This chart shows quarterly population estimates for Canada as a whole.
+
+```{python}
+#| echo: false
+df = pd.read_csv("../data/population/statcan_population_quarterly.csv", parse_dates=["date"])
+
+# National total — Canada
+canada = df[df["geography"] == "Canada"].copy()
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=canada["date"],
+    y=canada["population"],
+    mode="lines",
+    line=dict(color=CANADA_COLOR, width=3),
+    hovertemplate="<b>%{x|%Y Q%{customdata}}</b><br>Population: %{y:,.0f}<extra></extra>",
+    customdata=canada["date"].dt.quarter,
+))
+
+fig.update_layout(
+    title="Canada Total Population (Quarterly Estimates)",
+    xaxis_title="",
+    yaxis_title="Population",
+    yaxis_tickformat=",",
+    plot_bgcolor="white",
+    xaxis=dict(gridcolor="#e0e0e0"),
+    yaxis=dict(gridcolor="#e0e0e0"),
+    showlegend=False,
+    annotations=[dict(
+        text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
+        xref="paper", yref="paper", x=0, y=-0.15,
+        showarrow=False, font=dict(size=10, color="#999"),
+    )],
+)
+fig.show()
+```
+
+## Population by Province and Territory
+
+Select provinces to compare using the legend. Click a name to toggle it; double-click to isolate one province.
+
+```{python}
+#| echo: false
+# Provincial breakdown
+provinces = df[df["geography"] != "Canada"].copy()
+
+# Get latest date for sorting
+latest = provinces.groupby("geography")["population"].last().sort_values(ascending=False)
+top_provinces = latest.head(10).index.tolist()
+
+# Color palette
+colors = [
+    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+    "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5",
+]
+
+fig = go.Figure()
+for i, geo in enumerate(top_provinces):
+    subset = provinces[provinces["geography"] == geo]
+    fig.add_trace(go.Scatter(
+        x=subset["date"],
+        y=subset["population"],
+        name=geo,
+        mode="lines",
+        line=dict(color=colors[i % len(colors)], width=2),
+        hovertemplate=f"<b>{geo}</b><br>%{{x|%Y Q%{{customdata}}}}: %{{y:,.0f}}<extra></extra>",
+        customdata=subset["date"].dt.quarter,
+    ))
+
+fig.update_layout(
+    title="Population by Province (Top 10 by Current Population)",
+    xaxis_title="",
+    yaxis_title="Population",
+    yaxis_tickformat=",",
+    plot_bgcolor="white",
+    xaxis=dict(gridcolor="#e0e0e0"),
+    yaxis=dict(gridcolor="#e0e0e0"),
+    hovermode="x unified",
+    legend=dict(
+        orientation="h", yanchor="bottom", y=-0.4,
+        xanchor="center", x=0.5,
+        itemclick="toggle", itemdoubleclick="toggleothers",
+    ),
+    margin=dict(b=150),
+    annotations=[dict(
+        text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
+        xref="paper", yref="paper", x=0, y=-0.55,
+        showarrow=False, font=dict(size=10, color="#999"),
+    )],
+)
+fig.show()
+```
+
+## Download Data
+
+- [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01

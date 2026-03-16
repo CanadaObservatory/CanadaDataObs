@@ -22,19 +22,17 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All"),
             ],
-            x=0, y=1.15,  # position above chart, left-aligned to avoid title overlap
         )
-        xaxis_config["rangeslider"] = dict(visible=True, thickness=0.08)
 
     # Spacing depends on whether there's a legend below the chart
     if has_legend:
-        legend_y = -0.45
-        source_y = -0.62
-        bottom_margin = 180
-    else:
         legend_y = -0.3
-        source_y = -0.3
-        bottom_margin = 120
+        source_y = -0.42
+        bottom_margin = 140
+    else:
+        legend_y = -0.2
+        source_y = -0.2
+        bottom_margin = 80
 
     return go.Layout(
         title=dict(text=title, font=dict(size=18)),

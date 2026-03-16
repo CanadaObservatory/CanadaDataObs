@@ -25,12 +25,14 @@ try:
     cpi = pd.read_csv("../data/economics/statcan_cpi.csv", parse_dates=["date"])
     cpi = cpi.dropna(subset=["inflation_yoy"])
 
+    # Color bars: red above target, blue below
+    colors = [CANADA_COLOR if v >= 2 else "#1f77b4" for v in cpi["inflation_yoy"]]
+
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
+    fig.add_trace(go.Bar(
         x=cpi["date"],
         y=cpi["inflation_yoy"],
-        mode="lines",
-        line=dict(color=CANADA_COLOR, width=2),
+        marker_color=colors,
         hovertemplate="<b>%{x|%b %Y}</b><br>Inflation: %{y:.1f}%<extra></extra>",
     ))
 
@@ -53,10 +55,10 @@ try:
                     dict(step="all", label="All"),
                 ]
             ),
-            rangeslider=dict(visible=True),
         ),
-        yaxis=dict(gridcolor="#e0e0e0"),
+        yaxis=dict(gridcolor="#e0e0e0", autorange=True, fixedrange=False),
         showlegend=False,
+        margin=dict(b=80),
         annotations=[dict(
             text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {DATA_DATE}",
             xref="paper", yref="paper", x=0, y=-0.15,
@@ -133,19 +135,18 @@ try:
                     dict(step="all", label="All"),
                 ]
             ),
-            rangeslider=dict(visible=True),
         ),
         yaxis=dict(gridcolor="#e0e0e0"),
         hovermode="x unified",
         legend=dict(
-            orientation="h", yanchor="bottom", y=-0.35,
+            orientation="h", yanchor="bottom", y=-0.3,
             xanchor="center", x=0.5,
             itemclick="toggle", itemdoubleclick="toggleothers",
         ),
-        margin=dict(b=150),
+        margin=dict(b=140),
         annotations=[dict(
             text=f"Source: OECD National Accounts | Data as of: {DATA_DATE}",
-            xref="paper", yref="paper", x=0, y=-0.5,
+            xref="paper", yref="paper", x=0, y=-0.42,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )

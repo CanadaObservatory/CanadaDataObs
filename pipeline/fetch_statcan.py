@@ -148,18 +148,18 @@ def fetch_cpi():
     available_cols = [c for c in keep_cols if c in df.columns]
     df = df[available_cols].copy()
 
-    # Keep only "All-items" and Canada-level
+    # Keep only exactly "All-items" (2002=100 base) and Canada-level
     if "product_group" in df.columns:
-        df = df[df["product_group"].str.contains("All-items", case=False, na=False)]
+        df = df[df["product_group"] == "All-items"]
     if "geography" in df.columns:
         df = df[df["geography"] == "Canada"]
 
     df["date"] = pd.to_datetime(df["date"])
+    df["cpi_value"] = pd.to_numeric(df["cpi_value"], errors="coerce")
     df = df.dropna(subset=["cpi_value"])
     df = df.sort_values("date").reset_index(drop=True)
 
-    # Calculate year-over-year inflation rate
-    df["cpi_value"] = pd.to_numeric(df["cpi_value"], errors="coerce")
+    # Calculate year-over-year inflation rate (12 months back, single series)
     df["inflation_yoy"] = df["cpi_value"].pct_change(periods=12) * 100
 
     out_path = DATA_DIR / "economics" / "statcan_cpi.csv"

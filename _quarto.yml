@@ -17,7 +17,7 @@ website:
         text: About
     right:
       - icon: github
-        href: https://github.com/danweaver/DataCan
+        href: https://github.com/CanadaObservatory/CanadaDataObs
   page-footer:
     center: "DataCan — Open data for informed civic conversation"
 

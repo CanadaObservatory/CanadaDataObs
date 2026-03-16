@@ -23,6 +23,13 @@ Canada's inflation rate, measured as the year-over-year change in the Consumer P
 #| echo: false
 try:
     cpi = pd.read_csv("../data/economics/statcan_cpi.csv", parse_dates=["date"])
+    # Filter to single "All-items" series (not sub-categories)
+    if "product_group" in cpi.columns:
+        cpi = cpi[cpi["product_group"] == "All-items"]
+    cpi = cpi.sort_values("date").reset_index(drop=True)
+    # Recompute YoY in case CSV has stale values from mixed product groups
+    cpi["cpi_value"] = pd.to_numeric(cpi["cpi_value"], errors="coerce")
+    cpi["inflation_yoy"] = cpi["cpi_value"].pct_change(periods=12) * 100
     cpi = cpi.dropna(subset=["inflation_yoy"])
 
     # Color bars: red above target, blue below

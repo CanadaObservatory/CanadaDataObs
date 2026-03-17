@@ -60,14 +60,17 @@ try:
 
     # Default to most recent 1 year — compute y-range from visible data
     from datetime import timedelta
+    import math
     latest = cpi["date"].max()
     one_year_ago = latest - timedelta(days=365)
-    # Extend x-axis by 1 month so the latest bar isn't cut off
+    # Buffer x-axis: half month before start, one month after end
+    x_start = one_year_ago - timedelta(days=15)
     x_end = latest + timedelta(days=31)
 
     visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
-    y_min = min(visible.min(), 0) - 0.5
-    y_max = max(visible.max(), 3.5) + 0.5
+    # Round y-range to clean 0.5 boundaries with padding
+    y_min = math.floor(min(visible.min(), 0) * 2) / 2 - 0.5
+    y_max = math.ceil(max(visible.max(), 3.5) * 2) / 2 + 0.5
 
     fig.update_layout(
         xaxis_title="",
@@ -75,7 +78,7 @@ try:
         plot_bgcolor="white",
         xaxis=dict(
             gridcolor="#e0e0e0",
-            range=[one_year_ago, x_end],
+            range=[x_start, x_end],
             dtick="M1",
             tickformat="%b<br>%Y",
             rangeselector=dict(
@@ -149,9 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
       if (visibleY.length > 0) {
         var yMin = Math.min.apply(null, visibleY);
         var yMax = Math.max.apply(null, visibleY);
-        // Pad and ensure target band (0-3.5%) is always visible
-        yMin = Math.min(yMin, 0) - 0.5;
-        yMax = Math.max(yMax, 3.5) + 0.5;
+        // Round to clean 0.5 boundaries with padding, ensure target band visible
+        yMin = Math.floor(Math.min(yMin, 0) * 2) / 2 - 0.5;
+        yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 0.5;
         Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]});
       }
     }

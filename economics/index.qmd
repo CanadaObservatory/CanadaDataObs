@@ -152,6 +152,18 @@ except FileNotFoundError:
     console.log('[CPI] Polling active. Plotly ' + Plotly.version + ', bar trace ' + barIdx);
 
     var lastKey = '';
+    var logged = false;
+
+    // Pre-build array of {ms, y} from trace data for fast lookup
+    var points = [];
+    var rawX = el.data[barIdx].x;
+    var rawY = el.data[barIdx].y;
+    for (var j = 0; j < rawX.length; j++) {
+      var ms = new Date(rawX[j]).getTime();
+      var yv = Number(rawY[j]);
+      if (!isNaN(ms) && !isNaN(yv)) points.push({ms: ms, y: yv});
+    }
+    console.log('[CPI] Built ' + points.length + ' data points. Sample x[0]=' + rawX[0] + ' → ms=' + new Date(rawX[0]).getTime());
 
     setInterval(function() {
       try {
@@ -161,17 +173,23 @@ except FileNotFoundError:
         if (key === lastKey) return;
         lastKey = key;
 
-        var xMin = new Date(xr[0]).getTime();
-        var xMax = new Date(xr[1]).getTime();
+        // _fullLayout.xaxis.range values could be date strings or ms timestamps
+        var xMin = typeof xr[0] === 'number' ? xr[0] : new Date(xr[0]).getTime();
+        var xMax = typeof xr[1] === 'number' ? xr[1] : new Date(xr[1]).getTime();
+        if (!logged) {
+          console.log('[CPI] xrange type:', typeof xr[0], 'val:', xr[0], '→ ms:', xMin);
+          logged = true;
+        }
         var spanMo = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
 
-        var xs = el.data[barIdx].x, ys = el.data[barIdx].y;
         var vis = [];
-        for (var i = 0; i < xs.length; i++) {
-          var d = new Date(xs[i]).getTime();
-          if (d >= xMin && d <= xMax) vis.push(ys[i]);
+        for (var i = 0; i < points.length; i++) {
+          if (points[i].ms >= xMin && points[i].ms <= xMax) vis.push(points[i].y);
         }
-        if (!vis.length) return;
+        if (!vis.length) {
+          console.log('[CPI] No visible points in range');
+          return;
+        }
 
         var lo = Math.min.apply(null, vis);
         var hi = Math.max.apply(null, vis);
@@ -179,7 +197,7 @@ except FileNotFoundError:
         var yMax = Math.ceil(Math.max(hi, 3.5) * 2) / 2 + 1.0;
         var dtick = spanMo <= MAX_MONTHS_FOR_MONTHLY ? 'M1' : null;
 
-        console.log('[CPI] Range changed → y:[' + yMin + ',' + yMax + '] span:' + spanMo.toFixed(0) + 'mo dtick:' + dtick);
+        console.log('[CPI] Rescale → y:[' + yMin + ',' + yMax + '] vis:' + vis.length + 'pts span:' + spanMo.toFixed(0) + 'mo dtick:' + dtick);
         Plotly.relayout(el, {'yaxis.range': [yMin, yMax], 'xaxis.dtick': dtick});
       } catch(e) {
         console.error('[CPI]', e);

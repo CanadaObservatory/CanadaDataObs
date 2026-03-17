@@ -79,6 +79,7 @@ try:
         xaxis=dict(
             gridcolor="#e0e0e0",
             range=[x_start, x_end],
+            dtick="M1",
             tickformat="%b<br>%Y",
             rangeselector=dict(
                 buttons=[
@@ -125,65 +126,90 @@ except FileNotFoundError:
 
 ```{=html}
 <script>
-// Auto-scale y-axis when CPI chart x-range changes (e.g., via range selector buttons)
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    var plots = document.querySelectorAll('.js-plotly-plot');
-    if (!plots.length) return;
-    var cpiPlot = plots[0]; // CPI chart is first on the page
+// Auto-scale y-axis and adjust x-axis ticks when CPI chart range changes
+(function() {
+  var DEBOUNCE_MS = 100;
+  var MAX_MONTHS_FOR_MONTHLY_TICKS = 13;
+  var timer = null;
+  var updating = false;
 
-    // Find the bar trace (type === 'bar')
+  function setup() {
+    var plots = document.querySelectorAll('.js-plotly-plot');
+    if (!plots.length) { setTimeout(setup, 500); return; }
+    var cpiPlot = plots[0];
+    if (!cpiPlot.data || !cpiPlot.data.length) { setTimeout(setup, 500); return; }
+
+    // Find the bar trace
     var barIdx = 0;
     for (var t = 0; t < cpiPlot.data.length; t++) {
       if (cpiPlot.data[t].type === 'bar') { barIdx = t; break; }
     }
 
-    var rescaling = false; // guard against infinite loop
-
-    function rescaleY() {
-      if (rescaling) return;
-      // Read the ACTUAL current x-axis range from the layout
-      var layout = cpiPlot.layout;
-      var xRange = layout.xaxis && layout.xaxis.range;
+    function adjustChart() {
+      if (updating) return;
+      var xRange = cpiPlot._fullLayout.xaxis.range;
       if (!xRange || xRange.length < 2) return;
 
       var xMin = new Date(xRange[0]).getTime();
       var xMax = new Date(xRange[1]).getTime();
+      var spanMonths = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
 
+      // Compute visible y-range
       var xData = cpiPlot.data[barIdx].x;
       var yData = cpiPlot.data[barIdx].y;
       var visibleY = [];
       for (var i = 0; i < xData.length; i++) {
-        var t = new Date(xData[i]).getTime();
-        if (t >= xMin && t <= xMax) {
-          visibleY.push(yData[i]);
-        }
+        var d = new Date(xData[i]).getTime();
+        if (d >= xMin && d <= xMax) visibleY.push(yData[i]);
       }
-      if (visibleY.length > 0) {
-        var yMin = Math.min.apply(null, visibleY);
-        var yMax = Math.max.apply(null, visibleY);
-        // Round to clean 0.5 boundaries with padding, ensure target band visible
-        yMin = Math.floor(Math.min(yMin, 0) * 2) / 2 - 0.5;
-        yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 1.0;
-        rescaling = true;
-        Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]}).then(function() {
-          rescaling = false;
-        });
-      }
+      if (!visibleY.length) return;
+
+      var yMin = Math.min.apply(null, visibleY);
+      var yMax = Math.max.apply(null, visibleY);
+      yMin = Math.floor(Math.min(yMin, 0) * 2) / 2 - 0.5;
+      yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 1.0;
+
+      // Determine dtick: monthly if ≤13 months, otherwise auto
+      var newDtick = (spanMonths <= MAX_MONTHS_FOR_MONTHLY_TICKS) ? 'M1' : null;
+
+      var update = {
+        'yaxis.range': [yMin, yMax],
+        'xaxis.dtick': newDtick
+      };
+
+      updating = true;
+      Plotly.relayout(cpiPlot, update).then(function() {
+        updating = false;
+      }).catch(function() {
+        updating = false;
+      });
     }
 
-    // Listen to ALL relayout events — rangeselector buttons, zoom, pan
     cpiPlot.on('plotly_relayout', function(ed) {
-      if (rescaling) return;
-      // Skip if only y-axis changed (our own call)
+      if (updating) return;
+      // Skip events that only change y-axis (our own updates)
       var keys = Object.keys(ed);
       var onlyY = keys.every(function(k) { return k.indexOf('yaxis') === 0; });
       if (onlyY) return;
-      // Use requestAnimationFrame to let the x-axis range update settle first
-      requestAnimationFrame(function() { rescaleY(); });
+      // Debounce to let Plotly settle
+      clearTimeout(timer);
+      timer = setTimeout(adjustChart, DEBOUNCE_MS);
     });
-  }, 2000);
-});
+
+    // Also hook into plotly_afterplot for rangeselector button clicks
+    cpiPlot.on('plotly_afterplot', function() {
+      if (updating) return;
+      clearTimeout(timer);
+      timer = setTimeout(adjustChart, DEBOUNCE_MS);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(setup, 1500); });
+  } else {
+    setTimeout(setup, 1500);
+  }
+})();
 </script>
 ```
 

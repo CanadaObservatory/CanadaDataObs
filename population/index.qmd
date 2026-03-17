@@ -121,11 +121,11 @@ fig.update_layout(
     yaxis=dict(gridcolor="#e0e0e0"),
     hovermode="x unified",
     legend=dict(
-        orientation="h", yanchor="bottom", y=-0.3,
+        orientation="h", yanchor="top", y=-0.08,
         xanchor="center", x=0.5,
         itemclick="toggle", itemdoubleclick="toggleothers",
     ),
-    margin=dict(b=140, t=40),
+    margin=dict(b=180, t=40),
     annotations=[dict(
         text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {DATA_DATE}",
         xref="paper", yref="paper", x=0, y=-0.42,

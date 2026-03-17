@@ -30,11 +30,13 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
 
     # Spacing depends on whether there's a legend below the chart
     if has_legend:
-        legend_y = -0.3
-        source_y = -0.42
-        bottom_margin = 140
+        legend_y = -0.08
+        legend_yanchor = "top"
+        source_y = -0.52
+        bottom_margin = 200
     else:
         legend_y = -0.2
+        legend_yanchor = "bottom"
         source_y = -0.2
         bottom_margin = 80
 
@@ -45,7 +47,7 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
         hovermode="x unified",
         legend=dict(
             orientation="h",
-            yanchor="bottom",
+            yanchor=legend_yanchor,
             y=legend_y,
             xanchor="center",
             x=0.5,

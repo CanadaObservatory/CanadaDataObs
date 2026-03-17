@@ -130,105 +130,64 @@ except FileNotFoundError:
 
 ```{=html}
 <script>
-// Auto-scale y-axis and adjust x-axis ticks when CPI chart range changes.
-// Debug: open browser console (F12) to see "[CPI]" log messages.
+// Auto-scale y-axis and adjust x-axis ticks when CPI chart x-range changes.
+// Uses polling because Plotly 3.x does NOT fire plotly_relayout for
+// rangeselector button clicks. Polls every 300ms (lightweight).
 (function() {
-  var MAX_MONTHS_FOR_MONTHLY_TICKS = 13;
+  var POLL_MS = 300;
+  var MAX_MONTHS_FOR_MONTHLY = 13;
 
   function setup() {
-    // Check that Plotly global is available
-    if (typeof Plotly === 'undefined') {
-      console.log('[CPI] Plotly not loaded yet, retrying...');
-      setTimeout(setup, 500);
-      return;
-    }
-
+    if (typeof Plotly === 'undefined') { setTimeout(setup, 500); return; }
     var plots = document.querySelectorAll('.js-plotly-plot');
     if (!plots.length) { setTimeout(setup, 500); return; }
-    var cpiPlot = plots[0];
-    if (!cpiPlot._fullLayout) { setTimeout(setup, 500); return; }
+    var el = plots[0];
+    if (!el._fullLayout) { setTimeout(setup, 500); return; }
 
-    // Find the bar trace index
     var barIdx = -1;
-    for (var t = 0; t < cpiPlot.data.length; t++) {
-      if (cpiPlot.data[t].type === 'bar') { barIdx = t; break; }
+    for (var i = 0; i < el.data.length; i++) {
+      if (el.data[i].type === 'bar') { barIdx = i; break; }
     }
-    if (barIdx === -1) { console.log('[CPI] No bar trace found'); return; }
-    console.log('[CPI] Setup complete. Plotly version:', Plotly.version, 'bar trace:', barIdx);
+    if (barIdx < 0) return;
+    console.log('[CPI] Polling active. Plotly ' + Plotly.version + ', bar trace ' + barIdx);
 
-    var skipNext = false;
+    var lastKey = '';
 
-    function adjustChart() {
+    setInterval(function() {
       try {
-        var xRange = cpiPlot._fullLayout.xaxis.range;
-        if (!xRange || xRange.length < 2) {
-          console.log('[CPI] No x-range available');
-          return;
+        var xr = el._fullLayout.xaxis.range;
+        if (!xr) return;
+        var key = String(xr[0]) + '|' + String(xr[1]);
+        if (key === lastKey) return;
+        lastKey = key;
+
+        var xMin = new Date(xr[0]).getTime();
+        var xMax = new Date(xr[1]).getTime();
+        var spanMo = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
+
+        var xs = el.data[barIdx].x, ys = el.data[barIdx].y;
+        var vis = [];
+        for (var i = 0; i < xs.length; i++) {
+          var d = new Date(xs[i]).getTime();
+          if (d >= xMin && d <= xMax) vis.push(ys[i]);
         }
+        if (!vis.length) return;
 
-        var xMin = new Date(xRange[0]).getTime();
-        var xMax = new Date(xRange[1]).getTime();
-        var spanMonths = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
+        var lo = Math.min.apply(null, vis);
+        var hi = Math.max.apply(null, vis);
+        var yMin = lo >= 0 ? 0 : Math.floor(lo * 2) / 2 - 0.5;
+        var yMax = Math.ceil(Math.max(hi, 3.5) * 2) / 2 + 1.0;
+        var dtick = spanMo <= MAX_MONTHS_FOR_MONTHLY ? 'M1' : null;
 
-        // Collect y-values within visible x-range
-        var xData = cpiPlot.data[barIdx].x;
-        var yData = cpiPlot.data[barIdx].y;
-        var visibleY = [];
-        for (var i = 0; i < xData.length; i++) {
-          var d = new Date(xData[i]).getTime();
-          if (d >= xMin && d <= xMax) visibleY.push(yData[i]);
-        }
-        if (!visibleY.length) {
-          console.log('[CPI] No visible data points');
-          return;
-        }
-
-        var dataMin = Math.min.apply(null, visibleY);
-        var dataMax = Math.max.apply(null, visibleY);
-        // Start at 0 if all values positive, otherwise pad below
-        var yMin = dataMin >= 0 ? 0 : Math.floor(dataMin * 2) / 2 - 0.5;
-        // Ensure target band (3%) visible, plus room for buttons
-        var yMax = Math.ceil(Math.max(dataMax, 3.5) * 2) / 2 + 1.0;
-
-        // Monthly ticks if span ≤ 13 months
-        var newDtick = (spanMonths <= MAX_MONTHS_FOR_MONTHLY_TICKS) ? 'M1' : null;
-
-        console.log('[CPI] adjustChart: span=' + spanMonths.toFixed(1) + 'mo, data=[' + dataMin.toFixed(2) + ',' + dataMax.toFixed(2) + '], yRange=[' + yMin + ',' + yMax + '], dtick=' + newDtick);
-
-        skipNext = true;
-        Plotly.relayout(cpiPlot, {
-          'yaxis.range': [yMin, yMax],
-          'xaxis.dtick': newDtick
-        });
+        console.log('[CPI] Range changed → y:[' + yMin + ',' + yMax + '] span:' + spanMo.toFixed(0) + 'mo dtick:' + dtick);
+        Plotly.relayout(el, {'yaxis.range': [yMin, yMax], 'xaxis.dtick': dtick});
       } catch(e) {
-        console.error('[CPI] Error in adjustChart:', e);
+        console.error('[CPI]', e);
       }
-    }
-
-    cpiPlot.on('plotly_relayout', function(ed) {
-      var keys = Object.keys(ed);
-      console.log('[CPI] relayout event:', keys.join(', '));
-
-      if (skipNext) {
-        console.log('[CPI] Skipping (own update)');
-        skipNext = false;
-        return;
-      }
-
-      // Any relayout that involves x-axis or autorange → adjust
-      setTimeout(adjustChart, 200);
-    });
-
-    console.log('[CPI] Event listener attached, testing adjustChart on load...');
-    // Run once on setup to fix initial y-range if needed
-    // (disabled — let the Python y-range stand for initial view)
+    }, POLL_MS);
   }
 
-  // Wait for everything to be fully loaded and rendered
-  window.addEventListener('load', function() {
-    console.log('[CPI] Window loaded, waiting for Plotly render...');
-    setTimeout(setup, 2500);
-  });
+  window.addEventListener('load', function() { setTimeout(setup, 2000); });
 })();
 </script>
 ```

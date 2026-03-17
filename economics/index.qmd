@@ -154,16 +154,46 @@ except FileNotFoundError:
     var lastKey = '';
     var logged = false;
 
-    // Pre-build array of {ms, y} from trace data for fast lookup
-    var points = [];
-    var rawX = el.data[barIdx].x;
-    var rawY = el.data[barIdx].y;
-    for (var j = 0; j < rawX.length; j++) {
-      var ms = new Date(rawX[j]).getTime();
-      var yv = Number(rawY[j]);
-      if (!isNaN(ms) && !isNaN(yv)) points.push({ms: ms, y: yv});
+    // Pre-build array of {ms, y} from trace data for fast lookup.
+    // Try _fullData (Plotly 3.x processed), fall back to .data
+    var trace = (el._fullData && el._fullData[barIdx]) || el.data[barIdx];
+    var rawX = trace.x;
+    var rawY = trace.y;
+    console.log('[CPI] rawX:', Object.prototype.toString.call(rawX), 'len:', rawX ? rawX.length : 0);
+    console.log('[CPI] rawY:', Object.prototype.toString.call(rawY), 'len:', rawY ? rawY.length : 0);
+    if (rawY && rawY.length > 0) {
+      console.log('[CPI] y samples: [0]=' + rawY[0] + ' (' + typeof rawY[0] + '), [1]=' + rawY[1] + ' (' + typeof rawY[1] + ')');
     }
-    console.log('[CPI] Built ' + points.length + ' data points. Sample x[0]=' + rawX[0] + ' → ms=' + new Date(rawX[0]).getTime());
+
+    var points = [];
+    if (rawX && rawY) {
+      for (var j = 0; j < rawX.length; j++) {
+        var ms = new Date(rawX[j]).getTime();
+        var yv = parseFloat(rawY[j]);
+        if (!isNaN(ms) && !isNaN(yv)) points.push({ms: ms, y: yv});
+      }
+    }
+
+    // Fallback: try calcdata if trace data didn't work
+    if (points.length === 0 && el.calcdata && el.calcdata[barIdx]) {
+      console.log('[CPI] Trying calcdata fallback...');
+      var cd = el.calcdata[barIdx];
+      if (cd.length > 0) console.log('[CPI] calcdata[0] keys:', Object.keys(cd[0]).join(','));
+      for (var j = 0; j < cd.length; j++) {
+        var pt = cd[j];
+        // In Plotly calcdata, bar traces store x position and y value
+        if (pt.x !== undefined && pt.y !== undefined) {
+          points.push({ms: pt.x, y: pt.y});
+        } else if (pt.p !== undefined && pt.s !== undefined) {
+          points.push({ms: pt.p, y: pt.s});
+        }
+      }
+      if (points.length > 0) {
+        console.log('[CPI] calcdata: first pt ms=' + points[0].ms + ' y=' + points[0].y);
+      }
+    }
+
+    console.log('[CPI] Built ' + points.length + ' data points');
 
     setInterval(function() {
       try {

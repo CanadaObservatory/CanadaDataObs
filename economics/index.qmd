@@ -70,7 +70,7 @@ try:
     visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
     # Round y-range to clean 0.5 boundaries with padding
     y_min = math.floor(min(visible.min(), 0) * 2) / 2 - 0.5
-    y_max = math.ceil(max(visible.max(), 3.5) * 2) / 2 + 0.5
+    y_max = math.ceil(max(visible.max(), 3.5) * 2) / 2 + 1.0
 
     fig.update_layout(
         xaxis_title="",
@@ -79,7 +79,6 @@ try:
         xaxis=dict(
             gridcolor="#e0e0e0",
             range=[x_start, x_end],
-            dtick="M1",
             tickformat="%b<br>%Y",
             rangeselector=dict(
                 buttons=[
@@ -139,7 +138,18 @@ document.addEventListener('DOMContentLoaded', function() {
       if (cpiPlot.data[t].type === 'bar') { barIdx = t; break; }
     }
 
-    function rescaleY(xMin, xMax) {
+    var rescaling = false; // guard against infinite loop
+
+    function rescaleY() {
+      if (rescaling) return;
+      // Read the ACTUAL current x-axis range from the layout
+      var layout = cpiPlot.layout;
+      var xRange = layout.xaxis && layout.xaxis.range;
+      if (!xRange || xRange.length < 2) return;
+
+      var xMin = new Date(xRange[0]).getTime();
+      var xMax = new Date(xRange[1]).getTime();
+
       var xData = cpiPlot.data[barIdx].x;
       var yData = cpiPlot.data[barIdx].y;
       var visibleY = [];
@@ -154,33 +164,23 @@ document.addEventListener('DOMContentLoaded', function() {
         var yMax = Math.max.apply(null, visibleY);
         // Round to clean 0.5 boundaries with padding, ensure target band visible
         yMin = Math.floor(Math.min(yMin, 0) * 2) / 2 - 0.5;
-        yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 0.5;
-        Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]});
+        yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 1.0;
+        rescaling = true;
+        Plotly.relayout(cpiPlot, {'yaxis.range': [yMin, yMax]}).then(function() {
+          rescaling = false;
+        });
       }
     }
 
+    // Listen to ALL relayout events — rangeselector buttons, zoom, pan
     cpiPlot.on('plotly_relayout', function(ed) {
-      // Ignore our own relayout calls (yaxis.range only)
-      if (ed['yaxis.range'] && !ed['xaxis.range[0]'] && !ed['xaxis.range'] && !ed['xaxis.autorange']) return;
-
-      var xMin, xMax;
-      if (ed['xaxis.range[0]'] !== undefined) {
-        xMin = new Date(ed['xaxis.range[0]']).getTime();
-        xMax = new Date(ed['xaxis.range[1]']).getTime();
-      } else if (ed['xaxis.range'] !== undefined) {
-        xMin = new Date(ed['xaxis.range'][0]).getTime();
-        xMax = new Date(ed['xaxis.range'][1]).getTime();
-      } else if (ed['xaxis.autorange']) {
-        // "All" button — use full data range
-        var allY = cpiPlot.data[barIdx].y;
-        var minY = Math.min.apply(null, allY);
-        var maxY = Math.max.apply(null, allY);
-        Plotly.relayout(cpiPlot, {'yaxis.range': [minY - 1, maxY + 1]});
-        return;
-      } else {
-        return;
-      }
-      rescaleY(xMin, xMax);
+      if (rescaling) return;
+      // Skip if only y-axis changed (our own call)
+      var keys = Object.keys(ed);
+      var onlyY = keys.every(function(k) { return k.indexOf('yaxis') === 0; });
+      if (onlyY) return;
+      // Use requestAnimationFrame to let the x-axis range update settle first
+      requestAnimationFrame(function() { rescaleY(); });
     });
   }, 2000);
 });

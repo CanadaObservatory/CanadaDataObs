@@ -83,8 +83,7 @@ try:
         xaxis=dict(
             gridcolor="#e0e0e0",
             range=[x_start, x_end],
-            dtick="M1",
-            tickformat="%b<br>%Y",
+            tickformat="%b\n%Y",
             rangeselector=dict(
                 buttons=[
                     dict(count=1, label="1Y", step="year", stepmode="backward"),
@@ -130,14 +129,11 @@ except FileNotFoundError:
 
 ```{=html}
 <script>
-// Auto-scale y-axis and adjust x-axis ticks when CPI chart x-range changes.
+// Auto-scale y-axis when CPI chart x-range changes.
 // Uses polling because Plotly 3.x does NOT fire plotly_relayout for
-// rangeselector button clicks. Polls every 500ms.
+// rangeselector button clicks.
+// X-axis tick spacing is left entirely to Plotly's auto-tick logic.
 (function() {
-  var POLL_MS = 500;
-  // Show monthly ticks for spans up to ~2 years (with axis buffer)
-  var MAX_MONTHS_FOR_MONTHLY = 26;
-
   function setup() {
     if (typeof Plotly === 'undefined') { setTimeout(setup, 500); return; }
     var plots = document.querySelectorAll('.js-plotly-plot');
@@ -166,7 +162,7 @@ except FileNotFoundError:
     if (!points.length) return;
     console.log('[CPI] Ready: ' + points.length + ' points');
 
-    // Initialize lastKey with current range so we DON'T override on first poll
+    // Initialize lastKey with current range so we DON'T fire on first poll
     var xr0 = el._fullLayout.xaxis.range;
     var lastKey = xr0 ? String(xr0[0]) + '|' + String(xr0[1]) : '';
 
@@ -179,7 +175,6 @@ except FileNotFoundError:
 
         var xMin = typeof xr[0] === 'number' ? xr[0] : new Date(xr[0]).getTime();
         var xMax = typeof xr[1] === 'number' ? xr[1] : new Date(xr[1]).getTime();
-        var spanMo = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
 
         // Collect visible y-values
         var vis = [];
@@ -192,22 +187,20 @@ except FileNotFoundError:
         var hi = Math.max.apply(null, vis);
         var yMin = lo >= 0 ? 0 : Math.floor(lo * 2) / 2 - 0.5;
         var yMax = Math.ceil(Math.max(hi, 3.5) * 2) / 2 + 1.0;
-        var dtick = spanMo <= MAX_MONTHS_FOR_MONTHLY ? 'M1' : null;
 
-        console.log('[CPI] y:[' + yMin + ',' + yMax + '] ' + vis.length + 'pts ' + spanMo.toFixed(0) + 'mo dtick:' + dtick);
+        console.log('[CPI] y:[' + yMin + ',' + yMax + '] ' + vis.length + 'pts');
 
-        // Update key BEFORE relayout to prevent re-triggering from
-        // Plotly slightly adjusting the range after our relayout
+        // Update key BEFORE relayout to prevent re-triggering
         lastKey = key;
-        Plotly.relayout(el, {'yaxis.range': [yMin, yMax], 'xaxis.dtick': dtick}).then(function() {
-          // After relayout, capture the new range as lastKey to prevent loops
+        Plotly.relayout(el, {'yaxis.range': [yMin, yMax]}).then(function() {
+          // Capture post-relayout range to prevent loops
           var nr = el._fullLayout.xaxis.range;
           if (nr) lastKey = String(nr[0]) + '|' + String(nr[1]);
         });
       } catch(e) {
         console.error('[CPI]', e);
       }
-    }, POLL_MS);
+    }, 500);
   }
 
   window.addEventListener('load', function() { setTimeout(setup, 2000); });

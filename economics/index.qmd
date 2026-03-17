@@ -132,10 +132,11 @@ except FileNotFoundError:
 <script>
 // Auto-scale y-axis and adjust x-axis ticks when CPI chart x-range changes.
 // Uses polling because Plotly 3.x does NOT fire plotly_relayout for
-// rangeselector button clicks. Polls every 300ms (lightweight).
+// rangeselector button clicks. Polls every 500ms.
 (function() {
-  var POLL_MS = 300;
-  var MAX_MONTHS_FOR_MONTHLY = 13;
+  var POLL_MS = 500;
+  // Show monthly ticks for spans up to ~2 years (with axis buffer)
+  var MAX_MONTHS_FOR_MONTHLY = 26;
 
   function setup() {
     if (typeof Plotly === 'undefined') { setTimeout(setup, 500); return; }
@@ -144,27 +145,16 @@ except FileNotFoundError:
     var el = plots[0];
     if (!el._fullLayout) { setTimeout(setup, 500); return; }
 
+    // Find bar trace
     var barIdx = -1;
     for (var i = 0; i < el.data.length; i++) {
       if (el.data[i].type === 'bar') { barIdx = i; break; }
     }
     if (barIdx < 0) return;
-    console.log('[CPI] Polling active. Plotly ' + Plotly.version + ', bar trace ' + barIdx);
 
-    var lastKey = '';
-    var logged = false;
-
-    // Pre-build array of {ms, y} from trace data for fast lookup.
-    // Try _fullData (Plotly 3.x processed), fall back to .data
+    // Build lookup array from trace data
     var trace = (el._fullData && el._fullData[barIdx]) || el.data[barIdx];
-    var rawX = trace.x;
-    var rawY = trace.y;
-    console.log('[CPI] rawX:', Object.prototype.toString.call(rawX), 'len:', rawX ? rawX.length : 0);
-    console.log('[CPI] rawY:', Object.prototype.toString.call(rawY), 'len:', rawY ? rawY.length : 0);
-    if (rawY && rawY.length > 0) {
-      console.log('[CPI] y samples: [0]=' + rawY[0] + ' (' + typeof rawY[0] + '), [1]=' + rawY[1] + ' (' + typeof rawY[1] + ')');
-    }
-
+    var rawX = trace.x, rawY = trace.y;
     var points = [];
     if (rawX && rawY) {
       for (var j = 0; j < rawX.length; j++) {
@@ -173,27 +163,12 @@ except FileNotFoundError:
         if (!isNaN(ms) && !isNaN(yv)) points.push({ms: ms, y: yv});
       }
     }
+    if (!points.length) return;
+    console.log('[CPI] Ready: ' + points.length + ' points');
 
-    // Fallback: try calcdata if trace data didn't work
-    if (points.length === 0 && el.calcdata && el.calcdata[barIdx]) {
-      console.log('[CPI] Trying calcdata fallback...');
-      var cd = el.calcdata[barIdx];
-      if (cd.length > 0) console.log('[CPI] calcdata[0] keys:', Object.keys(cd[0]).join(','));
-      for (var j = 0; j < cd.length; j++) {
-        var pt = cd[j];
-        // In Plotly calcdata, bar traces store x position and y value
-        if (pt.x !== undefined && pt.y !== undefined) {
-          points.push({ms: pt.x, y: pt.y});
-        } else if (pt.p !== undefined && pt.s !== undefined) {
-          points.push({ms: pt.p, y: pt.s});
-        }
-      }
-      if (points.length > 0) {
-        console.log('[CPI] calcdata: first pt ms=' + points[0].ms + ' y=' + points[0].y);
-      }
-    }
-
-    console.log('[CPI] Built ' + points.length + ' data points');
+    // Initialize lastKey with current range so we DON'T override on first poll
+    var xr0 = el._fullLayout.xaxis.range;
+    var lastKey = xr0 ? String(xr0[0]) + '|' + String(xr0[1]) : '';
 
     setInterval(function() {
       try {
@@ -201,25 +176,17 @@ except FileNotFoundError:
         if (!xr) return;
         var key = String(xr[0]) + '|' + String(xr[1]);
         if (key === lastKey) return;
-        lastKey = key;
 
-        // _fullLayout.xaxis.range values could be date strings or ms timestamps
         var xMin = typeof xr[0] === 'number' ? xr[0] : new Date(xr[0]).getTime();
         var xMax = typeof xr[1] === 'number' ? xr[1] : new Date(xr[1]).getTime();
-        if (!logged) {
-          console.log('[CPI] xrange type:', typeof xr[0], 'val:', xr[0], '→ ms:', xMin);
-          logged = true;
-        }
         var spanMo = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
 
+        // Collect visible y-values
         var vis = [];
         for (var i = 0; i < points.length; i++) {
           if (points[i].ms >= xMin && points[i].ms <= xMax) vis.push(points[i].y);
         }
-        if (!vis.length) {
-          console.log('[CPI] No visible points in range');
-          return;
-        }
+        if (!vis.length) return;
 
         var lo = Math.min.apply(null, vis);
         var hi = Math.max.apply(null, vis);
@@ -227,8 +194,16 @@ except FileNotFoundError:
         var yMax = Math.ceil(Math.max(hi, 3.5) * 2) / 2 + 1.0;
         var dtick = spanMo <= MAX_MONTHS_FOR_MONTHLY ? 'M1' : null;
 
-        console.log('[CPI] Rescale → y:[' + yMin + ',' + yMax + '] vis:' + vis.length + 'pts span:' + spanMo.toFixed(0) + 'mo dtick:' + dtick);
-        Plotly.relayout(el, {'yaxis.range': [yMin, yMax], 'xaxis.dtick': dtick});
+        console.log('[CPI] y:[' + yMin + ',' + yMax + '] ' + vis.length + 'pts ' + spanMo.toFixed(0) + 'mo dtick:' + dtick);
+
+        // Update key BEFORE relayout to prevent re-triggering from
+        // Plotly slightly adjusting the range after our relayout
+        lastKey = key;
+        Plotly.relayout(el, {'yaxis.range': [yMin, yMax], 'xaxis.dtick': dtick}).then(function() {
+          // After relayout, capture the new range as lastKey to prevent loops
+          var nr = el._fullLayout.xaxis.range;
+          if (nr) lastKey = String(nr[0]) + '|' + String(nr[1]);
+        });
       } catch(e) {
         console.error('[CPI]', e);
       }

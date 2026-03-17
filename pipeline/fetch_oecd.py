@@ -11,6 +11,7 @@ from pipeline.config import (
     DATA_DIR, PEER_CODES, PEER_COUNTRIES,
     OECD_REQUEST_DELAY_SECONDS,
 )
+from pipeline.metadata import save_metadata, validate_columns
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -80,7 +81,8 @@ def fetch_rd_expenditure():
     if df is None:
         return None
 
-    # Clean and standardize
+    # Validate and clean
+    validate_columns(df, ["REF_AREA", "TIME_PERIOD", "OBS_VALUE"], "rd_expenditure")
     df = df[["REF_AREA", "TIME_PERIOD", "OBS_VALUE"]].copy()
     df = df.rename(columns={
         "REF_AREA": "country_code",
@@ -98,6 +100,13 @@ def fetch_rd_expenditure():
     out_path = DATA_DIR / "science" / "oecd_rd_expenditure.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="OECD",
+        source_table="MSTI_PUB (Main Science and Technology Indicators)",
+        frequency="annual",
+        unit="% of GDP",
+        transformations=["filtered to GERD as % of GDP for 20 OECD peers"],
+    )
     logger.info(f"Saved {len(df)} rows to {out_path}")
 
     return df
@@ -121,6 +130,7 @@ def fetch_gdp_per_capita():
     if df is None:
         return None
 
+    validate_columns(df, ["REF_AREA", "TIME_PERIOD", "OBS_VALUE"], "gdp_per_capita")
     df = df[["REF_AREA", "TIME_PERIOD", "OBS_VALUE"]].copy()
     df = df.rename(columns={
         "REF_AREA": "country_code",
@@ -137,6 +147,13 @@ def fetch_gdp_per_capita():
     out_path = DATA_DIR / "economics" / "oecd_gdp_per_capita.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="OECD",
+        source_table="SNA_TABLE1 (National Accounts)",
+        frequency="annual",
+        unit="USD (PPP, current prices)",
+        transformations=["filtered to GDP per capita, PPP, for 20 OECD peers"],
+    )
     logger.info(f"Saved {len(df)} rows to {out_path}")
 
     return df

@@ -7,12 +7,12 @@ import plotly.graph_objects as go
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, HIGHLIGHT_COUNTRY,
-    PEER_COUNTRIES, DATA_DATE,
+    PEER_COUNTRIES, DATA_DATE, get_data_date,
 )
 
 
 def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
-                  has_legend=True):
+                  has_legend=True, data_date=None):
     """Standard layout for all DataCan charts."""
     xaxis_config = dict(title=xaxis_title, gridcolor="#e0e0e0")
     if range_slider:
@@ -57,7 +57,7 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
         margin=dict(b=bottom_margin, t=40),
         annotations=[
             dict(
-                text=f"Data as of: {DATA_DATE}",
+                text=f"Data as of: {data_date or DATA_DATE}",
                 xref="paper", yref="paper",
                 x=1, y=source_y,
                 showarrow=False,

@@ -5,10 +5,6 @@ Run this script to update all data files.
 
 import sys
 import logging
-from pathlib import Path
-
-# Ensure project root is on path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pipeline.fetch_statcan import fetch_population_quarterly, fetch_population_components, fetch_cpi
 from pipeline.fetch_oecd import fetch_rd_expenditure, fetch_gdp_per_capita

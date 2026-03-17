@@ -5,13 +5,11 @@ description: "Research and development spending — Canada compared to OECD peer
 
 ```{python}
 #| echo: false
-import sys
-sys.path.insert(0, "..")
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
-    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, DATA_DATE,
+    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
 ```
 
@@ -27,7 +25,7 @@ Click any country name in the legend to toggle it on/off. Double-click to isolat
 
 ```{python}
 #| echo: false
-df = pd.read_csv("../data/science/oecd_rd_expenditure.csv")
+df = pd.read_csv("data/science/oecd_rd_expenditure.csv")
 
 fig = go.Figure()
 
@@ -102,7 +100,7 @@ fig.update_layout(
     ),
     margin=dict(b=200, t=40),
     annotations=[dict(
-        text=f"Source: OECD Main Science and Technology Indicators (MSTI) | Data as of: {DATA_DATE}",
+        text=f"Source: OECD Main Science and Technology Indicators (MSTI) | Data as of: {get_data_date('data/science/oecd_rd_expenditure.csv')}",
         xref="paper", yref="paper", x=0, y=-0.52,
         showarrow=False, font=dict(size=10, color="#999"),
     )],
@@ -140,7 +138,7 @@ fig.update_layout(
     showlegend=False,
     height=600,
     annotations=[dict(
-        text=f"Source: OECD MSTI | Data as of: {DATA_DATE}",
+        text=f"Source: OECD MSTI | Data as of: {get_data_date('data/science/oecd_rd_expenditure.csv')}",
         xref="paper", yref="paper", x=1, y=-0.1,
         showarrow=False, font=dict(size=10, color="#999"),
     )],

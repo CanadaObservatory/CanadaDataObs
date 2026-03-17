@@ -6,6 +6,7 @@ Uses the stats_can library for simplified API access.
 import pandas as pd
 import stats_can
 from pipeline.config import DATA_DIR, STATCAN_TABLES, PROJECT_ROOT
+from pipeline.metadata import save_metadata, validate_columns
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -58,14 +59,12 @@ def fetch_population_quarterly():
         logger.error(f"Failed to fetch StatCan table {table_id}: {e}")
         return None
 
-    # Clean and reshape
-    # The raw table has columns like REF_DATE, GEO, VALUE, etc.
-    df = df.rename(columns={"REF_DATE": "date", "GEO": "geography", "VALUE": "population"})
+    # Validate expected columns from StatCan
+    validate_columns(df, ["REF_DATE", "GEO", "VALUE"], "population_quarterly")
 
-    # Filter to key columns
-    keep_cols = ["date", "geography", "population"]
-    available_cols = [c for c in keep_cols if c in df.columns]
-    df = df[available_cols].copy()
+    # Clean and reshape
+    df = df.rename(columns={"REF_DATE": "date", "GEO": "geography", "VALUE": "population"})
+    df = df[["date", "geography", "population"]].copy()
 
     # Convert date
     df["date"] = pd.to_datetime(df["date"])
@@ -80,6 +79,13 @@ def fetch_population_quarterly():
     out_path = DATA_DIR / "population" / "statcan_population_quarterly.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df,
+        source="Statistics Canada",
+        source_table="17-10-0009-01",
+        frequency="quarterly",
+        unit="persons",
+        transformations=["filtered to date, geography, population columns"],
+    )
     logger.info(f"Saved {len(df)} rows to {out_path}")
 
     return df
@@ -99,16 +105,16 @@ def fetch_population_components():
         logger.error(f"Failed to fetch StatCan table {table_id}: {e}")
         return None
 
+    validate_columns(df, ["REF_DATE", "GEO", "Components of population growth", "VALUE"],
+                     "population_components")
+
     df = df.rename(columns={
         "REF_DATE": "date",
         "GEO": "geography",
         "Components of population growth": "component",
         "VALUE": "value",
     })
-
-    keep_cols = ["date", "geography", "component", "value"]
-    available_cols = [c for c in keep_cols if c in df.columns]
-    df = df[available_cols].copy()
+    df = df[["date", "geography", "component", "value"]].copy()
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.dropna(subset=["value"])
@@ -117,6 +123,13 @@ def fetch_population_components():
     out_path = DATA_DIR / "population" / "statcan_population_components.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df,
+        source="Statistics Canada",
+        source_table="17-10-0014-01",
+        frequency="quarterly",
+        unit="persons",
+        transformations=["filtered to date, geography, component, value columns"],
+    )
     logger.info(f"Saved {len(df)} rows to {out_path}")
 
     return df
@@ -136,23 +149,19 @@ def fetch_cpi():
         logger.error(f"Failed to fetch StatCan table {table_id}: {e}")
         return None
 
+    validate_columns(df, ["REF_DATE", "GEO", "Products and product groups", "VALUE"], "cpi")
+
     df = df.rename(columns={
         "REF_DATE": "date",
         "GEO": "geography",
         "Products and product groups": "product_group",
         "VALUE": "cpi_value",
     })
+    df = df[["date", "geography", "product_group", "cpi_value"]].copy()
 
-    # Filter to All-items CPI for Canada
-    keep_cols = ["date", "geography", "product_group", "cpi_value"]
-    available_cols = [c for c in keep_cols if c in df.columns]
-    df = df[available_cols].copy()
-
-    # Keep only exactly "All-items" (2002=100 base) and Canada-level
-    if "product_group" in df.columns:
-        df = df[df["product_group"] == "All-items"]
-    if "geography" in df.columns:
-        df = df[df["geography"] == "Canada"]
+    # Keep only All-items CPI for Canada
+    df = df[df["product_group"] == "All-items"]
+    df = df[df["geography"] == "Canada"]
 
     df["date"] = pd.to_datetime(df["date"])
     df["cpi_value"] = pd.to_numeric(df["cpi_value"], errors="coerce")
@@ -165,6 +174,16 @@ def fetch_cpi():
     out_path = DATA_DIR / "economics" / "statcan_cpi.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df,
+        source="Statistics Canada",
+        source_table="18-10-0004-01",
+        frequency="monthly",
+        unit="index (2002=100)",
+        transformations=[
+            "filtered to All-items CPI, Canada only",
+            "computed year-over-year inflation rate (12-month pct_change)",
+        ],
+    )
     logger.info(f"Saved {len(df)} rows to {out_path}")
 
     return df

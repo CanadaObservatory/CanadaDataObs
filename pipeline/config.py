@@ -10,8 +10,22 @@ from datetime import date
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 
-# Date stamp for chart annotations
+# Fallback date stamp (used only if metadata sidecar is missing)
 DATA_DATE = date.today().isoformat()
+
+
+def get_data_date(csv_path):
+    """Get the latest observation date from a dataset's metadata sidecar.
+
+    Falls back to today's date if no metadata file exists.
+    """
+    import json
+    meta_path = Path(csv_path).with_suffix(".json")
+    if meta_path.exists():
+        with open(meta_path) as f:
+            meta = json.load(f)
+        return meta.get("latest_observation_date", DATA_DATE)
+    return DATA_DATE
 
 # --- OECD Peer Group ---
 # Broader than G7: includes all comparable advanced economies

@@ -68,9 +68,13 @@ try:
     x_end = latest + timedelta(days=31)
 
     visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
-    # Round y-range to clean 0.5 boundaries with padding
-    y_min = math.floor(min(visible.min(), 0) * 2) / 2 - 0.5
-    y_max = math.ceil(max(visible.max(), 3.5) * 2) / 2 + 1.0
+    # Y-range: tight to data with padding for buttons at top
+    y_min_val = visible.min()
+    y_max_val = visible.max()
+    # Start at 0 if all values are positive (typical), otherwise pad below
+    y_min = 0 if y_min_val >= 0 else math.floor(y_min_val * 2) / 2 - 0.5
+    # Ensure target band (up to 3%) is visible, plus extra room for buttons
+    y_max = math.ceil(max(y_max_val, 3.5) * 2) / 2 + 1.0
 
     fig.update_layout(
         xaxis_title="",
@@ -132,6 +136,13 @@ except FileNotFoundError:
   var MAX_MONTHS_FOR_MONTHLY_TICKS = 13;
 
   function setup() {
+    // Check that Plotly global is available
+    if (typeof Plotly === 'undefined') {
+      console.log('[CPI] Plotly not loaded yet, retrying...');
+      setTimeout(setup, 500);
+      return;
+    }
+
     var plots = document.querySelectorAll('.js-plotly-plot');
     if (!plots.length) { setTimeout(setup, 500); return; }
     var cpiPlot = plots[0];
@@ -143,73 +154,81 @@ except FileNotFoundError:
       if (cpiPlot.data[t].type === 'bar') { barIdx = t; break; }
     }
     if (barIdx === -1) { console.log('[CPI] No bar trace found'); return; }
-    console.log('[CPI] Setup complete, bar trace index:', barIdx);
+    console.log('[CPI] Setup complete. Plotly version:', Plotly.version, 'bar trace:', barIdx);
 
-    // Store the last range we set so we can detect our own relayout calls
-    var lastYRange = null;
+    var skipNext = false;
 
     function adjustChart() {
-      var xRange = cpiPlot._fullLayout.xaxis.range;
-      if (!xRange || xRange.length < 2) return;
+      try {
+        var xRange = cpiPlot._fullLayout.xaxis.range;
+        if (!xRange || xRange.length < 2) {
+          console.log('[CPI] No x-range available');
+          return;
+        }
 
-      var xMin = new Date(xRange[0]).getTime();
-      var xMax = new Date(xRange[1]).getTime();
-      var spanMonths = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
+        var xMin = new Date(xRange[0]).getTime();
+        var xMax = new Date(xRange[1]).getTime();
+        var spanMonths = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
 
-      // Collect y-values within visible x-range
-      var xData = cpiPlot.data[barIdx].x;
-      var yData = cpiPlot.data[barIdx].y;
-      var visibleY = [];
-      for (var i = 0; i < xData.length; i++) {
-        var d = new Date(xData[i]).getTime();
-        if (d >= xMin && d <= xMax) visibleY.push(yData[i]);
+        // Collect y-values within visible x-range
+        var xData = cpiPlot.data[barIdx].x;
+        var yData = cpiPlot.data[barIdx].y;
+        var visibleY = [];
+        for (var i = 0; i < xData.length; i++) {
+          var d = new Date(xData[i]).getTime();
+          if (d >= xMin && d <= xMax) visibleY.push(yData[i]);
+        }
+        if (!visibleY.length) {
+          console.log('[CPI] No visible data points');
+          return;
+        }
+
+        var dataMin = Math.min.apply(null, visibleY);
+        var dataMax = Math.max.apply(null, visibleY);
+        // Start at 0 if all values positive, otherwise pad below
+        var yMin = dataMin >= 0 ? 0 : Math.floor(dataMin * 2) / 2 - 0.5;
+        // Ensure target band (3%) visible, plus room for buttons
+        var yMax = Math.ceil(Math.max(dataMax, 3.5) * 2) / 2 + 1.0;
+
+        // Monthly ticks if span ≤ 13 months
+        var newDtick = (spanMonths <= MAX_MONTHS_FOR_MONTHLY_TICKS) ? 'M1' : null;
+
+        console.log('[CPI] adjustChart: span=' + spanMonths.toFixed(1) + 'mo, data=[' + dataMin.toFixed(2) + ',' + dataMax.toFixed(2) + '], yRange=[' + yMin + ',' + yMax + '], dtick=' + newDtick);
+
+        skipNext = true;
+        Plotly.relayout(cpiPlot, {
+          'yaxis.range': [yMin, yMax],
+          'xaxis.dtick': newDtick
+        });
+      } catch(e) {
+        console.error('[CPI] Error in adjustChart:', e);
       }
-      if (!visibleY.length) return;
-
-      var yMin = Math.min.apply(null, visibleY);
-      var yMax = Math.max.apply(null, visibleY);
-      yMin = Math.floor(Math.min(yMin, 0) * 2) / 2 - 0.5;
-      yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 1.0;
-
-      // Determine dtick: monthly labels if span ≤ 13 months
-      var newDtick = (spanMonths <= MAX_MONTHS_FOR_MONTHLY_TICKS) ? 'M1' : null;
-
-      console.log('[CPI] adjustChart: span=' + spanMonths.toFixed(1) + 'mo, yRange=[' + yMin + ',' + yMax + '], dtick=' + newDtick);
-
-      lastYRange = [yMin, yMax];
-      Plotly.relayout(cpiPlot, {
-        'yaxis.range': [yMin, yMax],
-        'xaxis.dtick': newDtick
-      });
     }
 
     cpiPlot.on('plotly_relayout', function(ed) {
-      console.log('[CPI] plotly_relayout keys:', Object.keys(ed).join(', '));
-
-      // Detect if this is our own y-axis update by checking if it ONLY
-      // contains yaxis and/or xaxis.dtick keys (which we set together)
       var keys = Object.keys(ed);
-      var isOurs = keys.length > 0 && keys.every(function(k) {
-        return k.indexOf('yaxis') === 0 || k === 'xaxis.dtick';
-      });
-      if (isOurs) {
-        console.log('[CPI] Skipping own relayout');
+      console.log('[CPI] relayout event:', keys.join(', '));
+
+      if (skipNext) {
+        console.log('[CPI] Skipping (own update)');
+        skipNext = false;
         return;
       }
 
-      // Any x-axis change (zoom, pan, button click) → rescale after short delay
-      setTimeout(adjustChart, 150);
+      // Any relayout that involves x-axis or autorange → adjust
+      setTimeout(adjustChart, 200);
     });
 
-    console.log('[CPI] Event listener attached');
+    console.log('[CPI] Event listener attached, testing adjustChart on load...');
+    // Run once on setup to fix initial y-range if needed
+    // (disabled — let the Python y-range stand for initial view)
   }
 
-  // Wait for Quarto/Plotly to fully render
-  if (document.readyState === 'complete') {
-    setTimeout(setup, 2000);
-  } else {
-    window.addEventListener('load', function() { setTimeout(setup, 2000); });
-  }
+  // Wait for everything to be fully loaded and rendered
+  window.addEventListener('load', function() {
+    console.log('[CPI] Window loaded, waiting for Plotly render...');
+    setTimeout(setup, 2500);
+  });
 })();
 </script>
 ```

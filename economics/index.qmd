@@ -126,27 +126,29 @@ except FileNotFoundError:
 
 ```{=html}
 <script>
-// Auto-scale y-axis and adjust x-axis ticks when CPI chart range changes
+// Auto-scale y-axis and adjust x-axis ticks when CPI chart range changes.
+// Debug: open browser console (F12) to see "[CPI]" log messages.
 (function() {
-  var DEBOUNCE_MS = 100;
   var MAX_MONTHS_FOR_MONTHLY_TICKS = 13;
-  var timer = null;
-  var updating = false;
 
   function setup() {
     var plots = document.querySelectorAll('.js-plotly-plot');
     if (!plots.length) { setTimeout(setup, 500); return; }
     var cpiPlot = plots[0];
-    if (!cpiPlot.data || !cpiPlot.data.length) { setTimeout(setup, 500); return; }
+    if (!cpiPlot._fullLayout) { setTimeout(setup, 500); return; }
 
-    // Find the bar trace
-    var barIdx = 0;
+    // Find the bar trace index
+    var barIdx = -1;
     for (var t = 0; t < cpiPlot.data.length; t++) {
       if (cpiPlot.data[t].type === 'bar') { barIdx = t; break; }
     }
+    if (barIdx === -1) { console.log('[CPI] No bar trace found'); return; }
+    console.log('[CPI] Setup complete, bar trace index:', barIdx);
+
+    // Store the last range we set so we can detect our own relayout calls
+    var lastYRange = null;
 
     function adjustChart() {
-      if (updating) return;
       var xRange = cpiPlot._fullLayout.xaxis.range;
       if (!xRange || xRange.length < 2) return;
 
@@ -154,7 +156,7 @@ except FileNotFoundError:
       var xMax = new Date(xRange[1]).getTime();
       var spanMonths = (xMax - xMin) / (1000 * 60 * 60 * 24 * 30.44);
 
-      // Compute visible y-range
+      // Collect y-values within visible x-range
       var xData = cpiPlot.data[barIdx].x;
       var yData = cpiPlot.data[barIdx].y;
       var visibleY = [];
@@ -169,45 +171,44 @@ except FileNotFoundError:
       yMin = Math.floor(Math.min(yMin, 0) * 2) / 2 - 0.5;
       yMax = Math.ceil(Math.max(yMax, 3.5) * 2) / 2 + 1.0;
 
-      // Determine dtick: monthly if ≤13 months, otherwise auto
+      // Determine dtick: monthly labels if span ≤ 13 months
       var newDtick = (spanMonths <= MAX_MONTHS_FOR_MONTHLY_TICKS) ? 'M1' : null;
 
-      var update = {
+      console.log('[CPI] adjustChart: span=' + spanMonths.toFixed(1) + 'mo, yRange=[' + yMin + ',' + yMax + '], dtick=' + newDtick);
+
+      lastYRange = [yMin, yMax];
+      Plotly.relayout(cpiPlot, {
         'yaxis.range': [yMin, yMax],
         'xaxis.dtick': newDtick
-      };
-
-      updating = true;
-      Plotly.relayout(cpiPlot, update).then(function() {
-        updating = false;
-      }).catch(function() {
-        updating = false;
       });
     }
 
     cpiPlot.on('plotly_relayout', function(ed) {
-      if (updating) return;
-      // Skip events that only change y-axis (our own updates)
+      console.log('[CPI] plotly_relayout keys:', Object.keys(ed).join(', '));
+
+      // Detect if this is our own y-axis update by checking if it ONLY
+      // contains yaxis and/or xaxis.dtick keys (which we set together)
       var keys = Object.keys(ed);
-      var onlyY = keys.every(function(k) { return k.indexOf('yaxis') === 0; });
-      if (onlyY) return;
-      // Debounce to let Plotly settle
-      clearTimeout(timer);
-      timer = setTimeout(adjustChart, DEBOUNCE_MS);
+      var isOurs = keys.length > 0 && keys.every(function(k) {
+        return k.indexOf('yaxis') === 0 || k === 'xaxis.dtick';
+      });
+      if (isOurs) {
+        console.log('[CPI] Skipping own relayout');
+        return;
+      }
+
+      // Any x-axis change (zoom, pan, button click) → rescale after short delay
+      setTimeout(adjustChart, 150);
     });
 
-    // Also hook into plotly_afterplot for rangeselector button clicks
-    cpiPlot.on('plotly_afterplot', function() {
-      if (updating) return;
-      clearTimeout(timer);
-      timer = setTimeout(adjustChart, DEBOUNCE_MS);
-    });
+    console.log('[CPI] Event listener attached');
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(setup, 1500); });
+  // Wait for Quarto/Plotly to fully render
+  if (document.readyState === 'complete') {
+    setTimeout(setup, 2000);
   } else {
-    setTimeout(setup, 1500);
+    window.addEventListener('load', function() { setTimeout(setup, 2000); });
   }
 })();
 </script>

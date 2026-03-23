@@ -133,6 +133,147 @@ fig.update_layout(
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
+## Population Growth Rate
+
+Year-over-year percentage change in Canada's quarterly population. This is derived from the same quarterly estimates shown above — each quarter is compared to the same quarter one year earlier.
+
+```{python}
+#| echo: false
+# Compute YoY growth rate for Canada
+canada_growth = df[df["geography"] == "Canada"].copy()
+canada_growth = canada_growth.sort_values("date")
+canada_growth["pop_yoy_pct"] = canada_growth["population"].pct_change(periods=4) * 100
+canada_growth = canada_growth.dropna(subset=["pop_yoy_pct"])
+
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=canada_growth["date"],
+    y=canada_growth["pop_yoy_pct"],
+    mode="lines",
+    line=dict(color=CANADA_COLOR, width=3),
+    hovertemplate="<b>%{x|%Y Q%{customdata}}</b><br>Growth: %{y:.2f}%<extra></extra>",
+    customdata=canada_growth["date"].dt.quarter,
+))
+
+fig.update_layout(
+    xaxis_title="",
+    yaxis_title="Year-over-Year Growth (%)",
+    plot_bgcolor="white",
+    xaxis=dict(
+        gridcolor="#e0e0e0",
+        rangeselector=dict(
+            buttons=[
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(count=50, label="50Y", step="year", stepmode="backward"),
+                dict(step="all", label="All"),
+            ],
+            x=0, xanchor="left", y=1.01,
+        ),
+    ),
+    yaxis=dict(gridcolor="#e0e0e0"),
+    showlegend=False,
+    margin=dict(b=80, t=40),
+    annotations=[dict(
+        text=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}",
+        xref="paper", yref="paper", x=0, y=-0.15,
+        showarrow=False, font=dict(size=10, color="#999"),
+    )],
+)
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+## Components of Population Change
+
+Births, deaths, immigration, and emigration — the drivers behind Canada's population growth. Data from Statistics Canada's components of population growth table (quarterly estimates).
+
+```{python}
+#| echo: false
+import os
+
+components_path = "data/population/statcan_population_components.csv"
+if os.path.exists(components_path):
+    comp = pd.read_csv(components_path, parse_dates=["date"])
+    comp = comp[comp["geography"] == "Canada"].copy()
+
+    # Keep the main components for clarity
+    main_components = [
+        "Births",
+        "Deaths",
+        "Immigrants",
+        "Emigrants",
+        "Net interprovincial migration",
+        "Non-permanent residents",
+    ]
+    # Try matching — StatCan component names may vary slightly
+    available = comp["component"].unique()
+    keep = [c for c in available if any(m.lower() in c.lower() for m in main_components)]
+    if not keep:
+        # Fallback: show top components by absolute value
+        top = comp.groupby("component")["value"].apply(lambda x: x.abs().mean()).nlargest(6)
+        keep = top.index.tolist()
+
+    comp_filtered = comp[comp["component"].isin(keep)]
+
+    colors_map = {
+        "Births": "#2ca02c",
+        "Deaths": "#d62728",
+        "Immigrants": "#1f77b4",
+        "Emigrants": "#ff7f0e",
+    }
+
+    fig = go.Figure()
+    for component_name in keep:
+        subset = comp_filtered[comp_filtered["component"] == component_name].sort_values("date")
+        color = next((v for k, v in colors_map.items() if k.lower() in component_name.lower()), None)
+        fig.add_trace(go.Scatter(
+            x=subset["date"],
+            y=subset["value"],
+            name=component_name,
+            mode="lines",
+            line=dict(color=color, width=2) if color else dict(width=2),
+            hovertemplate=f"<b>{component_name}</b><br>%{{x|%Y Q%{{customdata}}}}: %{{y:,.0f}}<extra></extra>",
+            customdata=subset["date"].dt.quarter,
+        ))
+
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="Persons (quarterly)",
+        yaxis_tickformat=",",
+        plot_bgcolor="white",
+        xaxis=dict(
+            gridcolor="#e0e0e0",
+            rangeselector=dict(
+                buttons=[
+                    dict(count=5, label="5Y", step="year", stepmode="backward"),
+                    dict(count=10, label="10Y", step="year", stepmode="backward"),
+                    dict(count=20, label="20Y", step="year", stepmode="backward"),
+                    dict(step="all", label="All"),
+                ],
+                x=0, xanchor="left", y=1.01,
+            ),
+        ),
+        yaxis=dict(gridcolor="#e0e0e0"),
+        hovermode="x unified",
+        legend=dict(
+            orientation="h", yanchor="top", y=-0.08,
+            xanchor="center", x=0.5,
+            itemclick="toggle", itemdoubleclick="toggleothers",
+        ),
+        margin=dict(b=180, t=40),
+        annotations=[dict(
+            text=f"Source: Statistics Canada, Table 17-10-0014-01 | Data as of: {get_data_date(components_path)}",
+            xref="paper", yref="paper", x=0, y=-0.42,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    from IPython.display import Markdown
+    display(Markdown("*Population components data not yet available. Run the data pipeline to fetch this dataset.*"))
+```
+
 ## Download Data
 
 - [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01

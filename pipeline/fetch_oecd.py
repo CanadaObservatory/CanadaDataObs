@@ -159,6 +159,192 @@ def fetch_gdp_per_capita():
     return df
 
 
+def fetch_labour_productivity():
+    """
+    Fetch GDP per hour worked (USD, PPP) for OECD peers.
+    OECD Productivity database (PDB_LV).
+    Dimensions: REF_AREA.FREQ.MEASURE.ACTIVITY.UNIT_MEASURE.PRICE_BASE.TRANSFORMATION.ADJUSTMENT.CONVERSION_TYPE
+    """
+    logger.info("Fetching OECD labour productivity (GDP per hour worked)...")
+
+    country_str = "+".join(PEER_CODES)
+    df = _fetch_oecd_csv(
+        dataflow="OECD.SDD.TPS,DSD_PDB@DF_PDB_LV,1.0",
+        key=f"{country_str}.A.GDPHRS._T.USD_PPP_H.Q._Z._Z._Z",
+        start_period=2000,
+    )
+
+    if df is None:
+        return None
+
+    validate_columns(df, ["REF_AREA", "TIME_PERIOD", "OBS_VALUE"], "labour_productivity")
+    df = df[["REF_AREA", "TIME_PERIOD", "OBS_VALUE"]].copy()
+    df = df.rename(columns={
+        "REF_AREA": "country_code",
+        "TIME_PERIOD": "year",
+        "OBS_VALUE": "gdp_per_hour",
+    })
+
+    df["country_name"] = df["country_code"].map(PEER_COUNTRIES)
+    df["year"] = df["year"].astype(int)
+    df["gdp_per_hour"] = pd.to_numeric(df["gdp_per_hour"], errors="coerce")
+    df = df.dropna(subset=["gdp_per_hour"])
+    df = df.sort_values(["country_code", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "oecd_labour_productivity.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="OECD",
+        source_table="PDB_LV (Productivity Database)",
+        frequency="annual",
+        unit="USD PPP per hour worked",
+        transformations=["filtered to GDP per hour worked for 20 OECD peers"],
+    )
+    logger.info(f"Saved {len(df)} rows to {out_path}")
+
+    return df
+
+
+def fetch_unemployment():
+    """
+    Fetch harmonised unemployment rate (% of labour force) for OECD peers.
+    OECD Key Economic Indicators (KEI).
+    Dimensions: REF_AREA.FREQ.MEASURE.UNIT_MEASURE.ACTIVITY.ADJUSTMENT.TRANSFORMATION
+    """
+    logger.info("Fetching OECD unemployment rate...")
+
+    country_str = "+".join(PEER_CODES)
+    df = _fetch_oecd_csv(
+        dataflow="OECD.SDD.STES,DSD_KEI@DF_KEI,4.0",
+        key=f"{country_str}.A.UNEMP.PT_LF._T..",
+        start_period=2000,
+    )
+
+    if df is None:
+        return None
+
+    validate_columns(df, ["REF_AREA", "TIME_PERIOD", "OBS_VALUE"], "unemployment")
+    df = df[["REF_AREA", "TIME_PERIOD", "OBS_VALUE"]].copy()
+    df = df.rename(columns={
+        "REF_AREA": "country_code",
+        "TIME_PERIOD": "year",
+        "OBS_VALUE": "unemployment_rate",
+    })
+
+    df["country_name"] = df["country_code"].map(PEER_COUNTRIES)
+    df["year"] = df["year"].astype(int)
+    df["unemployment_rate"] = pd.to_numeric(df["unemployment_rate"], errors="coerce")
+    df = df.dropna(subset=["unemployment_rate"])
+    df = df.sort_values(["country_code", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "oecd_unemployment.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="OECD",
+        source_table="KEI (Key Economic Indicators)",
+        frequency="annual",
+        unit="% of labour force",
+        transformations=["filtered to harmonised unemployment rate for 20 OECD peers"],
+    )
+    logger.info(f"Saved {len(df)} rows to {out_path}")
+
+    return df
+
+
+def _fetch_green_growth(measure, unit_measure, value_col, csv_name, description,
+                         unit, start_period=1990):
+    """Shared helper for Green Growth indicators."""
+    country_str = "+".join(PEER_CODES)
+    df = _fetch_oecd_csv(
+        dataflow="OECD.ENV.EPI,DSD_GG@DF_GREEN_GROWTH,1.1",
+        key=f"{country_str}.A.{measure}.{unit_measure}._T",
+        start_period=start_period,
+    )
+
+    if df is None:
+        return None
+
+    validate_columns(df, ["REF_AREA", "TIME_PERIOD", "OBS_VALUE"], csv_name)
+    df = df[["REF_AREA", "TIME_PERIOD", "OBS_VALUE"]].copy()
+    df = df.rename(columns={
+        "REF_AREA": "country_code",
+        "TIME_PERIOD": "year",
+        "OBS_VALUE": value_col,
+    })
+
+    df["country_name"] = df["country_code"].map(PEER_COUNTRIES)
+    df["year"] = df["year"].astype(int)
+    df[value_col] = pd.to_numeric(df[value_col], errors="coerce")
+    df = df.dropna(subset=[value_col])
+    df = df.sort_values(["country_code", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "environment" / f"oecd_{csv_name}.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="OECD",
+        source_table="Green Growth Indicators",
+        frequency="annual",
+        unit=unit,
+        transformations=[f"filtered to {description} for 20 OECD peers"],
+    )
+    logger.info(f"Saved {len(df)} rows to {out_path}")
+
+    return df
+
+
+def fetch_co2_per_capita():
+    """Fetch production-based CO2 emissions per capita (tonnes CO2e per person)."""
+    logger.info("Fetching OECD CO2 emissions per capita...")
+    return _fetch_green_growth(
+        measure="CO2_PBEMCAP", unit_measure="T_CO2E_PS",
+        value_col="co2_per_capita", csv_name="co2_per_capita",
+        description="production-based CO2 per capita",
+        unit="tonnes CO2 per capita",
+    )
+
+
+def fetch_co2_intensity():
+    """Fetch CO2 emissions per unit of GDP (USD per kg CO2)."""
+    logger.info("Fetching OECD CO2 emissions intensity...")
+    return _fetch_green_growth(
+        measure="CO2_PBPROD", unit_measure="USD_CO2",
+        value_col="co2_productivity", csv_name="co2_intensity",
+        description="CO2 productivity (GDP per unit of CO2)",
+        unit="USD per kg CO2",
+    )
+
+
+def fetch_co2_indexed():
+    """Fetch production-based CO2 emissions, indexed (2000=100)."""
+    logger.info("Fetching OECD CO2 emissions indexed...")
+    return _fetch_green_growth(
+        measure="CO2_PBEM", unit_measure="IX",
+        value_col="co2_index", csv_name="co2_indexed",
+        description="production-based CO2 emissions (indexed 2000=100)",
+        unit="index (2000=100)",
+    )
+
+
+def fetch_renewables_share():
+    """Fetch renewable energy as % of total primary energy supply."""
+    logger.info("Fetching OECD renewable energy share...")
+    return _fetch_green_growth(
+        measure="RE_TPES", unit_measure="PT_SUP_NRG",
+        value_col="renewables_pct", csv_name="renewables_share",
+        description="renewable energy share of total energy supply",
+        unit="% of total primary energy supply",
+    )
+
+
 if __name__ == "__main__":
     fetch_rd_expenditure()
     fetch_gdp_per_capita()
+    fetch_labour_productivity()
+    fetch_unemployment()
+    fetch_co2_per_capita()
+    fetch_co2_intensity()
+    fetch_co2_indexed()
+    fetch_renewables_share()

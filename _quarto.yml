@@ -16,6 +16,8 @@ website:
         text: Economics
       - href: science/index.qmd
         text: Science & Innovation
+      - href: environment/index.qmd
+        text: Environment
       - href: about.qmd
         text: About
     right:

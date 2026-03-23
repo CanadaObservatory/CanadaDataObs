@@ -337,7 +337,145 @@ except FileNotFoundError:
     print("GDP per capita data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## Labour Productivity (GDP per Hour Worked)
+
+GDP per hour worked measures how efficiently an economy converts labour into output. Canada's productivity gap relative to the United States and other leading economies is a persistent concern.
+
+```{python}
+#| echo: false
+from pipeline.charts import peer_comparison_line
+import os
+
+prod_path = "data/economics/oecd_labour_productivity.csv"
+if os.path.exists(prod_path):
+    prod = pd.read_csv(prod_path)
+
+    fig = peer_comparison_line(
+        prod, x_col="year", y_col="gdp_per_hour",
+        title="", yaxis_title="USD (PPP) per hour worked",
+    )
+    fig.update_layout(
+        yaxis_tickformat="$,.1f",
+        annotations=[dict(
+            text=f"Source: OECD Productivity Database | Data as of: {get_data_date(prod_path)}",
+            xref="paper", yref="paper", x=0, y=-0.52,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Labour productivity data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Latest Labour Productivity: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(prod_path):
+    prod = pd.read_csv(prod_path)
+    latest_year = prod["year"].max()
+    latest = prod[prod["year"] == latest_year].copy()
+    latest = latest.sort_values("gdp_per_hour", ascending=True)
+
+    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=latest["gdp_per_hour"],
+        y=latest["country_name"],
+        orientation="h",
+        marker_color=colors,
+        hovertemplate="%{y}: $%{x:.1f}/hr<extra></extra>",
+    ))
+
+    fig.update_layout(
+        xaxis_title="USD (PPP) per hour worked",
+        xaxis_tickformat="$,.0f",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0"),
+        showlegend=False,
+        height=600,
+        annotations=[dict(
+            text=f"Source: OECD Productivity Database ({latest_year}) | Data as of: {get_data_date(prod_path)}",
+            xref="paper", yref="paper", x=1, y=-0.1,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show()
+else:
+    print("Labour productivity data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Unemployment Rate
+
+Harmonised unemployment rate as a percentage of the labour force, allowing consistent comparison across countries.
+
+```{python}
+#| echo: false
+unemp_path = "data/economics/oecd_unemployment.csv"
+if os.path.exists(unemp_path):
+    unemp = pd.read_csv(unemp_path)
+
+    fig = peer_comparison_line(
+        unemp, x_col="year", y_col="unemployment_rate",
+        title="", yaxis_title="% of labour force",
+    )
+    fig.update_layout(
+        yaxis_tickformat=".1f",
+        annotations=[dict(
+            text=f"Source: OECD Key Economic Indicators | Data as of: {get_data_date(unemp_path)}",
+            xref="paper", yref="paper", x=0, y=-0.52,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Unemployment data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Latest Unemployment Rate: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(unemp_path):
+    unemp = pd.read_csv(unemp_path)
+    latest_year = unemp["year"].max()
+    latest = unemp[unemp["year"] == latest_year].copy()
+    latest = latest.sort_values("unemployment_rate", ascending=True)
+
+    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=latest["unemployment_rate"],
+        y=latest["country_name"],
+        orientation="h",
+        marker_color=colors,
+        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+    ))
+
+    fig.update_layout(
+        xaxis_title="% of labour force",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0"),
+        showlegend=False,
+        height=600,
+        annotations=[dict(
+            text=f"Source: OECD Key Economic Indicators ({latest_year}) | Data as of: {get_data_date(unemp_path)}",
+            xref="paper", yref="paper", x=1, y=-0.1,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show()
+else:
+    print("Unemployment data not yet available. Run the data pipeline to fetch it.")
+```
+
 ## Download Data
 
 - [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada Table 18-10-0004-01
 - [GDP per Capita (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts, PPP current USD
+- [Labour Productivity (CSV)](../data/economics/oecd_labour_productivity.csv) — OECD Productivity Database
+- [Unemployment Rate (CSV)](../data/economics/oecd_unemployment.csv) — OECD Key Economic Indicators

@@ -79,6 +79,36 @@ OECD_DATASETS = {
         "id": "SNA_TABLE1",
         "description": "GDP per capita, current prices, PPP",
     },
+    "labour_productivity": {
+        "agency": "OECD",
+        "id": "PDB_LV",
+        "description": "GDP per hour worked, USD PPP",
+    },
+    "unemployment": {
+        "agency": "OECD",
+        "id": "KEI",
+        "description": "Harmonised unemployment rate, % of labour force",
+    },
+    "co2_per_capita": {
+        "agency": "OECD",
+        "id": "GREEN_GROWTH",
+        "description": "Production-based CO2 emissions per capita",
+    },
+    "co2_intensity": {
+        "agency": "OECD",
+        "id": "GREEN_GROWTH",
+        "description": "CO2 emissions per unit of GDP (productivity)",
+    },
+    "co2_indexed": {
+        "agency": "OECD",
+        "id": "GREEN_GROWTH",
+        "description": "Production-based CO2 emissions, indexed to 2000=100",
+    },
+    "renewables_share": {
+        "agency": "OECD",
+        "id": "GREEN_GROWTH",
+        "description": "Renewable energy as % of total primary energy supply",
+    },
 }
 
 # --- OECD Rate Limiting ---

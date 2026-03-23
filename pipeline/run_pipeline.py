@@ -7,7 +7,12 @@ import sys
 import logging
 
 from pipeline.fetch_statcan import fetch_population_quarterly, fetch_population_components, fetch_cpi
-from pipeline.fetch_oecd import fetch_rd_expenditure, fetch_gdp_per_capita
+from pipeline.fetch_oecd import (
+    fetch_rd_expenditure, fetch_gdp_per_capita,
+    fetch_labour_productivity, fetch_unemployment,
+    fetch_co2_per_capita, fetch_co2_intensity, fetch_co2_indexed,
+    fetch_renewables_share,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -60,6 +65,53 @@ def run_all():
     except Exception as e:
         logger.error(f"gdp_per_capita: {e}")
         results["gdp_per_capita"] = "ERROR"
+
+    try:
+        df = fetch_labour_productivity()
+        results["labour_productivity"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"labour_productivity: {e}")
+        results["labour_productivity"] = "ERROR"
+
+    try:
+        df = fetch_unemployment()
+        results["unemployment"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"unemployment: {e}")
+        results["unemployment"] = "ERROR"
+
+    # OECD Green Growth (Environment)
+    logger.info("=" * 50)
+    logger.info("OECD GREEN GROWTH")
+    logger.info("=" * 50)
+
+    try:
+        df = fetch_co2_per_capita()
+        results["co2_per_capita"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"co2_per_capita: {e}")
+        results["co2_per_capita"] = "ERROR"
+
+    try:
+        df = fetch_co2_intensity()
+        results["co2_intensity"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"co2_intensity: {e}")
+        results["co2_intensity"] = "ERROR"
+
+    try:
+        df = fetch_co2_indexed()
+        results["co2_indexed"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"co2_indexed: {e}")
+        results["co2_indexed"] = "ERROR"
+
+    try:
+        df = fetch_renewables_share()
+        results["renewables_share"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"renewables_share: {e}")
+        results["renewables_share"] = "ERROR"
 
     # Summary
     logger.info("=" * 50)

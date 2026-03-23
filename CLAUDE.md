@@ -24,9 +24,10 @@ DataCan/
 ├── _quarto.yml            ← site config, nav, theme
 ├── index.qmd              ← landing page
 ├── about.qmd              ← methodology
-├── population/index.qmd   ← population charts
-├── economics/index.qmd    ← inflation, GDP charts
+├── population/index.qmd   ← population charts (total, growth rate, components)
+├── economics/index.qmd    ← inflation, GDP, productivity, unemployment charts
 ├── science/index.qmd      ← R&D spending charts
+├── environment/index.qmd  ← CO2 emissions, renewables charts
 ├── pipeline/
 │   ├── __init__.py
 │   ├── config.py          ← peer groups, table IDs, styling, indicator registry
@@ -37,7 +38,8 @@ DataCan/
 ├── data/
 │   ├── population/        ← cleaned CSVs + metadata JSONs
 │   ├── economics/
-│   └── science/
+│   ├── science/
+│   └── environment/
 ├── .github/workflows/
 │   └── update-data.yml    ← weekly cron: fetch → commit → deploy
 └── requirements.txt
@@ -63,8 +65,11 @@ quarto render
   - Population components (17-10-0014-01)
   - CPI monthly (18-10-0004-01)
 - **OECD** — via SDMX REST API (`sdmx.oecd.org`)
-  - R&D expenditure (MSTI)
-  - GDP per capita (SNA_TABLE1)
+  - R&D expenditure (MSTI — `DSD_MSTI@DF_MSTI`)
+  - GDP per capita (SNA_TABLE1 — `DSD_NAMAIN1@DF_TABLE1_EXPENDITURE_HCPC`)
+  - Labour productivity / GDP per hour worked (PDB_LV — `DSD_PDB@DF_PDB_LV`)
+  - Unemployment rate (KEI — `DSD_KEI@DF_KEI`)
+  - CO2 per capita, CO2 intensity, CO2 indexed, renewables share (Green Growth — `DSD_GG@DF_GREEN_GROWTH`)
 
 ## Peer group
 

@@ -297,6 +297,7 @@ date,geography,population
 2025-04-01,Alberta,5010078
 2025-07-01,Alberta,5029346
 2025-10-01,Alberta,5040871
+2026-01-01,Alberta,5048151
 1951-07-01,British Columbia,1168000
 1951-10-01,British Columbia,1179000
 1952-01-01,British Columbia,1189000
@@ -595,6 +596,7 @@ date,geography,population
 2025-04-01,British Columbia,5699690
 2025-07-01,British Columbia,5697536
 2025-10-01,British Columbia,5683201
+2026-01-01,British Columbia,5658528
 1946-01-01,Canada,12188000
 1946-04-01,Canada,12241000
 1946-07-01,Canada,12316000
@@ -915,6 +917,7 @@ date,geography,population
 2025-04-01,Canada,41604555
 2025-07-01,Canada,41651653
 2025-10-01,Canada,41575585
+2026-01-01,Canada,41472081
 1951-07-01,Manitoba,778000
 1951-10-01,Manitoba,784000
 1952-01-01,Manitoba,789000
@@ -1213,6 +1216,7 @@ date,geography,population
 2025-04-01,Manitoba,1508031
 2025-07-01,Manitoba,1509702
 2025-10-01,Manitoba,1507057
+2026-01-01,Manitoba,1505117
 1951-07-01,New Brunswick,517000
 1951-10-01,New Brunswick,519000
 1952-01-01,New Brunswick,521000
@@ -1511,6 +1515,7 @@ date,geography,population
 2025-04-01,New Brunswick,867014
 2025-07-01,New Brunswick,869682
 2025-10-01,New Brunswick,868630
+2026-01-01,New Brunswick,867383
 1951-07-01,Newfoundland and Labrador,362000
 1951-10-01,Newfoundland and Labrador,365000
 1952-01-01,Newfoundland and Labrador,368000
@@ -1809,6 +1814,7 @@ date,geography,population
 2025-04-01,Newfoundland and Labrador,549456
 2025-07-01,Newfoundland and Labrador,549911
 2025-10-01,Newfoundland and Labrador,549738
+2026-01-01,Newfoundland and Labrador,548557
 1991-07-01,Northwest Territories,38724
 1991-10-01,Northwest Territories,38854
 1992-01-01,Northwest Territories,39055
@@ -1947,6 +1953,7 @@ date,geography,population
 2025-04-01,Northwest Territories,45875
 2025-07-01,Northwest Territories,45950
 2025-10-01,Northwest Territories,45848
+2026-01-01,Northwest Territories,45803
 1951-07-01,Northwest Territories including Nunavut,16000
 1951-10-01,Northwest Territories including Nunavut,16000
 1952-01-01,Northwest Territories including Nunavut,16000
@@ -2406,6 +2413,7 @@ date,geography,population
 2025-04-01,Nova Scotia,1091037
 2025-07-01,Nova Scotia,1093245
 2025-10-01,Nova Scotia,1091857
+2026-01-01,Nova Scotia,1090074
 1991-07-01,Nunavut,22154
 1991-10-01,Nunavut,22320
 1992-01-01,Nunavut,22497
@@ -2544,6 +2552,7 @@ date,geography,population
 2025-04-01,Nunavut,41798
 2025-07-01,Nunavut,41830
 2025-10-01,Nunavut,41919
+2026-01-01,Nunavut,41946
 1951-07-01,Ontario,4615000
 1951-10-01,Ontario,4665000
 1952-01-01,Ontario,4717000
@@ -2842,6 +2851,7 @@ date,geography,population
 2025-04-01,Ontario,16256538
 2025-07-01,Ontario,16258260
 2025-10-01,Ontario,16191372
+2026-01-01,Ontario,16136480
 1951-07-01,Prince Edward Island,99000
 1951-10-01,Prince Edward Island,99000
 1952-01-01,Prince Edward Island,100000
@@ -3140,6 +3150,7 @@ date,geography,population
 2025-04-01,Prince Edward Island,181289
 2025-07-01,Prince Edward Island,182657
 2025-10-01,Prince Edward Island,182508
+2026-01-01,Prince Edward Island,182001
 1951-07-01,Quebec,4066000
 1951-10-01,Quebec,4095000
 1952-01-01,Quebec,4126000
@@ -3438,6 +3449,7 @@ date,geography,population
 2025-04-01,Quebec,9041123
 2025-07-01,Quebec,9058297
 2025-10-01,Quebec,9058089
+2026-01-01,Quebec,9033887
 1951-07-01,Saskatchewan,834000
 1951-10-01,Saskatchewan,836000
 1952-01-01,Saskatchewan,836000
@@ -3736,6 +3748,7 @@ date,geography,population
 2025-04-01,Saskatchewan,1264537
 2025-07-01,Saskatchewan,1266959
 2025-10-01,Saskatchewan,1266234
+2026-01-01,Saskatchewan,1265936
 1951-07-01,Yukon,9000
 1951-10-01,Yukon,9000
 1952-01-01,Yukon,9000
@@ -4034,3 +4047,4 @@ date,geography,population
 2025-04-01,Yukon,48089
 2025-07-01,Yukon,48278
 2025-10-01,Yukon,48261
+2026-01-01,Yukon,48218

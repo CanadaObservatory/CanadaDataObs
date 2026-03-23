@@ -1,0 +1,14 @@
+{
+  "dataset_id": "oecd_rd_expenditure",
+  "source": "OECD",
+  "source_table": "MSTI_PUB (Main Science and Technology Indicators)",
+  "frequency": "annual",
+  "unit": "% of GDP",
+  "retrieved_at": "2026-03-23T08:39:15.914230+00:00",
+  "latest_observation_date": "2024",
+  "transformations": [
+    "filtered to GERD as % of GDP for 20 OECD peers"
+  ],
+  "notes": null,
+  "row_count": 438
+}

@@ -1,0 +1,15 @@
+{
+  "dataset_id": "statcan_cpi",
+  "source": "Statistics Canada",
+  "source_table": "18-10-0004-01",
+  "frequency": "monthly",
+  "unit": "index (2002=100)",
+  "retrieved_at": "2026-03-23T08:39:11.940203+00:00",
+  "latest_observation_date": "2026-02-01",
+  "transformations": [
+    "filtered to All-items CPI, Canada only",
+    "computed year-over-year inflation rate (12-month pct_change)"
+  ],
+  "notes": null,
+  "row_count": 1346
+}

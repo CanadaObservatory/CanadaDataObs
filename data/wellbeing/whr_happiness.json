@@ -4,7 +4,7 @@
   "source_table": "WHR Figure 2.1",
   "frequency": "annual",
   "unit": "Cantril ladder score (0-10)",
-  "retrieved_at": "2026-03-24T13:07:21.876619+00:00",
+  "retrieved_at": "2026-03-24T14:55:19.769203+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to 20 OECD peers",

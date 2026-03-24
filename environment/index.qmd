@@ -240,9 +240,130 @@ else:
     print("Renewable energy data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## Energy Mix by Country
+
+Primary energy supply broken down by source. Shows the share of each country's energy that comes from fossil fuels (coal, oil, gas), nuclear, and renewables. Countries are sorted by renewable energy share.
+
+```{python}
+#| echo: false
+emix_path = "data/environment/owid_energy_mix.csv"
+if os.path.exists(emix_path):
+    emix = pd.read_csv(emix_path)
+    latest_year = emix.dropna(subset=["coal_share_energy"]).groupby("country_code")["year"].max()
+
+    # Get latest available year per country
+    rows = []
+    for cc, yr in latest_year.items():
+        row = emix[(emix["country_code"] == cc) & (emix["year"] == yr)]
+        if not row.empty:
+            rows.append(row.iloc[0])
+    latest = pd.DataFrame(rows)
+
+    # Sort by renewables share (highest at top)
+    latest = latest.sort_values("renewables_share_energy", ascending=True)
+
+    # Energy source categories and colors
+    sources = [
+        ("coal_share_energy", "Coal", "#4a4a4a"),
+        ("oil_share_energy", "Oil", "#8c564b"),
+        ("gas_share_energy", "Natural Gas", "#ff7f0e"),
+        ("nuclear_share_energy", "Nuclear", "#9467bd"),
+        ("renewables_share_energy", "Renewables", "#2ca02c"),
+    ]
+
+    fig = go.Figure()
+    for col, name, color in sources:
+        vals = latest[col].fillna(0)
+        fig.add_trace(go.Bar(
+            y=latest["country_name"],
+            x=vals,
+            name=name,
+            orientation="h",
+            marker_color=color,
+            hovertemplate=f"{name}: %{{x:.1f}}%<extra>%{{y}}</extra>",
+        ))
+
+    fig.update_layout(
+        barmode="stack",
+        xaxis_title="% of primary energy supply",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0", range=[0, 100]),
+        legend=dict(
+            orientation="h", yanchor="top", y=-0.08,
+            xanchor="center", x=0.5,
+        ),
+        height=650,
+        margin=dict(b=120, t=20),
+        annotations=[dict(
+            text=f"Source: Our World in Data (Energy Institute) | Data as of: {get_data_date(emix_path)}",
+            xref="paper", yref="paper", x=0, y=-0.22,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Energy mix data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Canada's Energy Mix Over Time
+
+How Canada's energy sources have shifted over the decades.
+
+```{python}
+#| echo: false
+if os.path.exists(emix_path):
+    canada_emix = emix[emix["country_code"] == "CAN"].copy()
+    canada_emix = canada_emix.dropna(subset=["coal_share_energy"])
+    canada_emix = canada_emix.sort_values("year")
+
+    sources = [
+        ("coal_share_energy", "Coal", "#4a4a4a"),
+        ("oil_share_energy", "Oil", "#8c564b"),
+        ("gas_share_energy", "Natural Gas", "#ff7f0e"),
+        ("nuclear_share_energy", "Nuclear", "#9467bd"),
+        ("renewables_share_energy", "Renewables", "#2ca02c"),
+    ]
+
+    fig = go.Figure()
+    for col, name, color in sources:
+        fig.add_trace(go.Scatter(
+            x=canada_emix["year"],
+            y=canada_emix[col].fillna(0),
+            name=name,
+            mode="lines",
+            stackgroup="one",
+            line=dict(width=0.5, color=color),
+            fillcolor=color,
+            hovertemplate=f"{name}: %{{y:.1f}}%<extra></extra>",
+        ))
+
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="% of primary energy supply",
+        yaxis=dict(range=[0, 100], gridcolor="#e0e0e0"),
+        xaxis=dict(gridcolor="#e0e0e0"),
+        plot_bgcolor="white",
+        legend=dict(
+            orientation="h", yanchor="top", y=-0.08,
+            xanchor="center", x=0.5,
+        ),
+        margin=dict(b=120, t=20),
+        annotations=[dict(
+            text=f"Source: Our World in Data (Energy Institute) | Data as of: {get_data_date(emix_path)}",
+            xref="paper", yref="paper", x=0, y=-0.22,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Energy mix data not yet available. Run the data pipeline to fetch it.")
+```
+
 ## Download Data
 
 - [CO2 per Capita (CSV)](../data/environment/oecd_co2_per_capita.csv) — OECD Green Growth Indicators
 - [CO2 Productivity (CSV)](../data/environment/oecd_co2_intensity.csv) — OECD Green Growth Indicators
 - [CO2 Emissions Indexed (CSV)](../data/environment/oecd_co2_indexed.csv) — OECD Green Growth Indicators
 - [Renewable Energy Share (CSV)](../data/environment/oecd_renewables_share.csv) — OECD Green Growth Indicators
+- [Energy Mix (CSV)](../data/environment/owid_energy_mix.csv) — Our World in Data (Energy Institute)

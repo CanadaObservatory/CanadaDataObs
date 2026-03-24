@@ -70,6 +70,8 @@ quarto render
   - Labour productivity / GDP per hour worked (PDB_LV — `DSD_PDB@DF_PDB_LV`)
   - Unemployment rate (KEI — `DSD_KEI@DF_KEI`)
   - CO2 per capita, CO2 intensity, CO2 indexed, renewables share (Green Growth — `DSD_GG@DF_GREEN_GROWTH`)
+- **Our World in Data** — direct CSV download (`owid-energy-data.csv`)
+  - Energy mix by source: coal, oil, gas, nuclear, renewables shares (Energy Institute + Ember + EIA)
 
 ## Peer group
 

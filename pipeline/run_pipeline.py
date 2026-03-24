@@ -13,6 +13,7 @@ from pipeline.fetch_oecd import (
     fetch_co2_per_capita, fetch_co2_intensity, fetch_co2_indexed,
     fetch_renewables_share,
 )
+from pipeline.fetch_owid import fetch_energy_mix
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -112,6 +113,18 @@ def run_all():
     except Exception as e:
         logger.error(f"renewables_share: {e}")
         results["renewables_share"] = "ERROR"
+
+    # OWID
+    logger.info("=" * 50)
+    logger.info("OUR WORLD IN DATA")
+    logger.info("=" * 50)
+
+    try:
+        df = fetch_energy_mix()
+        results["energy_mix"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"energy_mix: {e}")
+        results["energy_mix"] = "ERROR"
 
     # Summary
     logger.info("=" * 50)

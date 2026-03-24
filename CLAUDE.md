@@ -27,19 +27,23 @@ DataCan/
 ├── population/index.qmd   ← population charts (total, growth rate, components)
 ├── economics/index.qmd    ← inflation, GDP, productivity, unemployment charts
 ├── science/index.qmd      ← R&D spending charts
-├── environment/index.qmd  ← CO2 emissions, renewables charts
+├── environment/index.qmd  ← CO2 emissions, energy mix, renewables charts
+├── wellbeing/index.qmd    ← happiness, life expectancy, freedom, corruption
 ├── pipeline/
 │   ├── __init__.py
 │   ├── config.py          ← peer groups, table IDs, styling, indicator registry
 │   ├── fetch_statcan.py   ← Statistics Canada API
 │   ├── fetch_oecd.py      ← OECD SDMX API
+│   ├── fetch_owid.py      ← Our World in Data (energy mix)
+│   ├── fetch_whr.py       ← World Happiness Report
 │   ├── charts.py          ← reusable Plotly chart builders
 │   └── run_pipeline.py    ← orchestrator
 ├── data/
 │   ├── population/        ← cleaned CSVs + metadata JSONs
 │   ├── economics/
 │   ├── science/
-│   └── environment/
+│   ├── environment/
+│   └── wellbeing/
 ├── .github/workflows/
 │   └── update-data.yml    ← weekly cron: fetch → commit → deploy
 └── requirements.txt
@@ -72,6 +76,10 @@ quarto render
   - CO2 per capita, CO2 intensity, CO2 indexed, renewables share (Green Growth — `DSD_GG@DF_GREEN_GROWTH`)
 - **Our World in Data** — direct CSV download (`owid-energy-data.csv`)
   - Energy mix by source: coal, oil, gas, nuclear, renewables shares (Energy Institute + Ember + EIA)
+- **World Happiness Report** — XLSX download from `files.worldhappiness.report`
+  - Happiness score (Cantril ladder), healthy life expectancy, freedom,
+    corruption, social support, generosity, GDP contributions
+  - URL updated annually when new report is released (typically March)
 
 ## Peer group
 

@@ -1,0 +1,277 @@
+---
+title: "Well-being"
+description: "Life satisfaction and well-being indicators — Canada and OECD peers"
+---
+
+```{python}
+#| echo: false
+import pandas as pd
+import plotly.graph_objects as go
+import os
+from pipeline.config import (
+    CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
+    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
+)
+from pipeline.charts import peer_comparison_line
+```
+
+Data from the [World Happiness Report](https://worldhappiness.report/), based on the Gallup World Poll. The happiness score (Life Evaluation) is a national average of responses to the Cantril ladder question, where respondents rate their current life on a scale from 0 (worst possible) to 10 (best possible). Scores shown are 3-year averages.
+
+## Happiness Score (Life Evaluation)
+
+```{python}
+#| echo: false
+whr_path = "data/wellbeing/whr_happiness.csv"
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+
+    fig = peer_comparison_line(
+        df, x_col="year", y_col="happiness_score",
+        title="", yaxis_title="Life Evaluation (0–10)",
+    )
+    fig.update_layout(
+        annotations=[dict(
+            text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=0, y=-0.52,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Happiness data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Latest Happiness Score: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+    latest_year = df["year"].max()
+    latest = df[df["year"] == latest_year].copy()
+    latest = latest.sort_values("happiness_score", ascending=True)
+
+    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=latest["happiness_score"],
+        y=latest["country_name"],
+        orientation="h",
+        marker_color=colors,
+        hovertemplate="%{y}: %{x:.2f}<extra></extra>",
+    ))
+
+    fig.update_layout(
+        xaxis_title="Life Evaluation (0–10)",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0", range=[0, 10]),
+        showlegend=False,
+        height=600,
+        annotations=[dict(
+            text=f"Source: World Happiness Report ({latest_year}) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=1, y=-0.1,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show()
+else:
+    print("Happiness data not yet available.")
+```
+
+## Healthy Life Expectancy (Contribution)
+
+How much healthy life expectancy contributes to each country's happiness score. This reflects the WHO's healthy life expectancy at birth measure, expressed as its partial contribution to the overall Cantril ladder score.
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+
+    fig = peer_comparison_line(
+        df, x_col="year", y_col="explained_life_expectancy",
+        title="", yaxis_title="Contribution to happiness score",
+    )
+    fig.update_layout(
+        annotations=[dict(
+            text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=0, y=-0.52,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Happiness data not yet available.")
+```
+
+## Latest Healthy Life Expectancy Contribution: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+    latest_year = df["year"].max()
+    latest = df[df["year"] == latest_year].dropna(subset=["explained_life_expectancy"]).copy()
+    latest = latest.sort_values("explained_life_expectancy", ascending=True)
+
+    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=latest["explained_life_expectancy"],
+        y=latest["country_name"],
+        orientation="h",
+        marker_color=colors,
+        hovertemplate="%{y}: %{x:.3f}<extra></extra>",
+    ))
+
+    fig.update_layout(
+        xaxis_title="Contribution to happiness score",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0"),
+        showlegend=False,
+        height=600,
+        annotations=[dict(
+            text=f"Source: World Happiness Report ({latest_year}) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=1, y=-0.1,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show()
+else:
+    print("Happiness data not yet available.")
+```
+
+## Freedom to Make Life Choices (Contribution)
+
+How much perceived freedom contributes to each country's happiness score. Based on the national average of responses to the question "Are you satisfied with your freedom to choose what you do with your life?"
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+
+    fig = peer_comparison_line(
+        df, x_col="year", y_col="explained_freedom",
+        title="", yaxis_title="Contribution to happiness score",
+    )
+    fig.update_layout(
+        annotations=[dict(
+            text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=0, y=-0.52,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Happiness data not yet available.")
+```
+
+## Latest Freedom Contribution: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+    latest_year = df["year"].max()
+    latest = df[df["year"] == latest_year].dropna(subset=["explained_freedom"]).copy()
+    latest = latest.sort_values("explained_freedom", ascending=True)
+
+    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=latest["explained_freedom"],
+        y=latest["country_name"],
+        orientation="h",
+        marker_color=colors,
+        hovertemplate="%{y}: %{x:.3f}<extra></extra>",
+    ))
+
+    fig.update_layout(
+        xaxis_title="Contribution to happiness score",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0"),
+        showlegend=False,
+        height=600,
+        annotations=[dict(
+            text=f"Source: World Happiness Report ({latest_year}) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=1, y=-0.1,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show()
+else:
+    print("Happiness data not yet available.")
+```
+
+## Perceptions of Corruption (Contribution)
+
+How much the absence of perceived corruption contributes to each country's happiness score. Based on responses about whether corruption is widespread in government and business. Higher values indicate lower perceived corruption.
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+
+    fig = peer_comparison_line(
+        df, x_col="year", y_col="explained_corruption",
+        title="", yaxis_title="Contribution to happiness score",
+    )
+    fig.update_layout(
+        annotations=[dict(
+            text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=0, y=-0.52,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Happiness data not yet available.")
+```
+
+## Latest Corruption Perception Contribution: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(whr_path):
+    df = pd.read_csv(whr_path)
+    latest_year = df["year"].max()
+    latest = df[df["year"] == latest_year].dropna(subset=["explained_corruption"]).copy()
+    latest = latest.sort_values("explained_corruption", ascending=True)
+
+    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=latest["explained_corruption"],
+        y=latest["country_name"],
+        orientation="h",
+        marker_color=colors,
+        hovertemplate="%{y}: %{x:.3f}<extra></extra>",
+    ))
+
+    fig.update_layout(
+        xaxis_title="Contribution to happiness score",
+        yaxis_title="",
+        plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0"),
+        showlegend=False,
+        height=600,
+        annotations=[dict(
+            text=f"Source: World Happiness Report ({latest_year}) | Data as of: {get_data_date(whr_path)}",
+            xref="paper", yref="paper", x=1, y=-0.1,
+            showarrow=False, font=dict(size=10, color="#999"),
+        )],
+    )
+    fig.show()
+else:
+    print("Happiness data not yet available.")
+```
+
+## Download Data
+
+- [Happiness Scores (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)

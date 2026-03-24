@@ -18,6 +18,8 @@ website:
         text: Science & Innovation
       - href: environment/index.qmd
         text: Environment
+      - href: wellbeing/index.qmd
+        text: Well-being
       - href: about.qmd
         text: About
     right:

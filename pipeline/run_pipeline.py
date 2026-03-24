@@ -14,6 +14,7 @@ from pipeline.fetch_oecd import (
     fetch_renewables_share,
 )
 from pipeline.fetch_owid import fetch_energy_mix
+from pipeline.fetch_whr import fetch_happiness
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -125,6 +126,18 @@ def run_all():
     except Exception as e:
         logger.error(f"energy_mix: {e}")
         results["energy_mix"] = "ERROR"
+
+    # World Happiness Report
+    logger.info("=" * 50)
+    logger.info("WORLD HAPPINESS REPORT")
+    logger.info("=" * 50)
+
+    try:
+        df = fetch_happiness()
+        results["happiness"] = "OK" if df is not None else "FAILED"
+    except Exception as e:
+        logger.error(f"happiness: {e}")
+        results["happiness"] = "ERROR"
 
     # Summary
     logger.info("=" * 50)

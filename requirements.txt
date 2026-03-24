@@ -5,3 +5,5 @@ pandasdmx
 kaleido
 jupyter
 pyyaml
+openpyxl
+requests

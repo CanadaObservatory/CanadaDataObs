@@ -63,7 +63,7 @@ HIGHLIGHT_COUNTRY = "CAN"
 # --- Statistics Canada Table IDs ---
 STATCAN_TABLES = {
     "population_quarterly": "17-10-0009-01",  # Population estimates, quarterly
-    "population_components": "17-10-0014-01",  # Components of population growth
+    "population_components": "17-10-0008-01",  # Components of demographic growth
     "cpi": "18-10-0004-01",  # Consumer Price Index, monthly
 }
 
@@ -76,7 +76,7 @@ OECD_DATASETS = {
     },
     "gdp_per_capita": {
         "agency": "OECD",
-        "id": "SNA_TABLE1",
+        "id": "SNA_TABLE1 (DSD_NAMAIN10)",
         "description": "GDP per capita, current prices, PPP",
     },
     "labour_productivity": {

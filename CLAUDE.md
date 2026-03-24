@@ -62,11 +62,11 @@ quarto render
 
 - **Statistics Canada** — via `stats_can` library
   - Population quarterly (17-10-0009-01)
-  - Population components (17-10-0014-01)
+  - Population components (17-10-0008-01)
   - CPI monthly (18-10-0004-01)
 - **OECD** — via SDMX REST API (`sdmx.oecd.org`)
   - R&D expenditure (MSTI — `DSD_MSTI@DF_MSTI`)
-  - GDP per capita (SNA_TABLE1 — `DSD_NAMAIN1@DF_TABLE1_EXPENDITURE_HCPC`)
+  - GDP per capita (SNA_TABLE1 — `DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC` v2.0)
   - Labour productivity / GDP per hour worked (PDB_LV — `DSD_PDB@DF_PDB_LV`)
   - Unemployment rate (KEI — `DSD_KEI@DF_KEI`)
   - CO2 per capita, CO2 intensity, CO2 indexed, renewables share (Green Growth — `DSD_GG@DF_GREEN_GROWTH`)

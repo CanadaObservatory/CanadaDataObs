@@ -105,13 +105,13 @@ def fetch_population_components():
         logger.error(f"Failed to fetch StatCan table {table_id}: {e}")
         return None
 
-    validate_columns(df, ["REF_DATE", "GEO", "Components of population growth", "VALUE"],
+    validate_columns(df, ["REF_DATE", "GEO", "Components of demographic growth", "VALUE"],
                      "population_components")
 
     df = df.rename(columns={
         "REF_DATE": "date",
         "GEO": "geography",
-        "Components of population growth": "component",
+        "Components of demographic growth": "component",
         "VALUE": "value",
     })
     df = df[["date", "geography", "component", "value"]].copy()
@@ -125,7 +125,7 @@ def fetch_population_components():
     df.to_csv(out_path, index=False)
     save_metadata(out_path, df=df,
         source="Statistics Canada",
-        source_table="17-10-0014-01",
+        source_table="17-10-0008-01",
         frequency="quarterly",
         unit="persons",
         transformations=["filtered to date, geography, component, value columns"],

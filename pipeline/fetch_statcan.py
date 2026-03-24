@@ -4,8 +4,7 @@ Uses the stats_can library for simplified API access.
 """
 
 import pandas as pd
-import stats_can
-from pipeline.config import DATA_DIR, STATCAN_TABLES, PROJECT_ROOT
+from pipeline.config import DATA_DIR, STATCAN_TABLES
 from pipeline.metadata import save_metadata, validate_columns
 import logging
 
@@ -16,33 +15,27 @@ logger = logging.getLogger(__name__)
 def _get_table(table_id):
     """Download a StatCan table and return as DataFrame.
 
-    Downloads the CSV zip from StatCan, caches locally in an h5 file,
-    and returns as a DataFrame. Works on fresh environments (e.g., GitHub Actions).
+    Downloads the CSV zip directly from StatCan's bulk download endpoint.
+    This avoids caching issues with the stats_can library's h5 store.
     """
-    # First try to download/update the table
-    try:
-        stats_can.update_tables(table_id, path=str(PROJECT_ROOT))
-    except Exception:
-        pass  # May fail if table not yet downloaded
+    import zipfile, io, requests
 
-    try:
-        return stats_can.table_to_df(table_id, path=str(PROJECT_ROOT))
-    except Exception:
-        # If h5 doesn't exist yet, download via zip
-        from stats_can.scwds import get_full_table_download
-        import zipfile, io, tempfile, requests
+    # Build direct download URL (works reliably on fresh CI environments)
+    # StatCan table IDs like "17-10-0008-01" → URL uses "17100008" (first 3 groups)
+    parts = table_id.split("-")
+    table_num = "".join(parts[:3])  # e.g., "17100008"
+    url = f"https://www150.statcan.gc.ca/n1/tbl/csv/{table_num}-eng.zip"
+    logger.info(f"  Downloading zip from: {url}")
 
-        url = get_full_table_download(table_id)
-        logger.info(f"  Downloading zip from: {url}")
-        r = requests.get(url, timeout=120)
-        r.raise_for_status()
+    r = requests.get(url, timeout=120)
+    r.raise_for_status()
 
-        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
-            csv_names = [n for n in z.namelist() if n.endswith('.csv')]
-            if not csv_names:
-                raise ValueError(f"No CSV found in zip for table {table_id}")
-            with z.open(csv_names[0]) as f:
-                return pd.read_csv(f)
+    with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+        csv_names = [n for n in z.namelist() if n.endswith('.csv')]
+        if not csv_names:
+            raise ValueError(f"No CSV found in zip for table {table_id}")
+        with z.open(csv_names[0]) as f:
+            return pd.read_csv(f)
 
 
 def fetch_population_quarterly():
@@ -105,18 +98,20 @@ def fetch_population_components():
         logger.error(f"Failed to fetch StatCan table {table_id}: {e}")
         return None
 
-    validate_columns(df, ["REF_DATE", "GEO", "Components of demographic growth", "VALUE"],
+    validate_columns(df, ["REF_DATE", "GEO", "Components of population growth", "VALUE"],
                      "population_components")
 
     df = df.rename(columns={
         "REF_DATE": "date",
         "GEO": "geography",
-        "Components of demographic growth": "component",
+        "Components of population growth": "component",
         "VALUE": "value",
     })
     df = df[["date", "geography", "component", "value"]].copy()
 
-    df["date"] = pd.to_datetime(df["date"])
+    # Dates are fiscal year format "1971/1972" — use the ending year as July 1
+    df["date"] = df["date"].astype(str).str.extract(r"(\d{4})$")[0]
+    df["date"] = pd.to_datetime(df["date"], format="%Y")
     df = df.dropna(subset=["value"])
     df = df.sort_values(["geography", "component", "date"]).reset_index(drop=True)
 

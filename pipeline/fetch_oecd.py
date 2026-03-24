@@ -121,12 +121,12 @@ def fetch_gdp_per_capita():
     logger.info("Fetching OECD GDP per capita (PPP, current prices)...")
 
     country_str = "+".join(PEER_CODES)
-    # Dataflow v2.0 has 12 dimensions:
+    # Dataflow v2.0 has 13 dimensions:
     # FREQ.REF_AREA.SECTOR.COUNTERPART_SECTOR.TRANSACTION.INSTR_ASSET.
     # ACTIVITY.EXPENDITURE.UNIT_MEASURE.PRICE_BASE.TRANSFORMATION.TABLE_IDENTIFIER
     df = _fetch_oecd_csv(
         dataflow="OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC,2.0",
-        key=f"A.{country_str}...B1GQ_POP....USD_PPP.V.N.",
+        key=f"A.{country_str}.S1.S1.B1GQ_POP._Z._Z._Z.USD_PPP_PS.V.N.T0102",
         start_period=2000,
     )
 

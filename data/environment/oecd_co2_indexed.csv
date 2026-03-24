@@ -1,0 +1,701 @@
+country_code,year,co2_index,country_name
+AUS,1990,77.55,Australia
+AUS,1991,78.0,Australia
+AUS,1992,79.2,Australia
+AUS,1993,80.37,Australia
+AUS,1994,82.15,Australia
+AUS,1995,85.26,Australia
+AUS,1996,88.22,Australia
+AUS,1997,90.57,Australia
+AUS,1998,96.44,Australia
+AUS,1999,98.25,Australia
+AUS,2000,100.0,Australia
+AUS,2001,101.89,Australia
+AUS,2002,104.23,Australia
+AUS,2003,104.11,Australia
+AUS,2004,108.11,Australia
+AUS,2005,108.86,Australia
+AUS,2006,110.44,Australia
+AUS,2007,113.49,Australia
+AUS,2008,114.47,Australia
+AUS,2009,116.43,Australia
+AUS,2010,117.12,Australia
+AUS,2011,116.55,Australia
+AUS,2012,116.75,Australia
+AUS,2013,114.68,Australia
+AUS,2014,111.82,Australia
+AUS,2015,113.15,Australia
+AUS,2016,115.39,Australia
+AUS,2017,115.85,Australia
+AUS,2018,115.33,Australia
+AUS,2019,114.5,Australia
+AUS,2020,110.31,Australia
+AUS,2021,107.85,Australia
+AUS,2022,106.04,Australia
+AUS,2023,106.21,Australia
+AUS,2024,104.17,Australia
+AUT,1990,90.97,Austria
+AUT,1991,97.73,Austria
+AUT,1992,89.87,Austria
+AUT,1993,90.21,Austria
+AUT,1994,90.88,Austria
+AUT,1995,96.33,Austria
+AUT,1996,102.33,Austria
+AUT,1997,101.03,Austria
+AUT,1998,102.02,Austria
+AUT,1999,99.39,Austria
+AUT,2000,100.0,Austria
+AUT,2001,107.07,Austria
+AUT,2002,109.4,Austria
+AUT,2003,117.61,Austria
+AUT,2004,119.71,Austria
+AUT,2005,120.41,Austria
+AUT,2006,116.7,Austria
+AUT,2007,111.8,Austria
+AUT,2008,110.96,Austria
+AUT,2009,101.29,Austria
+AUT,2010,110.54,Austria
+AUT,2011,107.74,Austria
+AUT,2012,102.61,Austria
+AUT,2013,103.68,Austria
+AUT,2014,97.72,Austria
+AUT,2015,99.56,Austria
+AUT,2016,100.23,Austria
+AUT,2017,103.77,Austria
+AUT,2018,99.16,Austria
+AUT,2019,101.53,Austria
+AUT,2020,92.79,Austria
+AUT,2021,96.99,Austria
+AUT,2022,91.68,Austria
+AUT,2023,85.38,Austria
+AUT,2024,83.82,Austria
+BEL,1990,93.41,Belgium
+BEL,1991,97.44,Belgium
+BEL,1992,95.82,Belgium
+BEL,1993,93.88,Belgium
+BEL,1994,98.0,Belgium
+BEL,1995,97.64,Belgium
+BEL,1996,102.14,Belgium
+BEL,1997,99.53,Belgium
+BEL,1998,101.96,Belgium
+BEL,1999,98.59,Belgium
+BEL,2000,100.0,Belgium
+BEL,2001,101.21,Belgium
+BEL,2002,94.61,Belgium
+BEL,2003,98.74,Belgium
+BEL,2004,96.94,Belgium
+BEL,2005,94.76,Belgium
+BEL,2006,92.07,Belgium
+BEL,2007,88.44,Belgium
+BEL,2008,90.95,Belgium
+BEL,2009,85.31,Belgium
+BEL,2010,91.62,Belgium
+BEL,2011,82.34,Belgium
+BEL,2012,81.39,Belgium
+BEL,2013,82.51,Belgium
+BEL,2014,77.0,Belgium
+BEL,2015,81.42,Belgium
+BEL,2016,80.48,Belgium
+BEL,2017,79.26,Belgium
+BEL,2018,79.82,Belgium
+BEL,2019,78.8,Belgium
+BEL,2020,72.3,Belgium
+BEL,2021,75.59,Belgium
+BEL,2022,70.6,Belgium
+BEL,2023,67.45,Belgium
+BEL,2024,69.16,Belgium
+CAN,1990,81.24,Canada
+CAN,1991,80.12,Canada
+CAN,1992,82.68,Canada
+CAN,1993,82.12,Canada
+CAN,1994,85.21,Canada
+CAN,1995,87.11,Canada
+CAN,1996,89.93,Canada
+CAN,1997,92.79,Canada
+CAN,1998,94.18,Canada
+CAN,1999,96.07,Canada
+CAN,2000,100.0,Canada
+CAN,2001,98.54,Canada
+CAN,2002,102.21,Canada
+CAN,2003,106.13,Canada
+CAN,2004,103.21,Canada
+CAN,2005,105.79,Canada
+CAN,2006,103.95,Canada
+CAN,2007,109.73,Canada
+CAN,2008,106.12,Canada
+CAN,2009,100.8,Canada
+CAN,2010,103.52,Canada
+CAN,2011,105.75,Canada
+CAN,2012,105.22,Canada
+CAN,2013,106.87,Canada
+CAN,2014,107.86,Canada
+CAN,2015,106.76,Canada
+CAN,2016,106.55,Canada
+CAN,2017,108.56,Canada
+CAN,2018,110.68,Canada
+CAN,2019,109.59,Canada
+CAN,2020,99.53,Canada
+CAN,2021,100.94,Canada
+CAN,2022,103.8,Canada
+CAN,2023,103.72,Canada
+CAN,2024,104.7,Canada
+CHE,1990,97.06,Switzerland
+CHE,1991,103.44,Switzerland
+CHE,1992,103.86,Switzerland
+CHE,1993,98.96,Switzerland
+CHE,1994,96.45,Switzerland
+CHE,1995,98.75,Switzerland
+CHE,1996,100.57,Switzerland
+CHE,1997,98.01,Switzerland
+CHE,1998,101.57,Switzerland
+CHE,1999,102.24,Switzerland
+CHE,2000,100.0,Switzerland
+CHE,2001,103.36,Switzerland
+CHE,2002,99.75,Switzerland
+CHE,2003,102.85,Switzerland
+CHE,2004,103.67,Switzerland
+CHE,2005,104.79,Switzerland
+CHE,2006,103.89,Switzerland
+CHE,2007,99.2,Switzerland
+CHE,2008,101.59,Switzerland
+CHE,2009,98.53,Switzerland
+CHE,2010,102.02,Switzerland
+CHE,2011,92.56,Switzerland
+CHE,2012,96.07,Switzerland
+CHE,2013,98.51,Switzerland
+CHE,2014,89.55,Switzerland
+CHE,2015,88.23,Switzerland
+CHE,2016,89.23,Switzerland
+CHE,2017,87.03,Switzerland
+CHE,2018,84.22,Switzerland
+CHE,2019,83.9,Switzerland
+CHE,2020,78.49,Switzerland
+CHE,2021,82.08,Switzerland
+CHE,2022,74.91,Switzerland
+CHE,2023,73.13,Switzerland
+CHE,2024,72.34,Switzerland
+DEU,1990,115.72,Germany
+DEU,1991,112.97,Germany
+DEU,1992,108.04,Germany
+DEU,1993,107.33,Germany
+DEU,1994,105.76,Germany
+DEU,1995,105.45,Germany
+DEU,1996,109.2,Germany
+DEU,1997,105.25,Germany
+DEU,1998,104.26,Germany
+DEU,1999,100.33,Germany
+DEU,2000,100.0,Germany
+DEU,2001,102.36,Germany
+DEU,2002,100.69,Germany
+DEU,2003,101.03,Germany
+DEU,2004,99.05,Germany
+DEU,2005,96.88,Germany
+DEU,2006,98.32,Germany
+DEU,2007,94.42,Germany
+DEU,2008,95.27,Germany
+DEU,2009,88.66,Germany
+DEU,2010,93.42,Germany
+DEU,2011,90.02,Germany
+DEU,2012,91.73,Germany
+DEU,2013,94.01,Germany
+DEU,2014,89.02,Germany
+DEU,2015,89.83,Germany
+DEU,2016,90.42,Germany
+DEU,2017,88.49,Germany
+DEU,2018,85.5,Germany
+DEU,2019,79.45,Germany
+DEU,2020,73.01,Germany
+DEU,2021,76.09,Germany
+DEU,2022,75.11,Germany
+DEU,2023,67.61,Germany
+DEU,2024,63.18,Germany
+DNK,1990,100.34,Denmark
+DNK,1991,120.53,Denmark
+DNK,1992,108.94,Denmark
+DNK,1993,113.63,Denmark
+DNK,1994,121.34,Denmark
+DNK,1995,114.99,Denmark
+DNK,1996,141.1,Denmark
+DNK,1997,121.9,Denmark
+DNK,1998,114.17,Denmark
+DNK,1999,107.89,Denmark
+DNK,2000,100.0,Denmark
+DNK,2001,103.13,Denmark
+DNK,2002,102.55,Denmark
+DNK,2003,113.18,Denmark
+DNK,2004,102.03,Denmark
+DNK,2005,95.44,Denmark
+DNK,2006,111.05,Denmark
+DNK,2007,101.68,Denmark
+DNK,2008,95.85,Denmark
+DNK,2009,92.43,Denmark
+DNK,2010,93.08,Denmark
+DNK,2011,82.8,Denmark
+DNK,2012,73.15,Denmark
+DNK,2013,76.54,Denmark
+DNK,2014,68.3,Denmark
+DNK,2015,64.08,Denmark
+DNK,2016,66.87,Denmark
+DNK,2017,62.53,Denmark
+DNK,2018,62.53,Denmark
+DNK,2019,55.82,Denmark
+DNK,2020,51.13,Denmark
+DNK,2021,54.63,Denmark
+DNK,2022,52.79,Denmark
+DNK,2023,48.31,Denmark
+DNK,2024,45.63,Denmark
+FIN,1990,99.59,Finland
+FIN,1991,100.94,Finland
+FIN,1992,95.84,Finland
+FIN,1993,98.23,Finland
+FIN,1994,110.19,Finland
+FIN,1995,103.07,Finland
+FIN,1996,115.05,Finland
+FIN,1997,111.31,Finland
+FIN,1998,105.11,Finland
+FIN,1999,103.65,Finland
+FIN,2000,100.0,Finland
+FIN,2001,111.16,Finland
+FIN,2002,115.52,Finland
+FIN,2003,130.87,Finland
+FIN,2004,123.27,Finland
+FIN,2005,100.71,Finland
+FIN,2006,122.01,Finland
+FIN,2007,118.67,Finland
+FIN,2008,102.86,Finland
+FIN,2009,99.01,Finland
+FIN,2010,113.82,Finland
+FIN,2011,100.13,Finland
+FIN,2012,89.69,Finland
+FIN,2013,91.14,Finland
+FIN,2014,83.77,Finland
+FIN,2015,77.59,Finland
+FIN,2016,82.85,Finland
+FIN,2017,78.07,Finland
+FIN,2018,80.16,Finland
+FIN,2019,74.43,Finland
+FIN,2020,65.83,Finland
+FIN,2021,65.61,Finland
+FIN,2022,62.3,Finland
+FIN,2023,54.42,Finland
+FIN,2024,50.28,Finland
+FRA,1990,94.7,France
+FRA,1991,101.54,France
+FRA,1992,98.52,France
+FRA,1993,93.49,France
+FRA,1994,92.05,France
+FRA,1995,94.23,France
+FRA,1996,98.59,France
+FRA,1997,96.26,France
+FRA,1998,102.14,France
+FRA,1999,100.53,France
+FRA,2000,100.0,France
+FRA,2001,100.97,France
+FRA,2002,99.41,France
+FRA,2003,100.99,France
+FRA,2004,101.15,France
+FRA,2005,101.93,France
+FRA,2006,99.39,France
+FRA,2007,96.96,France
+FRA,2008,95.79,France
+FRA,2009,92.19,France
+FRA,2010,93.25,France
+FRA,2011,90.49,France
+FRA,2012,91.35,France
+FRA,2013,91.62,France
+FRA,2014,82.42,France
+FRA,2015,83.98,France
+FRA,2016,84.8,France
+FRA,2017,85.98,France
+FRA,2018,83.2,France
+FRA,2019,81.26,France
+FRA,2020,71.88,France
+FRA,2021,80.83,France
+FRA,2022,78.31,France
+FRA,2023,72.03,France
+FRA,2024,69.5,France
+GBR,1990,105.54,United Kingdom
+GBR,1991,107.6,United Kingdom
+GBR,1992,105.18,United Kingdom
+GBR,1993,101.93,United Kingdom
+GBR,1994,100.51,United Kingdom
+GBR,1995,98.7,United Kingdom
+GBR,1996,102.54,United Kingdom
+GBR,1997,98.33,United Kingdom
+GBR,1998,98.84,United Kingdom
+GBR,1999,98.35,United Kingdom
+GBR,2000,100.0,United Kingdom
+GBR,2001,102.83,United Kingdom
+GBR,2002,100.12,United Kingdom
+GBR,2003,102.48,United Kingdom
+GBR,2004,102.46,United Kingdom
+GBR,2005,102.13,United Kingdom
+GBR,2006,102.37,United Kingdom
+GBR,2007,100.23,United Kingdom
+GBR,2008,97.51,United Kingdom
+GBR,2009,88.33,United Kingdom
+GBR,2010,91.64,United Kingdom
+GBR,2011,84.2,United Kingdom
+GBR,2012,88.46,United Kingdom
+GBR,2013,85.84,United Kingdom
+GBR,2014,78.33,United Kingdom
+GBR,2015,75.46,United Kingdom
+GBR,2016,71.31,United Kingdom
+GBR,2017,69.1,United Kingdom
+GBR,2018,67.85,United Kingdom
+GBR,2019,65.23,United Kingdom
+GBR,2020,57.96,United Kingdom
+GBR,2021,61.56,United Kingdom
+GBR,2022,58.84,United Kingdom
+GBR,2023,55.52,United Kingdom
+GBR,2024,53.15,United Kingdom
+IRL,1990,73.65,Ireland
+IRL,1991,75.14,Ireland
+IRL,1992,75.28,Ireland
+IRL,1993,75.7,Ireland
+IRL,1994,78.22,Ireland
+IRL,1995,79.7,Ireland
+IRL,1996,82.84,Ireland
+IRL,1997,85.24,Ireland
+IRL,1998,91.44,Ireland
+IRL,1999,94.97,Ireland
+IRL,2000,100.0,Ireland
+IRL,2001,105.2,Ireland
+IRL,2002,102.99,Ireland
+IRL,2003,102.67,Ireland
+IRL,2004,103.73,Ireland
+IRL,2005,108.32,Ireland
+IRL,2006,108.86,Ireland
+IRL,2007,108.22,Ireland
+IRL,2008,107.18,Ireland
+IRL,2009,96.09,Ireland
+IRL,2010,96.02,Ireland
+IRL,2011,86.94,Ireland
+IRL,2012,87.69,Ireland
+IRL,2013,84.6,Ireland
+IRL,2014,83.41,Ireland
+IRL,2015,86.69,Ireland
+IRL,2016,91.07,Ireland
+IRL,2017,87.81,Ireland
+IRL,2018,87.01,Ireland
+IRL,2019,82.96,Ireland
+IRL,2020,78.11,Ireland
+IRL,2021,82.41,Ireland
+IRL,2022,80.66,Ireland
+IRL,2023,73.81,Ireland
+IRL,2024,73.46,Ireland
+ISR,1990,59.84,Israel
+ISR,1991,60.77,Israel
+ISR,1992,64.83,Israel
+ISR,1993,71.2,Israel
+ISR,1994,76.32,Israel
+ISR,1995,81.82,Israel
+ISR,1996,85.81,Israel
+ISR,1997,89.79,Israel
+ISR,1998,89.92,Israel
+ISR,1999,92.46,Israel
+ISR,2000,100.0,Israel
+ISR,2001,102.35,Israel
+ISR,2002,108.05,Israel
+ISR,2003,111.23,Israel
+ISR,2004,111.54,Israel
+ISR,2005,107.21,Israel
+ISR,2006,113.06,Israel
+ISR,2007,117.18,Israel
+ISR,2008,117.57,Israel
+ISR,2009,116.43,Israel
+ISR,2010,124.79,Israel
+ISR,2011,123.1,Israel
+ISR,2012,134.48,Israel
+ISR,2013,118.1,Israel
+ISR,2014,113.72,Israel
+ISR,2015,116.73,Israel
+ISR,2016,115.22,Israel
+ISR,2017,116.54,Israel
+ISR,2018,108.81,Israel
+ISR,2019,112.41,Israel
+ISR,2020,105.21,Israel
+ISR,2021,103.97,Israel
+ISR,2022,108.66,Israel
+ISR,2023,102.87,Israel
+ISR,2024,103.69,Israel
+ITA,1990,92.62,Italy
+ITA,1991,92.38,Italy
+ITA,1992,91.77,Italy
+ITA,1993,91.06,Italy
+ITA,1994,90.02,Italy
+ITA,1995,95.4,Italy
+ITA,1996,94.7,Italy
+ITA,1997,95.45,Italy
+ITA,1998,97.95,Italy
+ITA,1999,99.36,Italy
+ITA,2000,100.0,Italy
+ITA,2001,99.94,Italy
+ITA,2002,101.61,Italy
+ITA,2003,105.91,Italy
+ITA,2004,108.22,Italy
+ITA,2005,108.56,Italy
+ITA,2006,106.84,Italy
+ITA,2007,105.0,Italy
+ITA,2008,102.0,Italy
+ITA,2009,91.27,Italy
+ITA,2010,93.23,Italy
+ITA,2011,91.36,Italy
+ITA,2012,87.21,Italy
+ITA,2013,80.29,Italy
+ITA,2014,75.91,Italy
+ITA,2015,78.41,Italy
+ITA,2016,77.46,Italy
+ITA,2017,76.46,Italy
+ITA,2018,75.43,Italy
+ITA,2019,73.57,Italy
+ITA,2020,65.22,Italy
+ITA,2021,72.96,Italy
+ITA,2022,73.8,Italy
+ITA,2023,67.57,Italy
+ITA,2024,63.52,Italy
+JPN,1990,91.56,Japan
+JPN,1991,92.56,Japan
+JPN,1992,93.42,Japan
+JPN,1993,92.82,Japan
+JPN,1994,97.34,Japan
+JPN,1995,98.24,Japan
+JPN,1996,99.44,Japan
+JPN,1997,98.56,Japan
+JPN,1998,95.25,Japan
+JPN,1999,98.65,Japan
+JPN,2000,100.0,Japan
+JPN,2001,99.04,Japan
+JPN,2002,102.21,Japan
+JPN,2003,102.92,Japan
+JPN,2004,102.4,Japan
+JPN,2005,103.05,Japan
+JPN,2006,101.13,Japan
+JPN,2007,104.27,Japan
+JPN,2008,98.46,Japan
+JPN,2009,93.84,Japan
+JPN,2010,98.7,Japan
+JPN,2011,103.63,Japan
+JPN,2012,107.14,Japan
+JPN,2013,108.19,Japan
+JPN,2014,103.83,Japan
+JPN,2015,100.49,Japan
+JPN,2016,99.26,Japan
+JPN,2017,97.98,Japan
+JPN,2018,94.53,Japan
+JPN,2019,91.31,Japan
+JPN,2020,86.31,Japan
+JPN,2021,87.69,Japan
+JPN,2022,85.59,Japan
+JPN,2023,81.72,Japan
+JPN,2024,78.93,Japan
+KOR,1990,55.44,South Korea
+KOR,1991,61.77,South Korea
+KOR,1992,67.2,South Korea
+KOR,1993,73.93,South Korea
+KOR,1994,79.69,South Korea
+KOR,1995,86.27,South Korea
+KOR,1996,92.56,South Korea
+KOR,1997,97.21,South Korea
+KOR,1998,83.34,South Korea
+KOR,1999,92.09,South Korea
+KOR,2000,100.0,South Korea
+KOR,2001,102.65,South Korea
+KOR,2002,106.09,South Korea
+KOR,2003,107.66,South Korea
+KOR,2004,112.18,South Korea
+KOR,2005,111.77,South Korea
+KOR,2006,113.12,South Korea
+KOR,2007,117.3,South Korea
+KOR,2008,119.96,South Korea
+KOR,2009,122.06,South Korea
+KOR,2010,135.89,South Korea
+KOR,2011,142.82,South Korea
+KOR,2012,142.18,South Korea
+KOR,2013,141.88,South Korea
+KOR,2014,138.27,South Korea
+KOR,2015,140.99,South Korea
+KOR,2016,141.55,South Korea
+KOR,2017,146.84,South Korea
+KOR,2018,152.31,South Korea
+KOR,2019,145.81,South Korea
+KOR,2020,135.54,South Korea
+KOR,2021,141.04,South Korea
+KOR,2022,136.61,South Korea
+KOR,2023,131.96,South Korea
+KOR,2024,132.09,South Korea
+NLD,1990,93.41,Netherlands
+NLD,1991,96.9,Netherlands
+NLD,1992,96.18,Netherlands
+NLD,1993,98.62,Netherlands
+NLD,1994,98.43,Netherlands
+NLD,1995,101.21,Netherlands
+NLD,1996,107.09,Netherlands
+NLD,1997,102.55,Netherlands
+NLD,1998,102.77,Netherlands
+NLD,1999,99.58,Netherlands
+NLD,2000,100.0,Netherlands
+NLD,2001,103.06,Netherlands
+NLD,2002,103.21,Netherlands
+NLD,2003,105.05,Netherlands
+NLD,2004,106.11,Netherlands
+NLD,2005,103.61,Netherlands
+NLD,2006,100.97,Netherlands
+NLD,2007,101.44,Netherlands
+NLD,2008,101.86,Netherlands
+NLD,2009,98.98,Netherlands
+NLD,2010,105.54,Netherlands
+NLD,2011,97.97,Netherlands
+NLD,2012,97.13,Netherlands
+NLD,2013,96.38,Netherlands
+NLD,2014,91.75,Netherlands
+NLD,2015,96.79,Netherlands
+NLD,2016,97.39,Netherlands
+NLD,2017,95.67,Netherlands
+NLD,2018,92.94,Netherlands
+NLD,2019,89.75,Netherlands
+NLD,2020,80.05,Netherlands
+NLD,2021,82.41,Netherlands
+NLD,2022,74.79,Netherlands
+NLD,2023,68.86,Netherlands
+NLD,2024,69.27,Netherlands
+NOR,1990,86.2,Norway
+NOR,1991,81.44,Norway
+NOR,1992,90.57,Norway
+NOR,1993,95.8,Norway
+NOR,1994,100.77,Norway
+NOR,1995,98.55,Norway
+NOR,1996,101.54,Norway
+NOR,1997,107.05,Norway
+NOR,1998,112.19,Norway
+NOR,1999,116.8,Norway
+NOR,2000,100.0,Norway
+NOR,2001,103.29,Norway
+NOR,2002,102.09,Norway
+NOR,2003,110.17,Norway
+NOR,2004,111.78,Norway
+NOR,2005,108.39,Norway
+NOR,2006,111.44,Norway
+NOR,2007,113.23,Norway
+NOR,2008,116.63,Norway
+NOR,2009,116.18,Norway
+NOR,2010,124.21,Norway
+NOR,2011,120.89,Norway
+NOR,2012,120.05,Norway
+NOR,2013,121.78,Norway
+NOR,2014,122.18,Norway
+NOR,2015,124.86,Norway
+NOR,2016,122.54,Norway
+NOR,2017,122.05,Norway
+NOR,2018,120.79,Norway
+NOR,2019,117.49,Norway
+NOR,2020,112.98,Norway
+NOR,2021,113.55,Norway
+NOR,2022,111.64,Norway
+NOR,2023,107.59,Norway
+NOR,2024,110.56,Norway
+NZL,1990,75.21,New Zealand
+NZL,1991,76.3,New Zealand
+NZL,1992,82.32,New Zealand
+NZL,1993,80.99,New Zealand
+NZL,1994,82.04,New Zealand
+NZL,1995,82.26,New Zealand
+NZL,1996,86.04,New Zealand
+NZL,1997,93.8,New Zealand
+NZL,1998,92.27,New Zealand
+NZL,1999,97.07,New Zealand
+NZL,2000,100.0,New Zealand
+NZL,2001,107.46,New Zealand
+NZL,2002,107.12,New Zealand
+NZL,2003,113.63,New Zealand
+NZL,2004,111.83,New Zealand
+NZL,2005,116.35,New Zealand
+NZL,2006,116.61,New Zealand
+NZL,2007,112.53,New Zealand
+NZL,2008,115.53,New Zealand
+NZL,2009,105.51,New Zealand
+NZL,2010,105.09,New Zealand
+NZL,2011,102.56,New Zealand
+NZL,2012,108.58,New Zealand
+NZL,2013,107.74,New Zealand
+NZL,2014,107.8,New Zealand
+NZL,2015,108.92,New Zealand
+NZL,2016,104.83,New Zealand
+NZL,2017,111.22,New Zealand
+NZL,2018,110.13,New Zealand
+NZL,2019,114.18,New Zealand
+NZL,2020,106.09,New Zealand
+NZL,2021,107.38,New Zealand
+NZL,2022,99.25,New Zealand
+NZL,2023,97.99,New Zealand
+NZL,2024,96.47,New Zealand
+SWE,1990,100.16,Sweden
+SWE,1991,102.14,Sweden
+SWE,1992,107.06,Sweden
+SWE,1993,106.59,Sweden
+SWE,1994,110.37,Sweden
+SWE,1995,109.51,Sweden
+SWE,1996,120.06,Sweden
+SWE,1997,108.25,Sweden
+SWE,1998,110.08,Sweden
+SWE,1999,107.96,Sweden
+SWE,2000,100.0,Sweden
+SWE,2001,98.42,Sweden
+SWE,2002,101.45,Sweden
+SWE,2003,103.86,Sweden
+SWE,2004,100.62,Sweden
+SWE,2005,93.8,Sweden
+SWE,2006,90.97,Sweden
+SWE,2007,87.93,Sweden
+SWE,2008,85.84,Sweden
+SWE,2009,79.82,Sweden
+SWE,2010,89.75,Sweden
+SWE,2011,82.88,Sweden
+SWE,2012,77.93,Sweden
+SWE,2013,74.99,Sweden
+SWE,2014,72.31,Sweden
+SWE,2015,72.28,Sweden
+SWE,2016,71.16,Sweden
+SWE,2017,70.47,Sweden
+SWE,2018,66.15,Sweden
+SWE,2019,65.26,Sweden
+SWE,2020,62.86,Sweden
+SWE,2021,67.63,Sweden
+SWE,2022,62.16,Sweden
+SWE,2023,60.49,Sweden
+SWE,2024,66.16,Sweden
+USA,1990,83.82,United States
+USA,1991,83.17,United States
+USA,1992,84.43,United States
+USA,1993,86.44,United States
+USA,1994,87.68,United States
+USA,1995,88.55,United States
+USA,1996,91.29,United States
+USA,1997,95.97,United States
+USA,1998,96.78,United States
+USA,1999,97.1,United States
+USA,2000,100.0,United States
+USA,2001,99.52,United States
+USA,2002,96.78,United States
+USA,2003,97.92,United States
+USA,2004,99.28,United States
+USA,2005,99.53,United States
+USA,2006,97.78,United States
+USA,2007,99.25,United States
+USA,2008,96.21,United States
+USA,2009,89.37,United States
+USA,2010,93.41,United States
+USA,2011,89.5,United States
+USA,2012,85.57,United States
+USA,2013,87.94,United States
+USA,2014,88.08,United States
+USA,2015,86.02,United States
+USA,2016,84.44,United States
+USA,2017,83.1,United States
+USA,2018,85.7,United States
+USA,2019,82.81,United States
+USA,2020,74.31,United States
+USA,2021,79.4,United States
+USA,2022,80.41,United States
+USA,2023,77.01,United States
+USA,2024,77.88,United States

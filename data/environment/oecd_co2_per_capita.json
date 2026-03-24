@@ -4,7 +4,7 @@
   "source_table": "Green Growth Indicators",
   "frequency": "annual",
   "unit": "tonnes CO2 per capita",
-  "retrieved_at": "2026-03-24T00:20:25.346699+00:00",
+  "retrieved_at": "2026-03-24T13:07:05.096162+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to production-based CO2 per capita for 20 OECD peers"

@@ -4,7 +4,7 @@
   "source_table": "owid-energy-data",
   "frequency": "annual",
   "unit": "% of primary energy",
-  "retrieved_at": "2026-04-06T09:56:35.630884+00:00",
+  "retrieved_at": "2026-04-13T11:05:22.859328+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to 20 OECD peers, selected energy share columns"

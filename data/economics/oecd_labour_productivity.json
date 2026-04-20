@@ -4,7 +4,7 @@
   "source_table": "PDB_LV (Productivity Database)",
   "frequency": "annual",
   "unit": "USD PPP per hour worked",
-  "retrieved_at": "2026-04-13T11:05:00.188579+00:00",
+  "retrieved_at": "2026-04-20T11:07:15.968616+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to GDP per hour worked for 20 OECD peers"

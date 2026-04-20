@@ -4,7 +4,7 @@
   "source_table": "MSTI_PUB (Main Science and Technology Indicators)",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-04-13T11:04:52.733670+00:00",
+  "retrieved_at": "2026-04-20T11:07:08.197071+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to GERD as % of GDP for 20 OECD peers"

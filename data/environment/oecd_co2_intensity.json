@@ -4,7 +4,7 @@
   "source_table": "Green Growth Indicators",
   "frequency": "annual",
   "unit": "USD per kg CO2",
-  "retrieved_at": "2026-04-20T11:07:31.549156+00:00",
+  "retrieved_at": "2026-04-27T08:13:06.330380+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to CO2 productivity (GDP per unit of CO2) for 20 OECD peers"

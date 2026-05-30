@@ -6,6 +6,12 @@
       "runtimeExecutable": "/Users/danweaver/opt/quarto/bin/quarto",
       "runtimeArgs": ["preview", "--no-browser", "--port", "4200"],
       "port": 4200
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd _site && python3 -m http.server 8765"],
+      "port": 8765
     }
   ]
 }

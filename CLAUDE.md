@@ -1,153 +1,180 @@
 # DataCan (Canada Observatory)
 
-Interactive data visualization website comparing Canada to OECD peers across
-population, economics, and science/innovation metrics. Built with Quarto +
+Interactive data-visualization website on the **state of Canada** — population,
+economy, cost of living, incomes, public finances, health, education, environment,
+and well-being — each compared against a group of OECD peers. Built with Quarto +
 Plotly, deployed to GitHub Pages via GitHub Actions.
 
 **Repo:** `CanadaObservatory/CanadaDataObs`
 **Live site:** https://canadaobservatory.github.io/CanadaDataObs/
 
+Editorial stance: **non-partisan, descriptive, no policy advocacy.** Comprehensive,
+comparable, authoritative coverage is the point — the data, peer comparisons, and
+official benchmarks (e.g. the Bank of Canada inflation target) do the work; we do
+not editorialize "good/bad."
+
 ## Architecture
 
-Four-layer design (v2 target):
+A declarative **indicator registry** drives everything:
 
-1. **Source adapters** — `pipeline/sources/` — talk to StatCan, OECD APIs
-2. **Transform + validate** — `pipeline/transforms/` — clean data, check schemas
-3. **Indicator registry** — `pipeline/config.py` — declarative indicator definitions
-4. **Rendering** — `.qmd` files + `charts/` — Quarto pages with Plotly charts
+1. **Registry** — `pipeline/config.py` — `INDICATORS` is a list of `Indicator`
+   dataclasses (the single source of truth: id, section, source, dataflow/key or
+   StatCan table+filters, value column, unit, frequency, chart recipe, optional
+   transform hook).
+2. **Fetchers** — one generic per source. `fetch_oecd.py:fetch_oecd_indicator`
+   handles every OECD SDMX series; `fetch_statcan.py:fetch_statcan_indicator`
+   handles single-series StatCan tables. Irregular sources (population, CPI, OWID
+   energy, WHR) stay bespoke and are referenced by `Indicator.fetch_fn` (a name
+   resolved in `run_pipeline.py`).
+3. **Orchestrator** — `run_pipeline.py` iterates `INDICATORS`, dispatching on
+   `source`. Each indicator is isolated; an empty/failed fetch **keeps the prior
+   CSV (STALE)** instead of blanking a chart. Exits non-zero only on a hard
+   failure (no data and no prior CSV).
+4. **Rendering** — `.qmd` pages call reusable builders in `pipeline/charts.py`.
+
+**To add an indicator:** add one `Indicator(...)` row to `INDICATORS`, then add a
+chart block to the relevant `.qmd`. No new fetch function for OECD/StatCan series.
 
 ## Project structure
 
 ```
 DataCan/
 ├── CLAUDE.md              ← this file
-├── _quarto.yml            ← site config, nav, theme
-├── index.qmd              ← landing page
-├── about.qmd              ← methodology
-├── population/index.qmd   ← population charts (total, growth rate, components)
-├── economics/index.qmd    ← inflation, GDP, productivity, unemployment charts
-├── science/index.qmd      ← R&D spending charts
-├── environment/index.qmd  ← CO2 emissions, energy mix, renewables charts
-├── wellbeing/index.qmd    ← happiness, life expectancy, freedom, corruption
+├── _quarto.yml            ← site config, nav (Economy is a dropdown), theme
+├── index.qmd  about.qmd   ← landing + methodology
+├── population/index.qmd   ← total, by-province, growth rate, components
+├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, unemployment, employment rate
+├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, rent, household debt
+├── income/index.qmd       ← median income, wages, Gini, poverty, LIM-AT
+├── fiscal/index.qmd       ← govt gross debt, budget balance
+├── health/index.qmd       ← life expectancy, health spending, beds, physicians, MRI units
+├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers  (titled "Education & Innovation")
+├── environment/index.qmd  ← CO2 per capita, CO2 indexed, renewables, energy mix
+├── wellbeing/index.qmd    ← happiness score + factor decomposition
 ├── pipeline/
-│   ├── __init__.py
-│   ├── config.py          ← peer groups, table IDs, styling, indicator registry
-│   ├── fetch_statcan.py   ← Statistics Canada API
-│   ├── fetch_oecd.py      ← OECD SDMX API
-│   ├── fetch_owid.py      ← Our World in Data (energy mix)
-│   ├── fetch_whr.py       ← World Happiness Report
-│   ├── charts.py          ← reusable Plotly chart builders
-│   └── run_pipeline.py    ← orchestrator
-├── data/
-│   ├── population/        ← cleaned CSVs + metadata JSONs
-│   ├── economics/
-│   ├── science/
-│   ├── environment/
-│   └── wellbeing/
-├── .github/workflows/
-│   └── update-data.yml    ← weekly cron: fetch → commit → deploy
+│   ├── config.py          ← Indicator dataclass + INDICATORS registry, peer group, COMPARATOR_COLORS, styling
+│   ├── fetch_oecd.py      ← fetch_oecd_indicator (generic SDMX) + _fetch_oecd_csv
+│   ├── fetch_statcan.py   ← fetch_statcan_indicator (generic) + bespoke population/CPI
+│   ├── fetch_owid.py      ← OWID energy mix (bespoke)
+│   ├── fetch_whr.py       ← World Happiness Report (bespoke)
+│   ├── metadata.py        ← save_metadata sidecars + validate_columns
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, time_series_multi
+│   └── run_pipeline.py    ← registry-driven orchestrator
+├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
+├── .claude/launch.json    ← preview servers: `quarto-preview` (live) and `site` (static _site)
+├── .github/workflows/update-data.yml  ← weekly cron: fetch → commit → deploy
 └── requirements.txt
 ```
 
 ## Key commands
 
 ```bash
-# Run data pipeline (fetches from StatCan + OECD, saves CSVs)
-python -m pipeline.run_pipeline
-
-# Preview site locally
-quarto preview
-
-# Render site to _site/
-quarto render
+python -m pipeline.run_pipeline   # fetch all indicators → data/<section>/*.csv (+ .json)
+quarto preview                    # local live preview
+quarto render                     # render site to _site/
 ```
 
-## Data sources
+## Indicator registry (pipeline/config.py)
 
-- **Statistics Canada** — via `stats_can` library
-  - Population quarterly (17-10-0009-01)
-  - Population components (17-10-0008-01)
-  - CPI monthly (18-10-0004-01)
-- **OECD** — via SDMX REST API (`sdmx.oecd.org`)
-  - R&D expenditure (MSTI — `DSD_MSTI@DF_MSTI`)
-  - GDP per capita (SNA_TABLE1 — `DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC` v2.0)
-  - Labour productivity / GDP per hour worked (PDB_LV — `DSD_PDB@DF_PDB_LV`)
-  - Unemployment rate (KEI — `DSD_KEI@DF_KEI`)
-  - CO2 per capita, CO2 intensity, CO2 indexed, renewables share (Green Growth — `DSD_GG@DF_GREEN_GROWTH`)
-- **Our World in Data** — direct CSV download (`owid-energy-data.csv`)
-  - Energy mix by source: coal, oil, gas, nuclear, renewables shares (Energy Institute + Ember + EIA)
-- **World Happiness Report** — XLSX download from `files.worldhappiness.report`
-  - Happiness score (Cantril ladder), healthy life expectancy, freedom,
-    corruption, social support, generosity, GDP contributions
-  - URL updated annually when new report is released (typically March)
+`Indicator` fields: `id, section, source ("oecd"|"statcan"|"custom"), title, unit,
+frequency, value_col, source_table, chart_recipe`; OECD: `dataflow, key
+(uses {countries} placeholder), start_period`; StatCan: `statcan_table,
+statcan_filters (col→value), date_format`; custom: `fetch_fn`; shared: `transform`
+(df→df hook, e.g. `_drop_future_years` for OECD Economic Outlook projection years),
+`output_subpath`. `Indicator.out_path` → `data/<section>/<source>_<id>.csv`.
 
-## Peer group
+OECD SDMX keys are exact and finicky — validate against `sdmx.oecd.org` before
+trusting one (probe the dataflow, find the all-total breakdown). Heavy interactive
+probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
+60/hr) does not.
 
-20 OECD countries: G7 + Australia, South Korea, Netherlands, Sweden,
-Switzerland, Norway, Denmark, Finland, Israel, Austria, Belgium, Ireland,
-New Zealand. Canada highlighted in red, peers in grey, OECD average dashed blue.
+## Data sources (34 indicators / 9 sections)
 
-## Chart conventions
+- **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
+  components 17-10-0008-01, CPI 18-10-0004-01 (All-items + the "Rent" group),
+  New Housing Price Index 18-10-0205-01, median after-tax income 11-10-0190-01,
+  low income (LIM-AT) 11-10-0135-01.
+- **OECD SDMX** (`fetch_oecd_indicator`): R&D/BERD/researchers (MSTI
+  `DSD_MSTI@DF_MSTI`), GDP/capita (`DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC`),
+  productivity (`DSD_PDB@DF_PDB_LV`), unemployment (`DSD_KEI@DF_KEI`), employment
+  rate (`DSD_LFS@DF_IALFS_EMP_WAP_Q`), real GDP growth + govt gross debt + budget
+  balance (Economic Outlook `DSD_EO@DF_EO`: GDPV_ANNPCT / GGFLQ / NLGQ), house
+  prices + price-to-income (`DSD_AN_HOUSE_PRICES@DF_HOUSE_PRICES`), household debt
+  (`DSD_HHDASH@DF_HHDASH_CTRY`), Gini + poverty (`DSD_WISE_IDD@DF_IDD`), average
+  wages (`DSD_EARNINGS@AV_AN_WAGE`), life expectancy (`DSD_HEALTH_STAT@DF_LE`),
+  health spending (`DSD_SHA@DF_SHA`), hospital beds (`DSD_HEALTH_REAC_HOSP@DF_BEDS_FUNC`),
+  physicians (`DSD_HEALTH_EMP_REAC@DF_PHYS`), MRI units (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`),
+  CO2 + renewables (Green Growth `DSD_GG@DF_GREEN_GROWTH`).
+- **Our World in Data** — energy mix CSV (Energy Institute + Ember + EIA).
+- **World Happiness Report** — Figure 2.1 XLSX. `WHR_URL` in `fetch_whr.py` must
+  be bumped each year (~March).
 
-- Canada: `#d62728` (red), width 3, lines+markers
-- Peers: `#7f7f7f` (grey), width 1.5
-- OECD average: `#1f77b4` (blue), dashed
-- Range selector buttons: 1Y, 2Y, 5Y, 10Y, 20Y, All — top-left at `x=0, y=1.01`
-- No Plotly titles (Quarto `##` headings serve as titles)
-- Source annotations at bottom of each chart
-- Legends below x-axis on multi-series charts
-- `plot_bgcolor="white"`, grid color `#e0e0e0`
+## Peer group & comparator colours
 
-## CPI inflation chart (economics/index.qmd)
+**17 OECD countries** (`PEER_COUNTRIES` in config.py): G7 + Australia, South Korea,
+Netherlands, Sweden, Switzerland, Norway, Denmark, Finland, Israel, New Zealand.
+(Dropped 2026-05: Belgium & Austria as redundant; Ireland because multinational
+accounting distorts its GDP/productivity figures.)
 
-Special behavior via inline JavaScript:
-- Bar chart with color coding: red (>3%), blue (<1%), grey (in target range)
-- Grey band shows Bank of Canada 1-3% target range
-- "2% target" label outside plot area (right margin)
-- **Y-axis auto-rescaling** via JS polling (every 500ms) because Plotly 3.x
-  does NOT fire `plotly_relayout` for rangeselector button clicks
-- Uses `el._fullData[barIdx]` for data access (rawY is Float64Array in Plotly 3.x)
-- X-axis tick spacing left to Plotly auto-tick (no dtick override)
+Canada is always red. A named **comparator set** gets distinct colours
+(`COMPARATOR_COLORS`): US blue, Australia orange, Germany green, UK purple, Sweden
+brown. Everyone else is light grey; the peer average is dark-grey dashed. Changing
+the highlighted set or peer list is a one-line edit in config.py.
 
-## GitHub Actions
+## Chart conventions (pipeline/charts.py)
 
-- **Trigger:** push to main, weekly cron (Monday 6am UTC), manual
-- **Pipeline:** fetch data → commit CSVs → Quarto render → deploy to Pages
-- Data fetch only runs on schedule/manual (not every push)
-- Deploy runs on every push (always rebuilds site from latest code + data)
+- `peer_comparison_line(df, x, y, ..., show_average=)` — the standard line chart.
+  Canada red+markers on top; comparators coloured; others light grey; optional
+  dark-grey-dashed peer average drawn only for years where ≥half the peers report
+  (composition-bias guard). Legend: Canada first, then comparators, then other
+  peers — each group **alphabetical by name** (via `legendrank`).
+- `ranked_bar(df, value_col, xaxis_title, source_note, ...)` — latest-year
+  horizontal bar, bars coloured by comparator. Picks the latest year that has
+  ≥`min_countries` **and** includes the highlighted country, so Canada is never
+  dropped from its own ranked bar when it reports a year behind peers.
+- `single_line` — Canada-only series (CPI, NHPI, rent, median/low income).
+- Styling: Canada `#d62728`/width 3, peers `#bdbdbd`/width 1.5, average `#555`
+  dashed; range buttons 1Y/2Y/5Y/10Y/20Y/All at `x=0,y=1.01`; no Plotly titles
+  (Quarto `##` headings are the titles); source note at the bottom;
+  `plot_bgcolor="white"`, grid `#e0e0e0`.
+- Indexed series (real house prices, price-to-income, CO2-indexed) must NOT be
+  ranked as if they were levels — a rebased index shows change from a base year,
+  not cross-country levels. House-price ranked bars are labelled "…since 2015".
 
-## Known issues
+## CPI inflation chart (housing/index.qmd — moved from economics)
 
-- Plotly CDN 403 for `plotly-3.4.0.min` (Quarto bundles its own copy, charts work)
-- `plotly_relayout` event does not fire for rangeselector buttons in Plotly 3.x
-- GDP per capita charts may be blank if OECD API returns empty data
+Bar chart with red(>3%)/blue(<1%)/grey(in-range) bars, the BoC 1–3% target band,
+and a 2% dashed line. **Y-axis auto-rescale** via 500 ms JS polling because Plotly
+does not fire `plotly_relayout` for rangeselector clicks; it targets the page's
+first plot (`plots[0]`), so the CPI chart must stay first on its page. Caveat:
+the JS needs `window.Plotly`, which Quarto's AMD-loaded bundle does not always
+expose (the chart still renders correctly; only the rescale-on-button is affected).
 
-## v2 plan
+## GitHub Actions (update-data.yml)
 
-Priority order for next development phase:
+Push to main, weekly cron (Mon 6am UTC), or manual. Data fetch runs on
+schedule/manual only; deploy runs on every push (renders from latest code + data).
+`continue-on-error` + the STALE fallback mean a transient source outage won't
+fail the build or blank a chart.
 
-### Phase 1: Foundation (do now)
-1. Remove `sys.path.insert` hacks — use `python -m pipeline.run_pipeline`
-2. Add metadata sidecar JSONs next to each CSV (source, retrieval date,
-   latest observation date, units, transformations)
-3. Replace `DATA_DATE = date.today()` with actual dataset freshness from metadata
-4. Add column validation in fetch functions — fail loudly on schema changes
-5. Separate `data/raw/` from `data/processed/` (raw downloads preserved)
+## Known issues / gotchas
 
-### Phase 2: Indicator registry (do next)
-6. Define indicators declaratively in config.py (title, source, fetch_fn,
-   transform_fn, validation schema, chart recipe, peer group, unit, frequency)
-7. Refactor run_pipeline.py to iterate the registry instead of manual calls
-8. Polish CPI as the gold-standard indicator template
+- `window.Plotly` undefined under Quarto's bundled Plotly → CPI rescale JS may not
+  fire (pre-existing; chart renders fine).
+- OECD Economic Outlook `DSD_EO` returns ~2 forecast years; capped by
+  `_drop_future_years`, charts note "recent years are projections".
+- `labour_productivity` (PDB_LV) intermittently returns HTTP 500 server-side →
+  rides the STALE fallback.
+- PISA / tertiary attainment deferred: the OECD education attainment dataflow mixes
+  national survey methodologies (excluded Canada from a fixed-methodology key);
+  needs harmonisation. PISA has no clean SDMX feed.
+- CIHI wait-times have no automated feed (beds/physicians/MRI are the proxies).
 
-### Phase 3: Chart architecture (do later)
-9. Two core chart recipes: Canada-highlighted line + ranked bar
-10. Standardize visual grammar (subtitles, source notes, latest-value labels)
-11. Add core inflation (CPI-trim) as dropdown option on inflation chart
+## Status & what's deferred
 
-### Deferred
-- Full canonical schema (indicator_id, geo, date, value, unit, ...)
-- Dataset versioning (hash raw files, log source URLs)
-- Run reports (machine-readable pipeline summary)
-- Small-multiple and indexed chart recipes
-- Mobile-aware layout presets
+Done: registry + generic fetchers (was the v2 plan), metadata sidecars, STALE
+fallback, the four new domains (Housing, Income, Health, Public Finances),
+comparator highlighting, peer-group trim. Deferred (candidates, not committed):
+business investment (GFCF), trade/current-account + exchange rate, top income
+shares / wealth, per-capita health spending, consumption-based CO2, nurses / CT /
+ICU beds, raw-vs-processed data split, dataset versioning.

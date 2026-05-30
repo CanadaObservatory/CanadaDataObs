@@ -5,7 +5,7 @@ Uses the stats_can library for simplified API access.
 
 import pandas as pd
 from pipeline.config import DATA_DIR, STATCAN_TABLES
-from pipeline.metadata import save_metadata, validate_columns
+from pipeline.metadata import save_metadata, validate_columns, SchemaError
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -35,7 +35,56 @@ def _get_table(table_id):
         if not csv_names:
             raise ValueError(f"No CSV found in zip for table {table_id}")
         with z.open(csv_names[0]) as f:
-            return pd.read_csv(f)
+            return pd.read_csv(f, low_memory=False)
+
+
+def fetch_statcan_indicator(ind):
+    """Generic single-series StatCan fetch driven by an Indicator registry entry.
+
+    Downloads the table, applies the entry's equality filters (column -> value),
+    and emits a simple [date, <value_col>] CSV for a single Canada-wide series.
+    Used for indicators like NHPI, median income, and the low-income rate; the
+    multi-geography population tables and CPI keep their bespoke functions.
+    """
+    logger.info(f"StatCan indicator: {ind.id} ({ind.title})")
+    try:
+        df = _get_table(ind.statcan_table)
+    except Exception as e:
+        logger.error(f"  Failed to fetch StatCan table {ind.statcan_table}: {e}")
+        return None
+
+    for col, val in ind.statcan_filters.items():
+        if col not in df.columns:
+            raise SchemaError(
+                f"{ind.id}: filter column '{col}' missing from table "
+                f"{ind.statcan_table}. Available: {list(df.columns)}"
+            )
+        df = df[df[col] == val]
+
+    validate_columns(df, ["REF_DATE", "VALUE"], ind.id)
+    df = df[["REF_DATE", "VALUE"]].rename(
+        columns={"REF_DATE": "date", "VALUE": ind.value_col})
+    df["date"] = pd.to_datetime(df["date"].astype(str), format=ind.date_format,
+                                errors="coerce")
+    df[ind.value_col] = pd.to_numeric(df[ind.value_col], errors="coerce")
+    df = (df.dropna(subset=["date", ind.value_col])
+            .sort_values("date").reset_index(drop=True))
+    if df.empty:
+        logger.warning(f"  {ind.id}: no rows after filtering — check filter values")
+        return None
+
+    out_path = ind.out_path
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="date",
+        source="Statistics Canada",
+        source_table=ind.source_table,
+        frequency=ind.frequency,
+        unit=ind.unit,
+        transformations=[f"filtered to {ind.statcan_filters}"],
+    )
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
+    return df
 
 
 def fetch_population_quarterly():

@@ -45,6 +45,9 @@ WHR_COUNTRY_MAP = {
     # Alternate names that WHR might use
     "Korea, Republic of": "KOR",
     "Korea": "KOR",
+    "Korea, Rep.": "KOR",
+    "Republic of Korea": "KOR",
+    "Korea (Republic of)": "KOR",
     "Turkiye": None,  # Not in peer group, skip
 }
 
@@ -93,6 +96,15 @@ def fetch_happiness():
     df = df.dropna(axis=1, how="all")
 
     validate_columns(df, ["year", "country_name", "happiness_score"], "happiness")
+
+    # Normalize country names before matching. WHR cells sometimes carry
+    # trailing or non-breaking spaces, which silently dropped exact-match
+    # countries from the peer group (this is why South Korea went missing).
+    df["country_name"] = (df["country_name"].astype(str)
+                          .str.replace(" ", " ", regex=False)
+                          .str.strip())
+    korea_like = sorted({n for n in df["country_name"].unique() if "korea" in n.lower()})
+    logger.info(f"  WHR names containing 'korea': {korea_like}")
 
     # Map to our peer country codes
     peer_names = set(WHR_COUNTRY_MAP.keys())

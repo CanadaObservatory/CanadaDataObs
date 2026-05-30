@@ -1,0 +1,14 @@
+{
+  "dataset_id": "oecd_poverty",
+  "source": "OECD",
+  "source_table": "OECD Income Distribution Database (IDD)",
+  "frequency": "annual",
+  "unit": "% of population",
+  "retrieved_at": "2026-05-30T00:25:00.620713+00:00",
+  "latest_observation_date": "2023",
+  "transformations": [
+    "filtered to Relative poverty rate (<50% median) for OECD peer group"
+  ],
+  "notes": null,
+  "row_count": 236
+}

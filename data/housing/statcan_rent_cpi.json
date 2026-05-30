@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_rent_cpi",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 18-10-0004-01",
+  "frequency": "monthly",
+  "unit": "index (2002=100)",
+  "retrieved_at": "2026-05-30T01:10:04.668625+00:00",
+  "latest_observation_date": "2026-04-01",
+  "transformations": [
+    "filtered to {'GEO': 'Canada', 'Products and product groups': 'Rent'}"
+  ],
+  "notes": null,
+  "row_count": 928
+}

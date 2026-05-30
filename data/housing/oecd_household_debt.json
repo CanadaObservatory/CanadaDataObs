@@ -1,0 +1,14 @@
+{
+  "dataset_id": "oecd_household_debt",
+  "source": "OECD",
+  "source_table": "OECD Household Dashboard",
+  "frequency": "annual",
+  "unit": "% of net disposable income",
+  "retrieved_at": "2026-05-30T00:24:56.184118+00:00",
+  "latest_observation_date": "2025",
+  "transformations": [
+    "filtered to Household debt for OECD peer group"
+  ],
+  "notes": null,
+  "row_count": 243
+}

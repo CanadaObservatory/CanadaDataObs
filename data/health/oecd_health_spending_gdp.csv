@@ -1,0 +1,426 @@
+country_code,year,health_pct_gdp,country_name
+AUS,2000,7.589,Australia
+AUS,2001,7.674,Australia
+AUS,2002,7.872,Australia
+AUS,2003,7.877,Australia
+AUS,2004,8.083,Australia
+AUS,2005,7.965,Australia
+AUS,2006,7.972,Australia
+AUS,2007,8.052,Australia
+AUS,2008,8.247,Australia
+AUS,2009,8.543,Australia
+AUS,2010,8.419,Australia
+AUS,2011,8.534,Australia
+AUS,2012,8.67,Australia
+AUS,2013,8.747,Australia
+AUS,2014,9.828,Australia
+AUS,2015,10.136,Australia
+AUS,2016,10.09,Australia
+AUS,2017,10.109,Australia
+AUS,2018,10.089,Australia
+AUS,2019,10.254,Australia
+AUS,2020,10.703,Australia
+AUS,2021,10.516,Australia
+AUS,2022,9.892,Australia
+AUS,2023,9.884,Australia
+AUS,2024,10.346,Australia
+CAN,2000,8.248,Canada
+CAN,2001,8.625,Canada
+CAN,2002,8.857,Canada
+CAN,2003,9.011,Canada
+CAN,2004,9.066,Canada
+CAN,2005,9.035,Canada
+CAN,2006,9.332,Canada
+CAN,2007,9.435,Canada
+CAN,2008,9.594,Canada
+CAN,2009,10.704,Canada
+CAN,2010,10.701,Canada
+CAN,2011,10.405,Canada
+CAN,2012,10.541,Canada
+CAN,2013,10.436,Canada
+CAN,2014,10.281,Canada
+CAN,2015,10.764,Canada
+CAN,2016,11.056,Canada
+CAN,2017,10.924,Canada
+CAN,2018,10.923,Canada
+CAN,2019,11.048,Canada
+CAN,2020,13.017,Canada
+CAN,2021,12.381,Canada
+CAN,2022,11.081,Canada
+CAN,2023,11.187,Canada
+CAN,2024,11.298,Canada
+CHE,2000,9.134,Switzerland
+CHE,2001,9.46,Switzerland
+CHE,2002,9.88,Switzerland
+CHE,2003,10.137,Switzerland
+CHE,2004,10.226,Switzerland
+CHE,2005,10.058,Switzerland
+CHE,2006,9.58,Switzerland
+CHE,2007,9.417,Switzerland
+CHE,2008,9.532,Switzerland
+CHE,2009,10.142,Switzerland
+CHE,2010,9.991,Switzerland
+CHE,2011,10.104,Switzerland
+CHE,2012,10.335,Switzerland
+CHE,2013,10.594,Switzerland
+CHE,2014,10.675,Switzerland
+CHE,2015,10.98,Switzerland
+CHE,2016,11.202,Switzerland
+CHE,2017,11.375,Switzerland
+CHE,2018,11.158,Switzerland
+CHE,2019,11.395,Switzerland
+CHE,2020,11.99,Switzerland
+CHE,2021,11.959,Switzerland
+CHE,2022,11.599,Switzerland
+CHE,2023,11.691,Switzerland
+CHE,2024,11.773,Switzerland
+DEU,2000,9.759,Germany
+DEU,2001,9.781,Germany
+DEU,2002,10.029,Germany
+DEU,2003,10.223,Germany
+DEU,2004,9.975,Germany
+DEU,2005,10.107,Germany
+DEU,2006,9.962,Germany
+DEU,2007,9.835,Germany
+DEU,2008,10.032,Germany
+DEU,2009,10.97,Germany
+DEU,2010,10.831,Germany
+DEU,2011,10.521,Germany
+DEU,2012,10.594,Germany
+DEU,2013,10.743,Germany
+DEU,2014,10.768,Germany
+DEU,2015,10.923,Germany
+DEU,2016,10.971,Germany
+DEU,2017,11.051,Germany
+DEU,2018,11.184,Germany
+DEU,2019,11.428,Germany
+DEU,2020,12.468,Germany
+DEU,2021,12.724,Germany
+DEU,2022,12.447,Germany
+DEU,2023,11.744,Germany
+DEU,2024,12.267,Germany
+DNK,2000,8.11,Denmark
+DNK,2001,8.444,Denmark
+DNK,2002,8.695,Denmark
+DNK,2003,8.89,Denmark
+DNK,2004,8.986,Denmark
+DNK,2005,9.067,Denmark
+DNK,2006,9.153,Denmark
+DNK,2007,9.302,Denmark
+DNK,2008,9.468,Denmark
+DNK,2009,10.629,Denmark
+DNK,2010,10.579,Denmark
+DNK,2011,10.378,Denmark
+DNK,2012,10.517,Denmark
+DNK,2013,10.279,Denmark
+DNK,2014,10.297,Denmark
+DNK,2015,10.359,Denmark
+DNK,2016,10.268,Denmark
+DNK,2017,10.114,Denmark
+DNK,2018,10.142,Denmark
+DNK,2019,10.185,Denmark
+DNK,2020,10.692,Denmark
+DNK,2021,10.656,Denmark
+DNK,2022,9.474,Denmark
+DNK,2023,9.513,Denmark
+DNK,2024,9.388,Denmark
+FIN,2000,7.095,Finland
+FIN,2001,7.252,Finland
+FIN,2002,7.63,Finland
+FIN,2003,7.94,Finland
+FIN,2004,8.06,Finland
+FIN,2005,8.289,Finland
+FIN,2006,8.286,Finland
+FIN,2007,8.084,Finland
+FIN,2008,8.344,Finland
+FIN,2009,9.162,Finland
+FIN,2010,9.142,Finland
+FIN,2011,9.239,Finland
+FIN,2012,9.617,Finland
+FIN,2013,9.845,Finland
+FIN,2014,9.831,Finland
+FIN,2015,9.7,Finland
+FIN,2016,9.456,Finland
+FIN,2017,9.191,Finland
+FIN,2018,9.103,Finland
+FIN,2019,9.223,Finland
+FIN,2020,9.7,Finland
+FIN,2021,9.91,Finland
+FIN,2022,9.742,Finland
+FIN,2023,10.474,Finland
+FIN,2024,10.603,Finland
+FRA,2000,9.617,France
+FRA,2001,9.757,France
+FRA,2002,10.083,France
+FRA,2003,10.135,France
+FRA,2004,10.212,France
+FRA,2005,10.237,France
+FRA,2006,10.398,France
+FRA,2007,10.334,France
+FRA,2008,10.513,France
+FRA,2009,11.291,France
+FRA,2010,11.224,France
+FRA,2011,11.176,France
+FRA,2012,11.337,France
+FRA,2013,11.478,France
+FRA,2014,11.579,France
+FRA,2015,11.5,France
+FRA,2016,11.57,France
+FRA,2017,11.449,France
+FRA,2018,11.308,France
+FRA,2019,11.171,France
+FRA,2020,12.129,France
+FRA,2021,12.249,France
+FRA,2022,11.835,France
+FRA,2023,11.503,France
+FRA,2024,11.541,France
+GBR,2000,7.146,United Kingdom
+GBR,2001,7.433,United Kingdom
+GBR,2002,7.859,United Kingdom
+GBR,2003,8.052,United Kingdom
+GBR,2004,8.322,United Kingdom
+GBR,2005,8.381,United Kingdom
+GBR,2006,8.54,United Kingdom
+GBR,2007,8.76,United Kingdom
+GBR,2008,9.033,United Kingdom
+GBR,2009,9.839,United Kingdom
+GBR,2010,9.788,United Kingdom
+GBR,2011,9.797,United Kingdom
+GBR,2012,9.893,United Kingdom
+GBR,2013,9.991,United Kingdom
+GBR,2014,9.977,United Kingdom
+GBR,2015,9.94,United Kingdom
+GBR,2016,9.871,United Kingdom
+GBR,2017,9.705,United Kingdom
+GBR,2018,9.795,United Kingdom
+GBR,2019,9.98,United Kingdom
+GBR,2020,12.104,United Kingdom
+GBR,2021,12.083,United Kingdom
+GBR,2022,11.097,United Kingdom
+GBR,2023,10.991,United Kingdom
+GBR,2024,11.133,United Kingdom
+ISR,2000,6.594,Israel
+ISR,2001,6.999,Israel
+ISR,2002,6.908,Israel
+ISR,2003,6.85,Israel
+ISR,2004,6.797,Israel
+ISR,2005,6.883,Israel
+ISR,2006,6.7,Israel
+ISR,2007,6.673,Israel
+ISR,2008,6.807,Israel
+ISR,2009,6.87,Israel
+ISR,2010,6.85,Israel
+ISR,2011,6.806,Israel
+ISR,2012,6.942,Israel
+ISR,2013,6.941,Israel
+ISR,2014,7.03,Israel
+ISR,2015,7.021,Israel
+ISR,2016,7.099,Israel
+ISR,2017,7.172,Israel
+ISR,2018,7.236,Israel
+ISR,2019,7.207,Israel
+ISR,2020,7.748,Israel
+ISR,2021,7.84,Israel
+ISR,2022,7.12,Israel
+ISR,2023,7.098,Israel
+ISR,2024,7.59,Israel
+ITA,2000,7.547,Italy
+ITA,2001,7.711,Italy
+ITA,2002,7.836,Italy
+ITA,2003,7.807,Italy
+ITA,2004,8.137,Italy
+ITA,2005,8.309,Italy
+ITA,2006,8.398,Italy
+ITA,2007,8.102,Italy
+ITA,2008,8.502,Italy
+ITA,2009,8.913,Italy
+ITA,2010,8.879,Italy
+ITA,2011,8.729,Italy
+ITA,2012,8.798,Italy
+ITA,2013,8.79,Italy
+ITA,2014,8.859,Italy
+ITA,2015,8.846,Italy
+ITA,2016,8.72,Italy
+ITA,2017,8.691,Italy
+ITA,2018,8.655,Italy
+ITA,2019,8.615,Italy
+ITA,2020,9.564,Italy
+ITA,2021,9.282,Italy
+ITA,2022,8.85,Italy
+ITA,2023,8.406,Italy
+ITA,2024,8.444,Italy
+JPN,2000,7.035,Japan
+JPN,2001,7.239,Japan
+JPN,2002,7.352,Japan
+JPN,2003,7.487,Japan
+JPN,2004,7.535,Japan
+JPN,2005,7.658,Japan
+JPN,2006,7.687,Japan
+JPN,2007,7.779,Japan
+JPN,2008,8.089,Japan
+JPN,2009,8.959,Japan
+JPN,2010,9.063,Japan
+JPN,2011,10.488,Japan
+JPN,2012,10.672,Japan
+JPN,2013,10.674,Japan
+JPN,2014,10.729,Japan
+JPN,2015,10.75,Japan
+JPN,2016,10.659,Japan
+JPN,2017,10.656,Japan
+JPN,2018,10.74,Japan
+JPN,2019,10.97,Japan
+JPN,2020,11.45,Japan
+JPN,2021,12.081,Japan
+JPN,2022,12.322,Japan
+JPN,2023,10.74,Japan
+JPN,2024,10.625,Japan
+KOR,2000,3.718,South Korea
+KOR,2001,4.164,South Korea
+KOR,2002,3.902,South Korea
+KOR,2003,4.459,South Korea
+KOR,2004,4.426,South Korea
+KOR,2005,4.646,South Korea
+KOR,2006,4.953,South Korea
+KOR,2007,4.96,South Korea
+KOR,2008,5.245,South Korea
+KOR,2009,5.683,South Korea
+KOR,2010,5.792,South Korea
+KOR,2011,5.9,South Korea
+KOR,2012,5.955,South Korea
+KOR,2013,6.066,South Korea
+KOR,2014,6.243,South Korea
+KOR,2015,6.46,South Korea
+KOR,2016,6.634,South Korea
+KOR,2017,6.796,South Korea
+KOR,2018,7.14,South Korea
+KOR,2019,7.691,South Korea
+KOR,2020,8.025,South Korea
+KOR,2021,8.327,South Korea
+KOR,2022,8.843,South Korea
+KOR,2023,8.472,South Korea
+KOR,2024,8.36,South Korea
+NLD,2000,7.704,Netherlands
+NLD,2001,8.042,Netherlands
+NLD,2002,8.619,Netherlands
+NLD,2003,9.02,Netherlands
+NLD,2004,9.072,Netherlands
+NLD,2005,9.06,Netherlands
+NLD,2006,9.036,Netherlands
+NLD,2007,9.001,Netherlands
+NLD,2008,9.218,Netherlands
+NLD,2009,9.908,Netherlands
+NLD,2010,10.095,Netherlands
+NLD,2011,10.145,Netherlands
+NLD,2012,10.455,Netherlands
+NLD,2013,10.502,Netherlands
+NLD,2014,10.457,Netherlands
+NLD,2015,10.189,Netherlands
+NLD,2016,10.125,Netherlands
+NLD,2017,9.937,Netherlands
+NLD,2018,9.851,Netherlands
+NLD,2019,9.936,Netherlands
+NLD,2020,10.95,Netherlands
+NLD,2021,11.135,Netherlands
+NLD,2022,10.031,Netherlands
+NLD,2023,9.832,Netherlands
+NLD,2024,10.006,Netherlands
+NOR,2000,7.703,Norway
+NOR,2001,8.01,Norway
+NOR,2002,8.983,Norway
+NOR,2003,9.194,Norway
+NOR,2004,8.796,Norway
+NOR,2005,8.299,Norway
+NOR,2006,7.882,Norway
+NOR,2007,8.017,Norway
+NOR,2008,7.915,Norway
+NOR,2009,9.033,Norway
+NOR,2010,8.858,Norway
+NOR,2011,8.735,Norway
+NOR,2012,8.722,Norway
+NOR,2013,8.874,Norway
+NOR,2014,9.283,Norway
+NOR,2015,10.07,Norway
+NOR,2016,10.53,Norway
+NOR,2017,10.23,Norway
+NOR,2018,9.96,Norway
+NOR,2019,10.438,Norway
+NOR,2020,11.424,Norway
+NOR,2021,9.814,Norway
+NOR,2022,7.909,Norway
+NOR,2023,9.416,Norway
+NOR,2024,9.689,Norway
+NZL,2000,7.47,New Zealand
+NZL,2001,7.579,New Zealand
+NZL,2002,7.9,New Zealand
+NZL,2003,7.722,New Zealand
+NZL,2004,7.901,New Zealand
+NZL,2005,8.273,New Zealand
+NZL,2006,8.638,New Zealand
+NZL,2007,8.329,New Zealand
+NZL,2008,8.651,New Zealand
+NZL,2009,9.136,New Zealand
+NZL,2010,9.095,New Zealand
+NZL,2011,9.107,New Zealand
+NZL,2012,9.202,New Zealand
+NZL,2013,8.939,New Zealand
+NZL,2014,8.972,New Zealand
+NZL,2015,8.889,New Zealand
+NZL,2016,8.769,New Zealand
+NZL,2017,8.618,New Zealand
+NZL,2018,8.57,New Zealand
+NZL,2019,8.619,New Zealand
+NZL,2020,9.252,New Zealand
+NZL,2021,9.551,New Zealand
+NZL,2022,10.568,New Zealand
+NZL,2023,10.129,New Zealand
+NZL,2024,10.062,New Zealand
+SWE,2000,7.325,Sweden
+SWE,2001,7.893,Sweden
+SWE,2002,8.186,Sweden
+SWE,2003,8.317,Sweden
+SWE,2004,8.143,Sweden
+SWE,2005,8.16,Sweden
+SWE,2006,8.042,Sweden
+SWE,2007,7.988,Sweden
+SWE,2008,8.226,Sweden
+SWE,2009,8.777,Sweden
+SWE,2010,8.324,Sweden
+SWE,2011,10.502,Sweden
+SWE,2012,10.834,Sweden
+SWE,2013,10.987,Sweden
+SWE,2014,11.072,Sweden
+SWE,2015,10.933,Sweden
+SWE,2016,10.982,Sweden
+SWE,2017,10.966,Sweden
+SWE,2018,11.125,Sweden
+SWE,2019,10.961,Sweden
+SWE,2020,11.443,Sweden
+SWE,2021,11.328,Sweden
+SWE,2022,10.946,Sweden
+SWE,2023,11.278,Sweden
+SWE,2024,11.312,Sweden
+USA,2000,12.49,United States
+USA,2001,13.168,United States
+USA,2002,13.995,United States
+USA,2003,14.506,United States
+USA,2004,14.551,United States
+USA,2005,14.579,United States
+USA,2006,14.709,United States
+USA,2007,14.918,United States
+USA,2008,15.207,United States
+USA,2009,16.201,United States
+USA,2010,16.197,United States
+USA,2011,16.14,United States
+USA,2012,16.12,United States
+USA,2013,15.952,United States
+USA,2014,16.142,United States
+USA,2015,16.402,United States
+USA,2016,16.692,United States
+USA,2017,16.638,United States
+USA,2018,16.513,United States
+USA,2019,16.545,United States
+USA,2020,18.516,United States
+USA,2021,17.352,United States
+USA,2022,16.529,United States
+USA,2023,16.694,United States
+USA,2024,17.16,United States

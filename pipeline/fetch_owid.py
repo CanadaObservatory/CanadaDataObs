@@ -44,13 +44,20 @@ def fetch_energy_mix():
     # Filter to our peer countries
     df = df[df["iso_code"].isin(PEER_CODES)].copy()
 
-    # Keep relevant columns
+    # Keep relevant columns — both primary-energy shares (full energy incl.
+    # transport & heating) and electricity-generation shares (the grid, where
+    # nuclear/hydro are properly sized and the low-carbon story is clearest).
     keep_cols = [
         "iso_code", "country", "year",
+        # primary energy (total energy supply)
         "coal_share_energy", "oil_share_energy", "gas_share_energy",
         "nuclear_share_energy", "renewables_share_energy",
         "hydro_share_energy", "solar_share_energy", "wind_share_energy",
-        "biofuel_share_energy",
+        "biofuel_share_energy", "low_carbon_share_energy", "fossil_share_energy",
+        # electricity generation
+        "coal_share_elec", "oil_share_elec", "gas_share_elec",
+        "nuclear_share_elec", "renewables_share_elec", "hydro_share_elec",
+        "low_carbon_share_elec", "fossil_share_elec",
         "primary_energy_consumption",
     ]
     available = [c for c in keep_cols if c in df.columns]

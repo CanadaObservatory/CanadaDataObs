@@ -370,12 +370,6 @@ INDICATORS = [
               dataflow="OECD.ENV.EPI,DSD_GG@DF_GREEN_GROWTH,1.1",
               key=f"{_C}.A.CO2_PBEM.IX._T", start_period=1990,
               source_table="OECD Green Growth Indicators"),
-    Indicator("renewables_share", "environment", "oecd",
-              "Renewable energy share", "% of total primary energy", "annual",
-              value_col="renewables_pct", chart_recipe="ranked_bar",
-              dataflow="OECD.ENV.EPI,DSD_GG@DF_GREEN_GROWTH,1.1",
-              key=f"{_C}.A.RE_TPES.PT_SUP_NRG._T", start_period=1990,
-              source_table="OECD Green Growth Indicators"),
     Indicator("energy_mix", "environment", "custom",
               "Energy mix by source", "% of primary energy", "annual",
               fetch_fn="fetch_energy_mix", output_subpath="owid_energy_mix.csv",
@@ -430,7 +424,7 @@ SNAPSHOT_SPECS = {
     "environment": [
         ("CO2 per capita", "data/environment/oecd_co2_per_capita.csv", "co2_per_capita", "{:.1f} t", "low"),
         ("CO2 vs 2000", "data/environment/oecd_co2_indexed.csv", "co2_index", "{:.0f}", "low"),
-        ("Renewable energy", "data/environment/oecd_renewables_share.csv", "renewables_pct", "{:.1f}%", "high"),
+        ("Clean electricity", "data/environment/owid_energy_mix.csv", "low_carbon_share_elec", "{:.0f}%", "high"),
     ],
     "fiscal": [
         ("Government debt", "data/fiscal/oecd_govt_debt.csv", "govt_debt", "{:.0f}% GDP", "low"),

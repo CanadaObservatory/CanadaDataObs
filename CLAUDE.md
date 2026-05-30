@@ -104,8 +104,12 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   wages (`DSD_EARNINGS@AV_AN_WAGE`), life expectancy (`DSD_HEALTH_STAT@DF_LE`),
   health spending (`DSD_SHA@DF_SHA`), hospital beds (`DSD_HEALTH_REAC_HOSP@DF_BEDS_FUNC`),
   physicians (`DSD_HEALTH_EMP_REAC@DF_PHYS`), MRI units (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`),
-  CO2 + renewables (Green Growth `DSD_GG@DF_GREEN_GROWTH`).
-- **Our World in Data** — energy mix CSV (Energy Institute + Ember + EIA).
+  CO2 per capita + indexed (Green Growth `DSD_GG@DF_GREEN_GROWTH`).
+- **Our World in Data** — energy mix CSV (Energy Institute + Ember + EIA): both
+  electricity-generation shares (`*_share_elec`, `low_carbon_share_elec`) and
+  primary-energy shares (`*_share_energy`). Energy is framed as **electricity** by
+  default (nuclear/hydro properly sized; Canada ≈78% low-carbon) with a labelled
+  total-energy secondary; the standalone OECD "renewables share" was dropped.
 - **World Happiness Report** — Figure 2.1 XLSX. `WHR_URL` in `fetch_whr.py` must
   be bumped each year (~March).
 
@@ -186,6 +190,11 @@ fail the build or blank a chart.
   national survey methodologies (excluded Canada from a fixed-methodology key);
   needs harmonisation. PISA has no clean SDMX feed.
 - CIHI wait-times have no automated feed (beds/physicians/MRI are the proxies).
+- Energy: nuclear in *primary energy* (~6% for Canada) looks low because primary
+  energy is dominated by transport/heating fuels — that's the denominator, not a
+  bug. The page leads with *electricity* shares where nuclear is ~13% (Ontario
+  ~50%) and Canada's grid is ~78% low-carbon. "Low-carbon" = renewables + nuclear;
+  prefer it over "renewables" (which omits nuclear) for the decarbonisation lens.
 
 ## Status & what's deferred
 

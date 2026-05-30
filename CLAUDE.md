@@ -132,7 +132,24 @@ the highlighted set or peer list is a one-line edit in config.py.
   horizontal bar, bars coloured by comparator. Picks the latest year that has
   ≥`min_countries` **and** includes the highlighted country, so Canada is never
   dropped from its own ranked bar when it reports a year behind peers.
-- `single_line` — Canada-only series (CPI, NHPI, rent, median/low income).
+- `single_line(..., rangeslider=True, source_note=, hovertemplate=, customdata=)` —
+  Canada-only series (NHPI, rent, median/low income, population total/growth).
+  `rangeslider=True` adds a draggable **time slider** below the chart for long
+  series and owns the source-note placement so it sits below the slider with no
+  overlap (these charts have no legend, which is why the slider is clean here).
+  It opens on the most recent ~25 years (window starts at 1999 so the 2000 tick
+  anchors it); the slider still spans all history and "All" resets the view.
+- Multi-line charts that get a slider (population by province & components, Canada
+  energy mix over time) move the legend to the **right** (`orientation="v", x=1.02`)
+  to free the bottom for the slider + source — no overlap. The 17-country peer
+  line charts deliberately keep range buttons only (a right-side 17-name legend is
+  unwieldy and their ~25-35yr span is well served by the buttons).
+- `page_snapshot(section)` (wraps `ranking_strip`) — the "Where Canada Stands"
+  scorecard at the top of each peer-comparison page: one row per indicator, every
+  peer a dot ordered **by rank** so further right = more favourable (lower-is-better
+  measures are flipped; rank 1 = best), Canada red. Spec per section lives in
+  `SNAPSHOT_SPECS` (config.py): `(label, csv path, value col, fmt, good)` where
+  `good` is "high"/"low". Rank-based positioning (not value) keeps it outlier-immune.
 - Styling: Canada `#d62728`/width 3, peers `#bdbdbd`/width 1.5, average `#555`
   dashed; range buttons 1Y/2Y/5Y/10Y/20Y/All at `x=0,y=1.01`; no Plotly titles
   (Quarto `##` headings are the titles); source note at the bottom;

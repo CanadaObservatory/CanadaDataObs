@@ -17,6 +17,16 @@ from pipeline.charts import peer_comparison_line, ranked_bar
 
 How much carbon Canada emits, how that has changed over time, and how its energy is sourced — shown against OECD peers. Production-based measures count emissions where they physically occur.
 
+## Where Canada Stands
+
+A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
+
+```{python}
+#| echo: false
+from pipeline.charts import page_snapshot
+page_snapshot("environment").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## CO2 Emissions per Capita
 
 Production-based CO2 emissions per person, in tonnes of CO2. This is the most directly comparable measure of a country's carbon footprint, controlling for population size.
@@ -223,16 +233,20 @@ if os.path.exists(emix_path):
         xaxis_title="",
         yaxis_title="% of primary energy supply",
         yaxis=dict(range=[0, 100], gridcolor="#e0e0e0"),
-        xaxis=dict(gridcolor="#e0e0e0"),
+        xaxis=dict(
+            gridcolor="#e0e0e0",
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5"),
+            range=[1999, int(canada_emix["year"].max())],
+        ),
         plot_bgcolor="white",
         legend=dict(
-            orientation="h", yanchor="top", y=-0.08,
-            xanchor="center", x=0.5,
+            orientation="v", yanchor="top", y=1,
+            xanchor="left", x=1.02,
         ),
-        margin=dict(b=120, t=20),
+        margin=dict(b=90, t=20, r=130),
         annotations=[dict(
             text=f"Source: Our World in Data (Energy Institute) | Data as of: {get_data_date(emix_path)}",
-            xref="paper", yref="paper", x=0, y=-0.22,
+            xref="paper", yref="paper", x=0, y=-0.28,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )

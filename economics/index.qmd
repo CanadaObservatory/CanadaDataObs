@@ -20,6 +20,16 @@ hour of work is, and how many people who want work can find it — these indicat
 place Canada's output and labour market alongside 17 OECD peers. Inflation and the
 cost of living have their own page: [Housing & Cost of Living](../housing/).
 
+## Where Canada Stands
+
+A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures like unemployment are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
+
+```{python}
+#| echo: false
+from pipeline.charts import page_snapshot
+page_snapshot("economics").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## Real GDP Growth
 
 Annual percentage change in real (inflation-adjusted) GDP — the headline measure of how fast the economy is expanding or contracting. The most recent year or two are OECD projections rather than final figures.

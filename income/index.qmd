@@ -20,6 +20,16 @@ from pipeline.config import (
 from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 ```
 
+## Where Canada Stands
+
+A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
+
+```{python}
+#| echo: false
+from pipeline.charts import page_snapshot
+page_snapshot("income").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## Median After-Tax Income in Canada
 
 Median after-tax income of Canadian families and unattached individuals, in
@@ -33,11 +43,9 @@ mi_path = "data/income/statcan_median_income.csv"
 if os.path.exists(mi_path):
     df = pd.read_csv(mi_path, parse_dates=["date"])
     fig = single_line(df, "date", "median_income", title="",
-                      yaxis_title="Median after-tax income (constant $)")
-    fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
-        text=f"Source: Statistics Canada, Table 11-10-0190-01 | Data as of: {get_data_date(mi_path)}",
-        xref="paper", yref="paper", x=0, y=-0.2,
-        showarrow=False, font=dict(size=10, color="#999"))])
+                      yaxis_title="Median after-tax income (constant $)",
+                      rangeslider=True, yaxis_tickformat="$,.0f",
+                      source_note=f"Source: Statistics Canada, Table 11-10-0190-01 | Data as of: {get_data_date(mi_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Median income data not yet available. Run the data pipeline.")
@@ -144,11 +152,9 @@ li_path = "data/income/statcan_low_income.csv"
 if os.path.exists(li_path):
     df = pd.read_csv(li_path, parse_dates=["date"])
     fig = single_line(df, "date", "low_income_rate", title="",
-                      yaxis_title="% of persons in low income (LIM-AT)")
-    fig.update_layout(annotations=[dict(
-        text=f"Source: Statistics Canada, Table 11-10-0135-01 | Data as of: {get_data_date(li_path)}",
-        xref="paper", yref="paper", x=0, y=-0.2,
-        showarrow=False, font=dict(size=10, color="#999"))])
+                      yaxis_title="% of persons in low income (LIM-AT)",
+                      rangeslider=True,
+                      source_note=f"Source: Statistics Canada, Table 11-10-0135-01 | Data as of: {get_data_date(li_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Low-income data not yet available. Run the data pipeline.")

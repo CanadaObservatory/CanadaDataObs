@@ -21,6 +21,16 @@ from pipeline.config import (
 from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 ```
 
+## Where Canada Stands
+
+A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
+
+```{python}
+#| echo: false
+from pipeline.charts import page_snapshot
+page_snapshot("housing").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## Inflation (CPI Year-over-Year)
 
 Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
@@ -144,15 +154,16 @@ except FileNotFoundError:
     if (typeof Plotly === 'undefined') { setTimeout(setup, 500); return; }
     var plots = document.querySelectorAll('.js-plotly-plot');
     if (!plots.length) { setTimeout(setup, 500); return; }
-    var el = plots[0];
-    if (!el._fullLayout) { setTimeout(setup, 500); return; }
-
-    // Find bar trace
-    var barIdx = -1;
-    for (var i = 0; i < el.data.length; i++) {
-      if (el.data[i].type === 'bar') { barIdx = i; break; }
+    // Find the plot holding the CPI bar chart (it may not be the first on the page)
+    var el = null, barIdx = -1;
+    for (var p = 0; p < plots.length; p++) {
+      if (!plots[p]._fullLayout || !plots[p].data) continue;
+      for (var i = 0; i < plots[p].data.length; i++) {
+        if (plots[p].data[i].type === 'bar') { el = plots[p]; barIdx = i; break; }
+      }
+      if (el) break;
     }
-    if (barIdx < 0) return;
+    if (!el) { setTimeout(setup, 500); return; }
 
     // Build lookup array from trace data
     var trace = (el._fullData && el._fullData[barIdx]) || el.data[barIdx];
@@ -301,11 +312,9 @@ nhpi_path = "data/housing/statcan_nhpi.csv"
 if os.path.exists(nhpi_path):
     df = pd.read_csv(nhpi_path, parse_dates=["date"])
     fig = single_line(df, "date", "nhpi", title="",
-                      yaxis_title="New Housing Price Index (Dec 2016 = 100)")
-    fig.update_layout(annotations=[dict(
-        text=f"Source: Statistics Canada, Table 18-10-0205-01 | Data as of: {get_data_date(nhpi_path)}",
-        xref="paper", yref="paper", x=0, y=-0.2,
-        showarrow=False, font=dict(size=10, color="#999"))])
+                      yaxis_title="New Housing Price Index (Dec 2016 = 100)",
+                      rangeslider=True,
+                      source_note=f"Source: Statistics Canada, Table 18-10-0205-01 | Data as of: {get_data_date(nhpi_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("New Housing Price Index not yet available. Run the data pipeline.")
@@ -321,11 +330,9 @@ rent_path = "data/housing/statcan_rent_cpi.csv"
 if os.path.exists(rent_path):
     df = pd.read_csv(rent_path, parse_dates=["date"])
     fig = single_line(df, "date", "rent_index", title="",
-                      yaxis_title="Rent CPI (2002 = 100)")
-    fig.update_layout(annotations=[dict(
-        text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date(rent_path)}",
-        xref="paper", yref="paper", x=0, y=-0.2,
-        showarrow=False, font=dict(size=10, color="#999"))])
+                      yaxis_title="Rent CPI (2002 = 100)",
+                      rangeslider=True,
+                      source_note=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date(rent_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Rent data not yet available. Run the data pipeline.")

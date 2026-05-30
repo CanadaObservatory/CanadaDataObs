@@ -20,6 +20,16 @@ from pipeline.config import (
 from pipeline.charts import peer_comparison_line, ranked_bar
 ```
 
+## Where Canada Stands
+
+A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
+
+```{python}
+#| echo: false
+from pipeline.charts import page_snapshot
+page_snapshot("health").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## Life Expectancy at Birth
 
 Life expectancy at birth (both sexes) — the average number of years a newborn

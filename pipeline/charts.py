@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, HIGHLIGHT_COUNTRY,
-    PEER_COUNTRIES, COMPARATOR_COLORS, DATA_DATE, get_data_date,
+    PEER_COUNTRIES, COMPARATOR_COLORS, SNAPSHOT_SPECS, DATA_DATE, get_data_date,
 )
 
 
@@ -233,6 +233,102 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
     return fig
 
 
+def ranking_strip(items, source_note=None, year_col="year",
+                  country_col="country_code", name_col="country_name",
+                  min_countries=8, height=None):
+    """"Where Canada stands" snapshot — one row per indicator, every peer plotted
+    as a dot positioned by its latest-year value (min–max normalised so all rows
+    share a scale). Oriented as a scorecard: more favourable is always on the right
+    (lower-is-better measures are flipped), rank 1 = best. Canada red, comparators
+    coloured, others light grey; hover shows the real value and rank.
+
+    `items`: list of (label, csv_path, value_col, fmt[, good]) where fmt is a Python
+    format string ("${:,.0f}", "{:.1f}%") and good is "high" (default) or "low"
+    to indicate which direction is more favourable.
+    """
+    import os
+    import pandas as pd
+
+    pts, labels = [], []
+    for item in items:
+        label, path, value_col, fmt = item[0], item[1], item[2], item[3]
+        good = item[4] if len(item) > 4 else "high"   # "high" or "low" is better
+        if not os.path.exists(path):
+            continue
+        df = pd.read_csv(path)
+        if value_col not in df.columns or country_col not in df.columns:
+            continue
+        year = _latest_year_with_coverage(df, value_col, year_col,
+                                          min_countries=min_countries,
+                                          country_col=country_col,
+                                          require_code=HIGHLIGHT_COUNTRY)
+        sub = df[df[year_col] == year].dropna(subset=[value_col]).copy()
+        if sub.empty:
+            continue
+        # rank 1 = best (direction-aware); position by rank so spacing is even and
+        # immune to outliers, and "more favourable" (rank 1) sits on the right.
+        sub["_rank"] = sub[value_col].rank(ascending=(good == "low"), method="min").astype(int)
+        n = len(sub)
+        labels.append(label)
+        for _, r in sub.iterrows():
+            rank = int(r["_rank"])
+            pos = (n - rank) / (n - 1) if n > 1 else 0.5
+            pts.append(dict(
+                label=label, x=pos, code=r[country_col],
+                name=(r[name_col] if name_col in sub.columns else r[country_col]),
+                val=fmt.format(r[value_col]), rank=rank, n=n, year=int(year),
+            ))
+    if not pts:
+        return go.Figure()
+
+    def _key(code):
+        if code == HIGHLIGHT_COUNTRY:
+            return "CAN"
+        return code if code in COMPARATOR_COLORS else "_other"
+
+    fig = go.Figure()
+
+    def _add(key, color, size, legend, rank):
+        sp = [p for p in pts if _key(p["code"]) == key]
+        if not sp:
+            return
+        fig.add_trace(go.Scatter(
+            x=[p["x"] for p in sp], y=[p["label"] for p in sp],
+            mode="markers", name=legend, legendrank=rank,
+            marker=dict(color=color, size=size, line=dict(width=0.5, color="white")),
+            customdata=[[p["name"], p["val"], p["rank"], p["n"], p["year"]] for p in sp],
+            hovertemplate="%{customdata[0]}: %{customdata[1]}  ·  rank "
+                          "%{customdata[2]} of %{customdata[3]} (%{customdata[4]})<extra></extra>",
+        ))
+
+    _add("_other", PEER_COLOR, 9, "Other peers", 999)
+    for i, code in enumerate(sorted(COMPARATOR_COLORS, key=lambda c: PEER_COUNTRIES.get(c, c))):
+        _add(code, COMPARATOR_COLORS[code], 11, PEER_COUNTRIES.get(code, code), 10 + i)
+    _add("CAN", CANADA_COLOR, 15, "Canada", 1)
+
+    fig.update_layout(
+        xaxis=dict(range=[-0.06, 1.06], showticklabels=False, showgrid=False,
+                   zeroline=False, title="less favourable  →  more favourable"),
+        yaxis=dict(categoryorder="array", categoryarray=labels[::-1],
+                   showgrid=True, gridcolor="#eee", ticksuffix="  "),
+        plot_bgcolor="white",
+        height=height or (140 + 48 * len(labels)),
+        legend=dict(orientation="h", yanchor="top", y=-0.16, xanchor="center", x=0.5),
+        margin=dict(l=10, r=20, t=20, b=120),
+        hovermode="closest",
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=-0.42, showarrow=False,
+                           font=dict(size=9, color="#aaa"))
+    return fig
+
+
+def page_snapshot(section, **kwargs):
+    """'Where Canada Stands' ranking strip for a page, from SNAPSHOT_SPECS."""
+    return ranking_strip(SNAPSHOT_SPECS.get(section, []), **kwargs)
+
+
 def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
                       colors=None):
     """
@@ -273,17 +369,52 @@ def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
     return fig
 
 
-def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR):
-    """Simple single-line time series chart."""
+def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
+                rangeslider=False, source_note=None, hovertemplate=None,
+                yaxis_tickformat=None, customdata=None):
+    """Single Canada-only time series.
+
+    Set rangeslider=True for long series (more than a decade or two) to add a
+    draggable time slider below the chart. Because these charts have no legend,
+    the slider only has to coexist with the source note, which this function
+    places below the slider (no overlap). Pass source_note to have it positioned
+    correctly for the slider; pass hovertemplate / yaxis_tickformat as needed.
+    """
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=df[x_col],
-        y=df[y_col],
-        mode="lines+markers",
+        x=df[x_col], y=df[y_col], mode="lines",
         line=dict(color=color, width=HIGHLIGHT_WIDTH),
-        marker=dict(size=5),
-        hovertemplate="%{y:,.0f}<extra></extra>",
+        customdata=customdata,
+        hovertemplate=hovertemplate or "%{y:,.0f}<extra></extra>",
     ))
-    fig.update_layout(_base_layout(title, yaxis_title))
-    fig.update_layout(showlegend=False)
+    xaxis = dict(
+        title="", gridcolor="#e0e0e0",
+        rangeselector=dict(buttons=[
+            dict(count=1, label="1Y", step="year", stepmode="backward"),
+            dict(count=5, label="5Y", step="year", stepmode="backward"),
+            dict(count=10, label="10Y", step="year", stepmode="backward"),
+            dict(count=20, label="20Y", step="year", stepmode="backward"),
+            dict(step="all", label="All"),
+        ], x=0, xanchor="left", y=1.01),
+    )
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.10, bgcolor="#f5f5f5")
+        # Open on the most recent ~25 years (from 1999, so the 2000 tick anchors
+        # the view); the slider still spans all history and "All" resets it.
+        import pandas as pd
+        xmin, xmax = df[x_col].min(), df[x_col].max()
+        xaxis["range"] = [max(xmin, pd.Timestamp("1999-01-01")), xmax]
+    yaxis = dict(title=yaxis_title, gridcolor="#e0e0e0")
+    if yaxis_tickformat:
+        yaxis["tickformat"] = yaxis_tickformat
+    fig.update_layout(
+        xaxis=xaxis, yaxis=yaxis, plot_bgcolor="white",
+        hovermode="x", showlegend=False,
+        margin=dict(t=40, b=(140 if rangeslider else 80)),
+    )
+    if source_note:
+        fig.add_annotation(
+            text=source_note, xref="paper", yref="paper",
+            x=0, y=(-0.34 if rangeslider else -0.18),
+            showarrow=False, font=dict(size=10, color="#999"))
     return fig

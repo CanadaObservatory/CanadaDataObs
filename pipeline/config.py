@@ -390,3 +390,50 @@ INDICATORS = [
 
 # Quick lookup by id
 INDICATORS_BY_ID = {ind.id: ind for ind in INDICATORS}
+
+
+# --- "Where Canada Stands" page snapshots ---
+# Per section: (row label, csv path, value column, hover format, good-direction).
+# good = "high" (higher is more favourable, default) | "low" (lower is better).
+# The snapshot is a scorecard: charts.ranking_strip flips "low" rows so that
+# "more favourable for Canada" is always on the right, and rank 1 = best.
+SNAPSHOT_SPECS = {
+    "economics": [
+        ("Real GDP growth", "data/economics/oecd_real_gdp_growth.csv", "real_gdp_growth", "{:.1f}%", "high"),
+        ("GDP per capita", "data/economics/oecd_gdp_per_capita.csv", "gdp_per_capita", "${:,.0f}", "high"),
+        ("Labour productivity", "data/economics/oecd_labour_productivity.csv", "gdp_per_hour", "${:.0f}/hr", "high"),
+        ("Unemployment", "data/economics/oecd_unemployment.csv", "unemployment_rate", "{:.1f}%", "low"),
+        ("Employment rate", "data/economics/oecd_employment_rate.csv", "employment_rate", "{:.1f}%", "high"),
+    ],
+    "housing": [
+        ("Real house prices vs 2015", "data/housing/oecd_house_price_real.csv", "house_price_real", "{:.0f}", "low"),
+        ("Price-to-income vs 2015", "data/housing/oecd_house_price_income.csv", "price_to_income", "{:.0f}", "low"),
+        ("Household debt", "data/housing/oecd_household_debt.csv", "household_debt", "{:.0f}%", "low"),
+    ],
+    "income": [
+        ("Average wage (real)", "data/income/oecd_avg_wage.csv", "avg_wage", "${:,.0f}", "high"),
+        ("Income inequality (Gini)", "data/income/oecd_gini.csv", "gini", "{:.3f}", "low"),
+        ("Relative poverty", "data/income/oecd_poverty.csv", "poverty_rate", "{:.1f}%", "low"),
+    ],
+    "health": [
+        ("Life expectancy", "data/health/oecd_life_expectancy.csv", "life_expectancy", "{:.1f} yrs", "high"),
+        ("Health spending", "data/health/oecd_health_spending_gdp.csv", "health_pct_gdp", "{:.1f}% GDP", "high"),
+        ("Hospital beds", "data/health/oecd_hospital_beds.csv", "hospital_beds", "{:.1f}/1k", "high"),
+        ("Physicians", "data/health/oecd_physicians.csv", "physicians", "{:.1f}/1k", "high"),
+        ("MRI units", "data/health/oecd_mri_units.csv", "mri_units", "{:.1f}/M", "high"),
+    ],
+    "science": [
+        ("R&D spending", "data/science/oecd_rd_expenditure.csv", "rd_pct_gdp", "{:.2f}% GDP", "high"),
+        ("Business R&D", "data/science/oecd_berd.csv", "berd_pct_gdp", "{:.2f}% GDP", "high"),
+        ("Researchers", "data/science/oecd_researchers.csv", "researchers_per_1000", "{:.1f}/1k", "high"),
+    ],
+    "environment": [
+        ("CO2 per capita", "data/environment/oecd_co2_per_capita.csv", "co2_per_capita", "{:.1f} t", "low"),
+        ("CO2 vs 2000", "data/environment/oecd_co2_indexed.csv", "co2_index", "{:.0f}", "low"),
+        ("Renewable energy", "data/environment/oecd_renewables_share.csv", "renewables_pct", "{:.1f}%", "high"),
+    ],
+    "fiscal": [
+        ("Government debt", "data/fiscal/oecd_govt_debt.csv", "govt_debt", "{:.0f}% GDP", "low"),
+        ("Budget balance", "data/fiscal/oecd_govt_balance.csv", "govt_balance", "{:.1f}% GDP", "high"),
+    ],
+}

@@ -3,11 +3,18 @@ title: "Canada Data Observatory"
 subtitle: "Interactive metrics for informed civic conversation"
 ---
 
-Canada Data Observatory provides interactive, regularly updated charts and downloadable data on Canada's key metrics. All data comes from official sources — primarily [Statistics Canada](https://www.statcan.gc.ca/) and the [OECD](https://data.oecd.org/) — and is updated automatically each week.
+Canada Data Observatory provides interactive, regularly updated charts and
+downloadable data on the state of the country — its population, economy, cost of
+living, incomes, public finances, health, education, environment, and well-being. All data comes
+from official sources — primarily [Statistics Canada](https://www.statcan.gc.ca/)
+and the [OECD](https://data.oecd.org/) — and is updated automatically each week.
 
-Where possible, Canada is shown alongside a broad set of 20 OECD peer countries (not just the G7) to provide meaningful international context.
+Where possible, Canada is shown alongside a broad set of 17 OECD peer countries
+(not just the G7) to provide meaningful international context.
 
-This is an open, non-partisan project. It presents data without policy advocacy. Data files are freely downloadable for anyone to use — students, journalists, researchers, and anyone who wants accessible Canadian data.
+This is an open, non-partisan project. It presents data without policy advocacy.
+Data files are freely downloadable for anyone to use — students, journalists,
+researchers, and anyone who wants accessible Canadian data.
 
 ---
 
@@ -15,25 +22,86 @@ This is an open, non-partisan project. It presents data without policy advocacy.
 
 ::::{.columns}
 
-:::{.column width="33%"}
+:::{.column width="32%"}
 ### [Population](population/)
-How many people live in Canada? How has the population changed, and why? National and provincial quarterly estimates.
+How many people live in Canada, how the population is changing, and why.
 
 *Source: Statistics Canada*
 :::
 
-:::{.column width="33%"}
-### [Economics](economics/)
-GDP per capita compared to peers. Inflation trends and the Bank of Canada's 2% target. How does Canada's economy measure up?
-
-*Sources: Statistics Canada, OECD*
+:::{.column width="2%"}
 :::
 
-:::{.column width="33%"}
-### [Science & Innovation](science/)
-How much does Canada invest in R&D? How does this compare to peer countries? A key measure of long-term competitiveness.
+:::{.column width="32%"}
+### [Economy & Jobs](economics/)
+GDP per capita, labour productivity, and unemployment, compared with peers.
 
-*Source: OECD MSTI*
+*Sources: OECD, Statistics Canada*
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Housing & Cost of Living](housing/)
+Inflation, house prices, affordability, and household debt.
+
+*Sources: OECD, Statistics Canada*
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column width="32%"}
+### [Income & Inequality](income/)
+Real incomes and wages, the Gini coefficient, and poverty rates.
+
+*Sources: OECD, Statistics Canada*
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Health](health/)
+Life expectancy and how much countries spend on health care.
+
+*Source: OECD*
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Education & Innovation](science/)
+R&D spending, researchers, and educational attainment.
+
+*Source: OECD*
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column width="32%"}
+### [Environment](environment/)
+CO₂ emissions, the energy mix, and renewable energy.
+
+*Sources: OECD, Our World in Data*
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Society & Well-being](wellbeing/)
+Life satisfaction and the factors that underlie it.
+
+*Source: World Happiness Report*
+:::
+
+:::{.column width="34%"}
 :::
 
 ::::
@@ -43,7 +111,7 @@ How much does Canada invest in R&D? How does this compare to peer countries? A k
 ## Principles
 
 - **Official sources only** — Statistics Canada, OECD, and other authoritative agencies
-- **Broad peer comparisons** — 20 OECD countries, not just the G7
+- **Broad peer comparisons** — 17 OECD countries, not just the G7
 - **Automatically updated** — data pipelines run weekly
 - **Open and downloadable** — all cleaned data available as CSV
 - **No policy advocacy** — the data speaks for itself

@@ -1,340 +1,76 @@
 ---
-title: "Economics"
-description: "GDP, inflation, and economic indicators — Canada and OECD peers"
+title: "Economy & Jobs"
+description: "GDP, productivity, and jobs — Canada and OECD peers"
 ---
 
 ```{python}
 #| echo: false
+import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
+from pipeline.charts import peer_comparison_line, ranked_bar
 ```
 
-## Inflation (CPI Year-over-Year)
+How fast the economy is growing, how large it is per person, how productive an
+hour of work is, and how many people who want work can find it — these indicators
+place Canada's output and labour market alongside 17 OECD peers. Inflation and the
+cost of living have their own page: [Housing & Cost of Living](../housing/).
 
-Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
+## Real GDP Growth
+
+Annual percentage change in real (inflation-adjusted) GDP — the headline measure of how fast the economy is expanding or contracting. The most recent year or two are OECD projections rather than final figures.
 
 ```{python}
 #| echo: false
-try:
-    cpi = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
-    # Filter to single "All-items" series (not sub-categories)
-    if "product_group" in cpi.columns:
-        cpi = cpi[cpi["product_group"] == "All-items"]
-    cpi = cpi.sort_values("date").reset_index(drop=True)
-    # Recompute YoY in case CSV has stale values from mixed product groups
-    cpi["cpi_value"] = pd.to_numeric(cpi["cpi_value"], errors="coerce")
-    cpi["inflation_yoy"] = cpi["cpi_value"].pct_change(periods=12) * 100
-    cpi = cpi.dropna(subset=["inflation_yoy"])
-
-    # Color bars: red above 3% (above target range), blue below 1% (below range), dark grey in range
-    colors = []
-    for v in cpi["inflation_yoy"]:
-        if v > 3:
-            colors.append(CANADA_COLOR)
-        elif v < 1:
-            colors.append("#1f77b4")
-        else:
-            colors.append("#555555")
-
-    fig = go.Figure()
-
-    # Target range band (1-3%)
-    fig.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.4,
-                  line_width=0, layer="below")
-
-    fig.add_trace(go.Bar(
-        x=cpi["date"],
-        y=cpi["inflation_yoy"],
-        marker_color=colors,
-        hovertemplate="<b>%{x|%b %Y}</b><br>Inflation: %{y:.1f}%<extra></extra>",
-    ))
-
-    # Bank of Canada 2% midpoint target — label outside plot area on right
-    fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.7)
-
-    # Default to most recent 1 year — compute y-range from visible data
-    from datetime import timedelta
-    import math
-    latest = cpi["date"].max()
-    one_year_ago = latest - timedelta(days=365)
-    # Buffer x-axis: half month before start, one month after end
-    x_start = one_year_ago - timedelta(days=15)
-    x_end = latest + timedelta(days=31)
-
-    visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
-    # Y-range: tight to data with padding for buttons at top
-    y_min_val = visible.min()
-    y_max_val = visible.max()
-    # Start at 0 if all values are positive (typical), otherwise pad below
-    y_min = 0 if y_min_val >= 0 else math.floor(y_min_val * 2) / 2 - 0.5
-    # Ensure target band (up to 3%) is visible, plus extra room for buttons
-    y_max = math.ceil(max(y_max_val, 3.5) * 2) / 2 + 1.0
-
-    fig.update_layout(
-        xaxis_title="",
-        yaxis_title="Inflation (%)",
-        plot_bgcolor="white",
-        xaxis=dict(
-            gridcolor="#e0e0e0",
-            range=[x_start, x_end],
-            tickformat="%b\n%Y",
-            rangeselector=dict(
-                buttons=[
-                    dict(count=1, label="1Y", step="year", stepmode="backward"),
-                    dict(count=2, label="2Y", step="year", stepmode="backward"),
-                    dict(count=5, label="5Y", step="year", stepmode="backward"),
-                    dict(count=10, label="10Y", step="year", stepmode="backward"),
-                    dict(count=20, label="20Y", step="year", stepmode="backward"),
-                    dict(step="all", label="All"),
-                ],
-                x=0, xanchor="left", y=1.01,
-            ),
-        ),
-        yaxis=dict(
-            gridcolor="#e0e0e0",
-            range=[y_min, y_max],
-        ),
-        showlegend=False,
-        margin=dict(b=100, t=40, r=80),
-        annotations=[
-            dict(
-                text="2% target",
-                xref="paper", yref="y",
-                x=1.01, y=2,
-                xanchor="left",
-                showarrow=False, font=dict(size=11, color="#888"),
-            ),
-            dict(
-                text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
-                xref="paper", yref="paper", x=0, y=-0.15,
-                showarrow=False, font=dict(size=10, color="#999"),
-            ),
-            dict(
-                text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
-                xref="paper", yref="paper", x=0, y=-0.22,
-                showarrow=False, font=dict(size=10, color="#999"),
-            ),
-        ],
-    )
+gdpg_path = "data/economics/oecd_real_gdp_growth.csv"
+if os.path.exists(gdpg_path):
+    df = pd.read_csv(gdpg_path)
+    fig = peer_comparison_line(df, "year", "real_gdp_growth",
+        title="", yaxis_title="Real GDP growth (annual %)", show_average=True)
+    fig.add_hline(y=0, line_dash="dot", line_color="#888", opacity=0.5)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(gdpg_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-except FileNotFoundError:
-    print("CPI data not yet available. Run the data pipeline to fetch it.")
-```
-
-```{=html}
-<script>
-// Auto-scale y-axis when CPI chart x-range changes.
-// Uses polling because Plotly 3.x does NOT fire plotly_relayout for
-// rangeselector button clicks.
-// X-axis tick spacing is left entirely to Plotly's auto-tick logic.
-(function() {
-  function setup() {
-    if (typeof Plotly === 'undefined') { setTimeout(setup, 500); return; }
-    var plots = document.querySelectorAll('.js-plotly-plot');
-    if (!plots.length) { setTimeout(setup, 500); return; }
-    var el = plots[0];
-    if (!el._fullLayout) { setTimeout(setup, 500); return; }
-
-    // Find bar trace
-    var barIdx = -1;
-    for (var i = 0; i < el.data.length; i++) {
-      if (el.data[i].type === 'bar') { barIdx = i; break; }
-    }
-    if (barIdx < 0) return;
-
-    // Build lookup array from trace data
-    var trace = (el._fullData && el._fullData[barIdx]) || el.data[barIdx];
-    var rawX = trace.x, rawY = trace.y;
-    var points = [];
-    if (rawX && rawY) {
-      for (var j = 0; j < rawX.length; j++) {
-        var ms = new Date(rawX[j]).getTime();
-        var yv = parseFloat(rawY[j]);
-        if (!isNaN(ms) && !isNaN(yv)) points.push({ms: ms, y: yv});
-      }
-    }
-    if (!points.length) return;
-    console.log('[CPI] Ready: ' + points.length + ' points');
-
-    // Initialize lastKey with current range so we DON'T fire on first poll
-    var xr0 = el._fullLayout.xaxis.range;
-    var lastKey = xr0 ? String(xr0[0]) + '|' + String(xr0[1]) : '';
-
-    setInterval(function() {
-      try {
-        var xr = el._fullLayout.xaxis.range;
-        if (!xr) return;
-        var key = String(xr[0]) + '|' + String(xr[1]);
-        if (key === lastKey) return;
-
-        var xMin = typeof xr[0] === 'number' ? xr[0] : new Date(xr[0]).getTime();
-        var xMax = typeof xr[1] === 'number' ? xr[1] : new Date(xr[1]).getTime();
-
-        // Collect visible y-values
-        var vis = [];
-        for (var i = 0; i < points.length; i++) {
-          if (points[i].ms >= xMin && points[i].ms <= xMax) vis.push(points[i].y);
-        }
-        if (!vis.length) return;
-
-        var lo = Math.min.apply(null, vis);
-        var hi = Math.max.apply(null, vis);
-        var yMin = lo >= 0 ? 0 : Math.floor(lo * 2) / 2 - 0.5;
-        var yMax = Math.ceil(Math.max(hi, 3.5) * 2) / 2 + 1.0;
-
-        console.log('[CPI] y:[' + yMin + ',' + yMax + '] ' + vis.length + 'pts');
-
-        // Update key BEFORE relayout to prevent re-triggering
-        lastKey = key;
-        Plotly.relayout(el, {'yaxis.range': [yMin, yMax]}).then(function() {
-          // Capture post-relayout range to prevent loops
-          var nr = el._fullLayout.xaxis.range;
-          if (nr) lastKey = String(nr[0]) + '|' + String(nr[1]);
-        });
-      } catch(e) {
-        console.error('[CPI]', e);
-      }
-    }, 500);
-  }
-
-  window.addEventListener('load', function() { setTimeout(setup, 2000); });
-})();
-</script>
+else:
+    print("Real GDP growth data not yet available. Run the data pipeline.")
 ```
 
 ## GDP per Capita (PPP, Current USD)
 
-GDP per capita at purchasing power parity allows meaningful comparison of living standards across countries. Canada is shown in red against OECD peers.
+GDP per capita at purchasing power parity allows meaningful comparison of living standards across countries. Canada is shown in red; the United States and other key comparators are highlighted in colour, with the remaining peers in light grey.
 
 ```{python}
 #| echo: false
-try:
-    df = pd.read_csv("data/economics/oecd_gdp_per_capita.csv")
-
-    fig = go.Figure()
-
-    # Peers first (grey)
-    for code in sorted(df["country_code"].unique()):
-        if code == HIGHLIGHT_COUNTRY:
-            continue
-        subset = df[df["country_code"] == code]
-        name = PEER_COUNTRIES.get(code, code)
-        fig.add_trace(go.Scatter(
-            x=subset["year"],
-            y=subset["gdp_per_capita"],
-            name=name,
-            mode="lines",
-            line=dict(color=PEER_COLOR, width=PEER_WIDTH),
-            opacity=0.5,
-            hovertemplate=f"<b>{name}</b>: $%{{y:,.0f}}<extra></extra>",
-        ))
-
-    # Canada on top
-    can = df[df["country_code"] == HIGHLIGHT_COUNTRY]
-    fig.add_trace(go.Scatter(
-        x=can["year"],
-        y=can["gdp_per_capita"],
-        name="Canada",
-        mode="lines+markers",
-        line=dict(color=CANADA_COLOR, width=HIGHLIGHT_WIDTH),
-        marker=dict(size=5),
-        hovertemplate="<b>Canada</b>: $%{y:,.0f}<extra></extra>",
-    ))
-
-    # Peer average
-    avg = df.groupby("year")["gdp_per_capita"].mean().reset_index()
-    fig.add_trace(go.Scatter(
-        x=avg["year"],
-        y=avg["gdp_per_capita"],
-        name="Peer Average",
-        mode="lines",
-        line=dict(color="#1f77b4", width=2, dash="dash"),
-        hovertemplate="<b>Peer Average</b>: $%{y:,.0f}<extra></extra>",
-    ))
-
-    fig.update_layout(
-        xaxis_title="",
-        yaxis_title="USD (PPP)",
-        yaxis_tickformat="$,.0f",
-        plot_bgcolor="white",
-        height=700,
-        xaxis=dict(
-            gridcolor="#e0e0e0",
-            rangeselector=dict(
-                buttons=[
-                    dict(count=1, label="1Y", step="year", stepmode="backward"),
-                    dict(count=2, label="2Y", step="year", stepmode="backward"),
-                    dict(count=5, label="5Y", step="year", stepmode="backward"),
-                    dict(count=10, label="10Y", step="year", stepmode="backward"),
-                    dict(count=20, label="20Y", step="year", stepmode="backward"),
-                    dict(step="all", label="All"),
-                ],
-                x=0, xanchor="left", y=1.01,
-            ),
-        ),
-        yaxis=dict(gridcolor="#e0e0e0"),
-        hovermode="x unified",
-        legend=dict(
-            orientation="h", yanchor="top", y=-0.08,
-            xanchor="center", x=0.5,
-            itemclick="toggle", itemdoubleclick="toggleothers",
-        ),
-        margin=dict(b=200, t=40),
-        annotations=[dict(
-            text=f"Source: OECD National Accounts | Data as of: {get_data_date('data/economics/oecd_gdp_per_capita.csv')}",
-            xref="paper", yref="paper", x=0, y=-0.52,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
+gdppc_path = "data/economics/oecd_gdp_per_capita.csv"
+if os.path.exists(gdppc_path):
+    df = pd.read_csv(gdppc_path)
+    fig = peer_comparison_line(df, "year", "gdp_per_capita",
+        title="", yaxis_title="USD (PPP)", show_average=True)
+    fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
+        text=f"Source: OECD National Accounts | Data as of: {get_data_date(gdppc_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-except FileNotFoundError:
-    print("GDP per capita data not yet available. Run the data pipeline to fetch it.")
+else:
+    print("GDP per capita data not yet available. Run the data pipeline.")
 ```
 
 ## Latest GDP per Capita: Ranked
 
 ```{python}
 #| echo: false
-try:
-    df = pd.read_csv("data/economics/oecd_gdp_per_capita.csv")
-
-    latest_year = df["year"].max()
-    latest = df[df["year"] == latest_year].copy()
-    latest["country_name"] = latest["country_code"].map(PEER_COUNTRIES)
-    latest = latest.sort_values("gdp_per_capita", ascending=True)
-
-    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=latest["gdp_per_capita"],
-        y=latest["country_name"],
-        orientation="h",
-        marker_color=colors,
-        hovertemplate="%{y}: $%{x:,.0f}<extra></extra>",
-    ))
-
-    fig.update_layout(
-        xaxis_title="USD (PPP)",
-        xaxis_tickformat="$,.0f",
-        yaxis_title="",
-        plot_bgcolor="white",
-        xaxis=dict(gridcolor="#e0e0e0"),
-        showlegend=False,
-        height=600,
-        annotations=[dict(
-            text=f"Source: OECD National Accounts | Data as of: {get_data_date('data/economics/oecd_gdp_per_capita.csv')}",
-            xref="paper", yref="paper", x=1, y=-0.1,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show()
-except FileNotFoundError:
-    print("GDP per capita data not yet available. Run the data pipeline to fetch it.")
+if os.path.exists(gdppc_path):
+    df = pd.read_csv(gdppc_path)
+    fig = ranked_bar(df, "gdp_per_capita", "USD (PPP)",
+        f"Source: OECD National Accounts | Data as of: {get_data_date(gdppc_path)}",
+        tickformat="$,.0f", hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## Labour Productivity (GDP per Hour Worked)
@@ -372,39 +108,11 @@ else:
 ```{python}
 #| echo: false
 if os.path.exists(prod_path):
-    prod = pd.read_csv(prod_path)
-    latest_year = prod["year"].max()
-    latest = prod[prod["year"] == latest_year].copy()
-    latest = latest.sort_values("gdp_per_hour", ascending=True)
-
-    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=latest["gdp_per_hour"],
-        y=latest["country_name"],
-        orientation="h",
-        marker_color=colors,
-        hovertemplate="%{y}: $%{x:.1f}/hr<extra></extra>",
-    ))
-
-    fig.update_layout(
-        xaxis_title="USD (PPP) per hour worked",
-        xaxis_tickformat="$,.0f",
-        yaxis_title="",
-        plot_bgcolor="white",
-        xaxis=dict(gridcolor="#e0e0e0"),
-        showlegend=False,
-        height=600,
-        annotations=[dict(
-            text=f"Source: OECD Productivity Database ({latest_year}) | Data as of: {get_data_date(prod_path)}",
-            xref="paper", yref="paper", x=1, y=-0.1,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show()
-else:
-    print("Labour productivity data not yet available. Run the data pipeline to fetch it.")
+    df = pd.read_csv(prod_path)
+    fig = ranked_bar(df, "gdp_per_hour", "USD (PPP) per hour worked",
+        f"Source: OECD Productivity Database | Data as of: {get_data_date(prod_path)}",
+        tickformat="$,.0f", hover_template="%{y}: $%{x:.1f}/hr<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## Unemployment Rate
@@ -439,43 +147,49 @@ else:
 ```{python}
 #| echo: false
 if os.path.exists(unemp_path):
-    unemp = pd.read_csv(unemp_path)
-    latest_year = unemp["year"].max()
-    latest = unemp[unemp["year"] == latest_year].copy()
-    latest = latest.sort_values("unemployment_rate", ascending=True)
+    df = pd.read_csv(unemp_path)
+    fig = ranked_bar(df, "unemployment_rate", "% of labour force",
+        f"Source: OECD Key Economic Indicators | Data as of: {get_data_date(unemp_path)}",
+        hover_template="%{y}: %{x:.1f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
 
-    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
+## Employment Rate (15–64)
 
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=latest["unemployment_rate"],
-        y=latest["country_name"],
-        orientation="h",
-        marker_color=colors,
-        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
-    ))
+The share of the working-age population (15–64) that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work.
 
-    fig.update_layout(
-        xaxis_title="% of labour force",
-        yaxis_title="",
-        plot_bgcolor="white",
-        xaxis=dict(gridcolor="#e0e0e0"),
-        showlegend=False,
-        height=600,
-        annotations=[dict(
-            text=f"Source: OECD Key Economic Indicators ({latest_year}) | Data as of: {get_data_date(unemp_path)}",
-            xref="paper", yref="paper", x=1, y=-0.1,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show()
+```{python}
+#| echo: false
+emp_path = "data/economics/oecd_employment_rate.csv"
+if os.path.exists(emp_path):
+    df = pd.read_csv(emp_path)
+    fig = peer_comparison_line(df, "year", "employment_rate",
+        title="", yaxis_title="% of population aged 15–64", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Labour Force Statistics | Data as of: {get_data_date(emp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
-    print("Unemployment data not yet available. Run the data pipeline to fetch it.")
+    print("Employment rate data not yet available. Run the data pipeline.")
+```
+
+## Latest Employment Rate: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(emp_path):
+    df = pd.read_csv(emp_path)
+    fig = ranked_bar(df, "employment_rate", "% of population aged 15–64",
+        f"Source: OECD Labour Force Statistics | Data as of: {get_data_date(emp_path)}",
+        hover_template="%{y}: %{x:.1f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## Download Data
 
-- [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada Table 18-10-0004-01
+- [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
 - [GDP per Capita (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts, PPP current USD
 - [Labour Productivity (CSV)](../data/economics/oecd_labour_productivity.csv) — OECD Productivity Database
 - [Unemployment Rate (CSV)](../data/economics/oecd_unemployment.csv) — OECD Key Economic Indicators
+- [Employment Rate (CSV)](../data/economics/oecd_employment_rate.csv) — OECD Labour Force Statistics

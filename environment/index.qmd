@@ -12,8 +12,10 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line
+from pipeline.charts import peer_comparison_line, ranked_bar
 ```
+
+How much carbon Canada emits, how that has changed over time, and how its energy is sourced — shown against OECD peers. Production-based measures count emissions where they physically occur.
 
 ## CO2 Emissions per Capita
 
@@ -47,104 +49,10 @@ else:
 #| echo: false
 if os.path.exists(co2cap_path):
     df = pd.read_csv(co2cap_path)
-    latest_year = df["year"].max()
-    latest = df[df["year"] == latest_year].copy()
-    latest = latest.sort_values("co2_per_capita", ascending=True)
-
-    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=latest["co2_per_capita"],
-        y=latest["country_name"],
-        orientation="h",
-        marker_color=colors,
-        hovertemplate="%{y}: %{x:.1f} t CO2/capita<extra></extra>",
-    ))
-
-    fig.update_layout(
-        xaxis_title="Tonnes CO2 per capita",
-        yaxis_title="",
-        plot_bgcolor="white",
-        xaxis=dict(gridcolor="#e0e0e0"),
-        showlegend=False,
-        height=600,
-        annotations=[dict(
-            text=f"Source: OECD Green Growth Indicators ({latest_year}) | Data as of: {get_data_date(co2cap_path)}",
-            xref="paper", yref="paper", x=1, y=-0.1,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show()
-else:
-    print("CO2 per capita data not yet available. Run the data pipeline to fetch it.")
-```
-
-## CO2 Productivity (GDP per Unit of CO2)
-
-How much economic output is generated per unit of CO2 emitted. Higher values indicate a more carbon-efficient economy. This measures the degree to which economic growth has been decoupled from emissions.
-
-```{python}
-#| echo: false
-co2int_path = "data/environment/oecd_co2_intensity.csv"
-if os.path.exists(co2int_path):
-    df = pd.read_csv(co2int_path)
-
-    fig = peer_comparison_line(
-        df, x_col="year", y_col="co2_productivity",
-        title="", yaxis_title="USD per kg CO2",
-    )
-    fig.update_layout(
-        yaxis_tickformat="$,.1f",
-        annotations=[dict(
-            text=f"Source: OECD Green Growth Indicators | Data as of: {get_data_date(co2int_path)}",
-            xref="paper", yref="paper", x=0, y=-0.52,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("CO2 intensity data not yet available. Run the data pipeline to fetch it.")
-```
-
-## Latest CO2 Productivity: Ranked
-
-```{python}
-#| echo: false
-if os.path.exists(co2int_path):
-    df = pd.read_csv(co2int_path)
-    latest_year = df["year"].max()
-    latest = df[df["year"] == latest_year].copy()
-    latest = latest.sort_values("co2_productivity", ascending=True)
-
-    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=latest["co2_productivity"],
-        y=latest["country_name"],
-        orientation="h",
-        marker_color=colors,
-        hovertemplate="%{y}: $%{x:.1f}/kg CO2<extra></extra>",
-    ))
-
-    fig.update_layout(
-        xaxis_title="USD per kg CO2 (higher = more efficient)",
-        xaxis_tickformat="$,.1f",
-        yaxis_title="",
-        plot_bgcolor="white",
-        xaxis=dict(gridcolor="#e0e0e0"),
-        showlegend=False,
-        height=600,
-        annotations=[dict(
-            text=f"Source: OECD Green Growth Indicators ({latest_year}) | Data as of: {get_data_date(co2int_path)}",
-            xref="paper", yref="paper", x=1, y=-0.1,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show()
-else:
-    print("CO2 intensity data not yet available. Run the data pipeline to fetch it.")
+    fig = ranked_bar(df, "co2_per_capita", "Tonnes CO2 per capita",
+        f"Source: OECD Green Growth Indicators | Data as of: {get_data_date(co2cap_path)}",
+        hover_template="%{y}: %{x:.1f} t CO2/capita<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## CO2 Emissions Trend (Indexed, 2000 = 100)
@@ -207,37 +115,10 @@ else:
 #| echo: false
 if os.path.exists(renew_path):
     df = pd.read_csv(renew_path)
-    latest_year = df["year"].max()
-    latest = df[df["year"] == latest_year].copy()
-    latest = latest.sort_values("renewables_pct", ascending=True)
-
-    colors = [CANADA_COLOR if c == "CAN" else PEER_COLOR for c in latest["country_code"]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=latest["renewables_pct"],
-        y=latest["country_name"],
-        orientation="h",
-        marker_color=colors,
-        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
-    ))
-
-    fig.update_layout(
-        xaxis_title="% of total energy supply",
-        yaxis_title="",
-        plot_bgcolor="white",
-        xaxis=dict(gridcolor="#e0e0e0"),
-        showlegend=False,
-        height=600,
-        annotations=[dict(
-            text=f"Source: OECD Green Growth Indicators ({latest_year}) | Data as of: {get_data_date(renew_path)}",
-            xref="paper", yref="paper", x=1, y=-0.1,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show()
-else:
-    print("Renewable energy data not yet available. Run the data pipeline to fetch it.")
+    fig = ranked_bar(df, "renewables_pct", "% of total energy supply",
+        f"Source: OECD Green Growth Indicators | Data as of: {get_data_date(renew_path)}",
+        hover_template="%{y}: %{x:.1f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## Energy Mix by Country
@@ -363,7 +244,6 @@ else:
 ## Download Data
 
 - [CO2 per Capita (CSV)](../data/environment/oecd_co2_per_capita.csv) — OECD Green Growth Indicators
-- [CO2 Productivity (CSV)](../data/environment/oecd_co2_intensity.csv) — OECD Green Growth Indicators
 - [CO2 Emissions Indexed (CSV)](../data/environment/oecd_co2_indexed.csv) — OECD Green Growth Indicators
 - [Renewable Energy Share (CSV)](../data/environment/oecd_renewables_share.csv) — OECD Green Growth Indicators
 - [Energy Mix (CSV)](../data/environment/owid_energy_mix.csv) — Our World in Data (Energy Institute)

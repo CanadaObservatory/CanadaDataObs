@@ -8,31 +8,38 @@ DataCan is a neutral, evidence-focused project that provides Canadians with easy
 
 ## Data Sources
 
-- **Statistics Canada** — Population estimates, economic indicators, CPI. Accessed via the [Statistics Canada Web Data Service](https://www.statcan.gc.ca/en/developers/wds) (REST API).
-- **OECD** — International comparisons including R&D spending, GDP metrics. Accessed via the [OECD SDMX API](https://sdmx.oecd.org/).
+- **Statistics Canada** — population estimates and components, the Consumer Price Index (including rent), the New Housing Price Index, median after-tax income, and the low-income rate. Downloaded from the [Statistics Canada](https://www.statcan.gc.ca/) bulk data tables.
+- **OECD** — international comparisons via the [OECD SDMX API](https://sdmx.oecd.org/): GDP per capita, real GDP growth, labour productivity, unemployment and the employment rate (National Accounts, Economic Outlook, Productivity, Key Economic Indicators, and Labour Force Statistics); house prices and household debt (Analytical House Prices, Household Dashboard); income inequality, poverty, and wages (Income Distribution Database, Average Annual Wages); government debt and budget balance (Economic Outlook); life expectancy and health spending (Health Statistics, System of Health Accounts); R&D and researchers (MSTI); and CO₂ and renewables (Green Growth Indicators).
+- **Our World in Data** — energy mix by source (Energy Institute, Ember, EIA), via direct CSV download.
+- **World Happiness Report** — life-evaluation scores from the Gallup World Poll.
 
 ## Methodology
 
 - All data comes from official, publicly available sources
 - Data is fetched and cleaned by automated Python scripts
 - Charts use consistent styling: Canada is highlighted in red, peer countries in grey
-- International comparisons use a broad OECD peer group (20 countries), not just the G7
+- International comparisons use a broad OECD peer group (17 countries), not just the G7
 - Each chart notes its data source and the date the data was last updated
 - Raw data files are available for download on each topic page
 
 ## Peer Group
 
-For international comparisons, DataCan uses a set of 20 comparable OECD economies:
+For international comparisons, DataCan uses a set of 17 comparable OECD economies:
 
 **G7:** Canada, United States, United Kingdom, Germany, France, Italy, Japan
 
-**Extended peers:** Australia, South Korea, Netherlands, Sweden, Switzerland, Norway, Denmark, Finland, Israel, Austria, Belgium, Ireland, New Zealand
+**Extended peers:** Australia, South Korea, Netherlands, Sweden, Switzerland, Norway, Denmark, Finland, Israel, New Zealand
 
 This broader set provides more meaningful context than the G7 alone, which excludes important peers.
 
 ## Update Schedule
 
-Data is updated weekly via automated scripts. Some data sources (e.g., population estimates) are updated quarterly by their source agency; others (e.g., OECD R&D data) are updated annually.
+Data is updated weekly via automated scripts. Source agencies refresh at
+different cadences — population estimates quarterly, most OECD series annually,
+the CPI monthly — and some are reported with a lag of a year or more. If a source
+is temporarily unavailable when the pipeline runs, the previous data is kept in
+place rather than overwritten, so a chart never goes blank because of a transient
+outage. Each chart shows the date of its latest observation.
 
 ## Open Data
 

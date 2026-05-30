@@ -5,21 +5,31 @@ project:
 
 website:
   title: "DataCan"
-  description: "Interactive metrics about Canada — population, economics, science & innovation"
+  description: "Interactive metrics about Canada — population, economy, housing, health, education, environment, and well-being"
   navbar:
     left:
       - href: index.qmd
         text: Home
       - href: population/index.qmd
         text: Population
-      - href: economics/index.qmd
-        text: Economics
+      - text: Economy
+        menu:
+          - href: economics/index.qmd
+            text: Growth & Jobs
+          - href: housing/index.qmd
+            text: Housing & Cost of Living
+          - href: income/index.qmd
+            text: Income & Inequality
+          - href: fiscal/index.qmd
+            text: Public Finances
+      - href: health/index.qmd
+        text: Health
       - href: science/index.qmd
-        text: Science & Innovation
+        text: Education & Innovation
       - href: environment/index.qmd
         text: Environment
       - href: wellbeing/index.qmd
-        text: Well-being
+        text: Society & Well-being
       - href: about.qmd
         text: About
     right:

@@ -1,0 +1,163 @@
+---
+title: "Income & Inequality"
+description: "Incomes, wages, and the distribution of income — Canada and OECD peers"
+---
+
+Aggregate growth is only part of the picture; how income reaches households, and
+how evenly it is shared, is another. These charts track real (inflation-adjusted)
+incomes and wages, the Gini coefficient, and relative poverty — for Canada and a
+broad group of 17 OECD peers.
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import (
+    CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
+    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
+)
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+```
+
+## Median After-Tax Income in Canada
+
+Median after-tax income of Canadian families and unattached individuals, in
+constant (inflation-adjusted) dollars. The median is the midpoint — half of
+households are above it, half below — so it reflects the typical household more
+faithfully than an average.
+
+```{python}
+#| echo: false
+mi_path = "data/income/statcan_median_income.csv"
+if os.path.exists(mi_path):
+    df = pd.read_csv(mi_path, parse_dates=["date"])
+    fig = single_line(df, "date", "median_income", title="",
+                      yaxis_title="Median after-tax income (constant $)")
+    fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
+        text=f"Source: Statistics Canada, Table 11-10-0190-01 | Data as of: {get_data_date(mi_path)}",
+        xref="paper", yref="paper", x=0, y=-0.2,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Median income data not yet available. Run the data pipeline.")
+```
+
+## Average Annual Wage (Real)
+
+Average annual wages converted to US dollars at purchasing power parity and held
+in constant prices, so levels can be compared across countries and over time.
+
+```{python}
+#| echo: false
+wage_path = "data/income/oecd_avg_wage.csv"
+if os.path.exists(wage_path):
+    df = pd.read_csv(wage_path)
+    fig = peer_comparison_line(df, "year", "avg_wage",
+        title="", yaxis_title="USD PPP (constant prices)", show_average=True)
+    fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
+        text=f"Source: OECD Average Annual Wages | Data as of: {get_data_date(wage_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Average wage data not yet available. Run the data pipeline.")
+```
+
+## Latest Average Annual Wage: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(wage_path):
+    df = pd.read_csv(wage_path)
+    fig = ranked_bar(df, "avg_wage", "USD PPP (constant prices)",
+        f"Source: OECD Average Annual Wages | Data as of: {get_data_date(wage_path)}",
+        tickformat="$,.0f", hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Income Inequality (Gini Coefficient)
+
+The Gini coefficient of disposable (after-tax, after-transfer) income runs from 0
+(everyone has the same income) to 1 (one person has all of it). Lower values
+indicate a more even distribution.
+
+```{python}
+#| echo: false
+gini_path = "data/income/oecd_gini.csv"
+if os.path.exists(gini_path):
+    df = pd.read_csv(gini_path)
+    fig = peer_comparison_line(df, "year", "gini",
+        title="", yaxis_title="Gini coefficient (0–1)", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Income Distribution Database | Data as of: {get_data_date(gini_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Gini data not yet available. Run the data pipeline.")
+```
+
+## Latest Gini Coefficient: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(gini_path):
+    df = pd.read_csv(gini_path)
+    fig = ranked_bar(df, "gini", "Gini coefficient (lower = more equal)",
+        f"Source: OECD Income Distribution Database | Data as of: {get_data_date(gini_path)}",
+        hover_template="%{y}: %{x:.3f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Relative Poverty Rate
+
+The relative poverty rate is the share of people living on less than half of the
+national median disposable income. It measures low income relative to the
+national standard of living rather than an absolute threshold.
+
+```{python}
+#| echo: false
+pov_path = "data/income/oecd_poverty.csv"
+if os.path.exists(pov_path):
+    df = pd.read_csv(pov_path)
+    fig = peer_comparison_line(df, "year", "poverty_rate",
+        title="", yaxis_title="% below 50% of median income", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Income Distribution Database | Data as of: {get_data_date(pov_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Poverty data not yet available. Run the data pipeline.")
+```
+
+## Low-Income Rate in Canada (LIM-AT)
+
+Statistics Canada's Low Income Measure, after tax (LIM-AT): the share of Canadians
+in households below half the median adjusted household income. This is the
+domestic counterpart to the OECD relative-poverty series above.
+
+```{python}
+#| echo: false
+li_path = "data/income/statcan_low_income.csv"
+if os.path.exists(li_path):
+    df = pd.read_csv(li_path, parse_dates=["date"])
+    fig = single_line(df, "date", "low_income_rate", title="",
+                      yaxis_title="% of persons in low income (LIM-AT)")
+    fig.update_layout(annotations=[dict(
+        text=f"Source: Statistics Canada, Table 11-10-0135-01 | Data as of: {get_data_date(li_path)}",
+        xref="paper", yref="paper", x=0, y=-0.2,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Low-income data not yet available. Run the data pipeline.")
+```
+
+## Download Data
+
+- [Median After-Tax Income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada Table 11-10-0190-01
+- [Average Annual Wage (CSV)](../data/income/oecd_avg_wage.csv) — OECD Average Annual Wages
+- [Gini Coefficient (CSV)](../data/income/oecd_gini.csv) — OECD Income Distribution Database
+- [Relative Poverty Rate (CSV)](../data/income/oecd_poverty.csv) — OECD Income Distribution Database
+- [Low-Income Rate, LIM-AT (CSV)](../data/income/statcan_low_income.csv) — Statistics Canada Table 11-10-0135-01

@@ -1,0 +1,376 @@
+---
+title: "Housing & Cost of Living"
+description: "Inflation, house prices, affordability, and household debt — Canada and OECD peers"
+---
+
+How much it costs to live in Canada — and to buy a home — has become a defining
+question of the decade. The charts below track consumer prices, house prices,
+the gap between home prices and incomes, and how much debt households carry.
+International comparisons use a broad group of 17 OECD peers so Canada's position
+can be read in context.
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import (
+    CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
+    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
+)
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+```
+
+## Inflation (CPI Year-over-Year)
+
+Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
+
+```{python}
+#| echo: false
+try:
+    cpi = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    # Filter to single "All-items" series (not sub-categories)
+    if "product_group" in cpi.columns:
+        cpi = cpi[cpi["product_group"] == "All-items"]
+    cpi = cpi.sort_values("date").reset_index(drop=True)
+    # Recompute YoY in case CSV has stale values from mixed product groups
+    cpi["cpi_value"] = pd.to_numeric(cpi["cpi_value"], errors="coerce")
+    cpi["inflation_yoy"] = cpi["cpi_value"].pct_change(periods=12) * 100
+    cpi = cpi.dropna(subset=["inflation_yoy"])
+
+    # Color bars: red above 3% (above target range), blue below 1% (below range), dark grey in range
+    colors = []
+    for v in cpi["inflation_yoy"]:
+        if v > 3:
+            colors.append(CANADA_COLOR)
+        elif v < 1:
+            colors.append("#1f77b4")
+        else:
+            colors.append("#555555")
+
+    fig = go.Figure()
+
+    # Target range band (1-3%)
+    fig.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.4,
+                  line_width=0, layer="below")
+
+    fig.add_trace(go.Bar(
+        x=cpi["date"],
+        y=cpi["inflation_yoy"],
+        marker_color=colors,
+        hovertemplate="<b>%{x|%b %Y}</b><br>Inflation: %{y:.1f}%<extra></extra>",
+    ))
+
+    # Bank of Canada 2% midpoint target — label outside plot area on right
+    fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.7)
+
+    # Default to most recent 1 year — compute y-range from visible data
+    from datetime import timedelta
+    import math
+    latest = cpi["date"].max()
+    one_year_ago = latest - timedelta(days=365)
+    # Buffer x-axis: half month before start, one month after end
+    x_start = one_year_ago - timedelta(days=15)
+    x_end = latest + timedelta(days=31)
+
+    visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
+    # Y-range: tight to data with padding for buttons at top
+    y_min_val = visible.min()
+    y_max_val = visible.max()
+    # Start at 0 if all values are positive (typical), otherwise pad below
+    y_min = 0 if y_min_val >= 0 else math.floor(y_min_val * 2) / 2 - 0.5
+    # Ensure target band (up to 3%) is visible, plus extra room for buttons
+    y_max = math.ceil(max(y_max_val, 3.5) * 2) / 2 + 1.0
+
+    fig.update_layout(
+        xaxis_title="",
+        yaxis_title="Inflation (%)",
+        plot_bgcolor="white",
+        xaxis=dict(
+            gridcolor="#e0e0e0",
+            range=[x_start, x_end],
+            tickformat="%b\n%Y",
+            rangeselector=dict(
+                buttons=[
+                    dict(count=1, label="1Y", step="year", stepmode="backward"),
+                    dict(count=2, label="2Y", step="year", stepmode="backward"),
+                    dict(count=5, label="5Y", step="year", stepmode="backward"),
+                    dict(count=10, label="10Y", step="year", stepmode="backward"),
+                    dict(count=20, label="20Y", step="year", stepmode="backward"),
+                    dict(step="all", label="All"),
+                ],
+                x=0, xanchor="left", y=1.01,
+            ),
+        ),
+        yaxis=dict(
+            gridcolor="#e0e0e0",
+            range=[y_min, y_max],
+        ),
+        showlegend=False,
+        margin=dict(b=100, t=40, r=80),
+        annotations=[
+            dict(
+                text="2% target",
+                xref="paper", yref="y",
+                x=1.01, y=2,
+                xanchor="left",
+                showarrow=False, font=dict(size=11, color="#888"),
+            ),
+            dict(
+                text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
+                xref="paper", yref="paper", x=0, y=-0.15,
+                showarrow=False, font=dict(size=10, color="#999"),
+            ),
+            dict(
+                text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
+                xref="paper", yref="paper", x=0, y=-0.22,
+                showarrow=False, font=dict(size=10, color="#999"),
+            ),
+        ],
+    )
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("CPI data not yet available. Run the data pipeline to fetch it.")
+```
+
+```{=html}
+<script>
+// Auto-scale y-axis when CPI chart x-range changes.
+// Uses polling because Plotly 3.x does NOT fire plotly_relayout for
+// rangeselector button clicks.
+// X-axis tick spacing is left entirely to Plotly's auto-tick logic.
+(function() {
+  function setup() {
+    if (typeof Plotly === 'undefined') { setTimeout(setup, 500); return; }
+    var plots = document.querySelectorAll('.js-plotly-plot');
+    if (!plots.length) { setTimeout(setup, 500); return; }
+    var el = plots[0];
+    if (!el._fullLayout) { setTimeout(setup, 500); return; }
+
+    // Find bar trace
+    var barIdx = -1;
+    for (var i = 0; i < el.data.length; i++) {
+      if (el.data[i].type === 'bar') { barIdx = i; break; }
+    }
+    if (barIdx < 0) return;
+
+    // Build lookup array from trace data
+    var trace = (el._fullData && el._fullData[barIdx]) || el.data[barIdx];
+    var rawX = trace.x, rawY = trace.y;
+    var points = [];
+    if (rawX && rawY) {
+      for (var j = 0; j < rawX.length; j++) {
+        var ms = new Date(rawX[j]).getTime();
+        var yv = parseFloat(rawY[j]);
+        if (!isNaN(ms) && !isNaN(yv)) points.push({ms: ms, y: yv});
+      }
+    }
+    if (!points.length) return;
+    console.log('[CPI] Ready: ' + points.length + ' points');
+
+    // Initialize lastKey with current range so we DON'T fire on first poll
+    var xr0 = el._fullLayout.xaxis.range;
+    var lastKey = xr0 ? String(xr0[0]) + '|' + String(xr0[1]) : '';
+
+    setInterval(function() {
+      try {
+        var xr = el._fullLayout.xaxis.range;
+        if (!xr) return;
+        var key = String(xr[0]) + '|' + String(xr[1]);
+        if (key === lastKey) return;
+
+        var xMin = typeof xr[0] === 'number' ? xr[0] : new Date(xr[0]).getTime();
+        var xMax = typeof xr[1] === 'number' ? xr[1] : new Date(xr[1]).getTime();
+
+        // Collect visible y-values
+        var vis = [];
+        for (var i = 0; i < points.length; i++) {
+          if (points[i].ms >= xMin && points[i].ms <= xMax) vis.push(points[i].y);
+        }
+        if (!vis.length) return;
+
+        var lo = Math.min.apply(null, vis);
+        var hi = Math.max.apply(null, vis);
+        var yMin = lo >= 0 ? 0 : Math.floor(lo * 2) / 2 - 0.5;
+        var yMax = Math.ceil(Math.max(hi, 3.5) * 2) / 2 + 1.0;
+
+        console.log('[CPI] y:[' + yMin + ',' + yMax + '] ' + vis.length + 'pts');
+
+        // Update key BEFORE relayout to prevent re-triggering
+        lastKey = key;
+        Plotly.relayout(el, {'yaxis.range': [yMin, yMax]}).then(function() {
+          // Capture post-relayout range to prevent loops
+          var nr = el._fullLayout.xaxis.range;
+          if (nr) lastKey = String(nr[0]) + '|' + String(nr[1]);
+        });
+      } catch(e) {
+        console.error('[CPI]', e);
+      }
+    }, 500);
+  }
+
+  window.addEventListener('load', function() { setTimeout(setup, 2000); });
+})();
+</script>
+```
+
+
+## Real House Prices
+
+Inflation-adjusted ("real") house price index, set to 100 in 2015. Because it
+removes general inflation, it shows how house prices have moved relative to the
+overall cost of living. Canada is shown in red against OECD peers.
+
+```{python}
+#| echo: false
+path = "data/housing/oecd_house_price_real.csv"
+if os.path.exists(path):
+    df = pd.read_csv(path)
+    fig = peer_comparison_line(df, "year", "house_price_real",
+        title="", yaxis_title="Real house price index (2015 = 100)",
+        show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Real house price data not yet available. Run the data pipeline.")
+```
+
+## Real House Price Growth Since 2015: Ranked
+
+Each country's index equals 100 in 2015, so this ranks **how much real house prices have risen since 2015** — not which country's housing is most expensive today. A rebased index can't show price *levels*; it shows change from a common starting point.
+
+```{python}
+#| echo: false
+if os.path.exists(path):
+    df = pd.read_csv(path)
+    fig = ranked_bar(df, "house_price_real", "Real house prices vs 2015 (index, 2015 = 100)",
+        f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path)}",
+        hover_template="%{y}: %{x:.0f} (2015=100)<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## House Prices Relative to Incomes
+
+The price-to-income ratio divides house prices by household disposable income
+(indexed to 2015 = 100). It is a standard affordability gauge: when the line
+rises, homes are becoming more expensive relative to what households earn.
+
+```{python}
+#| echo: false
+path2 = "data/housing/oecd_house_price_income.csv"
+if os.path.exists(path2):
+    df = pd.read_csv(path2)
+    fig = peer_comparison_line(df, "year", "price_to_income",
+        title="", yaxis_title="Price-to-income ratio (2015 = 100)",
+        show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path2)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Price-to-income data not yet available. Run the data pipeline.")
+```
+
+## Change in Price-to-Income Since 2015: Ranked
+
+This series is also rebased to 2015 = 100, so it ranks the **change** in the price-to-income ratio since 2015 — i.e. how much affordability has shifted — not the level of the ratio across countries.
+
+```{python}
+#| echo: false
+if os.path.exists(path2):
+    df = pd.read_csv(path2)
+    fig = ranked_bar(df, "price_to_income", "Price-to-income vs 2015 (index, 2015 = 100)",
+        f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path2)}",
+        hover_template="%{y}: %{x:.0f} (2015=100)<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## New Housing Prices in Canada
+
+Statistics Canada's New Housing Price Index tracks changes in builders' selling
+prices of new homes (the "total" of house and land), monthly. This is a
+Canada-specific series shown over time.
+
+```{python}
+#| echo: false
+nhpi_path = "data/housing/statcan_nhpi.csv"
+if os.path.exists(nhpi_path):
+    df = pd.read_csv(nhpi_path, parse_dates=["date"])
+    fig = single_line(df, "date", "nhpi", title="",
+                      yaxis_title="New Housing Price Index (Dec 2016 = 100)")
+    fig.update_layout(annotations=[dict(
+        text=f"Source: Statistics Canada, Table 18-10-0205-01 | Data as of: {get_data_date(nhpi_path)}",
+        xref="paper", yref="paper", x=0, y=-0.2,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("New Housing Price Index not yet available. Run the data pipeline.")
+```
+
+## Rent in Canada
+
+The Consumer Price Index for rent — what renters pay over time. Renters are roughly a third of Canadian households, so rent is a central part of the cost-of-living picture that owner-focused house-price indices miss.
+
+```{python}
+#| echo: false
+rent_path = "data/housing/statcan_rent_cpi.csv"
+if os.path.exists(rent_path):
+    df = pd.read_csv(rent_path, parse_dates=["date"])
+    fig = single_line(df, "date", "rent_index", title="",
+                      yaxis_title="Rent CPI (2002 = 100)")
+    fig.update_layout(annotations=[dict(
+        text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date(rent_path)}",
+        xref="paper", yref="paper", x=0, y=-0.2,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Rent data not yet available. Run the data pipeline.")
+```
+
+## Household Debt
+
+Household debt as a percentage of net disposable income. A value of 180% means
+households owe $1.80 for every dollar of annual after-tax income. It captures how
+leveraged households are — relevant to both affordability and financial risk.
+
+```{python}
+#| echo: false
+debt_path = "data/housing/oecd_household_debt.csv"
+if os.path.exists(debt_path):
+    df = pd.read_csv(debt_path)
+    fig = peer_comparison_line(df, "year", "household_debt",
+        title="", yaxis_title="% of net disposable income",
+        show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Household Dashboard | Data as of: {get_data_date(debt_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Household debt data not yet available. Run the data pipeline.")
+```
+
+## Latest Household Debt: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(debt_path):
+    df = pd.read_csv(debt_path)
+    fig = ranked_bar(df, "household_debt", "% of net disposable income",
+        f"Source: OECD Household Dashboard | Data as of: {get_data_date(debt_path)}",
+        hover_template="%{y}: %{x:.0f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Download Data
+
+- [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada Table 18-10-0004-01
+- [Real House Price Index (CSV)](../data/housing/oecd_house_price_real.csv) — OECD Analytical House Prices
+- [Price-to-Income Ratio (CSV)](../data/housing/oecd_house_price_income.csv) — OECD Analytical House Prices
+- [New Housing Price Index (CSV)](../data/housing/statcan_nhpi.csv) — Statistics Canada Table 18-10-0205-01
+- [Rent, CPI (CSV)](../data/housing/statcan_rent_cpi.csv) — Statistics Canada Table 18-10-0004-01
+- [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard

@@ -96,5 +96,50 @@ def fetch_energy_mix():
     return df
 
 
+OWID_CO2_URL = "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv"
+
+
+def fetch_consumption_co2():
+    """Consumption-based CO2 per capita (OWID): emissions allocated to where goods
+    are *consumed* rather than produced, so emissions embodied in imports count
+    against the importer. The production-based measure (already charted) misses
+    this; for trade-exposed economies the two can differ materially.
+    """
+    logger.info("Fetching OWID consumption-based CO2...")
+    try:
+        r = requests.get(OWID_CO2_URL, timeout=180)
+        r.raise_for_status()
+    except Exception as e:
+        logger.error(f"  Failed to fetch OWID CO2 data: {e}")
+        return None
+
+    df = pd.read_csv(io.StringIO(r.text))
+    validate_columns(df, ["iso_code", "country", "year", "consumption_co2_per_capita"],
+                     "consumption_co2")
+    df = df[df["iso_code"].isin(PEER_CODES)].copy()
+    df = df.rename(columns={"iso_code": "country_code",
+                            "consumption_co2_per_capita": "consumption_co2_pc"})
+    df["consumption_co2_pc"] = pd.to_numeric(df["consumption_co2_pc"], errors="coerce")
+    df = df.dropna(subset=["consumption_co2_pc"])
+    df["year"] = df["year"].astype(int)
+    df["country_name"] = df["country_code"].map(PEER_COUNTRIES)
+    df = (df[["country_code", "country_name", "year", "consumption_co2_pc"]]
+          .sort_values(["country_code", "year"]).reset_index(drop=True))
+    if df.empty:
+        return None
+
+    out_path = DATA_DIR / "environment" / "owid_consumption_co2.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="Our World in Data (Global Carbon Project)",
+        source_table="owid-co2-data",
+        frequency="annual", unit="tonnes CO2 per capita (consumption-based)",
+        transformations=["filtered to 17 OECD peers, consumption_co2_per_capita"])
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
+    return df
+
+
 if __name__ == "__main__":
     fetch_energy_mix()
+    fetch_consumption_co2()

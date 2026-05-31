@@ -42,25 +42,28 @@ DataCan/
 ├── CLAUDE.md              ← this file
 ├── _quarto.yml            ← site config, nav (Economy is a dropdown), theme
 ├── index.qmd  about.qmd   ← landing + methodology
-├── population/index.qmd   ← total, by-province, growth rate, components
-├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, unemployment, employment rate
-├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, rent, household debt
-├── income/index.qmd       ← median income, wages, Gini, poverty, LIM-AT
-├── fiscal/index.qmd       ← govt gross debt, budget balance
-├── health/index.qmd       ← life expectancy, health spending, beds, physicians, MRI units
+├── population/index.qmd   ← total, by-province, growth rate, components, non-permanent residents
+├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment, employment rate, current account
+├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, rent, housing starts, vacancy rate, household debt
+├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, neighbourhood income map (choropleth)
+├── fiscal/index.qmd       ← govt gross debt, budget balance, revenue, interest costs, defence
+├── health/index.qmd       ← life expectancy, avoidable mortality, health spending (%GDP + per person), beds, physicians, nurses, MRI units
 ├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers  (titled "Education & Innovation")
-├── environment/index.qmd  ← CO2 per capita, CO2 indexed, renewables, energy mix
-├── wellbeing/index.qmd    ← happiness score + factor decomposition
+├── environment/index.qmd  ← CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix
+├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide)
 ├── pipeline/
 │   ├── config.py          ← Indicator dataclass + INDICATORS registry, peer group, COMPARATOR_COLORS, styling
 │   ├── fetch_oecd.py      ← fetch_oecd_indicator (generic SDMX) + _fetch_oecd_csv
 │   ├── fetch_statcan.py   ← fetch_statcan_indicator (generic) + bespoke population/CPI
-│   ├── fetch_owid.py      ← OWID energy mix (bespoke)
+│   ├── fetch_owid.py      ← OWID energy mix + consumption CO2 (bespoke)
+│   ├── fetch_worldbank.py ← fetch_worldbank_indicator (generic WB API)
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, time_series_multi
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map, ranking_strip
+│   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   └── run_pipeline.py    ← registry-driven orchestrator
 ├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
+├── data/geo/              ← static 2021-census choropleth assets (CT GeoJSON + income CSV)
 ├── .claude/launch.json    ← preview servers: `quarto-preview` (live) and `site` (static _site)
 ├── .github/workflows/update-data.yml  ← weekly cron: fetch → commit → deploy
 └── requirements.txt
@@ -88,24 +91,43 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (34 indicators / 9 sections)
+## Data sources (50 indicators / 9 sections)
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   components 17-10-0008-01, CPI 18-10-0004-01 (All-items + the "Rent" group),
   New Housing Price Index 18-10-0205-01, median after-tax income 11-10-0190-01,
-  low income (LIM-AT) 11-10-0135-01.
+  low income (LIM-AT) 11-10-0135-01, electric power generation by type
+  25-10-0015-01 + fuel-level generation 25-10-0084-01 (provincial electricity mix
+  with the fossil slice split into coal/gas/oil; bespoke `fetch_provincial_electricity`),
+  housing starts 34-10-0143-01 + rental vacancy 34-10-0127-01 (CMHC), food insecurity
+  13-10-0835-01, Crime Severity Index 35-10-0026-01, homicide rate 35-10-0068-01,
+  non-permanent residents 17-10-0121-01 (all generic single-series `fetch_statcan_indicator`).
 - **OECD SDMX** (`fetch_oecd_indicator`): R&D/BERD/researchers (MSTI
   `DSD_MSTI@DF_MSTI`), GDP/capita (`DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC`),
   productivity (`DSD_PDB@DF_PDB_LV`), unemployment (`DSD_KEI@DF_KEI`), employment
-  rate (`DSD_LFS@DF_IALFS_EMP_WAP_Q`), real GDP growth + govt gross debt + budget
-  balance (Economic Outlook `DSD_EO@DF_EO`: GDPV_ANNPCT / GGFLQ / NLGQ), house
-  prices + price-to-income (`DSD_AN_HOUSE_PRICES@DF_HOUSE_PRICES`), household debt
-  (`DSD_HHDASH@DF_HHDASH_CTRY`), Gini + poverty (`DSD_WISE_IDD@DF_IDD`), average
+  rate (`DSD_LFS@DF_IALFS_EMP_WAP_Q`), and from the Economic Outlook (`DSD_EO@DF_EO`,
+  key `{countries}.MEASURE.A`, all `transform=_drop_future_years`): real GDP growth
+  GDPV_ANNPCT, gross debt GGFLQ, budget balance NLGQ, current account CBGDPR,
+  govt revenue YRGTQ, net interest GNINTQ (the `Q`/PT_B1GQ variants are %GDP), house
+  prices + price-to-income (`DSD_AN_HOUSE_PRICES@DF_HOUSE_PRICES`), household debt +
+  real household disposable income per capita (`DSD_HHDASH@DF_HHDASH_CTRY`; debt
+  MEASURE=LES1M_FD4, disposable income MEASURE=B6GS1M_R_POP unit IX, index 2007=100,
+  13 countries), Gini + poverty (`DSD_WISE_IDD@DF_IDD`), average
   wages (`DSD_EARNINGS@AV_AN_WAGE`), life expectancy (`DSD_HEALTH_STAT@DF_LE`),
-  health spending (`DSD_SHA@DF_SHA`), hospital beds (`DSD_HEALTH_REAC_HOSP@DF_BEDS_FUNC`),
-  physicians (`DSD_HEALTH_EMP_REAC@DF_PHYS`), MRI units (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`),
-  CO2 per capita + indexed (Green Growth `DSD_GG@DF_GREEN_GROWTH`).
-- **Our World in Data** — energy mix CSV (Energy Institute + Ember + EIA): both
+  health spending (`DSD_SHA@DF_SHA` — both % of GDP via `PT_B1GQ`/`PRICE_BASE=_Z`
+  and USD PPP per capita via `USD_PPP_PS`/`PRICE_BASE=V`; per-capita needs the
+  current-prices `V`, not `_Z`), hospital beds (`DSD_HEALTH_REAC_HOSP@DF_BEDS_FUNC`),
+  physicians (`DSD_HEALTH_EMP_REAC@DF_PHYS`), nurses (`DSD_HEALTH_REAC_EMP@DF_NURSE`
+  — note the reversed DSD name; HEALTH_PROF=MINU, activity P), MRI units
+  (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`), avoidable mortality (`DSD_HEALTH_STAT@DF_AM`,
+  MEASURE=AVM, deaths/100k), CO2 per capita + indexed (Green Growth `DSD_GG@DF_GREEN_GROWTH`).
+- **World Bank API** (`fetch_worldbank_indicator`, source="worldbank", `wb_indicator`
+  code; JSON, ISO-3 codes match PEER_CODES, CC-BY): business investment / gross fixed
+  capital formation %GDP (`NE.GDI.FTOT.ZS`) and defence spending %GDP
+  (`MS.MIL.XPND.GD.ZS`, WB-sourced from SIPRI so all 17 peers are covered, not just
+  NATO; the defence chart draws the NATO 2%-of-GDP guideline as a benchmark line).
+- **Our World in Data** — consumption-based CO2 per capita (`fetch_consumption_co2`,
+  OWID CO2 dataset / Global Carbon Project), and the energy mix CSV (Energy Institute + Ember + EIA): both
   electricity-generation shares (`*_share_elec`, `low_carbon_share_elec`) and
   primary-energy shares (`*_share_energy`). Energy is framed as **electricity** by
   default (nuclear/hydro properly sized; Canada ≈78% low-carbon) with a labelled
@@ -153,7 +175,13 @@ the highlighted set or peer list is a one-line edit in config.py.
   peer a dot ordered **by rank** so further right = more favourable (lower-is-better
   measures are flipped; rank 1 = best), Canada red. Spec per section lives in
   `SNAPSHOT_SPECS` (config.py): `(label, csv path, value col, fmt, good)` where
-  `good` is "high"/"low". Rank-based positioning (not value) keeps it outlier-immune.
+  `good` is "high"/"low". Rank-based positioning (not value) keeps it outlier-immune,
+  but because rank hides magnitude, each row also shows an always-on right-hand label
+  with Canada's **value · rank · peer median** (so a tight cluster reads differently
+  from a real gap), and a row whose latest year lags the newest row is flagged with
+  that year in its label. Only assign a `good` direction where "favourable" is
+  uncontroversial — current account and govt revenue are charted but kept off the
+  scorecard because higher/lower isn't clearly better.
 - Styling: Canada `#d62728`/width 3, peers `#bdbdbd`/width 1.5, average `#555`
   dashed; range buttons 1Y/2Y/5Y/10Y/20Y/All at `x=0,y=1.01`; no Plotly titles
   (Quarto `##` headings are the titles); source note at the bottom;
@@ -161,6 +189,28 @@ the highlighted set or peer list is a one-line edit in config.py.
 - Indexed series (real house prices, price-to-income, CO2-indexed) must NOT be
   ranked as if they were levels — a rebased index shows change from a base year,
   not cross-country levels. House-price ranked bars are labelled "…since 2015".
+
+## Choropleth maps (census-tract income)
+
+`charts.choropleth_map(geojson, df, location_col, value_col, ...)` — a zoomable
+Plotly `Choroplethmapbox` with the free `carto-positron` basemap (**no Mapbox
+token**); GeoJSON features must carry top-level `id == df[location_col]`. First
+use: **median household income by census tract** on the income page (the
+"put yourself on the map" view). Key facts:
+- **Static census assets, not weekly.** Census is a 5-yearly snapshot, so the CT
+  boundaries + income are built **once** by `pipeline/build_census_geo.py` →
+  `data/geo/ct_2021.geojson` (simplified to ~2.9 MB, feature id = CTUID) +
+  `data/geo/statcan_ct_income_2021.csv` (ctuid, name, median_income from the 2021
+  Census table 98-10-0058-01, 2020 income). Re-run on the next census (2026). The
+  weekly pipeline does NOT touch these.
+- **Page weight** ≈ 3.2 MB for the income page (the GeoJSON is inlined). Acceptable;
+  achieved via `geometry.simplify(0.0005)` + 4-decimal coordinate rounding + minified
+  JSON. CTs are CMA/urban-only — rural areas are blank (stated on the page).
+- **Colour scale is percentile-capped** (5th–95th) so a few ultra-rich tracts don't
+  flatten the contrast for typical neighbourhoods.
+- **Driving the map from JS** (e.g. preview tests): `window.Plotly` is undefined under
+  Quarto's AMD bundle — use `window.requirejs('plotly')` to get the handle for
+  `relayout`. (Same gotcha as the CPI rescale JS.)
 
 ## CPI inflation chart (housing/index.qmd — moved from economics)
 
@@ -177,6 +227,23 @@ Push to main, weekly cron (Mon 6am UTC), or manual. Data fetch runs on
 schedule/manual only; deploy runs on every push (renders from latest code + data).
 `continue-on-error` + the STALE fallback mean a transient source outage won't
 fail the build or blank a chart.
+
+## Licensing note (what may NOT be published)
+
+Every public source here permits republication with attribution (StatCan, OECD,
+OWID CC-BY, WHR). **CREA MLS® HPI is the exception** — its terms allow downloading
+for analysis but bar publishing/displaying the data without CREA's written consent,
+which is incompatible with this public repo + CSV downloads. It is the only source
+for absolute resale prices by city × dwelling type, so a reference figure is built
+**internally only** (`internal/crea_house_prices.py` → `internal/…html`); the whole
+`internal/` dir and `*MLS_HPI*` are git-ignored and must never be committed or put
+on a page. The published affordability story uses open data instead — the
+"Home Prices vs. Incomes" chart (OECD **real** house-price index vs. StatCan
+**real** median after-tax income, both rebased to 2000 = 100; by 2025 prices ≈280
+vs. income ≈126). Note: keep both lines on the same basis — the income CSV is in
+2024 constant dollars (real), so pairing it with a *nominal* price index is wrong;
+and NHPI tracks new-build builder prices, which understate the resale run-up, so
+the OECD real resale index is used here, not NHPI.
 
 ## Known issues / gotchas
 
@@ -195,12 +262,32 @@ fail the build or blank a chart.
   bug. The page leads with *electricity* shares where nuclear is ~13% (Ontario
   ~50%) and Canada's grid is ~78% low-carbon. "Low-carbon" = renewables + nuclear;
   prefer it over "renewables" (which omits nuclear) for the decarbonisation lens.
+- Provincial electricity (25-10-0015-01) is **generation** (actual output, latest
+  12 months), not installed capacity — gas shows at its real ~17% national share,
+  not its larger peaking capacity. Turbine types are bucketed Hydro/Nuclear/Wind/
+  Solar/Biomass + a fossil total; since that table only knows *turbine* type (steam/
+  combustion), not fuel, the fossil slice is split into **Coal/Natural gas/Oil** by
+  the fuel-level generation shares in **25-10-0084-01** (latest annual) — coal is
+  worth separating (≈2× the CO2/kWh of gas; Nova Scotia ~42% coal, Saskatchewan ~28%,
+  Alberta now ~2% after its coal→gas switch, Ontario 0%). Shares computed off the
+  bucket sum (≈100%; tidal & misc omitted). On its stacked bar the long province names force a wide left
+  margin, so the legend sits **on top** (a bottom legend wraps and collides with
+  the source note); like every chart here the bottom source note still clips at
+  mobile widths (deferred mobile-layout work), but fits the ~800px desktop column.
 
 ## Status & what's deferred
 
 Done: registry + generic fetchers (was the v2 plan), metadata sidecars, STALE
 fallback, the four new domains (Housing, Income, Health, Public Finances),
-comparator highlighting, peer-group trim. Deferred (candidates, not committed):
-business investment (GFCF), trade/current-account + exchange rate, top income
-shares / wealth, per-capita health spending, consumption-based CO2, nurses / CT /
-ICU beds, raw-vs-processed data split, dataset versioning.
+comparator highlighting, peer-group trim, health spending per capita, provincial
+electricity mix. A 2026-05 reviewer-driven expansion added the scorecard magnitude
+column and ~15 indicators: business investment (GFCF), current account, govt
+revenue + interest, defence (with the NATO 2% benchmark), nurses, avoidable
+mortality, real household disposable income, consumption-based CO2, housing starts
++ vacancy, food insecurity, Crime Severity Index + homicide, non-permanent residents.
+Deferred (candidates, not committed):
+**homeownership rate** (Census-only — no clean annual StatCan series; revisit when
+2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),
+PISA / tertiary attainment (no clean feed), CIHI wait-times (no automated feed),
+nurses/CT/ICU subdetail, absolute house prices by city + dwelling type (CREA MLS HPI
+— internal only), raw-vs-processed data split, dataset versioning.

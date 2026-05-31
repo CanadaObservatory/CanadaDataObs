@@ -22,9 +22,11 @@ from pipeline.fetch_oecd import fetch_oecd_indicator
 from pipeline.fetch_statcan import (
     fetch_statcan_indicator,
     fetch_population_quarterly, fetch_population_components, fetch_cpi,
+    fetch_provincial_electricity,
 )
-from pipeline.fetch_owid import fetch_energy_mix
+from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
 from pipeline.fetch_whr import fetch_happiness
+from pipeline.fetch_worldbank import fetch_worldbank_indicator
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -35,7 +37,9 @@ CUSTOM_FETCHERS = {
     "fetch_population_components": fetch_population_components,
     "fetch_cpi": fetch_cpi,
     "fetch_energy_mix": fetch_energy_mix,
+    "fetch_consumption_co2": fetch_consumption_co2,
     "fetch_happiness": fetch_happiness,
+    "fetch_provincial_electricity": fetch_provincial_electricity,
 }
 
 
@@ -44,6 +48,8 @@ def _run_one(ind):
         return fetch_oecd_indicator(ind)
     if ind.source == "statcan":
         return fetch_statcan_indicator(ind)
+    if ind.source == "worldbank":
+        return fetch_worldbank_indicator(ind)
     if ind.source == "custom":
         return CUSTOM_FETCHERS[ind.fetch_fn]()
     raise ValueError(f"Unknown source '{ind.source}' for indicator {ind.id}")

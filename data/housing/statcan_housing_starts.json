@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_housing_starts",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 34-10-0143-01 (CMHC)",
+  "frequency": "monthly",
+  "unit": "units (monthly)",
+  "retrieved_at": "2026-05-31T00:20:38.354844+00:00",
+  "latest_observation_date": "2026-04-01",
+  "transformations": [
+    "filtered to {'GEO': 'Canada', 'Housing estimates': 'Housing starts', 'Type of unit': 'Total units'}"
+  ],
+  "notes": null,
+  "row_count": 940
+}

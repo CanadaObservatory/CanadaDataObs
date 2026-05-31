@@ -1,0 +1,14 @@
+{
+  "dataset_id": "oecd_current_account",
+  "source": "OECD",
+  "source_table": "OECD Economic Outlook",
+  "frequency": "annual",
+  "unit": "% of GDP",
+  "retrieved_at": "2026-05-30T19:28:13.719701+00:00",
+  "latest_observation_date": "2026",
+  "transformations": [
+    "filtered to Current account balance for OECD peer group"
+  ],
+  "notes": null,
+  "row_count": 459
+}

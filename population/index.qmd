@@ -214,6 +214,25 @@ else:
     display(Markdown("*Population components data not yet available. Run the data pipeline to fetch this dataset.*"))
 ```
 
+## Non-Permanent Residents
+
+The number of non-permanent residents — people in Canada on work or study permits, or as asylum claimants and protected persons — has risen sharply in recent years. It is central to current debates about the pace of population growth, housing demand, and the capacity of public services. The line shows the total across all permit types.
+
+```{python}
+#| echo: false
+import os
+npr_path = "data/population/statcan_temp_residents.csv"
+if os.path.exists(npr_path):
+    df = pd.read_csv(npr_path, parse_dates=["date"])
+    fig = single_line(df, "date", "npr_count", title="",
+                      yaxis_title="Non-permanent residents", yaxis_tickformat=",",
+                      source_note=f"Source: Statistics Canada, Table 17-10-0121-01 | Data as of: {get_data_date(npr_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Non-permanent residents data not yet available. Run the data pipeline.")
+```
+
 ## Download Data
 
 - [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01
+- [Non-Permanent Residents (CSV)](../data/population/statcan_temp_residents.csv) — Statistics Canada Table 17-10-0121-01

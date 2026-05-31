@@ -320,6 +320,49 @@ else:
     print("New Housing Price Index not yet available. Run the data pipeline.")
 ```
 
+## Home Prices vs. Incomes
+
+House prices and household incomes, both in **real (inflation-adjusted) terms** and indexed to 2000 = 100 so they share one scale. Plotting the two paths together shows the affordability gap directly: the wider they spread, the more home prices have outrun what households actually earn. The price line is the OECD's real house-price index for Canada (which reflects the resale market); the income line is Statistics Canada's median after-tax income, also in constant dollars. (The New Housing Price Index isn't used here — it tracks builders' prices for *new* homes, which have lagged the resale run-up.)
+
+```{python}
+#| echo: false
+rprice_path = "data/housing/oecd_house_price_real.csv"
+inc_path = "data/income/statcan_median_income.csv"
+if os.path.exists(rprice_path) and os.path.exists(inc_path):
+    BASE = 2000
+    rp = pd.read_csv(rprice_path)
+    rp = rp[rp["country_code"] == "CAN"].sort_values("year")
+    rp["idx"] = rp["house_price_real"] / rp.loc[rp["year"] == BASE, "house_price_real"].iloc[0] * 100
+
+    inc = pd.read_csv(inc_path, parse_dates=["date"])
+    inc["year"] = inc["date"].dt.year
+    inc["idx"] = inc["median_income"] / inc.loc[inc["year"] == BASE, "median_income"].iloc[0] * 100
+    inc = inc[inc["year"] >= BASE]
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=rp["year"], y=rp["idx"], name="House prices (real)",
+        mode="lines", line=dict(color=CANADA_COLOR, width=3),
+        hovertemplate="House prices: %{y:.0f}<extra>%{x}</extra>"))
+    fig.add_trace(go.Scatter(x=inc["year"], y=inc["idx"], name="Median after-tax income (real)",
+        mode="lines", line=dict(color="#1f77b4", width=3),
+        hovertemplate="Income: %{y:.0f}<extra>%{x}</extra>"))
+    fig.update_layout(
+        plot_bgcolor="white",
+        yaxis=dict(title=f"Index ({BASE} = 100, real)", gridcolor="#e0e0e0"),
+        xaxis=dict(gridcolor="#e0e0e0",
+                   rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5"),
+                   range=[1999, int(rp["year"].max())]),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        margin=dict(b=90, t=50),
+        annotations=[dict(
+            text=f"Sources: OECD real house-price index & Statistics Canada median after-tax income (11-10-0190-01) | as of {get_data_date(inc_path)}",
+            xref="paper", yref="paper", x=0, y=-0.30, xanchor="left",
+            showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Price/income data not yet available. Run the data pipeline.")
+```
+
 ## Rent in Canada
 
 The Consumer Price Index for rent — what renters pay over time. Renters are roughly a third of Canadian households, so rent is a central part of the cost-of-living picture that owner-focused house-price indices miss.
@@ -336,6 +379,40 @@ if os.path.exists(rent_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Rent data not yet available. Run the data pipeline.")
+```
+
+## Housing Starts
+
+The number of new homes on which construction began, monthly. Starts are the clearest gauge of new housing *supply* — the other side of the affordability story from the prices, rents, and demand above. Whether new supply keeps pace with population growth is central to the debate.
+
+```{python}
+#| echo: false
+starts_path = "data/housing/statcan_housing_starts.csv"
+if os.path.exists(starts_path):
+    df = pd.read_csv(starts_path, parse_dates=["date"])
+    fig = single_line(df, "date", "housing_starts", title="",
+                      yaxis_title="Housing starts (units, monthly)", rangeslider=True,
+                      source_note=f"Source: Statistics Canada / CMHC, Table 34-10-0143-01 | Data as of: {get_data_date(starts_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Housing starts data not yet available. Run the data pipeline.")
+```
+
+## Rental Vacancy Rate
+
+The share of purpose-built rental apartments sitting empty, across census metropolitan areas. A low vacancy rate signals a tight rental market with little slack — upward pressure on rents and harder searches for tenants.
+
+```{python}
+#| echo: false
+vac_path = "data/housing/statcan_vacancy_rate.csv"
+if os.path.exists(vac_path):
+    df = pd.read_csv(vac_path, parse_dates=["date"])
+    fig = single_line(df, "date", "vacancy_rate", title="",
+                      yaxis_title="Vacancy rate (%)", rangeslider=True,
+                      source_note=f"Source: Statistics Canada / CMHC, Table 34-10-0127-01 | Data as of: {get_data_date(vac_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Vacancy rate data not yet available. Run the data pipeline.")
 ```
 
 ## Household Debt
@@ -380,4 +457,6 @@ if os.path.exists(debt_path):
 - [Price-to-Income Ratio (CSV)](../data/housing/oecd_house_price_income.csv) — OECD Analytical House Prices
 - [New Housing Price Index (CSV)](../data/housing/statcan_nhpi.csv) — Statistics Canada Table 18-10-0205-01
 - [Rent, CPI (CSV)](../data/housing/statcan_rent_cpi.csv) — Statistics Canada Table 18-10-0004-01
+- [Housing Starts (CSV)](../data/housing/statcan_housing_starts.csv) — Statistics Canada / CMHC Table 34-10-0143-01
+- [Rental Vacancy Rate (CSV)](../data/housing/statcan_vacancy_rate.csv) — Statistics Canada / CMHC Table 34-10-0127-01
 - [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard

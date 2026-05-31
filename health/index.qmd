@@ -64,6 +64,37 @@ if os.path.exists(le_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Avoidable Mortality
+
+Premature deaths (before age 75) from causes considered avoidable — either *preventable* through public health and prevention, or *treatable* through timely, effective health care — per 100,000 population, age-standardised. Unlike beds or physicians, this is an outcome rather than an input: it asks how many deaths the health system and prevention efforts could, in principle, have averted. Lower is better.
+
+```{python}
+#| echo: false
+am_path = "data/health/oecd_avoidable_mortality.csv"
+if os.path.exists(am_path):
+    df = pd.read_csv(am_path)
+    fig = peer_comparison_line(df, "year", "avoidable_mortality",
+        title="", yaxis_title="Deaths per 100,000 (age-standardised)", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Statistics | Data as of: {get_data_date(am_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Avoidable mortality data not yet available. Run the data pipeline.")
+```
+
+## Latest Avoidable Mortality: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(am_path):
+    df = pd.read_csv(am_path)
+    fig = ranked_bar(df, "avoidable_mortality", "Deaths per 100,000",
+        f"Source: OECD Health Statistics | Data as of: {get_data_date(am_path)}",
+        hover_template="%{y}: %{x:.0f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
 ## Health Spending
 
 Current expenditure on health as a percentage of GDP — covering both public and
@@ -94,6 +125,43 @@ if os.path.exists(hs_path):
     fig = ranked_bar(df, "health_pct_gdp", "% of GDP",
         f"Source: OECD Health Expenditure (SHA) | Data as of: {get_data_date(hs_path)}",
         hover_template="%{y}: %{x:.1f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Health Spending per Person
+
+The same spending expressed **per person**, in US dollars adjusted for purchasing
+power (PPP) so amounts are comparable across countries. This is often more
+tangible than the share of GDP — it is roughly what the system spends, on
+average, for each resident in a year.
+
+```{python}
+#| echo: false
+hspc_path = "data/health/oecd_health_spending_pc.csv"
+if os.path.exists(hspc_path):
+    df = pd.read_csv(hspc_path)
+    fig = peer_comparison_line(df, "year", "health_pc_usd",
+        title="", yaxis_title="US$ PPP per person", show_average=True)
+    fig.update_yaxes(tickprefix="$", tickformat=",")
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Expenditure (SHA), USD PPP | Data as of: {get_data_date(hspc_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Health spending per capita data not yet available. Run the data pipeline.")
+```
+
+## Latest Health Spending per Person: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(hspc_path):
+    df = pd.read_csv(hspc_path)
+    fig = ranked_bar(df, "health_pc_usd", "US$ PPP per person",
+        f"Source: OECD Health Expenditure (SHA), USD PPP | Data as of: {get_data_date(hspc_path)}",
+        hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.update_xaxes(tickprefix="$", tickformat=",")
     fig.show(config={"displaylogo": False})
 ```
 
@@ -165,6 +233,37 @@ if os.path.exists(phys_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Practising Nurses
+
+Practising nurses per 1,000 population. Nurses are the largest part of the health workforce, so this is a central measure of system capacity alongside physicians and beds.
+
+```{python}
+#| echo: false
+nurses_path = "data/health/oecd_nurses.csv"
+if os.path.exists(nurses_path):
+    df = pd.read_csv(nurses_path)
+    fig = peer_comparison_line(df, "year", "nurses",
+        title="", yaxis_title="Nurses per 1,000 population", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Statistics | Data as of: {get_data_date(nurses_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Nurses data not yet available. Run the data pipeline.")
+```
+
+## Latest Practising Nurses: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(nurses_path):
+    df = pd.read_csv(nurses_path)
+    fig = ranked_bar(df, "nurses", "Nurses per 1,000 population",
+        f"Source: OECD Health Statistics | Data as of: {get_data_date(nurses_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
 ## MRI Units
 
 Magnetic resonance imaging (MRI) units per million population — a measure of diagnostic-imaging capacity.
@@ -209,6 +308,9 @@ comparable proxies.
 
 - [Life Expectancy at Birth (CSV)](../data/health/oecd_life_expectancy.csv) — OECD Health Statistics
 - [Health Spending, % of GDP (CSV)](../data/health/oecd_health_spending_gdp.csv) — OECD Health Expenditure (SHA)
+- [Health Spending per Person, US$ PPP (CSV)](../data/health/oecd_health_spending_pc.csv) — OECD Health Expenditure (SHA)
 - [Hospital Beds (CSV)](../data/health/oecd_hospital_beds.csv) — OECD Health Statistics
 - [Practising Physicians (CSV)](../data/health/oecd_physicians.csv) — OECD Health Statistics
+- [Practising Nurses (CSV)](../data/health/oecd_nurses.csv) — OECD Health Statistics
 - [MRI Units (CSV)](../data/health/oecd_mri_units.csv) — OECD Health Statistics
+- [Avoidable Mortality (CSV)](../data/health/oecd_avoidable_mortality.csv) — OECD Health Statistics

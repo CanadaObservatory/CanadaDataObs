@@ -93,9 +93,40 @@ else:
     print("CO2 indexed data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## Consumption-Based CO2 per Capita
+
+The per-capita measure above counts emissions where they physically occur (production-based). This consumption-based measure instead assigns emissions to where goods are finally consumed, so the carbon embodied in imported goods counts against the importer rather than the exporter. Comparing the two shows whether trade flatters or worsens a country's footprint — relevant for a trading economy like Canada's.
+
+```{python}
+#| echo: false
+cco2_path = "data/environment/owid_consumption_co2.csv"
+if os.path.exists(cco2_path):
+    df = pd.read_csv(cco2_path)
+    fig = peer_comparison_line(df, "year", "consumption_co2_pc",
+        title="", yaxis_title="Tonnes CO2 per capita (consumption-based)", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(cco2_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Consumption-based CO2 data not yet available. Run the data pipeline.")
+```
+
+## Latest Consumption-Based CO2: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(cco2_path):
+    df = pd.read_csv(cco2_path)
+    fig = ranked_bar(df, "consumption_co2_pc", "Tonnes CO2 per capita",
+        f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(cco2_path)}",
+        hover_template="%{y}: %{x:.1f} t<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
 ## Low-Carbon Electricity
 
-The share of electricity generated from non-fossil sources — hydro, nuclear, wind, and solar combined. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating.
+The share of electricity generated from non-fossil sources — hydro, nuclear, wind, and solar combined. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating.
 
 ```{python}
 #| echo: false
@@ -199,6 +230,54 @@ else:
     print("Electricity mix data not yet available. Run the data pipeline.")
 ```
 
+## Electricity Mix by Province
+
+Canada has no single national grid — electricity is a provincial responsibility, and the mix varies enormously from one province to the next. Quebec, Manitoba, British Columbia, and Newfoundland & Labrador run almost entirely on hydro; Ontario leans heavily on nuclear. Among the provinces that still burn fossil fuels, the *type* matters: coal emits roughly twice the CO2 of natural gas per unit of electricity, so it is shown separately. Nova Scotia and Saskatchewan still lean on coal, while Alberta has largely switched from coal to gas. This is generation (actual output), not installed capacity.
+
+```{python}
+#| echo: false
+prov_elec_path = "data/environment/statcan_provincial_electricity.csv"
+prov_sources = [
+    ("Hydro", "#1f77b4"),
+    ("Nuclear", "#9467bd"),
+    ("Wind", "#17becf"),
+    ("Solar", "#e6b800"),
+    ("Biomass", "#2ca02c"),
+    ("Natural gas", "#ff7f0e"),
+    ("Oil", "#8c564b"),
+    ("Coal", "#333333"),
+]
+if os.path.exists(prov_elec_path):
+    pe = pd.read_csv(prov_elec_path)
+    wide = pe.pivot(index="province", columns="source", values="share").fillna(0)
+    for name, _ in prov_sources:
+        if name not in wide.columns:
+            wide[name] = 0
+    # cleanest-first: most fossil at the bottom, least at the top (coal stacked last/rightmost)
+    wide["_fossil"] = wide[["Natural gas", "Oil", "Coal"]].sum(axis=1)
+    wide = wide.sort_values("_fossil", ascending=False)
+
+    fig = go.Figure()
+    for name, color in prov_sources:
+        fig.add_trace(go.Bar(
+            y=wide.index, x=wide[name], name=name, orientation="h",
+            marker_color=color,
+            hovertemplate=f"{name}: %{{x:.1f}}%<extra>%{{y}}</extra>"))
+    fig.update_layout(
+        barmode="stack", xaxis_title="% of electricity generation", yaxis_title="",
+        plot_bgcolor="white", xaxis=dict(gridcolor="#e0e0e0", range=[0, 100]),
+        yaxis=dict(tickfont=dict(size=11)),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+        height=560, margin=dict(b=80, t=90, l=140),
+        annotations=[dict(
+            text=f"Source: Statistics Canada 25-10-0015-01 & 25-10-0084-01 | as of {get_data_date(prov_elec_path)}",
+            xref="paper", yref="paper", x=0, y=-0.18, xanchor="left",
+            showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Provincial electricity data not yet available. Run the data pipeline.")
+```
+
 ## Total Energy Mix in Canada
 
 Electricity is only part of the picture. This shows Canada's **total primary energy** — including the oil and gas burned for transport and heating, not just electricity — which is why fossil fuels still dominate even though the grid is mostly low-carbon.
@@ -242,4 +321,6 @@ else:
 
 - [CO2 per Capita (CSV)](../data/environment/oecd_co2_per_capita.csv) — OECD Green Growth Indicators
 - [CO2 Emissions Indexed (CSV)](../data/environment/oecd_co2_indexed.csv) — OECD Green Growth Indicators
+- [Consumption-Based CO2 per Capita (CSV)](../data/environment/owid_consumption_co2.csv) — Our World in Data (Global Carbon Project)
 - [Energy Mix — electricity & primary (CSV)](../data/environment/owid_energy_mix.csv) — Our World in Data (Energy Institute, Ember)
+- [Provincial Electricity Generation (CSV)](../data/environment/statcan_provincial_electricity.csv) — Statistics Canada 25-10-0015-01

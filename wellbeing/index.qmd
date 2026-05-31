@@ -12,7 +12,7 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 ```
 
 Data from the [World Happiness Report](https://worldhappiness.report/), based on
@@ -102,6 +102,38 @@ else:
     print("Happiness data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## Safety
+
+Safety is a basic component of well-being, and crime is often discussed using individual incidents rather than long-run trends. The two measures below give the trend instead. The **Crime Severity Index** weights each crime by its seriousness (so a homicide counts far more than a minor theft) and is indexed to 2006 = 100. The **homicide rate** is the most consistently measured serious crime over the long run.
+
+```{python}
+#| echo: false
+csi_path = "data/wellbeing/statcan_crime_severity.csv"
+if os.path.exists(csi_path):
+    df = pd.read_csv(csi_path, parse_dates=["date"])
+    fig = single_line(df, "date", "crime_severity_index", title="",
+                      yaxis_title="Crime Severity Index (2006 = 100)", rangeslider=True,
+                      source_note=f"Source: Statistics Canada, Table 35-10-0026-01 | Data as of: {get_data_date(csi_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Crime severity data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+hom_path = "data/wellbeing/statcan_homicide_rate.csv"
+if os.path.exists(hom_path):
+    df = pd.read_csv(hom_path, parse_dates=["date"])
+    fig = single_line(df, "date", "homicide_rate", title="",
+                      yaxis_title="Homicides per 100,000 population", rangeslider=True,
+                      source_note=f"Source: Statistics Canada, Table 35-10-0068-01 | Data as of: {get_data_date(hom_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Homicide data not yet available. Run the data pipeline.")
+```
+
 ## Download Data
 
 - [Happiness Scores & Factor Decomposition (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)
+- [Crime Severity Index (CSV)](../data/wellbeing/statcan_crime_severity.csv) — Statistics Canada Table 35-10-0026-01
+- [Homicide Rate (CSV)](../data/wellbeing/statcan_homicide_rate.csv) — Statistics Canada Table 35-10-0068-01

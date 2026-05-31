@@ -233,6 +233,110 @@ def fetch_cpi():
     return df
 
 
+PROVINCES = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",
+             "New Brunswick", "Quebec", "Ontario", "Manitoba", "Saskatchewan",
+             "Alberta", "British Columbia"]
+
+
+def fetch_provincial_electricity():
+    """Provincial electricity generation mix, with fossil fuels split by type.
+
+    The base mix comes from StatCan 25-10-0015-01 (latest 12 months, generation
+    by turbine type → Hydro / Nuclear / Wind / Solar / Biomass + a single fossil
+    total). That table only knows turbine type, not fuel, so the fossil slice is
+    split into Coal / Natural gas / Oil using the fuel-level generation shares
+    from 25-10-0084-01 (latest annual). Coal matters because it emits roughly
+    twice the CO2 of natural gas per kWh. This is generation (output), not
+    installed capacity.
+    """
+    logger.info("Fetching StatCan provincial electricity generation (with fuel split)...")
+    try:
+        gen = _get_table("25-10-0015-01")
+        fuel = _get_table("25-10-0084-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch provincial electricity tables: {e}")
+        return None
+
+    # --- base mix from 25-10-0015 (latest 12 months) ---
+    TYPE = "Type of electricity generation"
+    CLASS = "Class of electricity producer"
+    validate_columns(gen, ["REF_DATE", "GEO", CLASS, TYPE, "VALUE"], "provincial_electricity")
+    gen = gen[(gen[CLASS] == "Total all classes of electricity producer")
+              & gen["GEO"].isin(PROVINCES)].copy()
+    gen["VALUE"] = pd.to_numeric(gen["VALUE"], errors="coerce")
+    months = sorted(gen["REF_DATE"].dropna().unique())[-12:]
+    gen = gen[gen["REF_DATE"].isin(months)]
+
+    FOSSIL = "Total electricity production from non-renewable combustible fuels"
+    base_map = {
+        "Hydraulic turbine": "Hydro",
+        "Nuclear steam turbine": "Nuclear",
+        "Wind power turbine": "Wind",
+        "Solar": "Solar",
+        "Total electricity production from biomass": "Biomass",
+        FOSSIL: "Fossil",
+    }
+    gen = gen[gen[TYPE].isin(base_map)].copy()
+    gen["bucket"] = gen[TYPE].map(base_map)
+    base = gen.groupby(["GEO", "bucket"])["VALUE"].sum().unstack(fill_value=0.0)
+
+    # --- fossil split (Coal/Natural gas/Oil) from 25-10-0084 (latest annual) ---
+    NAICS = "North American Industry Classification System (NAICS)"
+    validate_columns(fuel, ["REF_DATE", "GEO", NAICS, "Fuel type", "UOM", "VALUE"],
+                     "provincial_electricity_fuel")
+    fuel = fuel[(fuel["UOM"] == "Megawatt hours")
+                & (fuel[NAICS] == "Total all classes of electricity")
+                & fuel["GEO"].isin(PROVINCES)].copy()
+    fuel["VALUE"] = pd.to_numeric(fuel["VALUE"], errors="coerce")
+    fyear = sorted(fuel["REF_DATE"].dropna().unique())[-1]
+    fuel = fuel[fuel["REF_DATE"] == fyear]
+    fuel_map = {
+        "Total coal, electricity generated": "Coal",
+        "Natural gas, electricity generated": "Natural gas",
+        "Total petroleum products, electricity generated": "Oil",
+    }
+    fuel = fuel[fuel["Fuel type"].isin(fuel_map)].copy()
+    fuel["fbucket"] = fuel["Fuel type"].map(fuel_map)
+    fsplit = fuel.groupby(["GEO", "fbucket"])["VALUE"].sum().unstack(fill_value=0.0)
+
+    # --- combine: split each province's fossil total by its fuel proportions ---
+    rows = []
+    for prov in PROVINCES:
+        if prov not in base.index:
+            continue
+        b = base.loc[prov]
+        fossil_total = float(b.get("Fossil", 0.0))
+        if prov in fsplit.index and fsplit.loc[prov].sum() > 0:
+            p = fsplit.loc[prov] / fsplit.loc[prov].sum()
+            coal, gas, oil = (fossil_total * p.get("Coal", 0.0),
+                              fossil_total * p.get("Natural gas", 0.0),
+                              fossil_total * p.get("Oil", 0.0))
+        else:                                  # no fuel detail → leave as gas
+            coal, gas, oil = 0.0, fossil_total, 0.0
+        by_src = {"Hydro": float(b.get("Hydro", 0.0)), "Nuclear": float(b.get("Nuclear", 0.0)),
+                  "Wind": float(b.get("Wind", 0.0)), "Solar": float(b.get("Solar", 0.0)),
+                  "Biomass": float(b.get("Biomass", 0.0)),
+                  "Natural gas": gas, "Oil": oil, "Coal": coal}
+        total = sum(by_src.values())
+        if total <= 0:
+            continue
+        for src, val in by_src.items():
+            rows.append({"province": prov, "source": src,
+                         "generation_mwh": val, "share": val / total * 100})
+    g = pd.DataFrame(rows)
+
+    out_path = DATA_DIR / "environment" / "statcan_provincial_electricity.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    g.to_csv(out_path, index=False)
+    save_metadata(out_path, df=g, latest_observation_date=str(months[-1]),
+        source="Statistics Canada", source_table="25-10-0015-01, 25-10-0084-01",
+        frequency="annual", unit="% of provincial electricity generation",
+        transformations=[f"base mix 25-10-0015-01 latest 12 months ({months[0]}–{months[-1]}); "
+                         f"fossil split into Coal/Natural gas/Oil by 25-10-0084-01 fuel shares ({fyear})"])
+    logger.info(f"  saved {len(g)} rows -> {out_path.name}")
+    return g
+
+
 if __name__ == "__main__":
     fetch_population_quarterly()
     fetch_population_components()

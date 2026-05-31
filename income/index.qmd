@@ -51,6 +51,32 @@ else:
     print("Median income data not yet available. Run the data pipeline.")
 ```
 
+## Median Household Income by Neighbourhood
+
+Where incomes run higher and lower, down to the neighbourhood. This map shows **median household total income** from the 2021 Census for each *census tract* — roughly a neighbourhood of 2,500–8,000 people. **Zoom and pan to your own area.** Census tracts cover cities and larger towns; sparsely populated rural areas aren't divided into tracts, so they appear blank.
+
+```{python}
+#| echo: false
+import json
+from pipeline.charts import choropleth_map
+geo_path = "data/geo/ct_2021.geojson"
+ct_income_path = "data/geo/statcan_ct_income_2021.csv"
+if os.path.exists(geo_path) and os.path.exists(ct_income_path):
+    ct_geo = json.load(open(geo_path))
+    ct_df = pd.read_csv(ct_income_path, dtype={"ctuid": str})
+    # cap the colour scale at the 5th/95th percentiles so a few ultra-rich tracts
+    # don't compress all the typical neighbourhoods into one dark band
+    zlo = float(ct_df["median_income"].quantile(0.05))
+    zhi = float(ct_df["median_income"].quantile(0.95))
+    fig = choropleth_map(ct_geo, ct_df, "ctuid", "median_income",
+        name_col="name", colorbar_title="Median household income",
+        value_prefix="$", colorscale="Viridis", zmin=zlo, zmax=zhi,
+        source_note="Source: 2021 Census (Statistics Canada, Table 98-10-0058-01) | income is for 2020 | boundaries: StatCan")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Census-tract income map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
 ## Average Annual Wage (Real)
 
 Average annual wages converted to US dollars at purchasing power parity and held
@@ -81,6 +107,37 @@ if os.path.exists(wage_path):
     fig = ranked_bar(df, "avg_wage", "USD PPP (constant prices)",
         f"Source: OECD Average Annual Wages | Data as of: {get_data_date(wage_path)}",
         tickformat="$,.0f", hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Real Household Disposable Income per Capita
+
+Real (inflation-adjusted) household disposable income per person, indexed to 2007 = 100. Disposable income is what households actually have to spend or save after taxes and transfers — a more direct gauge of household living standards than GDP per capita, which can rise without households feeling better off. Because it is indexed, the lines show *growth* since 2007 rather than dollar levels.
+
+```{python}
+#| echo: false
+disp_path = "data/income/oecd_disposable_income.csv"
+if os.path.exists(disp_path):
+    df = pd.read_csv(disp_path)
+    fig = peer_comparison_line(df, "year", "disposable_income_index",
+        title="", yaxis_title="Index (2007 = 100, real)", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Household Dashboard | Data as of: {get_data_date(disp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Disposable income data not yet available. Run the data pipeline.")
+```
+
+## Growth in Disposable Income Since 2007: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(disp_path):
+    df = pd.read_csv(disp_path)
+    fig = ranked_bar(df, "disposable_income_index", "Index (2007 = 100)",
+        f"Source: OECD Household Dashboard | Data as of: {get_data_date(disp_path)}",
+        hover_template="%{y}: %{x:.0f} (2007=100)<extra></extra>")
     fig.show(config={"displaylogo": False})
 ```
 
@@ -160,10 +217,29 @@ else:
     print("Low-income data not yet available. Run the data pipeline.")
 ```
 
+## Food Insecurity
+
+The share of people in households that experienced food insecurity in the past year — worrying about running out of food, compromising on quality or quantity, or going without. It is a direct measure of material hardship that income and poverty lines alone can miss, and has risen sharply in recent years.
+
+```{python}
+#| echo: false
+fi_path = "data/income/statcan_food_insecurity.csv"
+if os.path.exists(fi_path):
+    df = pd.read_csv(fi_path, parse_dates=["date"])
+    fig = single_line(df, "date", "food_insecurity_rate", title="",
+                      yaxis_title="% of persons in food-insecure households",
+                      source_note=f"Source: Statistics Canada, Table 13-10-0835-01 (Canadian Income Survey) | Data as of: {get_data_date(fi_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Food insecurity data not yet available. Run the data pipeline.")
+```
+
 ## Download Data
 
 - [Median After-Tax Income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada Table 11-10-0190-01
+- [Food Insecurity (CSV)](../data/income/statcan_food_insecurity.csv) — Statistics Canada Table 13-10-0835-01
 - [Average Annual Wage (CSV)](../data/income/oecd_avg_wage.csv) — OECD Average Annual Wages
+- [Real Household Disposable Income per Capita (CSV)](../data/income/oecd_disposable_income.csv) — OECD Household Dashboard
 - [Gini Coefficient (CSV)](../data/income/oecd_gini.csv) — OECD Income Distribution Database
 - [Relative Poverty Rate (CSV)](../data/income/oecd_poverty.csv) — OECD Income Distribution Database
 - [Low-Income Rate, LIM-AT (CSV)](../data/income/statcan_low_income.csv) — Statistics Canada Table 11-10-0135-01

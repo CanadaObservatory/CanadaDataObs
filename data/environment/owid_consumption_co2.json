@@ -1,0 +1,14 @@
+{
+  "dataset_id": "owid_consumption_co2",
+  "source": "Our World in Data (Global Carbon Project)",
+  "source_table": "owid-co2-data",
+  "frequency": "annual",
+  "unit": "tonnes CO2 per capita (consumption-based)",
+  "retrieved_at": "2026-05-31T00:05:00.241942+00:00",
+  "latest_observation_date": "2023",
+  "transformations": [
+    "filtered to 17 OECD peers, consumption_co2_per_capita"
+  ],
+  "notes": null,
+  "row_count": 565
+}

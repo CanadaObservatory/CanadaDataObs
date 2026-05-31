@@ -250,6 +250,8 @@ def ranking_strip(items, source_note=None, year_col="year",
     import pandas as pd
 
     pts, labels = [], []
+    rowmeta = {}        # display label -> dict(ca, rank, n, med) for the right column
+    row_year = {}       # display label -> latest year used
     for item in items:
         label, path, value_col, fmt = item[0], item[1], item[2], item[3]
         good = item[4] if len(item) > 4 else "high"   # "high" or "low" is better
@@ -269,7 +271,14 @@ def ranking_strip(items, source_note=None, year_col="year",
         # immune to outliers, and "more favourable" (rank 1) sits on the right.
         sub["_rank"] = sub[value_col].rank(ascending=(good == "low"), method="min").astype(int)
         n = len(sub)
+        med_fmt = fmt.format(sub[value_col].median())
         labels.append(label)
+        row_year[label] = int(year)
+        ca = sub[sub[country_col] == HIGHLIGHT_COUNTRY]
+        if not ca.empty:
+            cr = ca.iloc[0]
+            rowmeta[label] = dict(ca=fmt.format(cr[value_col]),
+                                  rank=int(cr["_rank"]), n=n, med=med_fmt)
         for _, r in sub.iterrows():
             rank = int(r["_rank"])
             pos = (n - rank) / (n - 1) if n > 1 else 0.5
@@ -277,9 +286,18 @@ def ranking_strip(items, source_note=None, year_col="year",
                 label=label, x=pos, code=r[country_col],
                 name=(r[name_col] if name_col in sub.columns else r[country_col]),
                 val=fmt.format(r[value_col]), rank=rank, n=n, year=int(year),
+                med=med_fmt,
             ))
     if not pts:
         return go.Figure()
+
+    # Coverage flag: if a row's latest year lags the newest row, show it in the label
+    newest = max(row_year.values())
+    disp = {lab: (f"{lab} ({row_year[lab]})" if row_year[lab] != newest else lab)
+            for lab in labels}
+    for p in pts:
+        p["dlabel"] = disp[p["label"]]
+    dlabels = [disp[l] for l in labels]
 
     def _key(code):
         if code == HIGHLIGHT_COUNTRY:
@@ -293,12 +311,13 @@ def ranking_strip(items, source_note=None, year_col="year",
         if not sp:
             return
         fig.add_trace(go.Scatter(
-            x=[p["x"] for p in sp], y=[p["label"] for p in sp],
+            x=[p["x"] for p in sp], y=[p["dlabel"] for p in sp],
             mode="markers", name=legend, legendrank=rank,
             marker=dict(color=color, size=size, line=dict(width=0.5, color="white")),
-            customdata=[[p["name"], p["val"], p["rank"], p["n"], p["year"]] for p in sp],
+            customdata=[[p["name"], p["val"], p["rank"], p["n"], p["year"], p["med"]] for p in sp],
             hovertemplate="%{customdata[0]}: %{customdata[1]}  ·  rank "
-                          "%{customdata[2]} of %{customdata[3]} (%{customdata[4]})<extra></extra>",
+                          "%{customdata[2]} of %{customdata[3]} (%{customdata[4]})"
+                          "  ·  peer median %{customdata[5]}<extra></extra>",
         ))
 
     _add("_other", PEER_COLOR, 9, "Other peers", 999)
@@ -306,17 +325,32 @@ def ranking_strip(items, source_note=None, year_col="year",
         _add(code, COMPARATOR_COLORS[code], 11, PEER_COUNTRIES.get(code, code), 10 + i)
     _add("CAN", CANADA_COLOR, 15, "Canada", 1)
 
+    # Always-on magnitude column on the right: Canada's value · rank · peer median.
+    # Dots are positioned by rank (even spacing, outlier-immune), so this text is
+    # what conveys actual magnitude and how far Canada sits from the peer middle.
+    for lab in labels:
+        m = rowmeta.get(lab)
+        if not m:
+            continue
+        fig.add_annotation(
+            xref="paper", yref="y", x=1.005, xanchor="left", y=disp[lab],
+            text=f"<b>{m['ca']}</b> · {m['rank']}/{m['n']} · med {m['med']}",
+            showarrow=False, font=dict(size=10, color="#444"), align="left")
+
     fig.update_layout(
         xaxis=dict(range=[-0.06, 1.06], showticklabels=False, showgrid=False,
                    zeroline=False, title="less favourable  →  more favourable"),
-        yaxis=dict(categoryorder="array", categoryarray=labels[::-1],
+        yaxis=dict(categoryorder="array", categoryarray=dlabels[::-1],
                    showgrid=True, gridcolor="#eee", ticksuffix="  "),
         plot_bgcolor="white",
         height=height or (140 + 48 * len(labels)),
         legend=dict(orientation="h", yanchor="top", y=-0.16, xanchor="center", x=0.5),
-        margin=dict(l=10, r=20, t=20, b=120),
+        margin=dict(l=10, r=165, t=20, b=120),
         hovermode="closest",
     )
+    fig.add_annotation(text="Canada: value · rank · peer median →", xref="paper", yref="paper",
+                       x=1.005, xanchor="left", y=1.0, yanchor="bottom",
+                       showarrow=False, font=dict(size=9, color="#aaa"))
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper",
                            x=0, xanchor="left", y=-0.42, showarrow=False,
@@ -327,6 +361,37 @@ def ranking_strip(items, source_note=None, year_col="year",
 def page_snapshot(section, **kwargs):
     """'Where Canada Stands' ranking strip for a page, from SNAPSHOT_SPECS."""
     return ranking_strip(SNAPSHOT_SPECS.get(section, []), **kwargs)
+
+
+def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
+                   colorbar_title="", colorscale="Viridis", reversescale=False,
+                   value_prefix="", value_suffix="", source_note=None,
+                   center=None, zoom=2.6, height=640, zmin=None, zmax=None):
+    """Zoomable choropleth map (Plotly Choroplethmapbox, free carto-positron
+    basemap — no API token). The `geojson` features must carry a top-level `id`
+    equal to df[location_col]. Used for the census-tract maps so users can pan/
+    zoom to their own area. Pass `name_col` for a human-readable hover label."""
+    center = center or {"lat": 58.0, "lon": -96.0}
+    customdata = df[[name_col]].to_numpy() if name_col else None
+    name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    fig = go.Figure(go.Choroplethmapbox(
+        geojson=geojson, locations=df[location_col], z=df[value_col],
+        zmin=zmin, zmax=zmax,
+        featureidkey="id", colorscale=colorscale, reversescale=reversescale,
+        marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
+        colorbar=dict(title=colorbar_title, tickprefix=value_prefix, ticksuffix=value_suffix),
+        customdata=customdata,
+        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{z:,.0f}}{value_suffix}<extra></extra>",
+    ))
+    fig.update_layout(
+        mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
+        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=-0.04, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
 
 
 def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,

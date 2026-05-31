@@ -196,6 +196,69 @@ if os.path.exists(emp_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Business Investment
+
+Gross fixed capital formation — spending on machinery, equipment, buildings, and intellectual property — as a share of GDP. Investment is what builds the capital each worker has to work with, so it is closely tied to the productivity and GDP-per-capita pictures above: persistently weak investment is one of the most common explanations for weak productivity growth.
+
+```{python}
+#| echo: false
+inv_path = "data/economics/worldbank_business_investment.csv"
+if os.path.exists(inv_path):
+    df = pd.read_csv(inv_path)
+    fig = peer_comparison_line(df, "year", "investment_pct_gdp",
+        title="", yaxis_title="% of GDP", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: World Bank / OECD National Accounts | Data as of: {get_data_date(inv_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Business investment data not yet available. Run the data pipeline.")
+```
+
+## Latest Business Investment: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(inv_path):
+    df = pd.read_csv(inv_path)
+    fig = ranked_bar(df, "investment_pct_gdp", "% of GDP",
+        f"Source: World Bank / OECD National Accounts | Data as of: {get_data_date(inv_path)}",
+        hover_template="%{y}: %{x:.1f}% of GDP<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Current Account Balance
+
+Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus. Whether a deficit is a concern depends on what it funds, so no favourable direction is implied.
+
+```{python}
+#| echo: false
+ca_path = "data/economics/oecd_current_account.csv"
+if os.path.exists(ca_path):
+    df = pd.read_csv(ca_path)
+    fig = peer_comparison_line(df, "year", "current_account",
+        title="", yaxis_title="% of GDP", show_average=True)
+    fig.add_hline(y=0, line_dash="dash", line_color="#888", opacity=0.5)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(ca_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Current account data not yet available. Run the data pipeline.")
+```
+
+## Latest Current Account Balance: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(ca_path):
+    df = pd.read_csv(ca_path)
+    fig = ranked_bar(df, "current_account", "% of GDP",
+        f"Source: OECD Economic Outlook | Data as of: {get_data_date(ca_path)}",
+        hover_template="%{y}: %{x:.1f}% of GDP<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
 ## Download Data
 
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
@@ -203,3 +266,5 @@ if os.path.exists(emp_path):
 - [Labour Productivity (CSV)](../data/economics/oecd_labour_productivity.csv) — OECD Productivity Database
 - [Unemployment Rate (CSV)](../data/economics/oecd_unemployment.csv) — OECD Key Economic Indicators
 - [Employment Rate (CSV)](../data/economics/oecd_employment_rate.csv) — OECD Labour Force Statistics
+- [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts
+- [Current Account Balance (CSV)](../data/economics/oecd_current_account.csv) — OECD Economic Outlook

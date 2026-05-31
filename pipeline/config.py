@@ -102,6 +102,7 @@ PEER_WIDTH = 1.5
 # source dispatch (see run_pipeline.py):
 #   "oecd"    -> generic SDMX fetch via fetch_oecd_indicator(ind)
 #   "statcan" -> generic single-series table fetch via fetch_statcan_indicator(ind)
+#   "worldbank" -> generic World Bank API fetch via fetch_worldbank_indicator(ind)
 #   "custom"  -> bespoke function named by `fetch_fn` (irregular reshaping)
 #
 # OECD `key` uses the literal placeholder {countries}, replaced at fetch time
@@ -124,6 +125,8 @@ class Indicator:
     dataflow: Optional[str] = None     # e.g. "OECD.STI.STP,DSD_MSTI@DF_MSTI,1.3"
     key: Optional[str] = None          # SDMX key with {countries} placeholder
     start_period: int = 2000
+    # --- World Bank API (generic, fetch_worldbank_indicator) ---
+    wb_indicator: Optional[str] = None  # e.g. "NE.GDI.FTOT.ZS"
     # --- StatCan generic single-series ---
     statcan_table: Optional[str] = None
     statcan_filters: dict = field(default_factory=dict)  # column -> exact value
@@ -169,6 +172,13 @@ INDICATORS = [
               fetch_fn="fetch_population_components",
               output_subpath="statcan_population_components.csv",
               source_table="Statistics Canada 17-10-0008-01"),
+    Indicator("temp_residents", "population", "statcan",
+              "Non-permanent residents", "persons", "quarterly",
+              value_col="npr_count", date_format="%Y-%m",
+              statcan_table="17-10-0121-01",
+              statcan_filters={"GEO": "Canada",
+                               "Non-permanent resident types": "Total, non-permanent residents"},
+              source_table="Statistics Canada 17-10-0121-01"),
 
     # ----- Economy & Jobs (OECD) -----
     Indicator("gdp_per_capita", "economics", "oecd",
@@ -201,6 +211,17 @@ INDICATORS = [
               dataflow="OECD.SDD.TPS,DSD_LFS@DF_IALFS_EMP_WAP_Q",
               key=f"{_C}.EMP_WAP.PT_WAP_SUB..Y._T.Y15T64..A", start_period=2005,
               source_table="OECD Labour Force Statistics"),
+    Indicator("current_account", "economics", "oecd",
+              "Current account balance", "% of GDP", "annual",
+              value_col="current_account", chart_recipe="line",
+              dataflow="OECD.ECO.MAD,DSD_EO@DF_EO", key=f"{_C}.CBGDPR.A",
+              transform=_drop_future_years,
+              source_table="OECD Economic Outlook"),
+    Indicator("business_investment", "economics", "worldbank",
+              "Investment (gross fixed capital formation)", "% of GDP", "annual",
+              value_col="investment_pct_gdp", chart_recipe="ranked_bar",
+              wb_indicator="NE.GDI.FTOT.ZS",
+              source_table="World Bank / OECD National Accounts"),
     # CPI is bespoke (All-items + Canada filter, computes YoY inflation)
     Indicator("cpi", "economics", "custom",
               "Consumer Price Index (inflation)", "index (2002=100)", "monthly",
@@ -220,6 +241,23 @@ INDICATORS = [
               dataflow="OECD.ECO.MAD,DSD_EO@DF_EO", key=f"{_C}.NLGQ.A",
               transform=_drop_future_years,
               source_table="OECD Economic Outlook"),
+    Indicator("govt_revenue", "fiscal", "oecd",
+              "Government revenue", "% of GDP", "annual",
+              value_col="govt_revenue", chart_recipe="ranked_bar",
+              dataflow="OECD.ECO.MAD,DSD_EO@DF_EO", key=f"{_C}.YRGTQ.A",
+              transform=_drop_future_years,
+              source_table="OECD Economic Outlook"),
+    Indicator("govt_interest", "fiscal", "oecd",
+              "Government interest costs", "% of GDP", "annual",
+              value_col="govt_interest", chart_recipe="ranked_bar",
+              dataflow="OECD.ECO.MAD,DSD_EO@DF_EO", key=f"{_C}.GNINTQ.A",
+              transform=_drop_future_years,
+              source_table="OECD Economic Outlook"),
+    Indicator("defence", "fiscal", "worldbank",
+              "Defence spending", "% of GDP", "annual",
+              value_col="defence_pct_gdp", chart_recipe="ranked_bar",
+              wb_indicator="MS.MIL.XPND.GD.ZS",
+              source_table="World Bank (data from SIPRI)"),
 
     # ----- Housing & Cost of Living -----
     Indicator("house_price_real", "housing", "oecd",
@@ -255,6 +293,19 @@ INDICATORS = [
               statcan_filters={"GEO": "Canada",
                                "Products and product groups": "Rent"},
               source_table="Statistics Canada 18-10-0004-01"),
+    Indicator("housing_starts", "housing", "statcan",
+              "Housing starts", "units (monthly)", "monthly",
+              value_col="housing_starts", date_format="%Y-%m",
+              statcan_table="34-10-0143-01",
+              statcan_filters={"GEO": "Canada", "Housing estimates": "Housing starts",
+                               "Type of unit": "Total units"},
+              source_table="Statistics Canada 34-10-0143-01 (CMHC)"),
+    Indicator("vacancy_rate", "housing", "statcan",
+              "Rental vacancy rate", "% of rental units", "annual",
+              value_col="vacancy_rate", date_format="%Y",
+              statcan_table="34-10-0127-01",
+              statcan_filters={"GEO": "Census metropolitan areas"},
+              source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
 
     # ----- Income & Inequality -----
     Indicator("gini", "income", "oecd",
@@ -277,6 +328,13 @@ INDICATORS = [
               dataflow="OECD.ELS.SAE,DSD_EARNINGS@AV_AN_WAGE,1.0",
               key=f"{_C}.WG.USD_PPP.A.Q.MEAN._Z",
               source_table="OECD Average Annual Wages"),
+    Indicator("disposable_income", "income", "oecd",
+              "Real household disposable income per capita", "index (real, per capita)", "annual",
+              value_col="disposable_income_index", chart_recipe="line",
+              # HHDASH: FREQ.REF_AREA.MEASURE.UNIT — real gross disposable income per cap, index
+              dataflow="OECD.SDD.NAD,DSD_HHDASH@DF_HHDASH_CTRY,1.0",
+              key=f"A.{_C}.B6GS1M_R_POP.IX",
+              source_table="OECD Household Dashboard"),
     Indicator("median_income", "income", "statcan",
               "Median after-tax income (real)", "2024 constant dollars", "annual",
               value_col="median_income", date_format="%Y",
@@ -296,6 +354,14 @@ INDICATORS = [
                                "Low income lines": "Low income measure after tax",
                                "Statistics": "Percentage of persons in low income"},
               source_table="Statistics Canada 11-10-0135-01"),
+    Indicator("food_insecurity", "income", "statcan",
+              "Household food insecurity", "% of persons", "annual",
+              value_col="food_insecurity_rate", date_format="%Y",
+              statcan_table="13-10-0835-01",
+              statcan_filters={"GEO": "Canada", "Demographic characteristics": "All persons",
+                               "Household food security status": "Food insecure",
+                               "Statistics": "Percentage of persons"},
+              source_table="Statistics Canada 13-10-0835-01"),
 
     # ----- Health -----
     Indicator("life_expectancy", "health", "oecd",
@@ -311,6 +377,13 @@ INDICATORS = [
               # 12 dims; current expenditure (EXP_HEALTH), all financing/function/provider
               dataflow="OECD.ELS.HD,DSD_SHA@DF_SHA,1.0",
               key=f"{_C}.A.EXP_HEALTH.PT_B1GQ._T._Z._T._T._T._Z._Z._Z",
+              source_table="OECD Health Expenditure (SHA)"),
+    Indicator("health_spending_pc", "health", "oecd",
+              "Health spending per person", "USD PPP per capita", "annual",
+              value_col="health_pc_usd", chart_recipe="ranked_bar",
+              # USD PPP per capita needs current prices (PRICE_BASE=V), not _Z
+              dataflow="OECD.ELS.HD,DSD_SHA@DF_SHA,1.0",
+              key=f"{_C}.A.EXP_HEALTH.USD_PPP_PS._T._Z._T._T._T._Z._Z.V",
               source_table="OECD Health Expenditure (SHA)"),
     Indicator("hospital_beds", "health", "oecd",
               "Hospital beds", "per 1,000 population", "annual",
@@ -329,6 +402,19 @@ INDICATORS = [
               value_col="mri_units", chart_recipe="ranked_bar",
               dataflow="OECD.ELS.HD,DSD_HEALTH_REAC_HOSP@DF_MED_TECH",
               key=f"{_C}.MTU.10P6HB.....MRI._T",  # MRI scanners, all providers
+              source_table="OECD Health Statistics"),
+    Indicator("nurses", "health", "oecd",
+              "Practising nurses", "per 1,000 population", "annual",
+              value_col="nurses", chart_recipe="ranked_bar",
+              dataflow="OECD.ELS.HD,DSD_HEALTH_REAC_EMP@DF_NURSE",
+              key=f"{_C}.HSE.10P3HB._Z._Z.MINU._Z.P._Z",  # total practising nurses
+              source_table="OECD Health Statistics"),
+    Indicator("avoidable_mortality", "health", "oecd",
+              "Avoidable mortality", "deaths per 100,000", "annual",
+              value_col="avoidable_mortality", chart_recipe="ranked_bar",
+              # AVM=avoidable (preventable+treatable), age-standardised deaths/100k
+              dataflow="OECD.ELS.HD,DSD_HEALTH_STAT@DF_AM,1.1",
+              key=f"{_C}.A.AVM.DT_10P5HB._T._T._Z._Z.STANDARD._Z._Z._Z._Z",
               source_table="OECD Health Statistics"),
 
     # ----- Education & Innovation (OECD MSTI reuses the R&D dataflow) -----
@@ -370,16 +456,39 @@ INDICATORS = [
               dataflow="OECD.ENV.EPI,DSD_GG@DF_GREEN_GROWTH,1.1",
               key=f"{_C}.A.CO2_PBEM.IX._T", start_period=1990,
               source_table="OECD Green Growth Indicators"),
+    Indicator("consumption_co2", "environment", "custom",
+              "Consumption-based CO2 per capita", "tonnes CO2 per capita", "annual",
+              value_col="consumption_co2_pc", chart_recipe="ranked_bar",
+              fetch_fn="fetch_consumption_co2", output_subpath="owid_consumption_co2.csv",
+              source_table="Our World in Data (Global Carbon Project)"),
     Indicator("energy_mix", "environment", "custom",
               "Energy mix by source", "% of primary energy", "annual",
               fetch_fn="fetch_energy_mix", output_subpath="owid_energy_mix.csv",
               source_table="Our World in Data (Energy Institute)"),
+    Indicator("provincial_electricity", "environment", "custom",
+              "Electricity generation by province & source", "% of generation", "annual",
+              fetch_fn="fetch_provincial_electricity",
+              output_subpath="statcan_provincial_electricity.csv",
+              source_table="Statistics Canada 25-10-0015-01"),
 
     # ----- Society & Well-being (bespoke XLSX parse) -----
     Indicator("happiness", "wellbeing", "custom",
               "Happiness & well-being", "Cantril ladder (0–10)", "annual",
               fetch_fn="fetch_happiness", output_subpath="whr_happiness.csv",
               source_table="World Happiness Report"),
+    Indicator("crime_severity", "wellbeing", "statcan",
+              "Crime Severity Index", "index (2006=100)", "annual",
+              value_col="crime_severity_index", date_format="%Y",
+              statcan_table="35-10-0026-01",
+              statcan_filters={"GEO": "Canada", "Statistics": "Crime severity index"},
+              source_table="Statistics Canada 35-10-0026-01"),
+    Indicator("homicide_rate", "wellbeing", "statcan",
+              "Homicide rate", "per 100,000 population", "annual",
+              value_col="homicide_rate", date_format="%Y",
+              statcan_table="35-10-0068-01",
+              statcan_filters={"GEO": "Canada",
+                               "Homicides": "Homicide rates per 100,000 population"},
+              source_table="Statistics Canada 35-10-0068-01"),
 ]
 
 # Quick lookup by id
@@ -396,6 +505,7 @@ SNAPSHOT_SPECS = {
         ("Real GDP growth", "data/economics/oecd_real_gdp_growth.csv", "real_gdp_growth", "{:.1f}%", "high"),
         ("GDP per capita", "data/economics/oecd_gdp_per_capita.csv", "gdp_per_capita", "${:,.0f}", "high"),
         ("Labour productivity", "data/economics/oecd_labour_productivity.csv", "gdp_per_hour", "${:.0f}/hr", "high"),
+        ("Business investment", "data/economics/worldbank_business_investment.csv", "investment_pct_gdp", "{:.1f}% GDP", "high"),
         ("Unemployment", "data/economics/oecd_unemployment.csv", "unemployment_rate", "{:.1f}%", "low"),
         ("Employment rate", "data/economics/oecd_employment_rate.csv", "employment_rate", "{:.1f}%", "high"),
     ],
@@ -406,6 +516,7 @@ SNAPSHOT_SPECS = {
     ],
     "income": [
         ("Average wage (real)", "data/income/oecd_avg_wage.csv", "avg_wage", "${:,.0f}", "high"),
+        ("Disposable income (vs 2007)", "data/income/oecd_disposable_income.csv", "disposable_income_index", "{:.0f}", "high"),
         ("Income inequality (Gini)", "data/income/oecd_gini.csv", "gini", "{:.3f}", "low"),
         ("Relative poverty", "data/income/oecd_poverty.csv", "poverty_rate", "{:.1f}%", "low"),
     ],
@@ -414,7 +525,9 @@ SNAPSHOT_SPECS = {
         ("Health spending", "data/health/oecd_health_spending_gdp.csv", "health_pct_gdp", "{:.1f}% GDP", "high"),
         ("Hospital beds", "data/health/oecd_hospital_beds.csv", "hospital_beds", "{:.1f}/1k", "high"),
         ("Physicians", "data/health/oecd_physicians.csv", "physicians", "{:.1f}/1k", "high"),
+        ("Nurses", "data/health/oecd_nurses.csv", "nurses", "{:.1f}/1k", "high"),
         ("MRI units", "data/health/oecd_mri_units.csv", "mri_units", "{:.1f}/M", "high"),
+        ("Avoidable mortality", "data/health/oecd_avoidable_mortality.csv", "avoidable_mortality", "{:.0f}/100k", "low"),
     ],
     "science": [
         ("R&D spending", "data/science/oecd_rd_expenditure.csv", "rd_pct_gdp", "{:.2f}% GDP", "high"),
@@ -423,11 +536,13 @@ SNAPSHOT_SPECS = {
     ],
     "environment": [
         ("CO2 per capita", "data/environment/oecd_co2_per_capita.csv", "co2_per_capita", "{:.1f} t", "low"),
+        ("Consumption CO2", "data/environment/owid_consumption_co2.csv", "consumption_co2_pc", "{:.1f} t", "low"),
         ("CO2 vs 2000", "data/environment/oecd_co2_indexed.csv", "co2_index", "{:.0f}", "low"),
         ("Clean electricity", "data/environment/owid_energy_mix.csv", "low_carbon_share_elec", "{:.0f}%", "high"),
     ],
     "fiscal": [
         ("Government debt", "data/fiscal/oecd_govt_debt.csv", "govt_debt", "{:.0f}% GDP", "low"),
         ("Budget balance", "data/fiscal/oecd_govt_balance.csv", "govt_balance", "{:.1f}% GDP", "high"),
+        ("Interest costs", "data/fiscal/oecd_govt_interest.csv", "govt_interest", "{:.1f}% GDP", "low"),
     ],
 }

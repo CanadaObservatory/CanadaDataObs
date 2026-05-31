@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_crime_severity",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 35-10-0026-01",
+  "frequency": "annual",
+  "unit": "index (2006=100)",
+  "retrieved_at": "2026-05-31T00:20:39.076267+00:00",
+  "latest_observation_date": "2024-01-01",
+  "transformations": [
+    "filtered to {'GEO': 'Canada', 'Statistics': 'Crime severity index'}"
+  ],
+  "notes": null,
+  "row_count": 27
+}

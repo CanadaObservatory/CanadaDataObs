@@ -9,3 +9,8 @@ GitHub_token.rtf
 *.h5
 
 /.quarto/
+
+# Internal-only / non-redistributable reference (e.g. CREA MLS HPI — licensed data
+# that must NOT be published or committed to this public repo). Local use only.
+internal/
+*MLS_HPI*

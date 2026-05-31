@@ -42,15 +42,16 @@ DataCan/
 ├── CLAUDE.md              ← this file
 ├── _quarto.yml            ← site config, nav (Economy is a dropdown), theme
 ├── index.qmd  about.qmd   ← landing + methodology
-├── population/index.qmd   ← total, by-province, growth rate, components, non-permanent residents
-├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment, employment rate, current account
-├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, rent, housing starts, vacancy rate, household debt
-├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, neighbourhood income map (choropleth)
+├── population/index.qmd   ← total, by-province, growth rate, components, non-permanent residents, diversity-by-city map (visible-minority dropdown)
+├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate, current account
+├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city), rent, housing starts, vacancy rate, household debt
+├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, income map (city) + link to neighbourhood-detail page
+├── income/neighbourhoods.qmd ← census-tract income choropleth (heavy ~3MB; its own page so the index stays light)
 ├── fiscal/index.qmd       ← govt gross debt, budget balance, revenue, interest costs, defence
 ├── health/index.qmd       ← life expectancy, avoidable mortality, health spending (%GDP + per person), beds, physicians, nurses, MRI units
 ├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers  (titled "Education & Innovation")
 ├── environment/index.qmd  ← CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix
-├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide)
+├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide + by-city map)
 ├── pipeline/
 │   ├── config.py          ← Indicator dataclass + INDICATORS registry, peer group, COMPARATOR_COLORS, styling
 │   ├── fetch_oecd.py      ← fetch_oecd_indicator (generic SDMX) + _fetch_oecd_csv
@@ -63,7 +64,7 @@ DataCan/
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   └── run_pipeline.py    ← registry-driven orchestrator
 ├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
-├── data/geo/              ← static 2021-census choropleth assets (CT GeoJSON + income CSV)
+├── data/geo/              ← static 2021-census choropleth assets (CT income; CMA unemployment/dwelling-value/value-to-income/crime/visible-minority)
 ├── .claude/launch.json    ← preview servers: `quarto-preview` (live) and `site` (static _site)
 ├── .github/workflows/update-data.yml  ← weekly cron: fetch → commit → deploy
 └── requirements.txt
@@ -211,6 +212,46 @@ use: **median household income by census tract** on the income page (the
 - **Driving the map from JS** (e.g. preview tests): `window.Plotly` is undefined under
   Quarto's AMD bundle — use `window.requirejs('plotly')` to get the handle for
   `relayout`. (Same gotcha as the CPI rescale JS.)
+
+**City-level (CMA) maps** — `build_census_geo.build_cma()` builds a second, lighter tier:
+`data/geo/cma_2021.geojson` (156 metro areas, **0.18 MB**) + `data/geo/statcan_cma_indicators.csv`
+(unemployment, median dwelling value, value-to-income, Crime Severity Index per CMA). Sources:
+the comprehensive **CMA census profile** (GEONO=002, has Unemployment rate + "Median value of
+dwellings ($)" + household income) and crime from 35-10-0026-01 (CSI joined on the 3-digit CMA
+code parsed from the `[35535]`-style GEO labels — ~40 CMAs report CSI). Four maps drawn from it:
+unemployment (Economy), Crime Severity (Society & Well-being), and **median dwelling value +
+value-to-income** (Housing). The housing two answer "can we map house prices?" — **yes**, via
+the census's *owner-estimated* dwelling value (not sale prices; CREA sale prices stay
+internal-only), and value÷income is the affordability map (Vancouver ~11.7×, Toronto ~10× vs
+Calgary ~4.6×). Crime/unemployment/housing aren't available at census-tract level cheaply
+(labour/housing CT tables are 300–600 MB), so these are CMA-level; CT versions are a future
+heavy-extraction option. **Split-province CMA gotcha:** Ottawa-Gatineau (505), Lloydminster
+(840) + two others span two provinces and appear as two boundary features sharing one CMAUID —
+`build_cma()` **dissolves by CMAUID** (one polygon per CMA), else duplicate feature ids leave
+half the CMA uncoloured (this was a real bug — Ottawa showed only the Gatineau side). The crime
+join also prefers the **combined** whole-CMA row over a single province "part".
+
+**Dropdown maps** — `charts.choropleth_groups_map(geojson, df, location_col, groups, ...)` adds a
+Plotly `updatemenus` dropdown that `restyle`s the mapped variable across `groups`
+(each option auto-caps its 5–95 pct colour range + updates colorbar/hover). First use: **visible-minority
+groups by city** on the Population page (`build_cma_ethnicity()` → `data/geo/statcan_cma_ethnicity.csv`,
+CHARACTERISTIC_IDs 1684–1694 from the CMA census profile: All VM / South Asian / Chinese / Black /
+Filipino / Arab / Latin American / SE Asian / W Asian / Korean / Japanese). **Most sensitive layer —
+deliberately descriptive:** neutral single-hue scale (Purples, no red/green valence), no scorecard, no
+"good/bad" direction, StatCan's own "visible minority" term, and a note that it's separate from
+Indigenous identity and shows only residential geography.
+
+**City → neighbourhood level-of-detail (separate page, not JS lazy-load).** The income map shows
+the light **CMA** layer on `income/index.qmd` (page **365 KB**) with a link to a dedicated
+`income/neighbourhoods.qmd` that **embeds** the full ~6,000-tract choropleth (that page ≈3 MB). The
+heavy tract layer therefore loads only when the user navigates to it, the index stays fast, and —
+crucially — it **works from `file://` too** (everything is embedded; nothing is fetched). We first
+tried JS `fetch()` lazy-loading on one page, but browsers block `fetch()` of local files on
+`file://` (the reviewer opens rendered files directly), so the separate-page approach is the robust
+pattern and the one to reuse for future tract maps. (`build_ct_income_geojson()` still emits a
+combined `data/geo/ct_income_2021.geojson` as a data download.) Crime has no tract data;
+unemployment/value/diversity each need a one-time CT extraction (300–600 MB tables) before they
+could get a neighbourhood page.
 
 ## CPI inflation chart (housing/index.qmd — moved from economics)
 

@@ -365,7 +365,7 @@ def page_snapshot(section, **kwargs):
 
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
-                   value_prefix="", value_suffix="", source_note=None,
+                   value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
                    center=None, zoom=2.6, height=640, zmin=None, zmax=None):
     """Zoomable choropleth map (Plotly Choroplethmapbox, free carto-positron
     basemap — no API token). The `geojson` features must carry a top-level `id`
@@ -381,7 +381,7 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
         colorbar=dict(title=colorbar_title, tickprefix=value_prefix, ticksuffix=value_suffix),
         customdata=customdata,
-        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{z:,.0f}}{value_suffix}<extra></extra>",
+        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{z:{value_fmt}}}{value_suffix}<extra></extra>",
     ))
     fig.update_layout(
         mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
@@ -391,6 +391,51 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         fig.add_annotation(text=source_note, xref="paper", yref="paper",
                            x=0, xanchor="left", y=-0.04, showarrow=False,
                            font=dict(size=10, color="#999"))
+    return fig
+
+
+def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
+                          colorscale="Purples", source_note=None,
+                          center=None, zoom=2.6, height=660):
+    """Choropleth with a dropdown to switch the mapped variable across `groups`
+    (list of (column, label)). Used for the descriptive visible-minority maps —
+    neutral single-hue scale (no red/green valence), each option auto-caps its
+    colour range to its 5th–95th percentile. Values are percentages."""
+    center = center or {"lat": 56.0, "lon": -96.0}
+    locs = df[location_col]
+    custom = df[[name_col]].to_numpy()
+
+    def cap(col):
+        return float(df[col].quantile(0.05)), float(df[col].quantile(0.95))
+
+    c0, l0 = groups[0]
+    lo0, hi0 = cap(c0)
+    fig = go.Figure(go.Choroplethmapbox(
+        geojson=geojson, locations=locs, z=df[c0].tolist(), featureidkey="id",
+        colorscale=colorscale, zmin=lo0, zmax=hi0,
+        marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
+        colorbar=dict(title=f"% {l0}", ticksuffix="%"),
+        customdata=custom,
+        hovertemplate=f"<b>%{{customdata[0]}}</b><br>{l0}: %{{z:.1f}}%<extra></extra>",
+    ))
+    buttons = []
+    for col, label in groups:
+        lo, hi = cap(col)
+        buttons.append(dict(method="restyle", label=label, args=[{
+            "z": [df[col].tolist()], "zmin": lo, "zmax": hi,
+            "colorbar.title.text": f"% {label}",
+            "hovertemplate": f"<b>%{{customdata[0]}}</b><br>{label}: %{{z:.1f}}%<extra></extra>",
+        }]))
+    fig.update_layout(
+        mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
+        margin=dict(l=0, r=0, t=46, b=36), height=height,
+        updatemenus=[dict(buttons=buttons, active=0, x=0.01, y=0.99,
+                          xanchor="left", yanchor="top", bgcolor="white",
+                          bordercolor="#ccc", borderwidth=1, showactive=True)],
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 

@@ -363,6 +363,46 @@ else:
     print("Price/income data not yet available. Run the data pipeline.")
 ```
 
+## Home Values by City
+
+Sale prices by city aren't openly available, but the census asks owners to estimate their home's value — a usable proxy. This maps **median dwelling value** across metropolitan areas (2021 Census). **Zoom and pan to your area.** Owner-estimated, 2021; city-level (CMA/CA).
+
+```{python}
+#| echo: false
+import json
+from pipeline.charts import choropleth_map
+cma_geo_path = "data/geo/cma_2021.geojson"
+cma_path = "data/geo/statcan_cma_indicators.csv"
+if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
+    cma_geo = json.load(open(cma_geo_path))
+    cma = pd.read_csv(cma_path, dtype={"cmauid": str})
+    sub = cma.dropna(subset=["dwelling_value"])
+    fig = choropleth_map(cma_geo, sub, "cmauid", "dwelling_value", name_col="name",
+        colorbar_title="Median dwelling value", value_prefix="$", value_fmt=",.0f", colorscale="Viridis",
+        zmin=float(sub["dwelling_value"].quantile(0.05)), zmax=float(sub["dwelling_value"].quantile(0.95)),
+        source_note="Source: 2021 Census (owner-estimated dwelling value). City-level (CMA/CA).")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Home-value map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+## Affordability by City (home value ÷ income)
+
+Home value divided by median household income — roughly how many years of a typical household's income a typical home costs. It turns the price map into an *affordability* map: the same $1M home is far less attainable where incomes are lower. **Zoom and pan to your area.** (2021 Census; owner-estimated value ÷ median household income.)
+
+```{python}
+#| echo: false
+if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
+    sub = cma.dropna(subset=["value_to_income"])
+    fig = choropleth_map(cma_geo, sub, "cmauid", "value_to_income", name_col="name",
+        colorbar_title="Home value ÷ income", value_suffix="×", value_fmt=".1f", colorscale="YlOrRd",
+        zmin=float(sub["value_to_income"].quantile(0.05)), zmax=float(sub["value_to_income"].quantile(0.95)),
+        source_note="Source: 2021 Census — median dwelling value ÷ median household income. City-level (CMA/CA).")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Affordability map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
 ## Rent in Canada
 
 The Consumer Price Index for rent — what renters pay over time. Renters are roughly a third of Canadian households, so rent is a central part of the cost-of-living picture that owner-focused house-price indices miss.
@@ -459,4 +499,5 @@ if os.path.exists(debt_path):
 - [Rent, CPI (CSV)](../data/housing/statcan_rent_cpi.csv) — Statistics Canada Table 18-10-0004-01
 - [Housing Starts (CSV)](../data/housing/statcan_housing_starts.csv) — Statistics Canada / CMHC Table 34-10-0143-01
 - [Rental Vacancy Rate (CSV)](../data/housing/statcan_vacancy_rate.csv) — Statistics Canada / CMHC Table 34-10-0127-01
+- [City home value, value-to-income & more (CSV)](../data/geo/statcan_cma_indicators.csv) — 2021 Census (owner-estimated dwelling value)
 - [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard

@@ -132,8 +132,32 @@ else:
     print("Homicide data not yet available. Run the data pipeline.")
 ```
 
+## Crime Severity by City
+
+The same Crime Severity Index, mapped across metropolitan areas (latest year) — it weights offences by seriousness, so a city with more serious crime scores higher. **Zoom and pan to your area.** Reported for larger metropolitan areas only (smaller places aren't shown).
+
+```{python}
+#| echo: false
+import json
+from pipeline.charts import choropleth_map
+cma_geo_path = "data/geo/cma_2021.geojson"
+cma_path = "data/geo/statcan_cma_indicators.csv"
+if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
+    cma_geo = json.load(open(cma_geo_path))
+    cma = pd.read_csv(cma_path, dtype={"cmauid": str})
+    sub = cma.dropna(subset=["crime_severity"])
+    fig = choropleth_map(cma_geo, sub, "cmauid", "crime_severity", name_col="name",
+        colorbar_title="Crime Severity Index", value_fmt=".1f", colorscale="YlOrRd",
+        zmin=float(sub["crime_severity"].quantile(0.05)), zmax=float(sub["crime_severity"].quantile(0.95)),
+        source_note="Source: Statistics Canada, Table 35-10-0026-01 (latest year). Larger metro areas only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("City crime map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
 ## Download Data
 
 - [Happiness Scores & Factor Decomposition (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)
+- [City indicators incl. Crime Severity (CSV)](../data/geo/statcan_cma_indicators.csv) — Statistics Canada (2021 Census + Table 35-10-0026-01)
 - [Crime Severity Index (CSV)](../data/wellbeing/statcan_crime_severity.csv) — Statistics Canada Table 35-10-0026-01
 - [Homicide Rate (CSV)](../data/wellbeing/statcan_homicide_rate.csv) — Statistics Canada Table 35-10-0068-01

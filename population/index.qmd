@@ -232,7 +232,33 @@ else:
     print("Non-permanent residents data not yet available. Run the data pipeline.")
 ```
 
+## Diversity by City
+
+Where Canada's visible-minority communities live, by metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. This is a descriptive picture of residential geography — "visible minority" is Statistics Canada's term, and it is a separate concept from Indigenous identity. There is no "good" or "bad" reading here; it simply shows where people live.
+
+```{python}
+#| echo: false
+import os, json
+from pipeline.charts import choropleth_groups_map
+eth_geo = "data/geo/cma_2021.geojson"
+eth_path = "data/geo/statcan_cma_ethnicity.csv"
+if os.path.exists(eth_geo) and os.path.exists(eth_path):
+    geo = json.load(open(eth_geo))
+    eth = pd.read_csv(eth_path, dtype={"cmauid": str})
+    groups = [("all_vm", "All visible minorities"), ("south_asian", "South Asian"),
+              ("chinese", "Chinese"), ("black", "Black"), ("filipino", "Filipino"),
+              ("arab", "Arab"), ("latin_american", "Latin American"),
+              ("southeast_asian", "Southeast Asian"), ("west_asian", "West Asian"),
+              ("korean", "Korean"), ("japanese", "Japanese")]
+    fig = choropleth_groups_map(geo, eth, "cmauid", groups, name_col="name", colorscale="Purples",
+        source_note="Source: 2021 Census (Statistics Canada). 'Visible minority' is StatCan's term; excludes Indigenous identity. Descriptive only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Diversity map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
 ## Download Data
 
 - [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01
 - [Non-Permanent Residents (CSV)](../data/population/statcan_temp_residents.csv) — Statistics Canada Table 17-10-0121-01
+- [Visible-Minority Groups by City (CSV)](../data/geo/statcan_cma_ethnicity.csv) — 2021 Census (Statistics Canada)

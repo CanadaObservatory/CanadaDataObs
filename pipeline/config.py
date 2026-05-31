@@ -30,6 +30,20 @@ def get_data_date(csv_path):
         return meta.get("latest_observation_date", DATA_DATE)
     return DATA_DATE
 
+
+def get_retrieved_date(csv_path):
+    """Date the dataset was last fetched (metadata sidecar `retrieved_at`), as
+    YYYY-MM-DD — i.e. when the data was *accessed*, distinct from its latest
+    observation year. Falls back to today's date."""
+    import json
+    meta_path = Path(csv_path).with_suffix(".json")
+    if meta_path.exists():
+        with open(meta_path) as f:
+            ra = json.load(f).get("retrieved_at")
+        if ra:
+            return str(ra)[:10]
+    return DATA_DATE
+
 # --- OECD Peer Group ---
 # Broader than G7: includes all comparable advanced economies
 

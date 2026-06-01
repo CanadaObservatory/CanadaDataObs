@@ -4,7 +4,7 @@
   "source_table": "Green Growth Indicators",
   "frequency": "annual",
   "unit": "% of total primary energy supply",
-  "retrieved_at": "2026-05-18T09:51:31.715894+00:00",
+  "retrieved_at": "2026-06-01T11:21:25.999682+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to renewable energy share of total energy supply for 20 OECD peers"

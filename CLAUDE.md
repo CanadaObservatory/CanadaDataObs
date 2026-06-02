@@ -249,7 +249,8 @@ residual category — it includes white *and* Indigenous people; the visible-min
 ethnic-origin block and must NOT be mixed in). This same group list also drives the **CT-level** diversity
 map (`population/neighbourhoods.qmd`).
 
-**Diversity over time** — `charts.vm_history_lines()` is a multi-line census-year trend with a Plotly
+**Diversity over time** — `charts.history_lines()` (a generic builder — pass `group_colors` +
+`hidden_groups`/`thick_group`; also drives the religion trend below) is a multi-line census-year trend with a Plotly
 `updatemenus` **geography dropdown** (Canada / each province·territory / 8 big CMAs); like
 `choropleth_groups_map` it `restyle`s only the traces' `y` per geography (x = census years, shared). Data
 from `build_vm_history()` → `data/geo/statcan_vm_history.csv` (tidy: geography, geo_level, year, group,
@@ -272,6 +273,44 @@ neutral framing (self-reported, asked only **decennially**, no scorecard/valence
 single-hue scale to distinguish it visually from the Purples diversity map. Drives the city map on
 `population/index.qmd` + the CT map on `population/religion-neighbourhoods.qmd`. Toronto sanity: Christian
 46.4% / No religion 26.6% / Muslim 10.2%.
+
+**Religion over time** — `build_religion_history()` → `data/geo/statcan_religion_history.csv`, charted with
+`history_lines()` on the Population page. There is **no religion-by-census-year cube**, and religion is
+**decennial**, so this is a **2-point** trend stitched from two clean censuses on a total-population basis:
+2021 from the **wide cube 98-10-0353** (religion in columns; filter Age/Gender = Total, Statistics = "2021
+Counts") + 2011 from the **NHS Profile** CSVs (Canada/prov = FMT `CSV101`, CMA = `CSV201`; skiprows=1, name
+col is `Prov_Name` vs **`CMA_CA_Name`** respectively, filter Topic="Religion"). Counts (incl. a `_base_` row)
+are summed per geography·year before dividing, so **split-province CMA parts (Ottawa–Gatineau) and dup rows
+are handled**; the 2021 cube excludes "part" geographies to avoid double-counting. Canada Christian 67%→53%,
+No religion 24%→35% (2011→2021). 2011 = voluntary NHS (flagged). This `statcan_religion_history.csv` drives the
+**"By province and city, 2011 vs 2021"** dropdown chart (the geographic comparison).
+
+**Religion over time — Canada long-run (1871–2021).** `build_religion_canada_longrun()` →
+`data/geo/statcan_religion_canada_longrun.csv`, charted with `history_lines(dropdown=False)` (single-geography,
+no selector — added a `dropdown` flag) as the **lead** chart in that section. **16 decennial census points,
+Canada only**, on a total-population basis, stitched from primary StatCan products: **1871–1971** = CANSIM
+**17-10-0073-01** ("Historical statistics, principal religious denominations"; the ~16 Christian denominations
+roll into "Christian", Jewish/No-religion/Other map direct, "denominations unknown" stays in the base);
+**1981** = **95F0303X Table 15** total-pop column (the only primary source covering 1981; Christian summed from
+its detailed denominations — page IDs are year-paginated: 2001=4068393, 1991=4068394, 1981=**4153162**);
+**1991/2001** = the **"Major religious denominations, Canada, 1991 and 2001"** companion table (its Christian
+total **includes "Christian n.i.e."**, matching how 2011/2021 roll up — the 95F0303X product lumps n.i.e. into
+"Other" and understates Christian, so it is NOT used for 1991/2001); **2011/2021** reused from the history CSV
+above. Each gap-year set is verified to sum to its census total. Muslim/Hindu/Sikh/Buddhist begin **1981**
+(negligible & inside "Other" before, so those lines start there; **"Other religions" is truncated at 1971** in
+the long-run line chart — its broad-catch-all era — so it doesn't appear to still contain them post-1981, and to
+avoid a misleading 1971→1981 drop). Christian/No-religion/Jewish span the full series. The long-run chart also
+carries a **%/absolute "Show:" toggle** (`history_lines(measures=[...])` — method="update" restyles every
+trace's y + the y-axis title; counts show that even Christianity grew in raw numbers as its share fell). Canada
+Christian **95%→53%**, No religion **0.2%→35%** (1871→2021). **Use only authoritative primary sources for this site — never Wikipedia or
+third-party compilations**, even as a convenient cross-check. 2001 is no longer "omitted" (the prior note); it
+and 1981/1991 are now sourced from the published census tabulations above. Two **companion charts** sit in the
+same section: `charts.change_bars()` — a diverging horizontal bar of each group's **1981→2021 percentage-point
+change** (the "scale of change"; Christian −36 pp vs No religion +27 pp, world religions each >4×), coloured by
+the same group palette, labels inside the long bars (`textposition="auto"`); and `charts.composition_bars()` —
+a **100%-stacked** 2021 composition across Canada + the 8 big CMAs (from `statcan_religion_history.csv`, ordered
+by Christian share), showing Toronto/Vancouver's diversity vs Montréal's Christian majority. Both derive from
+existing CSVs (no new data file).
 
 **City → neighbourhood level-of-detail (separate page, not JS lazy-load).** The income map shows
 the light **CMA** layer on `income/index.qmd` (page **365 KB**) with a link to a dedicated

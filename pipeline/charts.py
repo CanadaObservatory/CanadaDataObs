@@ -446,23 +446,35 @@ VM_GROUP_COLORS = {
     "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
 }
 
+RELIGION_HISTORY_COLORS = {
+    "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
+    "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#d62728",
+    "Buddhist": "#9467bd", "Jewish": "#8c564b",
+    "Traditional Indigenous spirituality": "#e377c2", "Other religions": "#17becf",
+}
 
-def vm_history_lines(df, *, value_col="share", default_geo="Canada",
-                     source_note=None, nhs_year=2011, height=560,
-                     yaxis_title="% of population (aged 15+)"):
-    """Visible-minority composition over census years, with a dropdown to switch the
-    geography (Canada / a province / a city). Mirrors `choropleth_groups_map`'s
-    dropdown idiom: one fixed line trace per group, and each dropdown button
-    `restyle`s every trace's y to the chosen geography's values (x — the census
-    years — is shared, so only y changes). `df` is the tidy long output of
-    `build_vm_history` (geography, geo_level, year, group, share). 2011 (voluntary
-    NHS) is flagged rather than hidden."""
+
+def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
+                  value_col="share", default_geo="Canada", source_note=None,
+                  nhs_year=2011, nhs_label="2011: voluntary NHS", height=560,
+                  yaxis_title="% of population", dropdown=True, measures=None):
+    """Composition over census years, with a dropdown to switch the geography
+    (Canada / a province / a city). Mirrors `choropleth_groups_map`'s dropdown idiom:
+    one fixed line trace per group; each dropdown button `restyle`s every trace's y to
+    the chosen geography's values (x — the census years — is shared, so only y changes).
+    `df` is a tidy long frame (geography, geo_level, year, group, <value_col>).
+    `group_colors` (dict group->colour) sets the legend order; `hidden_groups` start
+    legend-hidden; `thick_group` is bold. A voluntary-NHS year is flagged, not hidden.
+    `dropdown=False` plots `default_geo` only with no geography selector — used for the
+    Canada long-run series, whose deep history exists for one geography only.
+    `measures` (list of {label, col, fmt, suffix, ytitle}) adds a Show: selector that
+    `update`s every trace's y + the y-axis title — e.g. share (%) vs absolute counts."""
     import pandas as pd
     df = df.copy()
     df["year"] = df["year"].astype(int)
     years = sorted(df["year"].unique())
 
-    pref = list(VM_GROUP_COLORS.keys())
+    pref = list(group_colors.keys())
     present = set(df["group"])
     groups = [g for g in pref if g in present] + [g for g in df["group"].unique()
                                                   if g not in pref]
@@ -474,47 +486,132 @@ def vm_history_lines(df, *, value_col="share", default_geo="Canada",
     if default_geo in geos:
         geos = [default_geo] + [g for g in geos if g != default_geo]
 
-    def yvals(geo, group):
-        s = df[(df["geography"] == geo) & (df["group"] == group)].set_index("year")[value_col]
+    def yvals(geo, group, col=value_col):
+        s = (df[(df["geography"] == geo) & (df["group"] == group)]
+             .drop_duplicates("year").set_index("year")[col])
         return [float(s.loc[y]) if y in s.index else None for y in years]
+
+    init = measures[0] if measures else dict(col=value_col, fmt=".1f", suffix="%", ytitle=yaxis_title)
+    def hover(g, m):           # per-group hovertemplate for a measure spec
+        return f"{g}: %{{y:{m.get('fmt', '.1f')}}}{m.get('suffix', '')}<extra></extra>"
 
     fig = go.Figure()
     for g in groups:
         fig.add_trace(go.Scatter(
-            x=years, y=yvals(default_geo, g), name=g, mode="lines+markers",
-            visible=("legendonly" if g == "Not a visible minority" else True),
-            line=dict(color=VM_GROUP_COLORS.get(g, "#888"),
-                      width=3 if g == "All visible minorities" else 1.8),
-            marker=dict(size=6),
-            hovertemplate=f"{g}: %{{y:.1f}}%<extra></extra>"))
-
-    buttons = [dict(method="restyle", label=geo,
-                    args=[{"y": [yvals(geo, g) for g in groups]}]) for geo in geos]
+            x=years, y=yvals(default_geo, g, init["col"]), name=g, mode="lines+markers",
+            visible=("legendonly" if g in hidden_groups else True),
+            line=dict(color=group_colors.get(g, "#888"),
+                      width=3 if g == thick_group else 1.8),
+            marker=dict(size=6), hovertemplate=hover(g, init)))
 
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=dict(title="Census year", gridcolor="#e0e0e0",
                    tickmode="array", tickvals=years),
-        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0", rangemode="tozero"),
+        yaxis=dict(title=init.get("ytitle", yaxis_title), gridcolor="#e0e0e0", rangemode="tozero"),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
-        margin=dict(l=10, r=180, t=70, b=90),
-        updatemenus=[dict(buttons=buttons, active=0, x=0.0, y=1.14,
-                          xanchor="left", yanchor="top", bgcolor="white",
-                          bordercolor="#ccc", borderwidth=1, showactive=True)],
+        margin=dict(l=10, r=180, t=70 if (dropdown or measures) else 40, b=90),
     )
-    fig.add_annotation(text="Geography:", xref="paper", yref="paper",
-                       x=0.0, y=1.20, xanchor="left", yanchor="bottom",
-                       showarrow=False, font=dict(size=11, color="#666"))
+    if dropdown:
+        buttons = [dict(method="restyle", label=geo,
+                        args=[{"y": [yvals(geo, g) for g in groups]}]) for geo in geos]
+        fig.update_layout(updatemenus=[dict(buttons=buttons, active=0, x=0.0, y=1.14,
+                          xanchor="left", yanchor="top", bgcolor="white",
+                          bordercolor="#ccc", borderwidth=1, showactive=True)])
+        fig.add_annotation(text="Geography:", xref="paper", yref="paper",
+                           x=0.0, y=1.20, xanchor="left", yanchor="bottom",
+                           showarrow=False, font=dict(size=11, color="#666"))
+    if measures:
+        mbtns = [dict(method="update", label=m["label"], args=[
+                     {"y": [yvals(default_geo, g, m["col"]) for g in groups],
+                      "hovertemplate": [hover(g, m) for g in groups]},
+                     {"yaxis.title.text": m.get("ytitle", yaxis_title)}]) for m in measures]
+        fig.update_layout(updatemenus=[dict(buttons=mbtns, active=0, x=0.0, y=1.14,
+                          xanchor="left", yanchor="top", bgcolor="white",
+                          bordercolor="#ccc", borderwidth=1, showactive=True)])
+        fig.add_annotation(text="Show:", xref="paper", yref="paper",
+                           x=0.0, y=1.20, xanchor="left", yanchor="bottom",
+                           showarrow=False, font=dict(size=11, color="#666"))
     if nhs_year in years:
         fig.add_vrect(x0=nhs_year - 0.25, x1=nhs_year + 0.25, line_width=0,
                       fillcolor="#000", opacity=0.05)
         fig.add_annotation(x=nhs_year, y=1.0, yref="paper", yanchor="bottom",
-                           text="2011: voluntary NHS", showarrow=False,
+                           text=nhs_label, showarrow=False,
                            font=dict(size=9, color="#999"))
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper",
                            x=0, xanchor="left", y=-0.18, showarrow=False,
                            font=dict(size=10, color="#999"))
+    return fig
+
+
+def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
+                geography="Canada", geo_col="geography", source_note=None, height=460):
+    """Diverging horizontal bars of each group's change in <value_col> between two years
+    for one geography — the 'scale of change' view that quantifies what the long-run line
+    chart shows. Bars are coloured by group (same palette as the lines), diverge around
+    zero, and are sorted by signed change (largest decline at the bottom, largest gain at
+    the top); each y-label carries the group's start→end values."""
+    d = df[df[geo_col] == geography].copy()
+    d["year"] = d["year"].astype(int)
+    rows = []
+    for g in group_colors:                       # palette order; skip groups absent in either year
+        sub = d[d["group"] == g]
+        s0, s1 = sub[sub["year"] == year_start][value_col], sub[sub["year"] == year_end][value_col]
+        if len(s0) and len(s1):
+            a, b = float(s0.iloc[0]), float(s1.iloc[0])
+            rows.append((g, a, b, b - a))
+    rows.sort(key=lambda r: r[3])                 # ascending → most-negative first (bottom)
+    deltas = [round(r[3], 1) for r in rows]        # round for display (avoids float noise like 4.4799…)
+    labels = [f"{g}<br>{a:.0f}% → {b:.0f}%" for g, a, b, _ in rows]
+    fig = go.Figure(go.Bar(
+        x=deltas, y=labels, orientation="h",
+        marker_color=[group_colors.get(g, "#888") for g, *_ in rows],
+        text=[f"{dl:+.1f} pp" for dl in deltas], textposition="auto",
+        cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
+    pad = max(abs(min(deltas)), abs(max(deltas))) * 0.15
+    fig.update_layout(
+        plot_bgcolor="white", height=height, showlegend=False,
+        xaxis=dict(title=f"Change in share, {year_start}→{year_end} (percentage points)",
+                   gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5,
+                   range=[min(deltas) - pad, max(deltas) + pad]),
+        yaxis=dict(gridcolor="white"),
+        margin=dict(l=160, r=40, t=20, b=70),
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-0.2, showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
+def composition_bars(df, *, group_colors, year, geographies=None, value_col="share",
+                     geo_col="geography", source_note=None, height=520):
+    """100%-stacked horizontal bars of composition by geography for one year — one bar per
+    geography, a segment per group (same palette as the lines). Shows how the mix differs
+    across places. `geographies` (ordered list) selects and orders the rows top-to-bottom."""
+    import pandas as pd
+    d = df[df["year"].astype(int) == year].copy()
+    geos = geographies or sorted(d[geo_col].unique())
+    d = d[d[geo_col].isin(geos)]
+    groups = [g for g in group_colors if g in set(d["group"])]
+    piv = d.pivot_table(index=geo_col, columns="group", values=value_col, aggfunc="first")
+    fig = go.Figure()
+    for g in groups:
+        fig.add_trace(go.Bar(
+            y=geos, orientation="h", name=g, marker_color=group_colors.get(g, "#888"),
+            x=[float(piv.loc[geo, g]) if (geo in piv.index and g in piv.columns
+               and pd.notna(piv.loc[geo, g])) else 0 for geo in geos],
+            hovertemplate=f"{g}: %{{x:.1f}}%<extra></extra>"))
+    fig.update_layout(
+        barmode="stack", plot_bgcolor="white", height=height, hovermode="y unified",
+        xaxis=dict(title=None, gridcolor="#e0e0e0", ticksuffix="%", range=[0, 100]),
+        yaxis=dict(autorange="reversed"),         # first geography at top
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        margin=dict(l=110, r=20, t=70, b=70),
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-0.16, showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 

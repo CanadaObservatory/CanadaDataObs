@@ -487,6 +487,260 @@ def _vm_history_2001():
     return None
 
 
+# ---- Historical religion composition (decennial: 2011 + 2021) -------------------
+# No religion-by-census-year cube exists, so stitch the two clean censuses on a
+# total-population basis: 2021 from the wide cube 98-10-0353 (religion in columns),
+# 2011 from the NHS Profile CSVs (Canada/prov = FMT CSV101, CMA = CSV201). Both keyed
+# on the population base. 2011 was the voluntary NHS (flagged). 2001 is XML-only and
+# omitted (same fragility we defer for VM 2001). Top-level groups only (Christian
+# sub-denominations roll into the Christian total).
+REL_GROUP_LABELS = {           # output key -> display label (also the chart order)
+    "christian": "Christian", "no_religion": "No religion / secular",
+    "muslim": "Muslim", "hindu": "Hindu", "sikh": "Sikh", "buddhist": "Buddhist",
+    "jewish": "Jewish", "indigenous_spirituality": "Traditional Indigenous spirituality",
+    "other_religion": "Other religions",
+}
+REL_MAP_2021 = {               # 2021 cube religion column-name -> key
+    "Buddhist": "buddhist", "Christian": "christian", "Hindu": "hindu",
+    "Jewish": "jewish", "Muslim": "muslim", "Sikh": "sikh",
+    "Traditional (North American Indigenous) spirituality": "indigenous_spirituality",
+    "Other religions and spiritual traditions": "other_religion",
+    "No religion and secular perspectives": "no_religion",
+}
+REL_MAP_2011 = {               # 2011 NHS Characteristic (stripped) -> key
+    "Buddhist": "buddhist", "Christian": "christian", "Hindu": "hindu",
+    "Jewish": "jewish", "Muslim": "muslim", "Sikh": "sikh",
+    "Traditional (Aboriginal) Spirituality": "indigenous_spirituality",
+    "Other religions": "other_religion", "No religious affiliation": "no_religion",
+}
+REL_2011_BASE = "Total population in private households by religion"
+CITY_LABELS = [("Toronto", "Toronto"), ("Montr", "Montréal"), ("Vancouver", "Vancouver"),
+               ("Calgary", "Calgary"), ("Edmonton", "Edmonton"), ("Ottawa", "Ottawa–Gatineau"),
+               ("Winnipeg", "Winnipeg"), ("Halifax", "Halifax")]
+NHS2011_CANPROV = ("https://www12.statcan.gc.ca/nhs-enm/2011/dp-pd/prof/details/download-telecharger/"
+                   "comprehensive/comp_download.cfm?LANG=E&CTLG=99-004-XWE2011001&FMT=CSV101")
+NHS2011_CMA = ("https://www12.statcan.gc.ca/nhs-enm/2011/dp-pd/prof/details/download-telecharger/"
+               "comprehensive/comp_download.cfm?LANG=E&CTLG=99-004-XWE2011001&FMT=CSV201")
+
+
+def _rel_city_label(name):
+    for pref, label in CITY_LABELS:
+        if str(name).startswith(pref):
+            return label
+    return None
+
+
+def _rel_geo(geo, is_cma_source=False):
+    """Map a raw geography label to (level, canonical_label) or None."""
+    g = str(geo)
+    if g == "Canada":
+        return ("national", "Canada")
+    if g in PROV_TERR:
+        return ("province", g)
+    if (is_cma_source or "(CMA)" in g) and "part" not in g.lower():
+        lbl = _rel_city_label(g)
+        if lbl:
+            return ("cma", lbl)
+    return None
+
+
+def build_religion_history():
+    rows = []   # (geography, geo_level, year, key, count, base)
+
+    # --- 2021: wide cube 98-10-0353 (religion in columns; total population) ---
+    try:
+        url21 = "https://www150.statcan.gc.ca/n1/tbl/csv/98100353-eng.zip"
+        _download_cache(url21, "/tmp/statcan_98100353.zip", "StatCan 98-10-0353 (2021 religion)")
+        z = zipfile.ZipFile("/tmp/statcan_98100353.zip")
+        member = [n for n in z.namelist() if n.endswith(".csv") and "metadata" not in n.lower()][0]
+        for chunk in pd.read_csv(z.open(member), dtype=str, low_memory=False, chunksize=100_000):
+            cols = list(chunk.columns)
+            agec, genc, stc = _detect(cols, "age"), _detect(cols, "gender"), _detect(cols, "statistic")
+            relcols = {col: col.split(":", 1)[1].rsplit("[", 1)[0].strip()
+                       for col in cols if col.startswith("Religion")}
+            basecol = next((c for c, nm in relcols.items() if nm.startswith("Total - Religion")), None)
+            c = chunk[chunk[agec].str.startswith("Total", na=False)
+                      & chunk[genc].str.startswith("Total", na=False)
+                      & chunk[stc].str.strip().str.lower().str.startswith("2021 count")]
+            for _, r in c.iterrows():
+                m = _rel_geo(r["GEO"])
+                if not m:
+                    continue
+                rows.append((m[1], m[0], 2021, "_base_", r[basecol]))
+                for col, nm in relcols.items():
+                    key = REL_MAP_2021.get(nm)
+                    if key:
+                        rows.append((m[1], m[0], 2021, key, r[col]))
+    except Exception as e:
+        print(f"  religion_history 2021 failed: {e}")
+
+    # --- 2011: NHS Profile CSVs (Canada/prov + CMA), total population ---
+    def parse_2011(url, cache, label, is_cma):
+        _download_cache(url, cache, label)
+        z = zipfile.ZipFile(cache)
+        member = [n for n in z.namelist() if n.lower().endswith(".csv") and "dq" not in n.lower()][0]
+        df = pd.read_csv(z.open(member), dtype=str, encoding="latin-1", skiprows=1, low_memory=False)
+        # CSV101 (Canada/prov) name col = Prov_Name; CSV201 (CMA/CA) = CMA_CA_Name
+        namecol = "CMA_CA_Name" if "CMA_CA_Name" in df.columns else df.columns[1]
+        if "Geo_Type" in df.columns:                  # the CMA file also lists CAs — keep CMAs
+            df = df[df["Geo_Type"] == "CMA"]
+        df = df[df["Topic"] == "Religion"].copy()
+        df["char"] = df["Characteristic"].str.strip()
+        df["Total"] = pd.to_numeric(df["Total"], errors="coerce")
+        for geo, sub in df.groupby(namecol):
+            m = _rel_geo(geo, is_cma_source=is_cma)
+            if not m:
+                continue
+            # emit base + group counts as rows; split-province CMA parts are summed later
+            for _, br in sub[sub["char"] == REL_2011_BASE].iterrows():
+                rows.append((m[1], m[0], 2011, "_base_", br["Total"]))
+            for _, r in sub.iterrows():
+                key = REL_MAP_2011.get(r["char"])
+                if key:
+                    rows.append((m[1], m[0], 2011, key, r["Total"]))
+
+    for url, cache, label, is_cma in [
+            (NHS2011_CANPROV, "/tmp/nhs2011_canprov.zip", "2011 NHS Canada/prov", False),
+            (NHS2011_CMA, "/tmp/nhs2011_cma.zip", "2011 NHS CMA", True)]:
+        try:
+            parse_2011(url, cache, label, is_cma)
+        except Exception as e:
+            print(f"  religion_history {label} failed: {e}")
+
+    long = pd.DataFrame(rows, columns=["geography", "geo_level", "year", "group_key", "count"])
+    long["count"] = pd.to_numeric(long["count"], errors="coerce")
+    long = long.dropna(subset=["count"])
+    # sum across any split-province parts / duplicate rows, then divide by the base
+    agg = long.groupby(["geography", "geo_level", "year", "group_key"],
+                       as_index=False)["count"].sum()
+    base = agg[agg["group_key"] == "_base_"].set_index(["geography", "year"])["count"]
+    g = agg[agg["group_key"] != "_base_"].copy()
+    g["base"] = [base.get((geo, yr)) for geo, yr in zip(g["geography"], g["year"])]
+    g = g.dropna(subset=["base"])
+    g["share"] = (g["count"] / g["base"] * 100).round(2)
+    g["group"] = g["group_key"].map(REL_GROUP_LABELS)
+    out = (g[["geography", "geo_level", "year", "group", "count", "share"]]
+           .dropna(subset=["group"])
+           .sort_values(["geo_level", "geography", "group", "year"]))
+    os.makedirs(GEO_DIR, exist_ok=True)
+    out.to_csv(f"{GEO_DIR}/statcan_religion_history.csv", index=False)
+    yrs = sorted(out["year"].unique().tolist())
+    print(f"religion_history: {len(out)} rows | years {yrs} | geos {out['geography'].nunique()}")
+
+
+# ---- Canada long-run religion (1871–2021) -----------------------------------
+# Extends the 2-point (2011/2021) trend back to 1871 for CANADA ONLY, on a
+# total-population basis, stitched from primary StatCan census products:
+#   1871–1971  CANSIM 17-10-0073-01 "Historical statistics, principal religious
+#              denominations" (decennial; the ~16 Christian denominations are
+#              rolled into "Christian"; Jewish / No religion / Other map direct;
+#              "denominations unknown" stays in the base, so groups sum to <100%).
+#   1981       95F0303X Table 15 total-population column — the only primary source
+#              covering 1981; Christian summed from its detailed denominations.
+#   1991/2001  "Major religious denominations, Canada, 1991 and 2001" companion
+#              table; its Christian total includes "Christian n.i.e.", matching how
+#              2011/2021 roll up Christian (the farm-population product lumps n.i.e.
+#              into "Other", understating Christian — so it is NOT used for these two).
+#   2011/2021  reused from build_religion_history()'s Canada rows.
+# Muslim/Hindu/Sikh/Buddhist were not broken out before 1981 (negligible, inside
+# "Other"), so those lines begin in 1981; Christian/No-religion/Jewish/Other span
+# the full series. 1981–2001 used the mandatory 20% long form; 2011 the voluntary
+# NHS (flagged); 2021 mandatory. Canada-only — the existing dropdown chart keeps the
+# 2011-vs-2021 provincial/city comparison.
+HIST_REL_CHRISTIAN = {
+    "Anglican", "Baptist", "Congregationalist", "Evangelical Church", "Greek Orthodox",
+    "Jehovah's Witnesses", "Lutheran", "Mennonite", "Methodist", "Mormon", "Pentecostal",
+    "Presbyterian", "Roman Catholic", "Salvation Army", "Ukrainian (Greek) Catholic",
+    "United Church of Canada",
+}
+HIST_REL_DIRECT = {"Jewish": "Jewish", "No religion": "No religion / secular",
+                   "Other religious denominations": "Other religions"}
+LONGRUN_GROUPS = ["Christian", "No religion / secular", "Muslim", "Hindu", "Sikh",
+                  "Buddhist", "Jewish", "Other religions"]
+# 1981 from 95F0303X T15 (total-pop col); 1991/2001 from the major-denominations
+# companion. Counts verified to sum to each census base; shares derived in code.
+# "Other" for 1991/2001 is the residual (base − named groups) so shares ≈ 100%.
+REL_GAP_YEARS = {
+    1981: {"_base": 24014885, "Christian": 21440115, "No religion / secular": 1781345,
+           "Jewish": 296345, "Muslim": 98130, "Hindu": 69480, "Sikh": 67655,
+           "Buddhist": 51830, "Other religions": 209975},
+    1991: {"_base": 26994045, "Christian": 22371735, "No religion / secular": 3333245,
+           "Jewish": 318185, "Muslim": 253265, "Hindu": 157015, "Sikh": 147440,
+           "Buddhist": 163415, "Other religions": 249745},
+    2001: {"_base": 29639030, "Christian": 22708040, "No religion / secular": 4796325,
+           "Jewish": 329995, "Muslim": 579640, "Hindu": 297200, "Sikh": 278415,
+           "Buddhist": 300345, "Other religions": 349070},
+}
+GAP_SRC = {1981: "1981 Census (StatCan 95F0303X, Table 15)",
+           1991: "1991 Census (StatCan, major religious denominations)",
+           2001: "2001 Census (StatCan, major religious denominations)"}
+
+
+def build_religion_canada_longrun():
+    rows = []   # (year, group, count, share, source)
+
+    # --- 1871–1971: CANSIM 17-10-0073-01 (historical denominations) ---
+    try:
+        url = "https://www150.statcan.gc.ca/n1/tbl/csv/17100073-eng.zip"
+        _download_cache(url, "/tmp/statcan_17100073.zip", "StatCan 17-10-0073 (historical religion)")
+        z = zipfile.ZipFile("/tmp/statcan_17100073.zip")
+        member = [n for n in z.namelist() if n.endswith(".csv") and "metadata" not in n.lower()][0]
+        h = pd.read_csv(z.open(member), dtype=str)
+        h["VALUE"] = pd.to_numeric(h["VALUE"], errors="coerce")
+        for yr, sub in h.groupby("REF_DATE"):
+            vals = sub.dropna(subset=["VALUE"]).set_index("Religious denominations")["VALUE"]
+            base = vals.get("Total religious denominations")
+            if not base:
+                continue
+            agg = {"Christian": 0.0, "No religion / secular": 0.0, "Jewish": 0.0, "Other religions": 0.0}
+            for den, v in vals.items():
+                if den == "Total religious denominations":
+                    continue
+                if den in HIST_REL_CHRISTIAN:
+                    agg["Christian"] += v
+                elif den in HIST_REL_DIRECT:
+                    agg[HIST_REL_DIRECT[den]] += v
+                # "Religious denominations unknown" is intentionally unmapped (non-response)
+            for grp, cnt in agg.items():
+                rows.append((int(yr), grp, int(cnt), round(cnt / base * 100, 2),
+                             "1871–1971 Censuses (StatCan Table 17-10-0073-01)"))
+    except Exception as e:
+        print(f"  religion_longrun 1871–1971 failed: {e}")
+
+    # --- 1981 / 1991 / 2001: hand-curated from primary StatCan census products ---
+    for year, d in REL_GAP_YEARS.items():
+        base = d["_base"]
+        for grp, cnt in d.items():
+            if grp == "_base":
+                continue
+            rows.append((year, grp, cnt, round(cnt / base * 100, 2), GAP_SRC[year]))
+
+    # --- 2011 / 2021: reuse the Canada rows from build_religion_history() ---
+    hist_path = f"{GEO_DIR}/statcan_religion_history.csv"
+    if os.path.exists(hist_path):
+        rh = pd.read_csv(hist_path)
+        ca = rh[(rh["geography"] == "Canada") & (rh["year"].isin([2011, 2021]))
+                & (rh["group"].isin(LONGRUN_GROUPS))]
+        src = {2011: "2011 National Household Survey (voluntary)", 2021: "2021 Census"}
+        for _, r in ca.iterrows():
+            rows.append((int(r["year"]), r["group"], int(r["count"]),
+                         round(float(r["share"]), 2), src[int(r["year"])]))
+    else:
+        print("  religion_longrun: statcan_religion_history.csv missing — run build_religion_history first")
+
+    out = pd.DataFrame(rows, columns=["year", "group", "count", "share", "source"])
+    out["geography"] = "Canada"
+    out["geo_level"] = "national"
+    out = out[["geography", "geo_level", "year", "group", "count", "share", "source"]] \
+        .sort_values(["group", "year"])
+    os.makedirs(GEO_DIR, exist_ok=True)
+    out.to_csv(f"{GEO_DIR}/statcan_religion_canada_longrun.csv", index=False)
+    yrs = sorted(out["year"].unique().tolist())
+    chr_now = out[(out["group"] == "Christian") & (out["year"] == yrs[-1])]["share"].iloc[0]
+    print(f"religion_longrun: {len(out)} rows | Canada {yrs[0]}–{yrs[-1]} "
+          f"({len(yrs)} census points) | Christian {yrs[0]}→{yrs[-1]} ends {chr_now}%")
+
+
 def build_ct_income_geojson():
     """Combined census-tract income GeoJSON (geometry + income baked into
     feature properties + id=CTUID), served as a static file and fetched
@@ -517,4 +771,6 @@ if __name__ == "__main__":
     build_cma_religion()
     build_ct_income_geojson()
     build_vm_history()         # historical visible-minority composition (cube)
+    build_religion_history()   # religion composition 2011 + 2021 (cube + NHS profiles)
+    build_religion_canada_longrun()  # Canada religion 1871–2021 (historical census + gap fill)
     build_ct_from_profile()    # CT dwelling value + diversity + religion (~238 MB profile)

@@ -234,7 +234,11 @@ else:
 
 ## Diversity by City
 
-Where Canada's visible-minority communities live, by metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. This is a descriptive picture of residential geography — "visible minority" is Statistics Canada's term, and it is a separate concept from Indigenous identity. There is no "good" or "bad" reading here; it simply shows where people live.
+Where Canada's visible-minority communities live, by metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. This is a descriptive picture of residential geography — "visible minority" is Statistics Canada's term, and it is a separate concept from Indigenous identity. There is no "good" or "bad" reading here; it simply shows where people live. The **"Not a visible minority"** option is StatCan's residual category — it includes white *and* Indigenous people; the census has no distinct "White" group.
+
+For the full **neighbourhood-level** view — every census tract, where you can zoom right to your own street — open the dedicated map (kept on its own page so this one stays fast to load):
+
+**[→ Diversity by neighbourhood (census-tract map)](neighbourhoods.qmd)**
 
 ```{python}
 #| echo: false
@@ -249,12 +253,62 @@ if os.path.exists(eth_geo) and os.path.exists(eth_path):
               ("chinese", "Chinese"), ("black", "Black"), ("filipino", "Filipino"),
               ("arab", "Arab"), ("latin_american", "Latin American"),
               ("southeast_asian", "Southeast Asian"), ("west_asian", "West Asian"),
-              ("korean", "Korean"), ("japanese", "Japanese")]
+              ("korean", "Korean"), ("japanese", "Japanese"),
+              ("not_vm", "Not a visible minority")]
     fig = choropleth_groups_map(geo, eth, "cmauid", groups, name_col="name", colorscale="Purples",
-        source_note="Source: 2021 Census (Statistics Canada). 'Visible minority' is StatCan's term; excludes Indigenous identity. Descriptive only.")
+        source_note="Source: 2021 Census (Statistics Canada). 'Visible minority' is StatCan's term; 'Not a visible minority' includes white and Indigenous people. Descriptive only.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Diversity map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+## How the Diversity of Canada Has Changed
+
+Canada's visible-minority population has grown from roughly one in eight people in the early 2000s to more than one in four. This chart traces each group's share across recent censuses. **Use the dropdown to switch geography** — Canada, a province, or a major city — and click legend entries to add or remove groups (the "Not a visible minority" majority starts hidden so the smaller groups are legible; click it on to see the full composition).
+
+A few notes for honest reading: shares here are of the **population aged 15 and over** (the basis of the only consistent multi-census table), so they differ slightly from the all-ages maps above; **2011** was the *voluntary* National Household Survey rather than the mandatory census, so its point is flagged and less directly comparable; and sub-group definitions have shifted modestly over the decades, so the **"All visible minorities"** total is the most comparable line.
+
+```{python}
+#| echo: false
+import os
+from pipeline.charts import vm_history_lines
+vmh_path = "data/geo/statcan_vm_history.csv"
+if os.path.exists(vmh_path):
+    vmh = pd.read_csv(vmh_path)
+    fig = vm_history_lines(vmh,
+        source_note="Source: 2021 Census, Statistics Canada Table 98-10-0429-01 (visible minority by census year; population aged 15+). 2011 = voluntary National Household Survey.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Historical diversity data not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+## Religion by City
+
+The religious make-up of Canada's metropolitan areas (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. Religion is self-reported, and the census asks it only once a decade. Like the diversity map above, this is a descriptive picture of where people live — there is no "good" or "bad" reading. **"No religion / secular"** is now the second-largest group nationally and is included; the many Christian denominations are rolled into a single "Christian" total. This is a separate concept from ethnicity and from Indigenous identity.
+
+For the full **neighbourhood-level** view — every census tract, where you can zoom right to your own street — open the dedicated map (kept on its own page so this one stays fast to load):
+
+**[→ Religion by neighbourhood (census-tract map)](religion-neighbourhoods.qmd)**
+
+```{python}
+#| echo: false
+import os, json
+from pipeline.charts import choropleth_groups_map
+rel_geo = "data/geo/cma_2021.geojson"
+rel_path = "data/geo/statcan_cma_religion.csv"
+if os.path.exists(rel_geo) and os.path.exists(rel_path):
+    geo = json.load(open(rel_geo))
+    rel = pd.read_csv(rel_path, dtype={"cmauid": str})
+    groups = [("christian", "Christian"), ("no_religion", "No religion / secular"),
+              ("muslim", "Muslim"), ("hindu", "Hindu"), ("sikh", "Sikh"),
+              ("buddhist", "Buddhist"), ("jewish", "Jewish"),
+              ("indigenous_spirituality", "Traditional Indigenous spirituality"),
+              ("other_religion", "Other religions & spiritual traditions")]
+    fig = choropleth_groups_map(geo, rel, "cmauid", groups, name_col="name", colorscale="Teal",
+        source_note="Source: 2021 Census (Statistics Canada); % of population in private households. Religion is self-reported. Descriptive only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Religion map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
 ## Download Data
@@ -262,3 +316,7 @@ else:
 - [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01
 - [Non-Permanent Residents (CSV)](../data/population/statcan_temp_residents.csv) — Statistics Canada Table 17-10-0121-01
 - [Visible-Minority Groups by City (CSV)](../data/geo/statcan_cma_ethnicity.csv) — 2021 Census (Statistics Canada)
+- [Visible-Minority Groups by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_ethnicity_2021.csv) — 2021 Census (Statistics Canada)
+- [Visible-Minority Composition by Census Year (CSV)](../data/geo/statcan_vm_history.csv) — Statistics Canada Table 98-10-0429-01 (population aged 15+)
+- [Religion by City (CSV)](../data/geo/statcan_cma_religion.csv) — 2021 Census (Statistics Canada)
+- [Religion by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_religion_2021.csv) — 2021 Census (Statistics Canada)

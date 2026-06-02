@@ -363,9 +363,56 @@ else:
     print("Price/income data not yet available. Run the data pipeline.")
 ```
 
+## Actual Home Prices by City and Type
+
+The charts above use index and proxy measures because actual transaction prices are tightly licensed. The figures in this section use the **CREA MLS® Home Price Index** — the real estate industry's benchmark for the price of a "typical" home in each market — **published here with CREA's written permission for educational use**. Unlike the census's owner-estimated values or the New Housing Price Index, this tracks actual resale prices and breaks them out by dwelling type.
+
+This first chart shows the latest **benchmark price by city and dwelling type** — detached houses, townhouses, and apartments/condos — across Canada's major markets.
+
+```{python}
+#| echo: false
+crea_ok = False
+try:
+    from pipeline.crea import (load_crea, fig_price_by_type, fig_price_time_series,
+                               fig_price_to_income)
+    _sheets, _agg, _month = load_crea(".")
+    crea_ok = True
+    fig_price_by_type(_sheets, _month).show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except Exception as e:
+    print("CREA price data temporarily unavailable.")
+```
+
+## Detached House Prices Over Time, by City
+
+How the benchmark price of a detached (single-family) home has moved in each major market — the run-up that the index and proxy charts above can only hint at. Drag the slider to focus on a period.
+
+```{python}
+#| echo: false
+if crea_ok:
+    fig_price_time_series(_sheets).show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CREA price data temporarily unavailable.")
+```
+
+## How Many Years of Income a Home Costs
+
+Dividing the national benchmark price by median after-tax income gives an intuitive affordability gauge: how many years of a typical household's after-tax income it would take to buy the typical home. (The benchmark is deflated to 2024 dollars via CPI so it is comparable with the inflation-adjusted income series.) The ratio has climbed from roughly **5.7× in 2005 to 9.3× in 2024**.
+
+```{python}
+#| echo: false
+if crea_ok:
+    fig_price_to_income(_agg, ".").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CREA price data temporarily unavailable.")
+```
+
 ## Home Values by City
 
 Sale prices by city aren't openly available, but the census asks owners to estimate their home's value — a usable proxy. This maps **median dwelling value** across metropolitan areas (2021 Census). **Zoom and pan to your area.** Owner-estimated, 2021; city-level (CMA/CA).
+
+For the full **neighbourhood-level** view — every census tract, where you can zoom right to your own street — open the dedicated map (kept on its own page so this one stays fast to load):
+
+**[→ Home value by neighbourhood (census-tract map)](neighbourhoods.qmd)**
 
 ```{python}
 #| echo: false
@@ -500,4 +547,5 @@ if os.path.exists(debt_path):
 - [Housing Starts (CSV)](../data/housing/statcan_housing_starts.csv) — Statistics Canada / CMHC Table 34-10-0143-01
 - [Rental Vacancy Rate (CSV)](../data/housing/statcan_vacancy_rate.csv) — Statistics Canada / CMHC Table 34-10-0127-01
 - [City home value, value-to-income & more (CSV)](../data/geo/statcan_cma_indicators.csv) — 2021 Census (owner-estimated dwelling value)
+- [Home value by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_dwelling_value_2021.csv) — 2021 Census (owner-estimated dwelling value)
 - [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard

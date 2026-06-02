@@ -42,9 +42,12 @@ DataCan/
 ├── CLAUDE.md              ← this file
 ├── _quarto.yml            ← site config, nav (Economy is a dropdown), theme
 ├── index.qmd  about.qmd   ← landing + methodology
-├── population/index.qmd   ← total, by-province, growth rate, components, non-permanent residents, diversity-by-city map (visible-minority dropdown)
+├── population/index.qmd   ← total, by-province, growth rate, components, non-permanent residents, diversity-by-city map (visible-minority dropdown incl. "Not a visible minority"), diversity-over-time chart (census-year + geography dropdown), religion-by-city map, links to neighbourhood diversity + religion pages
+├── population/neighbourhoods.qmd ← census-tract visible-minority choropleth w/ group dropdown (heavy ~3MB; own page)
+├── population/religion-neighbourhoods.qmd ← census-tract religion choropleth w/ group dropdown (heavy ~3MB; own page)
 ├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate, current account
-├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city), rent, housing starts, vacancy rate, household debt
+├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
+├── housing/neighbourhoods.qmd ← census-tract dwelling-value choropleth (heavy ~3MB; own page)
 ├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, income map (city) + link to neighbourhood-detail page
 ├── income/neighbourhoods.qmd ← census-tract income choropleth (heavy ~3MB; its own page so the index stays light)
 ├── fiscal/index.qmd       ← govt gross debt, budget balance, revenue, interest costs, defence
@@ -64,7 +67,7 @@ DataCan/
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   └── run_pipeline.py    ← registry-driven orchestrator
 ├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
-├── data/geo/              ← static 2021-census choropleth assets (CT income; CMA unemployment/dwelling-value/value-to-income/crime/visible-minority)
+├── data/geo/              ← static 2021-census choropleth assets (CT income/dwelling-value/visible-minority/religion; CMA unemployment/dwelling-value/value-to-income/crime/visible-minority/religion; visible-minority-by-census-year history)
 ├── .claude/launch.json    ← preview servers: `quarto-preview` (live) and `site` (static _site)
 ├── .github/workflows/update-data.yml  ← weekly cron: fetch → commit → deploy
 └── requirements.txt
@@ -235,11 +238,40 @@ join also prefers the **combined** whole-CMA row over a single province "part".
 Plotly `updatemenus` dropdown that `restyle`s the mapped variable across `groups`
 (each option auto-caps its 5–95 pct colour range + updates colorbar/hover). First use: **visible-minority
 groups by city** on the Population page (`build_cma_ethnicity()` → `data/geo/statcan_cma_ethnicity.csv`,
-CHARACTERISTIC_IDs 1684–1694 from the CMA census profile: All VM / South Asian / Chinese / Black /
-Filipino / Arab / Latin American / SE Asian / W Asian / Korean / Japanese). **Most sensitive layer —
+CHARACTERISTIC_IDs 1684–1694 **+ 1697** from the CMA census profile: All VM / South Asian / Chinese / Black /
+Filipino / Arab / Latin American / SE Asian / W Asian / Korean / Japanese / **Not a visible minority**). All
+shares use the population base id **1683** as denominator. **Most sensitive layer —
 deliberately descriptive:** neutral single-hue scale (Purples, no red/green valence), no scorecard, no
 "good/bad" direction, StatCan's own "visible minority" term, and a note that it's separate from
-Indigenous identity and shows only residential geography.
+Indigenous identity and shows only residential geography. **"Not a visible minority" (id 1697)** is StatCan's
+residual category — it includes white *and* Indigenous people; the visible-minority variable has **no distinct
+"White" group** (the only "Caucasian (White)" value, id 1715, lives in the separate multiple-response
+ethnic-origin block and must NOT be mixed in). This same group list also drives the **CT-level** diversity
+map (`population/neighbourhoods.qmd`).
+
+**Diversity over time** — `charts.vm_history_lines()` is a multi-line census-year trend with a Plotly
+`updatemenus` **geography dropdown** (Canada / each province·territory / 8 big CMAs); like
+`choropleth_groups_map` it `restyle`s only the traces' `y` per geography (x = census years, shared). Data
+from `build_vm_history()` → `data/geo/statcan_vm_history.csv` (tidy: geography, geo_level, year, group,
+count, share), sourced from the one current cube with a **Census-year dimension**, **98-10-0429-01**
+(2006/2011/2016/2021 × Visible minority (15) × geography). **Gotcha: that cube CSV is WIDE in census year** —
+values sit in four columns `Census year (4):YYYY[n]`, with no single `VALUE` column. Caveats baked into the
+page + chart: its universe is the **population aged 15+** (no 0–14 group → shares run a touch below the
+all-ages maps; labelled as such); **2011** was the voluntary NHS (flagged, not hidden); sub-group definitions
+drift across decades so the **All-VM total** is the comparable line. "Not a visible minority" defaults to
+legend-hidden so the smaller groups are legible. (2001 is a documented best-effort hook, `_vm_history_2001`,
+currently a no-op — legacy 2001/2006 census VM products are XML/IVT-only and format-fragile.)
+
+**Religion by city + neighbourhood** — the same `choropleth_groups_map` treatment as the visible-minority
+layer. `build_cma_religion()` → `data/geo/statcan_cma_religion.csv` and the same `build_ct_from_profile()`
+parse → `data/geo/statcan_ct_religion_2021.csv` (one extra characteristic set in the existing CT pass — no
+extra download). Top-level 2021-Census groups (`RELIGION_GROUPS`, base id **1949**): Christian / No
+religion-secular / Muslim / Hindu / Sikh / Buddhist / Jewish / Traditional Indigenous spirituality / Other —
+the Christian sub-denominations (1952–1966) are rolled into the Christian total (1951). Same deliberately
+neutral framing (self-reported, asked only **decennially**, no scorecard/valence); uses the **"Teal"**
+single-hue scale to distinguish it visually from the Purples diversity map. Drives the city map on
+`population/index.qmd` + the CT map on `population/religion-neighbourhoods.qmd`. Toronto sanity: Christian
+46.4% / No religion 26.6% / Muslim 10.2%.
 
 **City → neighbourhood level-of-detail (separate page, not JS lazy-load).** The income map shows
 the light **CMA** layer on `income/index.qmd` (page **365 KB**) with a link to a dedicated
@@ -249,9 +281,20 @@ crucially — it **works from `file://` too** (everything is embedded; nothing i
 tried JS `fetch()` lazy-loading on one page, but browsers block `fetch()` of local files on
 `file://` (the reviewer opens rendered files directly), so the separate-page approach is the robust
 pattern and the one to reuse for future tract maps. (`build_ct_income_geojson()` still emits a
-combined `data/geo/ct_income_2021.geojson` as a data download.) Crime has no tract data;
-unemployment/value/diversity each need a one-time CT extraction (300–600 MB tables) before they
-could get a neighbourhood page.
+combined `data/geo/ct_income_2021.geojson` as a data download.)
+
+**Now extended to home value + diversity** (`build_ct_from_profile()`): both the CT **dwelling value**
+(`statcan_ct_dwelling_value_2021.csv`, 6,054 tracts) and the CT **visible-minority shares**
+(`statcan_ct_ethnicity_2021.csv`, 6,158 tracts) come from the **same** one-time download — the comprehensive
+Census Profile *for census tracts*, **98-401-X2021007** (`GetFile.cfm?…&GEONO=007`, ~238 MB zip, multi-GB
+uncompressed). It's read in **chunks** (keep only `DGUID` contains `S0507` = CT rows + the needed
+characteristics: dwelling-value id 1488 resolved by name, VM ids 1683–1697) so memory stays bounded, and the
+zip is cached to `/tmp` so re-runs are cheap. CTUIDs are derived `DGUID.replace("2021S0507","")` — identical to
+`build_income()`, so they match the existing `ct_2021.geojson` geometry (which is **reused**, no new boundary
+download; both new CSVs join 100%). Pages: `housing/neighbourhoods.qmd` (dwelling value, `choropleth_map`) and
+`population/neighbourhoods.qmd` (diversity dropdown, `choropleth_groups_map`), each linked from its index page
+like the income one. Crime still has no tract data; unemployment/value-to-income would each need their own CT
+extraction. **None of this is weekly** — it's a one-time census build in `build_census_geo.py`.
 
 ## CPI inflation chart (housing/index.qmd — moved from economics)
 
@@ -269,22 +312,32 @@ schedule/manual only; deploy runs on every push (renders from latest code + data
 `continue-on-error` + the STALE fallback mean a transient source outage won't
 fail the build or blank a chart.
 
-## Licensing note (what may NOT be published)
+## Licensing note (CREA — published as charts only, with permission)
 
-Every public source here permits republication with attribution (StatCan, OECD,
-OWID CC-BY, WHR). **CREA MLS® HPI is the exception** — its terms allow downloading
-for analysis but bar publishing/displaying the data without CREA's written consent,
-which is incompatible with this public repo + CSV downloads. It is the only source
-for absolute resale prices by city × dwelling type, so a reference figure is built
-**internally only** (`internal/crea_house_prices.py` → `internal/…html`); the whole
-`internal/` dir and `*MLS_HPI*` are git-ignored and must never be committed or put
-on a page. The published affordability story uses open data instead — the
-"Home Prices vs. Incomes" chart (OECD **real** house-price index vs. StatCan
-**real** median after-tax income, both rebased to 2000 = 100; by 2025 prices ≈280
-vs. income ≈126). Note: keep both lines on the same basis — the income CSV is in
-2024 constant dollars (real), so pairing it with a *nominal* price index is wrong;
-and NHPI tracks new-build builder prices, which understate the resale run-up, so
-the OECD real resale index is used here, not NHPI.
+Every source here permits republication with attribution (StatCan, OECD, OWID CC-BY,
+WHR). **CREA MLS® HPI** was previously internal-only; **as of 2026-06 we have CREA's
+written permission for educational public use on this site**, so it is now published —
+but **as charts only, not as a redistributable dataset**. Rules that preserve that:
+- **Never commit or write CREA data to `data/`, and never offer it as a CSV download.**
+  A committed CSV = redistribution; only the rendered *charts* are published (display,
+  which the permission covers).
+- `pipeline/crea.py` loads the monthly HPI workbook (`Seasonally Adjusted (M).xlsx` in
+  `MLS_HPI_<Month>_<Year>.zip`) at **render time** — cached in the git-ignored
+  `internal/` dir; a fresh CI checkout downloads the latest month — and builds the
+  figures. Page blocks wrap it in try/except → "temporarily unavailable" if the fetch
+  fails (no STALE CSV fallback, by design; needs `openpyxl`, already in requirements).
+- **Every CREA figure carries `crea.ATTRIB`**: "Source: CREA MLS® Home Price Index,
+  © The Canadian Real Estate Association. Used with permission for educational purposes."
+- Housing page CREA charts: benchmark price by city × dwelling type; detached price
+  over time by city; national price-to-income over time (≈5.7×→9.3×, 2005→2024 — CREA
+  composite deflated to 2024 $ via CPI ÷ real median income). `internal/crea_house_prices.py`
+  stays as the original reference builder; `*MLS_HPI*` zips stay git-ignored.
+
+The open-data **"Home Prices vs. Incomes"** chart (OECD **real** house-price index vs.
+StatCan **real** median after-tax income, both rebased to 2000 = 100) is kept as a
+complementary, fully-open cross-check. Keep both lines on the same basis — the income
+CSV is 2024 constant dollars (real), so pairing it with a *nominal* price index is wrong;
+and NHPI tracks new-build builder prices, which understate the resale run-up.
 
 ## Known issues / gotchas
 

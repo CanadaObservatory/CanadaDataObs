@@ -439,6 +439,85 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     return fig
 
 
+VM_GROUP_COLORS = {
+    "All visible minorities": "#111111",   # headline (thick)
+    "Not a visible minority": "#9e9e9e",
+    "South Asian": "#1f77b4", "Chinese": "#d62728", "Black": "#2ca02c",
+    "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
+}
+
+
+def vm_history_lines(df, *, value_col="share", default_geo="Canada",
+                     source_note=None, nhs_year=2011, height=560,
+                     yaxis_title="% of population (aged 15+)"):
+    """Visible-minority composition over census years, with a dropdown to switch the
+    geography (Canada / a province / a city). Mirrors `choropleth_groups_map`'s
+    dropdown idiom: one fixed line trace per group, and each dropdown button
+    `restyle`s every trace's y to the chosen geography's values (x — the census
+    years — is shared, so only y changes). `df` is the tidy long output of
+    `build_vm_history` (geography, geo_level, year, group, share). 2011 (voluntary
+    NHS) is flagged rather than hidden."""
+    import pandas as pd
+    df = df.copy()
+    df["year"] = df["year"].astype(int)
+    years = sorted(df["year"].unique())
+
+    pref = list(VM_GROUP_COLORS.keys())
+    present = set(df["group"])
+    groups = [g for g in pref if g in present] + [g for g in df["group"].unique()
+                                                  if g not in pref]
+
+    order = {"national": 0, "province": 1, "cma": 2}
+    geos = (df.drop_duplicates("geography")[["geography", "geo_level"]]
+            .assign(o=lambda d: d["geo_level"].map(order))
+            .sort_values(["o", "geography"])["geography"].tolist())
+    if default_geo in geos:
+        geos = [default_geo] + [g for g in geos if g != default_geo]
+
+    def yvals(geo, group):
+        s = df[(df["geography"] == geo) & (df["group"] == group)].set_index("year")[value_col]
+        return [float(s.loc[y]) if y in s.index else None for y in years]
+
+    fig = go.Figure()
+    for g in groups:
+        fig.add_trace(go.Scatter(
+            x=years, y=yvals(default_geo, g), name=g, mode="lines+markers",
+            visible=("legendonly" if g == "Not a visible minority" else True),
+            line=dict(color=VM_GROUP_COLORS.get(g, "#888"),
+                      width=3 if g == "All visible minorities" else 1.8),
+            marker=dict(size=6),
+            hovertemplate=f"{g}: %{{y:.1f}}%<extra></extra>"))
+
+    buttons = [dict(method="restyle", label=geo,
+                    args=[{"y": [yvals(geo, g) for g in groups]}]) for geo in geos]
+
+    fig.update_layout(
+        plot_bgcolor="white", height=height, hovermode="x unified",
+        xaxis=dict(title="Census year", gridcolor="#e0e0e0",
+                   tickmode="array", tickvals=years),
+        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        margin=dict(l=10, r=180, t=70, b=90),
+        updatemenus=[dict(buttons=buttons, active=0, x=0.0, y=1.14,
+                          xanchor="left", yanchor="top", bgcolor="white",
+                          bordercolor="#ccc", borderwidth=1, showactive=True)],
+    )
+    fig.add_annotation(text="Geography:", xref="paper", yref="paper",
+                       x=0.0, y=1.20, xanchor="left", yanchor="bottom",
+                       showarrow=False, font=dict(size=11, color="#666"))
+    if nhs_year in years:
+        fig.add_vrect(x0=nhs_year - 0.25, x1=nhs_year + 0.25, line_width=0,
+                      fillcolor="#000", opacity=0.05)
+        fig.add_annotation(x=nhs_year, y=1.0, yref="paper", yanchor="bottom",
+                           text="2011: voluntary NHS", showarrow=False,
+                           font=dict(size=9, color="#999"))
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=-0.18, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
 def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
                       colors=None):
     """

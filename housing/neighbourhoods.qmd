@@ -1,0 +1,46 @@
+---
+title: "Home Value by Neighbourhood"
+description: "Median dwelling value across Canada's cities, by census tract — 2021 Census"
+---
+
+```{python}
+#| echo: false
+import os
+import json
+import pandas as pd
+from pipeline.charts import choropleth_map
+```
+
+Median dwelling value for each **census tract** — roughly a neighbourhood of 2,500–8,000
+people — from the 2021 Census. **Zoom and pan to your own area.** Census tracts cover cities
+and larger towns; sparsely populated rural areas aren't divided into tracts, so they appear
+blank.
+
+This is the census's **owner-estimated** value (what owners think their home would sell for),
+not a record of sale prices — open sale-price data by neighbourhood isn't available. It is the
+same measure as the city-level [home-value map](index.qmd), at finer resolution.
+
+This detailed view lives on its own page (≈3 MB of boundary data) so the main
+[Housing & Cost of Living](index.qmd) page stays fast to load.
+
+[← Back to Housing & Cost of Living](index.qmd)
+
+```{python}
+#| echo: false
+geo_path = "data/geo/ct_2021.geojson"
+dv_path = "data/geo/statcan_ct_dwelling_value_2021.csv"
+if os.path.exists(geo_path) and os.path.exists(dv_path):
+    ct_geo = json.load(open(geo_path))
+    ct_df = pd.read_csv(dv_path, dtype={"ctuid": str}).dropna(subset=["dwelling_value"])
+    zlo = float(ct_df["dwelling_value"].quantile(0.05))
+    zhi = float(ct_df["dwelling_value"].quantile(0.95))
+    fig = choropleth_map(ct_geo, ct_df, "ctuid", "dwelling_value", name_col="name",
+        colorbar_title="Median dwelling value", value_prefix="$", colorscale="Viridis",
+        zmin=zlo, zmax=zhi, height=720,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); owner-estimated median dwelling value by census tract.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Census-tract home-value map not available — run `python -m pipeline.build_census_geo`.")
+```
+
+[← Back to Housing & Cost of Living](index.qmd)

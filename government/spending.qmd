@@ -73,6 +73,44 @@ if os.path.exists(fin_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
+## The Budget Balance, by Era
+
+The gap between revenue and spending is the federal **budget balance** — a surplus when revenue exceeds spending, a deficit when it falls short. This view makes the balance explicit as a share of GDP, with the periods in office of successive federal governments shaded for reference. It is descriptive: the shading shows *when* governments changed, not a claim about cause. (Shares of GDP begin in 1981; fiscal years are matched to governments approximately.)
+
+```{python}
+#| echo: false
+import plotly.graph_objects as go
+if os.path.exists(fin_path):
+    fin = pd.read_csv(fin_path)
+    b = fin.dropna(subset=["revenue_pct_gdp", "expenditure_pct_gdp"]).copy()
+    b["balance"] = b["revenue_pct_gdp"] - b["expenditure_pct_gdp"]
+    b = b.sort_values("year")
+    bal_colors = ["#4e79a7" if v >= 0 else "#d62728" for v in b["balance"]]
+    figb = go.Figure(go.Bar(x=b["year"], y=b["balance"], marker_color=bal_colors,
+        hovertemplate="%{x}: %{y:+.1f}% of GDP<extra></extra>"))
+    # Neutral by-era bands (successive federal governments) — descriptive only.
+    eras = [(1981, "Trudeau"), (1984, "Mulroney"), (1993, "Chrétien / Martin"),
+            (2006, "Harper"), (2015, "Trudeau")]
+    ymax_year = int(b["year"].max())
+    for i, (start, name) in enumerate(eras):
+        end = eras[i + 1][0] if i + 1 < len(eras) else ymax_year + 1
+        if i % 2 == 0:
+            figb.add_vrect(x0=start - 0.5, x1=end - 0.5, fillcolor="#000000",
+                           opacity=0.04, line_width=0, layer="below")
+        figb.add_annotation(x=(start - 0.5 + end - 0.5) / 2, y=1.0, yref="paper",
+            yanchor="bottom", text=name, showarrow=False, font=dict(size=9, color="#888"))
+    figb.add_hline(y=0, line_color="#888", line_width=1)
+    figb.update_layout(plot_bgcolor="white", height=460, bargap=0.15, showlegend=False,
+        yaxis=dict(title="Budget balance (% of GDP)", gridcolor="#e0e0e0",
+                   ticksuffix="%", zeroline=False),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        margin=dict(t=50, b=90, r=20))
+    figb.add_annotation(
+        text=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}",
+        xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))
+    figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## What the Money Is Spent On — by Type
 
 The federal government's own statement of operations splits spending by economic

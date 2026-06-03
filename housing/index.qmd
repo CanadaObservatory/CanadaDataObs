@@ -226,6 +226,50 @@ except FileNotFoundError:
 ```
 
 
+## Food vs. Overall Inflation
+
+Groceries are the cost-of-living pressure Canadians cite most often. This compares **food** price inflation with the **all-items** rate, year over year. Food has generally run hotter than overall inflation through the recent cost-of-living period.
+
+```{python}
+#| echo: false
+try:
+    ai = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in ai.columns:
+        ai = ai[ai["product_group"] == "All-items"]
+    ai = ai.sort_values("date")
+    ai["yoy"] = pd.to_numeric(ai["cpi_value"], errors="coerce").pct_change(12) * 100
+    fd = pd.read_csv("data/economics/statcan_food_cpi.csv", parse_dates=["date"]).sort_values("date")
+    fd["yoy"] = pd.to_numeric(fd["food_index"], errors="coerce").pct_change(12) * 100
+
+    figf = go.Figure()
+    figf.add_trace(go.Scatter(x=fd["date"], y=fd["yoy"], name="Food", mode="lines",
+        line=dict(color="#e15759", width=2.5), hovertemplate="Food: %{y:.1f}%<extra></extra>"))
+    figf.add_trace(go.Scatter(x=ai["date"], y=ai["yoy"], name="All-items", mode="lines",
+        line=dict(color="#888888", width=2), hovertemplate="All-items: %{y:.1f}%<extra></extra>"))
+    figf.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.6)
+    latest = fd["date"].max()
+    figf.update_layout(
+        plot_bgcolor="white", height=440, hovermode="x unified",
+        yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%"),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+            range=[pd.Timestamp("2015-01-01"), latest],
+            rangeselector=dict(buttons=[
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02,
+                    bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=120, r=20))
+    figf.add_annotation(
+        text=f"Source: Statistics Canada, Table 18-10-0004-01 (All-items and Food) | Data as of: {get_data_date('data/economics/statcan_food_cpi.csv')}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    figf.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("CPI data not yet available. Run the data pipeline to fetch it.")
+```
+
 ## Real House Prices
 
 Inflation-adjusted ("real") house price index, set to 100 in 2015. Because it

@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_food_cpi",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 18-10-0004-01",
+  "frequency": "monthly",
+  "unit": "index (2002=100)",
+  "retrieved_at": "2026-06-03T20:01:09.020854+00:00",
+  "latest_observation_date": "2026-04-01",
+  "transformations": [
+    "filtered to {'GEO': 'Canada', 'Products and product groups': 'Food'}"
+  ],
+  "notes": null,
+  "row_count": 928
+}

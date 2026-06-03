@@ -254,6 +254,17 @@ INDICATORS = [
                                "Seasonal adjustment": "Seasonally adjusted at annual rates"},
               output_subpath="statcan_gdp_quarterly.csv",
               source_table="Statistics Canada 36-10-0104-01"),
+    # Food CPI (the most-felt cost-of-living component) as its own series, like
+    # rent_cpi — kept separate from statcan_cpi.csv so the all-items deflator used
+    # elsewhere (crea.py) stays single-series.
+    Indicator("food_cpi", "economics", "statcan",
+              "Food CPI", "index (2002=100)", "monthly",
+              value_col="food_index", date_format="%Y-%m",
+              statcan_table="18-10-0004-01",
+              statcan_filters={"GEO": "Canada",
+                               "Products and product groups": "Food"},
+              output_subpath="statcan_food_cpi.csv",
+              source_table="Statistics Canada 18-10-0004-01"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",

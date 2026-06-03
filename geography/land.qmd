@@ -1,0 +1,69 @@
+---
+title: "The Land"
+description: "Canada’s terrestrial ecozones and what the land is covered by"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
+```
+
+## The lay of the land
+
+Canada spans **15 terrestrial ecozones** — broad regions defined by their climate, landforms, soils and vegetation. They range from the **Arctic Cordillera**'s ice-capped mountains to the **Prairies**' grasslands and the **Mixedwood Plains** that hold most of the population around the lower Great Lakes and St. Lawrence. The single largest is the **Boreal Shield**, the rock-and-conifer heart of the country.
+
+```{python}
+#| echo: false
+ez_geo_path, ez_csv = "data/geo/nef_ecozones.geojson", "data/geo/statcan_landcover_ecozone.csv"
+ECOZONE_COLORS = {
+    "Arctic Cordillera": "#c9d6df", "Northern Arctic": "#dde6ec", "Southern Arctic": "#b7c9b0",
+    "Taiga Plains": "#9bc4a6", "Taiga Shield": "#74b08e", "Taiga Cordillera": "#a7c8ad",
+    "Hudson Plains": "#6db6b3", "Boreal Shield": "#2e7d52", "Boreal Plains": "#7fb069",
+    "Boreal Cordillera": "#5fa07a", "Pacific Maritime": "#2f8f8f", "Montane Cordillera": "#8a9a5b",
+    "Atlantic Maritime": "#4e9c7d", "Mixedwood Plains": "#a7d06e", "Prairies": "#e3c469",
+}
+if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
+    ez_geo = json.load(open(ez_geo_path))
+    ez = pd.read_csv(ez_csv, dtype={"fid": str})
+    fig = choropleth_categorical(ez_geo, ez, "fid", "ecozone",
+        color_map=ECOZONE_COLORS, ordered=list(ECOZONE_COLORS.keys()),
+        center={"lat": 63, "lon": -96}, zoom=2.2,
+        source_note="Source: National Ecological Framework for Canada (Agriculture and Agri-Food Canada / ECCC). Terrestrial ecozones.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Ecozones not yet available — run `python -m pipeline.build_geography`.")
+```
+
+### What the land is covered by
+
+The same ecozones, shaded by **land cover** — the share of each region that is forest, cropland, water, wetland, snow and ice, and so on (2020). **Use the dropdown to switch the mapped class.** The contrasts are stark: the **Prairies** are about 60% cropland; the boreal zones are overwhelmingly **treed**; the Arctic ecozones are **barren** or sparsely vegetated; and inland **water** alone covers a fifth or more of some shield regions — a reminder of how much of Canada is lake.
+
+```{python}
+#| echo: false
+if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
+    ez_geo = json.load(open(ez_geo_path))
+    ez = pd.read_csv(ez_csv, dtype={"fid": str})
+    groups = [("treed", "Forest / treed"), ("cropland", "Cropland"), ("water", "Inland water"),
+              ("wetland", "Wetland (non-treed)"), ("grass_shrub", "Grassland & shrubland"),
+              ("barren", "Barren land"), ("sparse_veg", "Sparsely vegetated"),
+              ("snow_ice", "Snow & ice"), ("built_up", "Built-up"),
+              ("treed_disturb", "Recent treed disturbance")]
+    fig = choropleth_groups_map(ez_geo, ez, "fid", groups, name_col="ecozone", colorscale="YlGn",
+        center={"lat": 63, "lon": -96}, zoom=2.2,
+        source_note="Source: Statistics Canada Table 38-10-0177-01 (land cover by ecozone, 2020). Share of each ecozone's area.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Land-cover data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## Download data
+
+- [Land cover by ecozone (CSV)](../data/geo/statcan_landcover_ecozone.csv) — Statistics Canada Table 38-10-0177-01 (2020)

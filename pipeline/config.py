@@ -503,6 +503,17 @@ INDICATORS = [
               statcan_filters={"GEO": "Canada",
                                "Homicides": "Homicide rates per 100,000 population"},
               source_table="Statistics Canada 35-10-0068-01"),
+
+    # ----- Geography (weekly/annual series; static map assets are built once by
+    #        pipeline/build_geography.py and are not part of this registry) -----
+    Indicator("wildfire", "geography", "custom",
+              "Wildfire area burned", "hectares", "annual",
+              fetch_fn="fetch_wildfire", output_subpath="nfdb_wildfire.csv",
+              source_table="NRCan Canadian National Fire Database (NFDB)"),
+    Indicator("sea_ice", "geography", "custom",
+              "Arctic sea-ice extent", "million km²", "monthly",
+              fetch_fn="fetch_sea_ice", output_subpath="nsidc_sea_ice.csv",
+              source_table="NSIDC Sea Ice Index (G02135)"),
 ]
 
 # Quick lookup by id

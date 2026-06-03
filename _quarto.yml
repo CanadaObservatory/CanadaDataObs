@@ -10,8 +10,24 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: population/index.qmd
-        text: Population
+      - text: Population
+        menu:
+          - href: population/index.qmd
+            text: Population & Growth
+          - href: population/diversity.qmd
+            text: Diversity
+          - href: population/religion.qmd
+            text: Religion
+      - text: Geography
+        menu:
+          - href: geography/index.qmd
+            text: Where People Live
+          - href: geography/land.qmd
+            text: The Land
+          - href: geography/water.qmd
+            text: Water
+          - href: geography/fire-ice.qmd
+            text: Fire & Ice
       - text: Economy
         menu:
           - href: economics/index.qmd

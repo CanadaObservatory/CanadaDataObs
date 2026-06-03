@@ -1,0 +1,63 @@
+---
+title: "Where People Live"
+description: "Population density across Canada — the empty-north, border-hugging pattern (2021 Census)"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+```
+
+Canada is a country defined by its physical extent. At **9.98 million km²** it is the second-largest country on Earth, with the **longest coastline of any nation** (about 243,000 km) and roughly **a fifth of the world's fresh water**. Yet it is home to only about 40 million people — so most of that vastness is boreal forest, tundra, rock and ice, and most Canadians live in a narrow band along the southern edge. The maps below describe that geography: where people are, what the land is made of, where the water is, and how fire and ice are changing.
+
+*These pages are descriptive. They show physical and natural features and how they vary across the country; the sources are official (Statistics Canada, Natural Resources Canada, ECCC, NSIDC), and the maps carry no "good" or "bad" reading.*
+
+## Where Canadians live
+
+Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Because that range spans several orders of magnitude, the map is shaded on a **logarithmic** scale (each step is ten times denser). The pattern is unmistakable: the country fills in toward its southern border and empties out to the north.
+
+```{python}
+#| echo: false
+prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
+if os.path.exists(prov_geo_path) and os.path.exists(prov_csv):
+    prov_geo = json.load(open(prov_geo_path))
+    pg = pd.read_csv(prov_csv, dtype={"pruid": str})
+    fig = choropleth_map(prov_geo, pg, "pruid", "density", name_col="name",
+        colorbar_title="People per km²", colorscale="YlOrRd", value_fmt=",.2f", log=True,
+        center={"lat": 62, "lon": -96}, zoom=2.3,
+        source_note="Source: 2021 Census, Statistics Canada (population density per km²). Colour scale is logarithmic.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Province geography not yet available — run `python -m pipeline.build_geography`.")
+```
+
+### Population density within cities
+
+Zooming in, the same measure reveals how compact each metropolitan area is. Density here is people per square kilometre **within** each census metropolitan area or agglomeration — a rough read on how tightly a city is built. Pan and zoom to your own region.
+
+```{python}
+#| echo: false
+cma_geo_path, cma_den = "data/geo/cma_2021.geojson", "data/geo/statcan_cma_density.csv"
+if os.path.exists(cma_geo_path) and os.path.exists(cma_den):
+    cma_geo = json.load(open(cma_geo_path))
+    cd = pd.read_csv(cma_den, dtype={"cmauid": str})
+    fig = choropleth_map(cma_geo, cd, "cmauid", "density", name_col="name",
+        colorbar_title="People per km²", colorscale="YlOrRd", value_fmt=",.0f", log=True,
+        center={"lat": 56, "lon": -96}, zoom=2.6,
+        source_note="Source: 2021 Census, Statistics Canada. Density within each metropolitan area (CMA/CA); logarithmic scale.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("City density not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## Download data
+
+- [Population density & freshwater area by province (CSV)](../data/geo/statcan_prov_geography.csv) — 2021 Census + NRCan/StatCan area table
+- [Population density by metro area (CSV)](../data/geo/statcan_cma_density.csv) — 2021 Census (Statistics Canada)

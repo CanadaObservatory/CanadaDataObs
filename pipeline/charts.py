@@ -366,22 +366,50 @@ def page_snapshot(section, **kwargs):
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
-                   center=None, zoom=2.6, height=640, zmin=None, zmax=None):
+                   center=None, zoom=2.6, height=640, zmin=None, zmax=None, log=False):
     """Zoomable choropleth map (Plotly Choroplethmapbox, free carto-positron
     basemap — no API token). The `geojson` features must carry a top-level `id`
     equal to df[location_col]. Used for the census-tract maps so users can pan/
-    zoom to their own area. Pass `name_col` for a human-readable hover label."""
+    zoom to their own area. Pass `name_col` for a human-readable hover label.
+
+    `log=True` colours on a base-10 log scale (for heavily skewed quantities like
+    population density, where a few dense provinces would otherwise flatten the
+    rest); the colourbar ticks are relabelled to the real values and zmin/zmax are
+    ignored. The hover always shows the true (un-logged) value, read from
+    customdata so the displayed number is identical whether or not log is set."""
+    import math
+    import numpy as np
+    import pandas as pd
     center = center or {"lat": 58.0, "lon": -96.0}
-    customdata = df[[name_col]].to_numpy() if name_col else None
+    vals = pd.to_numeric(df[value_col], errors="coerce")
+    base = df.copy()
+    base["_v"] = vals.to_numpy()
+    cols = ([name_col] if name_col else []) + ["_v"]
+    customdata = base[cols].to_numpy()
     name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    vidx = 1 if name_col else 0
+
+    if log:
+        z = np.where(vals.to_numpy() > 0, np.log10(vals.where(vals > 0).to_numpy()), np.nan)
+        finite = [v for v in z if v == v]
+        lo, hi = math.floor(min(finite)), math.ceil(max(finite))
+        tickvals = list(range(lo, hi + 1))
+        ticktext = [f"{10 ** t:,.0f}" if t >= 0 else f"{10 ** t:g}" for t in tickvals]
+        colorbar = dict(title=colorbar_title, tickvals=tickvals, ticktext=ticktext,
+                        tickprefix=value_prefix, ticksuffix=value_suffix)
+        z_, zmin_, zmax_ = z, None, None
+    else:
+        colorbar = dict(title=colorbar_title, tickprefix=value_prefix, ticksuffix=value_suffix)
+        z_, zmin_, zmax_ = vals, zmin, zmax
+
     fig = go.Figure(go.Choroplethmapbox(
-        geojson=geojson, locations=df[location_col], z=df[value_col],
-        zmin=zmin, zmax=zmax,
+        geojson=geojson, locations=df[location_col], z=z_,
+        zmin=zmin_, zmax=zmax_,
         featureidkey="id", colorscale=colorscale, reversescale=reversescale,
         marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
-        colorbar=dict(title=colorbar_title, tickprefix=value_prefix, ticksuffix=value_suffix),
+        colorbar=colorbar,
         customdata=customdata,
-        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{z:{value_fmt}}}{value_suffix}<extra></extra>",
+        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{customdata[{vidx}]:{value_fmt}}}{value_suffix}<extra></extra>",
     ))
     fig.update_layout(
         mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
@@ -395,32 +423,44 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
 
 
 def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
-                          colorscale="Purples", source_note=None,
-                          center=None, zoom=2.6, height=660):
+                          colorscale="Cividis", source_note=None,
+                          center=None, zoom=2.6, height=660, cap_quantiles=(0.0, 1.0),
+                          opacity=0.82):
     """Choropleth with a dropdown to switch the mapped variable across `groups`
-    (list of (column, label)). Used for the descriptive visible-minority maps —
-    neutral single-hue scale (no red/green valence), each option auto-caps its
-    colour range to its 5th–95th percentile. Values are percentages."""
+    (list of (column, label)). Used for the descriptive share maps (visible
+    minority, religion, land cover); values are percentages and each option
+    rescales its own colour range + colorbar.
+
+    `cap_quantiles` = the (low, high) quantiles each group's colour range is clipped
+    to. Default (0, 1) = the group's true min–max — correct for *share* layers where
+    the high values are the subject (so Toronto's 57% visible-minority reads
+    differently from Calgary's 39% instead of both clamping to the darkest colour).
+    Pass a high quantile < 1 (e.g. (0, 0.98)) for the ~6,000-tract maps, where a few
+    near-100% enclave tracts would otherwise stretch the scale and flatten the
+    typical range. The default colour scale is **Cividis** — perceptually uniform and
+    colourblind-safe, with no red/green valence — so wide spreads stay legible while
+    these sensitive layers keep a neutral, descriptive reading."""
     center = center or {"lat": 56.0, "lon": -96.0}
     locs = df[location_col]
     custom = df[[name_col]].to_numpy()
+    qlo, qhi = cap_quantiles
 
-    def cap(col):
-        return float(df[col].quantile(0.05)), float(df[col].quantile(0.95))
+    def rng(col):
+        return float(df[col].quantile(qlo)), float(df[col].quantile(qhi))
 
     c0, l0 = groups[0]
-    lo0, hi0 = cap(c0)
+    lo0, hi0 = rng(c0)
     fig = go.Figure(go.Choroplethmapbox(
         geojson=geojson, locations=locs, z=df[c0].tolist(), featureidkey="id",
         colorscale=colorscale, zmin=lo0, zmax=hi0,
-        marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
+        marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=opacity),
         colorbar=dict(title=f"% {l0}", ticksuffix="%"),
         customdata=custom,
         hovertemplate=f"<b>%{{customdata[0]}}</b><br>{l0}: %{{z:.1f}}%<extra></extra>",
     ))
     buttons = []
     for col, label in groups:
-        lo, hi = cap(col)
+        lo, hi = rng(col)
         buttons.append(dict(method="restyle", label=label, args=[{
             "z": [df[col].tolist()], "zmin": lo, "zmax": hi,
             "colorbar.title.text": f"% {label}",
@@ -436,6 +476,76 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
                            y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
+# Qualitative palette for categorical maps (ecozones etc.) — distinct, print-safe.
+CATEGORICAL_PALETTE = [
+    "#4e79a7", "#59a14f", "#9c755f", "#e15759", "#f28e2b", "#edc948",
+    "#b07aa1", "#76b7b2", "#ff9da7", "#86bcb6", "#d37295", "#a0cbe8",
+    "#8cd17d", "#b6992d", "#bab0ac",
+]
+
+
+def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
+                           color_map=None, ordered=None, source_note=None,
+                           center=None, zoom=2.4, height=660, legend_title=None,
+                           legend_orientation="v"):
+    """Categorical choropleth — each polygon coloured by a *discrete* category
+    rather than a continuous value (used for ecozones and permafrost zones).
+
+    Plotly's Choroplethmapbox is value-based, so each category is mapped to an
+    integer code laid over a hard-stepped discrete colourscale (value i sits in
+    the middle of band i via zmin=-0.5/zmax=n-0.5); the colourbar is hidden and a
+    real legend is drawn with invisible Scattermapbox proxies (one per category).
+    Pass `ordered` to fix the legend order (and, for an ordinal ramp like the
+    permafrost zones, the colour order); `color_map` to set exact colours, else
+    CATEGORICAL_PALETTE is cycled. `geojson` features must carry a top-level `id`
+    equal to df[location_col]; `name_col` adds a per-feature hover label."""
+    center = center or {"lat": 62.0, "lon": -96.0}
+    cats = list(ordered) if ordered else sorted(df[cat_col].dropna().unique())
+    if color_map is None:
+        color_map = {c: CATEGORICAL_PALETTE[i % len(CATEGORICAL_PALETTE)]
+                     for i, c in enumerate(cats)}
+    code = {c: i for i, c in enumerate(cats)}
+    n = len(cats)
+    colorscale = []
+    for i, c in enumerate(cats):
+        colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
+
+    custom = (df[[name_col, cat_col]].to_numpy() if name_col else df[[cat_col]].to_numpy())
+    name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    cat_idx = 1 if name_col else 0
+    fig = go.Figure(go.Choroplethmapbox(
+        geojson=geojson, locations=df[location_col],
+        z=[code.get(v) for v in df[cat_col]],
+        zmin=-0.5, zmax=n - 0.5, featureidkey="id",
+        colorscale=colorscale, showscale=False,
+        marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
+        customdata=custom,
+        hovertemplate=f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>",
+    ))
+    # Choroplethmapbox shows no legend entry, so draw category swatches as
+    # zero-point Scattermapbox proxies (nothing rendered on the map; legend only).
+    for c in cats:
+        fig.add_trace(go.Scattermapbox(
+            lat=[None], lon=[None], mode="markers",
+            marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
+        ))
+    legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.01)
+              if legend_orientation == "v"
+              else dict(orientation="h", yanchor="top", y=-0.02, xanchor="center", x=0.5))
+    if legend_title:
+        legend["title"] = dict(text=legend_title)
+    fig.update_layout(
+        mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
+        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        legend=legend, showlegend=True,
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.04, showarrow=False,
+                           font=dict(size=10, color="#999"))
     return fig
 
 

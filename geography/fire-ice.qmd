@@ -1,0 +1,124 @@
+---
+title: "Fire & Ice"
+description: "Wildfire, permafrost, and the retreat of Arctic sea ice"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
+```
+
+## Fire and ice
+
+### Wildfire
+
+Wildfire is part of the boreal landscape, but the area burned varies enormously from year to year — and **2023 was, by a wide margin, the worst fire season on record**, with about **17.6 million hectares** burned across Canada (roughly the size of Florida). The chart shows the national total each year since 1959.
+
+```{python}
+#| echo: false
+wf_path = "data/geography/nfdb_wildfire.csv"
+if os.path.exists(wf_path):
+    w = pd.read_csv(wf_path)
+    ca = w[w["geography"] == "Canada"].sort_values("year").copy()
+    ca["mha"] = ca["area_burned_ha"] / 1e6
+    fig = go.Figure(go.Bar(
+        x=ca["year"], y=ca["mha"], marker_color=CANADA_COLOR,
+        hovertemplate="<b>%{x}</b><br>%{y:.1f} million ha burned<extra></extra>"))
+    fig.update_layout(
+        plot_bgcolor="white", height=420,
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title="Million hectares burned", gridcolor="#e0e0e0"),
+        margin=dict(t=30, b=70),
+        annotations=[dict(text=f"Source: Natural Resources Canada, Canadian National Fire Database | Data as of: {get_data_date(wf_path)}",
+                          xref="paper", yref="paper", x=0, y=-0.18, showarrow=False,
+                          font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "displayModeBar": False})
+else:
+    print("Wildfire data not yet available — run the data pipeline.")
+```
+
+In that record 2023 season, the burning was spread across the country. Mapping each province and territory's burned area **as a share of its own land area** — rather than raw hectares, which would simply track the size of the big northern provinces — shows that several provinces lost **2–4% of their entire land area** to fire in a single year.
+
+```{python}
+#| echo: false
+if os.path.exists(wf_path) and os.path.exists(prov_geo_path) and os.path.exists(prov_csv):
+    prov_geo = json.load(open(prov_geo_path))
+    pg = pd.read_csv(prov_csv, dtype={"pruid": str})
+    w = pd.read_csv(wf_path)
+    w23 = (w[(w["year"] == 2023) & (w["geography"] != "Canada")]
+           .merge(pg[["pruid", "name", "land_area_km2"]], left_on="geography", right_on="name", how="right"))
+    w23["pct_burned"] = w23["area_burned_ha"] / w23["land_area_km2"]   # ha/100 km² ÷ land km² × 100
+    fig = choropleth_map(prov_geo, w23, "pruid", "pct_burned", name_col="name",
+        colorbar_title="% of land burned, 2023", colorscale="OrRd", value_suffix="%", value_fmt=".2f",
+        center={"lat": 62, "lon": -96}, zoom=2.3,
+        source_note="Source: NRCan Canadian National Fire Database; land area NRCan/StatCan. Area burned in 2023 ÷ provincial land area. Nunavut has no point-fire data.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Wildfire-by-province data not yet available.")
+```
+
+### Permafrost
+
+Much of the North sits on **permafrost** — ground that stays frozen year-round. It grades from **continuous** permafrost across the High Arctic (frozen almost everywhere) to **isolated patches** near its southern limit. The classic national map below shows those zones; note that it reflects mapping from the mid-1990s, and permafrost extent has been **retreating** as the climate warms, so the southern boundary today sits further north.
+
+```{python}
+#| echo: false
+pf_geo_path, pf_csv = "data/geo/permafrost_zones.geojson", "data/geo/permafrost_zones.csv"
+PF_COLORS = {
+    "Continuous (90–100%)": "#08519c", "Extensive discontinuous (50–90%)": "#3182bd",
+    "Sporadic discontinuous (10–50%)": "#6baed6", "Isolated patches (0–10%)": "#bdd7e7",
+}
+if os.path.exists(pf_geo_path) and os.path.exists(pf_csv):
+    pf_geo = json.load(open(pf_geo_path))
+    pf = pd.read_csv(pf_csv, dtype={"fid": str})
+    fig = choropleth_categorical(pf_geo, pf, "fid", "zone",
+        color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_orientation="h",
+        center={"lat": 64, "lon": -96}, zoom=2.2,
+        source_note="Source: Permafrost map of Canada, Atlas of Canada 5th edition (Natural Resources Canada). Mapping ~1995; extent has since declined.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Permafrost data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+### Arctic sea ice
+
+The clearest single signal of a warming North is the decline of **Arctic sea ice**. Its extent swings with the seasons — peaking in March, bottoming out in September — but the **September minimum has fallen by roughly 40% since satellite records began in 1979**. Canada's Arctic waters, including the Northwest Passage, are increasingly ice-free at the end of summer.
+
+```{python}
+#| echo: false
+si_path = "data/geography/nsidc_sea_ice.csv"
+if os.path.exists(si_path):
+    s = pd.read_csv(si_path)
+    sep = s[s["month"] == 9].sort_values("year")
+    mar = s[s["month"] == 3].sort_values("year")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=mar["year"], y=mar["extent_mkm2"], name="March (winter maximum)",
+                             mode="lines", line=dict(color="#9ecae1", width=2)))
+    fig.add_trace(go.Scatter(x=sep["year"], y=sep["extent_mkm2"], name="September (summer minimum)",
+                             mode="lines+markers", line=dict(color="#08519c", width=3), marker=dict(size=4)))
+    fig.update_layout(
+        plot_bgcolor="white", height=460, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title="Sea-ice extent (million km²)", gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        margin=dict(t=40, b=70),
+        annotations=[dict(text=f"Source: NSIDC Sea Ice Index (G02135), Northern Hemisphere | Data as of: {get_data_date(si_path)}",
+                          xref="paper", yref="paper", x=0, y=-0.18, showarrow=False,
+                          font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Sea-ice data not yet available — run the data pipeline.")
+```
+
+## Download data
+
+- [Wildfire area burned, national & by province (CSV)](../data/geography/nfdb_wildfire.csv) — NRCan Canadian National Fire Database
+- [Arctic sea-ice extent, monthly (CSV)](../data/geography/nsidc_sea_ice.csv) — NSIDC Sea Ice Index (G02135)

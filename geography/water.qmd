@@ -1,0 +1,39 @@
+---
+title: "Water"
+description: "Fresh water across Canada — lakes and rivers as a share of each province’s area"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
+```
+
+## A country of fresh water
+
+Canada holds close to **20% of the world's fresh water** and more lake area than any other country. How much of each province or territory is actually *covered* by inland water varies widely: nearly **15% of Ontario and Manitoba** is fresh water, against around 2% of Alberta and British Columbia. Prince Edward Island has effectively none.
+
+```{python}
+#| echo: false
+if os.path.exists(prov_geo_path) and os.path.exists(prov_csv):
+    prov_geo = json.load(open(prov_geo_path))
+    pg = pd.read_csv(prov_csv, dtype={"pruid": str})
+    fig = choropleth_map(prov_geo, pg, "pruid", "pct_freshwater", name_col="name",
+        colorbar_title="% fresh water", colorscale="Blues", value_suffix="%", value_fmt=".1f",
+        center={"lat": 62, "lon": -96}, zoom=2.3,
+        source_note="Source: Natural Resources Canada / Statistics Canada land and freshwater area. Inland lakes & rivers as a share of total area.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Freshwater data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## Download data
+
+- [Land & freshwater area by province (CSV)](../data/geo/statcan_prov_geography.csv) — NRCan / Statistics Canada

@@ -763,6 +763,119 @@ def build_ct_income_geojson():
     print(f"wrote {path}: {round(os.path.getsize(path)/1e6, 2)} MB, {len(feats)} tracts")
 
 
+# ---- Dissemination-area diversity (TRIAL: one metro at a time) ------------------
+# DAs are StatCan's smallest standard geography (~400–700 people) — finer than CTs.
+# National DA files are huge (boundary ~98 MB; DA Census Profile 2.1 GB, or ~293 MB
+# for the BC provincial split), so we filter to ONE CMA. Same visible-minority IDs
+# (1683–1697) as build_ct_from_profile; only the DGUID prefix differs (2021S0512 for
+# DAs vs 2021S0507 for CTs). The CMA is selected spatially with the existing
+# cma_2021.geojson polygon, so no extra geographic-attributes download is needed.
+DA_BND_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/"
+              "boundary-limites/files-fichiers/lda_000a21a_e.zip")
+DA_PROFILE_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/"
+                  "download-telecharger/comp/GetFile.cfm?Lang=E&FILETYPE=CSV&GEONO={geono}")
+
+
+def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouver"):
+    """Visible-minority AND religion shares + boundaries at dissemination-area level
+    for ONE CMA. One pass over the (large) provincial DA Census Profile produces both
+    layers (like build_ct_from_profile), filtered to the CMA via the existing
+    cma_2021.geojson polygon. `pruid`/`geono` accept a list for split-province CMAs
+    (Ottawa–Gatineau: pruid=["35","24"], geono=["006_Ontario","006_Quebec"])."""
+    pruids = [pruid] if isinstance(pruid, str) else list(pruid)
+    geonos = [geono] if isinstance(geono, str) else list(geono)
+    cma = gpd.read_file(f"{GEO_DIR}/cma_2021.geojson")
+    cma["cmauid"] = cma["cmauid"].astype(str)
+    poly = cma[cma["cmauid"] == cmauid].to_crs(epsg=4326).geometry.union_all()
+
+    # --- DA boundaries → province pre-filter → spatial filter to the CMA ---
+    bz = zipfile.ZipFile(_download_cache(DA_BND_URL, "/tmp/lda_000a21a_e.zip", "DA boundaries (~98 MB)"))
+    bz.extractall("/tmp/da_bnd")
+    shp = [f for f in bz.namelist() if f.endswith(".shp")][0]
+    g = gpd.read_file(f"/tmp/da_bnd/{shp}")
+    uid = [c for c in g.columns if c.upper() == "DAUID"][0]
+    prc = [c for c in g.columns if c.upper() == "PRUID"][0]
+    g["dauid"] = g[uid].astype(str)
+    g = g[g[prc].astype(str).isin(pruids)].to_crs(epsg=4326)
+    cmac = [c for c in g.columns if c.upper() == "CMAUID"]
+    if cmac:
+        g = g[g[cmac[0]].astype(str) == cmauid].copy()
+    else:
+        g = g[g.geometry.representative_point().within(poly)].copy()
+    g["geometry"] = g["geometry"].simplify(0.0004, preserve_topology=True)
+    g = g[["dauid", "geometry"]]
+    da_ids = set(g["dauid"])
+    print(f"DA boundaries ({slug}): {len(da_ids)} DAs in CMA {cmauid}")
+
+    # --- DA profile (visible minority + religion) from the provincial split(s),
+    #     chunk-read like the CT build; concatenated across provinces for split CMAs ---
+    needed = ({cid for cid, _, _ in VM_GROUPS} | {1683}
+              | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE})
+    keep = []
+    for gn in geonos:
+        pz = zipfile.ZipFile(_download_cache(DA_PROFILE_URL.format(geono=gn),
+                                             f"/tmp/da_profile_{gn}.zip", f"DA profile {gn} (large)"))
+        # provincial-split profile names its data file "..._CSV_data_<Province>.csv"
+        csvn = [n for n in pz.namelist()
+                if n.lower().endswith(".csv") and "data" in n.lower() and "geo" not in n.lower()][0]
+        for chunk in pd.read_csv(pz.open(csvn), usecols=["DGUID", "CHARACTERISTIC_ID", "C1_COUNT_TOTAL"],
+                                 dtype=str, encoding="latin-1", chunksize=400_000):
+            chunk = chunk[chunk["DGUID"].str.contains("S0512", na=False)]
+            if chunk.empty:
+                continue
+            cid = pd.to_numeric(chunk["CHARACTERISTIC_ID"], errors="coerce")
+            chunk = chunk[cid.isin(needed)]
+            if not chunk.empty:
+                keep.append(chunk)
+    prof = pd.concat(keep, ignore_index=True)
+    prof["cid"] = pd.to_numeric(prof["CHARACTERISTIC_ID"], errors="coerce")
+    prof["dauid"] = prof["DGUID"].astype(str).str.replace("2021S0512", "", regex=False)
+    prof["v"] = pd.to_numeric(prof["C1_COUNT_TOTAL"], errors="coerce")
+    prof = prof[prof["dauid"].isin(da_ids)]
+
+    def ser(cid):
+        return prof[prof["cid"] == cid].drop_duplicates("dauid").set_index("dauid")["v"]
+    base = ser(1683)
+    eth = pd.DataFrame(index=sorted(da_ids))
+    eth.index.name = "dauid"
+    for cid, col, _ in VM_GROUPS:
+        eth[col] = (ser(cid) / base * 100).round(1)
+    eth["name"] = "StatCan area #" + eth.index.astype(str)
+    eth = eth.dropna(subset=["all_vm"])
+    os.makedirs(GEO_DIR, exist_ok=True)
+    eth.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_ethnicity.csv", index=False)
+    print(f"DA ethnicity ({slug}): {len(eth)} DAs with data")
+
+    # --- religion shares (same DAs; religion population base 1949) ---
+    rbase = ser(RELIGION_BASE)
+    rel = pd.DataFrame(index=sorted(da_ids))
+    rel.index.name = "dauid"
+    for cid, col, _ in RELIGION_GROUPS:
+        rel[col] = (ser(cid) / rbase * 100).round(1)
+    rel["name"] = "StatCan area #" + rel.index.astype(str)
+    rel = rel.dropna(subset=["christian"])
+    rel.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_religion.csv", index=False)
+    print(f"DA religion ({slug}): {len(rel)} DAs with data")
+
+    # --- geojson (DAs present in either layer), id = DAUID ---
+    g = g[g["dauid"].isin(set(eth.index) | set(rel.index))]
+    gj = json.loads(g.to_json())
+
+    def rnd(o):
+        if isinstance(o, float):
+            return round(o, COORD_DECIMALS)
+        if isinstance(o, list):
+            return [rnd(x) for x in o]
+        return o
+    for ft in gj["features"]:
+        ft["id"] = ft["properties"]["dauid"]
+        ft["geometry"]["coordinates"] = rnd(ft["geometry"]["coordinates"])
+    path = f"{GEO_DIR}/da_{slug}_2021.geojson"
+    with open(path, "w") as f:
+        f.write(json.dumps(gj, separators=(",", ":")))
+    print(f"wrote {path}: {round(os.path.getsize(path) / 1e6, 2)} MB")
+
+
 if __name__ == "__main__":
     ids = build_income()
     build_boundaries(ids)

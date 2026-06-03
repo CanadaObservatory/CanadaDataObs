@@ -27,6 +27,7 @@ from pipeline.fetch_statcan import (
 from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
 from pipeline.fetch_whr import fetch_happiness
 from pipeline.fetch_worldbank import fetch_worldbank_indicator
+from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -40,6 +41,8 @@ CUSTOM_FETCHERS = {
     "fetch_consumption_co2": fetch_consumption_co2,
     "fetch_happiness": fetch_happiness,
     "fetch_provincial_electricity": fetch_provincial_electricity,
+    "fetch_wildfire": fetch_wildfire,
+    "fetch_sea_ice": fetch_sea_ice,
 }
 
 

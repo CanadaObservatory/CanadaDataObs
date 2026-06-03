@@ -1,50 +1,39 @@
 ---
-title: "Religion by Neighbourhood"
-description: "Religious groups across Canada's cities, by census tract — 2021 Census"
+title: "Religion by dissemination area — Vancouver"
+description: "Religious composition at Statistics Canada's finest standard geography, for the Vancouver area (2021 Census)"
 ---
 
 ```{python}
 #| echo: false
-import os
-import json
+import os, json
 import pandas as pd
 from pipeline.charts import choropleth_groups_map
 ```
 
-The share of each major religion in every **census tract** — roughly a neighbourhood of
-2,500–8,000 people — from the 2021 Census. **Use the dropdown to switch between groups, and
-zoom and pan to your own area.** Census tracts cover cities and larger towns; sparsely
-populated rural areas aren't divided into tracts, so they appear blank.
+This map drops below the census tract to the **dissemination area (DA)** — Statistics Canada's *smallest* standard geography, about **400–700 people each** — for **Vancouver**. Religion is self-reported and asked only once a decade. Other metros are linked from the [main Population page](religion.qmd#religion-by-neighbourhood).
 
-Religion is self-reported and asked only once a decade. This is a descriptive picture of
-residential geography — there is no "good" or "bad" reading here. **"No religion / secular"** is
-now the second-largest group nationally and is included; the many Christian denominations are
-rolled into a single "Christian" total. Religion is a separate concept from ethnicity and from
-Indigenous identity.
-
-This detailed view lives on its own page (≈3 MB of boundary data) so the main
-[Population](index.qmd) page stays fast to load.
-
-[← Back to Population](index.qmd)
+Descriptive only — no "good"/"bad" reading. "No religion / secular" is included, and the Christian denominations are rolled into a single total. **Use the dropdown** to switch groups; zoom and pan to your street.
 
 ```{python}
 #| echo: false
-geo_path = "data/geo/ct_2021.geojson"
-rel_path = "data/geo/statcan_ct_religion_2021.csv"
-if os.path.exists(geo_path) and os.path.exists(rel_path):
-    ct_geo = json.load(open(geo_path))
-    ct_df = pd.read_csv(rel_path, dtype={"ctuid": str})
+da_geo = "data/geo/da_vancouver_2021.geojson"
+da_path = "data/geo/statcan_da_vancouver_religion.csv"
+if os.path.exists(da_geo) and os.path.exists(da_path):
+    geo = json.load(open(da_geo))
+    da = pd.read_csv(da_path, dtype={"dauid": str})
     groups = [("christian", "Christian"), ("no_religion", "No religion / secular"),
               ("muslim", "Muslim"), ("hindu", "Hindu"), ("sikh", "Sikh"),
               ("buddhist", "Buddhist"), ("jewish", "Jewish"),
               ("indigenous_spirituality", "Traditional Indigenous spirituality"),
               ("other_religion", "Other religions & spiritual traditions")]
-    fig = choropleth_groups_map(ct_geo, ct_df, "ctuid", groups, name_col="name",
-        colorscale="Teal", height=720,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population in private households by census tract. Religion is self-reported. Descriptive only.")
+    fig = choropleth_groups_map(geo, da, "dauid", groups, name_col="name",
+        colorscale="Cividis", opacity=0.6, center={"lat": 49.18, "lon": -122.9}, zoom=8.3, height=720,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021006); % of population by dissemination area, Vancouver CMA. Religion is self-reported. Descriptive only.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
-    print("Census-tract religion map not available — run `python -m pipeline.build_census_geo`.")
+    print("Vancouver DA religion map not available — run build_da_profile in pipeline.build_census_geo.")
 ```
 
-[← Back to Population](index.qmd)
+*Download: [Vancouver DA religion shares (CSV)](../data/geo/statcan_da_vancouver_religion.csv) — 2021 Census (Statistics Canada).*
+
+[← Back to Religion](religion.qmd)

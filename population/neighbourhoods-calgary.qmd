@@ -1,0 +1,40 @@
+---
+title: "Diversity by dissemination area — Calgary"
+description: "Visible-minority composition at Statistics Canada's finest standard geography, for the Calgary area (2021 Census)"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import choropleth_groups_map
+```
+
+This map drops below the census tract to the **dissemination area (DA)** — Statistics Canada's *smallest* standard geography, about **400–700 people each** (several DAs make up one tract). It's the level neighbourhood apps such as HouseSigma use, where each little area is labelled by its StatCan ID. This page covers **Calgary**; other metros are linked from the [main Population page](diversity.qmd#diversity-by-neighbourhood).
+
+Descriptive only: "visible minority" is Statistics Canada's term, "Not a visible minority" includes white *and* Indigenous people, and there is no "good"/"bad" reading. **Use the dropdown** to switch groups; zoom and pan to your street.
+
+```{python}
+#| echo: false
+da_geo = "data/geo/da_calgary_2021.geojson"
+da_path = "data/geo/statcan_da_calgary_ethnicity.csv"
+if os.path.exists(da_geo) and os.path.exists(da_path):
+    geo = json.load(open(da_geo))
+    da = pd.read_csv(da_path, dtype={"dauid": str})
+    groups = [("all_vm", "All visible minorities"), ("south_asian", "South Asian"),
+              ("chinese", "Chinese"), ("black", "Black"), ("filipino", "Filipino"),
+              ("arab", "Arab"), ("latin_american", "Latin American"),
+              ("southeast_asian", "Southeast Asian"), ("west_asian", "West Asian"),
+              ("korean", "Korean"), ("japanese", "Japanese"),
+              ("not_vm", "Not a visible minority")]
+    fig = choropleth_groups_map(geo, da, "dauid", groups, name_col="name",
+        colorscale="Cividis", opacity=0.6, center={"lat": 51.04, "lon": -114.07}, zoom=9.3, height=720,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021006); % of population by dissemination area, Calgary CMA. 'Visible minority' is StatCan's term; 'Not a visible minority' includes white and Indigenous people. Descriptive only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Calgary DA diversity map not available — run build_da_profile in pipeline.build_census_geo.")
+```
+
+*Download: [Calgary DA visible-minority shares (CSV)](../data/geo/statcan_da_calgary_ethnicity.csv) — 2021 Census (Statistics Canada).*
+
+[← Back to Diversity](diversity.qmd)

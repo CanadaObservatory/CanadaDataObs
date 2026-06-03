@@ -51,6 +51,55 @@ else:
     print("Real GDP growth data not yet available. Run the data pipeline.")
 ```
 
+## Are We in a Recession? Quarterly GDP
+
+"Recession" is usually shorthand for the economy shrinking for two quarters in a row. This chart shows the **quarter-over-quarter change in real (inflation-adjusted) GDP** for Canada, every quarter back to 1961 — red bars are quarters the economy contracted. The long record puts the present in context: the deep contractions of the early 1980s and 1990s, the 2008–09 financial crisis, the record pandemic swing in 2020, and the most recent quarters. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
+
+```{python}
+#| echo: false
+gdpq_path = "data/economics/statcan_gdp_quarterly.csv"
+if os.path.exists(gdpq_path):
+    q = pd.read_csv(gdpq_path, parse_dates=["date"]).sort_values("date")
+    q["growth"] = q["gdp"].pct_change() * 100
+    q = q.dropna(subset=["growth"]).copy()
+    q["qlabel"] = q["date"].dt.year.astype(str) + " Q" + q["date"].dt.quarter.astype(str)
+    bar_colors = ["#d62728" if v < 0 else "#4e79a7" for v in q["growth"]]
+    import math
+    # Clip the y-axis to normal quarters so past recessions stay legible; the
+    # 2020 pandemic swings (≈ −11% / +9%) are ~5× any other quarter and would
+    # otherwise crush the whole series into a flat band near zero.
+    _normal = q.loc[q["growth"].abs() <= 5, "growth"]
+    _ylo, _yhi = math.floor(_normal.min()) - 0.5, math.ceil(_normal.max()) + 0.5
+    figq = go.Figure(go.Bar(
+        x=q["date"], y=q["growth"], marker_color=bar_colors,
+        customdata=q["qlabel"],
+        hovertemplate="%{customdata}: %{y:+.1f}%<extra></extra>"))
+    figq.add_hline(y=0, line_color="#888", line_width=1)
+    figq.update_layout(
+        plot_bgcolor="white", showlegend=False, height=460, bargap=0.15,
+        yaxis=dict(title="Real GDP, quarter-over-quarter % change",
+                   gridcolor="#e0e0e0", ticksuffix="%", zeroline=False,
+                   range=[_ylo, _yhi]),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+                   rangeselector=dict(buttons=[
+                       dict(count=10, label="10Y", step="year", stepmode="backward"),
+                       dict(count=20, label="20Y", step="year", stepmode="backward"),
+                       dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+                   rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        margin=dict(t=40, b=120))
+    figq.add_annotation(
+        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, chained 2017 $, seasonally adjusted) | Data as of: {get_data_date(gdpq_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
+        font=dict(size=10, color="#999"))
+    if (q["growth"].abs() > 5).any():
+        figq.add_annotation(x="2020-07-01", y=_yhi, yanchor="top",
+            text="2020 pandemic<br>quarters (off-scale)",
+            showarrow=False, align="center", font=dict(size=9, color="#999"))
+    figq.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Quarterly GDP data not yet available. Run the data pipeline.")
+```
+
 ## GDP per Capita (PPP, Current USD)
 
 GDP per capita at purchasing power parity allows meaningful comparison of living standards across countries. Canada is shown in red; the United States and other key comparators are highlighted in colour, with the remaining peers in light grey.
@@ -81,6 +130,44 @@ if os.path.exists(gdppc_path):
         f"Source: OECD National Accounts | Data as of: {get_data_date(gdppc_path)}",
         tickformat="$,.0f", hover_template="%{y}: $%{x:,.0f}<extra></extra>")
     fig.show(config={"displaylogo": False})
+```
+
+## Are We Falling Behind? GDP per Capita Relative to the US and Peers
+
+One of the most-discussed economic questions is whether Canadian living standards are slipping behind. This chart answers it directly: Canada's GDP per capita (PPP) shown **as a percentage of the United States** and **of the peer-group average** (the other 16 OECD economies), over time. A value of 100% means parity; below 100% means Canada trails. We compare against the full peer group rather than the narrower G7, with the United States shown as a single named comparator.
+
+```{python}
+#| echo: false
+from pipeline.charts import lines_over_time
+
+if os.path.exists(gdppc_path):
+    g = pd.read_csv(gdppc_path)
+    piv = g.pivot(index="year", columns="country_code", values="gdp_per_capita")
+    peers_ex_ca = [c for c in piv.columns if c != HIGHLIGHT_COUNTRY]
+    def _rel(denom, label):
+        s = (100 * piv[HIGHLIGHT_COUNTRY] / denom).rename("value").reset_index()
+        s["comparator"] = label
+        return s
+    rel = pd.concat([
+        _rel(piv["USA"], "vs. the United States"),
+        _rel(piv[peers_ex_ca].mean(axis=1), "vs. the peer-group average"),
+    ], ignore_index=True).dropna(subset=["value"])
+    fig = lines_over_time(
+        rel, "year", "value", "comparator",
+        yaxis_title="Canada's GDP per capita (% of comparator)",
+        colors={"vs. the United States": "#1f77b4",
+                "vs. the peer-group average": "#555555"},
+        group_order=["vs. the United States", "vs. the peer-group average"],
+        yticksuffix="%", hover_decimals=1, rangemode="normal",
+        source_note=f"Source: OECD National Accounts (GDP per capita, PPP) | Data as of: {get_data_date(gdppc_path)}",
+    )
+    _lo = rel["value"].min()
+    fig.update_yaxes(range=[max(0, _lo - 3), 102])
+    fig.add_hline(y=100, line_dash="dot", line_color="#999",
+                  annotation_text="parity (100%)", annotation_position="top right")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("GDP per capita data not yet available. Run the data pipeline.")
 ```
 
 ## Labour Productivity (GDP per Hour Worked)

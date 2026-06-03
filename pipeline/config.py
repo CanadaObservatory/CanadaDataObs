@@ -241,6 +241,19 @@ INDICATORS = [
               "Consumer Price Index (inflation)", "index (2002=100)", "monthly",
               fetch_fn="fetch_cpi", output_subpath="statcan_cpi.csv",
               source_table="Statistics Canada 18-10-0004-01"),
+    # Quarterly real GDP level (chained 2017$, SAAR) — the "are we in a recession?"
+    # series; the chart computes quarter-over-quarter % change (StatCan's published
+    # "% change" is q/q, validated against the table). Canada-only, 1961–.
+    Indicator("gdp_quarterly", "economics", "statcan",
+              "Real GDP (quarterly)", "chained 2017 $ (SAAR)", "quarterly",
+              value_col="gdp", date_format="%Y-%m",
+              statcan_table="36-10-0104-01",
+              statcan_filters={"GEO": "Canada",
+                               "Estimates": "Gross domestic product at market prices",
+                               "Prices": "Chained (2017) dollars",
+                               "Seasonal adjustment": "Seasonally adjusted at annual rates"},
+              output_subpath="statcan_gdp_quarterly.csv",
+              source_table="Statistics Canada 36-10-0104-01"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",

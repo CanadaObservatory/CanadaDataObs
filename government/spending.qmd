@@ -162,6 +162,9 @@ REGIONAL = ["Atlantic Canada Opportunities Agency", "Prairies Economic Developme
 if os.path.exists(depts_path):
     df = pd.read_csv(depts_path)
     df["share"] = df["value"] / df["value"].sum() * 100
+    # adaptive precision: 1 decimal at/above 1%, 2 decimals below so small
+    # departments (e.g. the Nuclear Safety Commission, ~0.04%) don't read as 0.0%
+    df["share_label"] = df["share"].map(lambda s: f"{s:.1f}%" if s >= 1 else f"{s:.2f}%")
     grp = lambda names: df[df["department"].isin(names)]
     views = [("Top 25 departments", df.nlargest(25, "value")),
              ("Top 50 departments", df.nlargest(50, "value")),
@@ -169,7 +172,7 @@ if os.path.exists(depts_path):
              ("Public safety & security", grp(SAFETY)),
              ("Regional development agencies", grp(REGIONAL))]
     fig = category_bar_views(views, "department", "value", xaxis_title="$ billions",
-        value_scale=1e9, value_fmt=",.1f", tickprefix="$", text_col="share", text_fmt="{:.1f}%",
+        value_scale=1e9, value_fmt=",.1f", tickprefix="$", text_col="share_label", text_fmt="{}",
         source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase) / Public Accounts of Canada | Data as of: {get_data_date(depts_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

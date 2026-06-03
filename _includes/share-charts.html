@@ -1,0 +1,141 @@
+<!--
+  Per-chart share / permalink affordance (site-wide, included via _quarto.yml
+  format.html.include-after-body). Adds a small "Share" button to every chart
+  section so each chart has a stable link people can copy, bookmark and share.
+  Pure DOM + clipboard — does NOT touch the Plotly API (so it sidesteps the
+  window.Plotly / requirejs('plotly') AMD gotcha noted in CLAUDE.md). Each chart
+  already lives in <section id="..."> with a heading, so the section id is the
+  permalink target; anchor navigation is handled natively by the browser.
+-->
+<style>
+  .chart-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-left: 0.6rem;
+    padding: 0.12em 0.6em;
+    font-size: 0.62em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    vertical-align: middle;
+    color: #6c757d;
+    background: transparent;
+    border: 1px solid #ced4da;
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0.6;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: opacity .15s ease, color .15s ease, border-color .15s ease, background-color .15s ease;
+  }
+  .chart-share:hover,
+  .chart-share:focus-visible {
+    opacity: 1;
+    color: #2c3e50;
+    border-color: #adb5bd;
+    background-color: #f1f3f5;
+    outline: none;
+  }
+  .chart-share:focus-visible { box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.25); }
+  .chart-share svg { width: 1em; height: 1em; flex: 0 0 auto; }
+  .chart-share.copied { color: #1e7e34; border-color: #1e7e34; background-color: #eafaef; opacity: 1; }
+  @media print { .chart-share { display: none !important; } }
+</style>
+<script>
+(function () {
+  "use strict";
+
+  var LINK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+  var CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  // Native share sheet only on touch devices; desktop always copies (predictable).
+  var useNativeShare = !!navigator.share && window.matchMedia &&
+    window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+  function permalink(id) {
+    return location.origin + location.pathname + '#' + id;
+  }
+
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? resolve() : reject(new Error('copy failed'));
+      } catch (e) { reject(e); }
+    });
+  }
+
+  function flash(btn) {
+    var original = btn.innerHTML;
+    btn.classList.add('copied');
+    btn.innerHTML = CHECK_SVG + '<span>Copied</span>';
+    clearTimeout(btn._resetTimer);
+    btn._resetTimer = setTimeout(function () {
+      btn.classList.remove('copied');
+      btn.innerHTML = original;
+    }, 1600);
+  }
+
+  function onClick(btn, url, title) {
+    return function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (useNativeShare) {
+        navigator.share({ title: title || document.title, url: url }).catch(function (e) {
+          if (e && e.name === 'AbortError') return;            // user dismissed the sheet
+          copy(url).then(function () { flash(btn); }).catch(function () {});
+        });
+        return;
+      }
+      copy(url)
+        .then(function () { flash(btn); })
+        .catch(function () { window.prompt('Copy this link to the chart:', url); });
+    };
+  }
+
+  function makeButton(url, title) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chart-share';
+    btn.innerHTML = LINK_SVG + '<span>Share</span>';
+    var label = 'Copy a link to this chart' + (title ? ': ' + title : '');
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+    btn.addEventListener('click', onClick(btn, url, title));
+    return btn;
+  }
+
+  function init() {
+    var charts = document.querySelectorAll('.plotly-graph-div, .js-plotly-plot');
+    var seen = {};
+    Array.prototype.forEach.call(charts, function (chart) {
+      var section = chart.closest('section[id]');
+      if (!section || !section.id || seen[section.id]) return;
+      var heading = section.querySelector('h1, h2, h3, h4, h5, h6');
+      if (!heading) return;
+      seen[section.id] = true;
+      heading.appendChild(makeButton(permalink(section.id), heading.textContent.trim()));
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

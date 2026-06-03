@@ -66,3 +66,4 @@ format:
     toc: true
     code-fold: true
     code-summary: "Show code"
+    include-after-body: _includes/share-charts.html

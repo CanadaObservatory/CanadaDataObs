@@ -814,3 +814,174 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
             x=0, y=(-0.34 if rangeslider else -0.18),
             showarrow=False, font=dict(size=10, color="#999"))
     return fig
+
+
+# Neutral qualitative palette for non-country categorical series (government
+# levels, public-sector sectors, spending categories) — distinct and print-safe,
+# with no red/green valence (the Government section is descriptive, not a
+# scorecard). Canada-red is reserved for the single highlighted series.
+SERIES_PALETTE = [
+    "#4e79a7", "#f28e2b", "#59a14f", "#e15759", "#76b7b2", "#edc948",
+    "#b07aa1", "#9c755f", "#ff9da7", "#86bcb6", "#bab0ac", "#d37295",
+]
+
+
+def _series_colors(groups, colors):
+    if colors:
+        return {g: colors.get(g, "#888") for g in groups}
+    return {g: SERIES_PALETTE[i % len(SERIES_PALETTE)] for i, g in enumerate(groups)}
+
+
+def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
+                    colors=None, group_order=None, source_note=None, height=460,
+                    yaxis_tickformat=None, ytickprefix="", yticksuffix="",
+                    hover_decimals=0, legend_orientation="v", rangemode="tozero"):
+    """Plain multi-line time series for annual data — integer-year safe (no
+    date-axis range buttons, unlike the OECD peer charts). `df` is long:
+    (x_col, group_col, value_col). Used for government employment by level and
+    federal revenue-vs-expenditure."""
+    groups = group_order or list(df[group_col].drop_duplicates())
+    cmap = _series_colors(groups, colors)
+    fig = go.Figure()
+    for g in groups:
+        s = df[df[group_col] == g].sort_values(x_col)
+        fig.add_trace(go.Scatter(
+            x=s[x_col], y=s[value_col], name=str(g), mode="lines+markers",
+            line=dict(color=cmap[g], width=2.5), marker=dict(size=5),
+            hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
+    legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
+              if legend_orientation == "v"
+              else dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5))
+    yaxis = dict(title=yaxis_title, gridcolor="#e0e0e0", rangemode=rangemode,
+                 tickprefix=ytickprefix, ticksuffix=yticksuffix)
+    if yaxis_tickformat:
+        yaxis["tickformat"] = yaxis_tickformat
+    fig.update_layout(
+        plot_bgcolor="white", height=height, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"), yaxis=yaxis, legend=legend,
+        margin=dict(l=10, r=(175 if legend_orientation == "v" else 20), t=30, b=80))
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.18, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
+def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=True,
+                      source_note=None, height=None):
+    """Single Canada-only series with a dropdown to switch among `options`
+    (alternative y-columns on the same chart — e.g. an absolute total vs a
+    per-capita view), plus the standard range buttons and an optional range
+    slider. Each option is a dict: {col, label, yaxis_title, hovertemplate}. The
+    dropdown toggles which series is shown and updates the y-axis title; the axis
+    re-scales automatically to the visible series."""
+    fig = go.Figure()
+    for i, o in enumerate(options):
+        fig.add_trace(go.Scatter(
+            x=df[x_col], y=df[o["col"]], mode="lines", name=o["label"],
+            line=dict(color=color, width=HIGHLIGHT_WIDTH), visible=(i == 0),
+            hovertemplate=o.get("hovertemplate", "%{y}<extra></extra>")))
+    buttons = [dict(method="update", label=o["label"],
+                    args=[{"visible": [j == i for j in range(len(options))]},
+                          {"yaxis.title.text": o["yaxis_title"]}])
+               for i, o in enumerate(options)]
+    xaxis = dict(title="", gridcolor="#e0e0e0", rangeselector=dict(buttons=[
+        dict(count=1, label="1Y", step="year", stepmode="backward"),
+        dict(count=5, label="5Y", step="year", stepmode="backward"),
+        dict(count=10, label="10Y", step="year", stepmode="backward"),
+        dict(step="all", label="All")], x=0, xanchor="left", y=1.01))
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.10, bgcolor="#f5f5f5")
+    fig.update_layout(
+        xaxis=xaxis, yaxis=dict(title=options[0]["yaxis_title"], gridcolor="#e0e0e0"),
+        plot_bgcolor="white", hovermode="x", showlegend=False, height=height,
+        margin=dict(t=60, b=(140 if rangeslider else 80)),
+        updatemenus=[dict(buttons=buttons, active=0, x=1, xanchor="right", y=1.13,
+                          yanchor="top", bgcolor="white", bordercolor="#ccc",
+                          borderwidth=1, showactive=True)])
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           y=(-0.34 if rangeslider else -0.18), showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
+def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
+                 group_order=None, source_note=None, height=480,
+                 ytickprefix="", yticksuffix="", hover_decimals=0, value_scale=1.0,
+                 legend_orientation="v"):
+    """Stacked area over time — the composition of a total by category
+    (public-sector sectors, federal expense by type, government spending by
+    function). `df` is long: (x_col, group_col, value_col). `value_scale` divides
+    values for display (e.g. 1000 to show $millions as $billions). Bands are
+    ordered largest-total first unless `group_order` is given."""
+    import pandas as pd
+    d = df.copy()
+    d["_v"] = pd.to_numeric(d[value_col], errors="coerce") / value_scale
+    groups = group_order or list(
+        d.groupby(group_col)["_v"].sum().sort_values(ascending=False).index)
+    cmap = _series_colors(groups, colors)
+    xs = sorted(d[x_col].unique())
+    fig = go.Figure()
+    for g in groups:
+        s = d[d[group_col] == g].set_index(x_col)["_v"]
+        fig.add_trace(go.Scatter(
+            x=xs, y=[s.get(x) for x in xs], name=str(g), mode="lines",
+            stackgroup="one", line=dict(width=0.5, color=cmap[g]), fillcolor=cmap[g],
+            hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
+    if legend_orientation == "h":   # legend below the plot → x-axis uses full width
+        legend = dict(orientation="h", yanchor="top", y=-0.07, xanchor="left", x=0)
+        margin = dict(l=10, r=20, t=30, b=130)
+        src_y = -0.40
+    else:                            # legend stacked on the right (default)
+        legend = dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
+        margin = dict(l=10, r=200, t=30, b=80)
+        src_y = -0.18
+    fig.update_layout(
+        plot_bgcolor="white", height=height, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0",
+                   tickprefix=ytickprefix, ticksuffix=yticksuffix),
+        legend=legend, margin=margin)
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=src_y, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
+def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
+                 color="#4e79a7", value_scale=1.0, value_fmt=",.0f",
+                 tickprefix="", ticksuffix="", top_n=None, height=None,
+                 hovertemplate=None, highlight=None, highlight_color=CANADA_COLOR,
+                 text_col=None, text_fmt="{}"):
+    """Horizontal ranked bar for non-country categories (departments, spending
+    objects, public-sector sectors). Sorted descending with an optional `top_n`;
+    single neutral colour by default, with an optional `highlight` set of labels
+    to colour differently."""
+    import pandas as pd
+    d = df.copy()
+    d["_v"] = pd.to_numeric(d[value_col], errors="coerce") / value_scale
+    d = d.dropna(subset=["_v"]).sort_values("_v", ascending=False)
+    if top_n:
+        d = d.head(top_n)
+    d = d.sort_values("_v")          # ascending → largest bar on top
+    hl = set(highlight or [])
+    colors = [highlight_color if str(l) in hl else color for l in d[label_col]]
+    text = ([text_fmt.format(v) for v in d[text_col]]
+            if text_col and text_col in d.columns else None)
+    fig = go.Figure(go.Bar(
+        x=d["_v"], y=d[label_col].astype(str), orientation="h", marker_color=colors,
+        text=text, textposition="auto", cliponaxis=False,
+        hovertemplate=hovertemplate or
+        f"%{{y}}: {tickprefix}%{{x:{value_fmt}}}{ticksuffix}<extra></extra>"))
+    fig.update_layout(
+        plot_bgcolor="white", showlegend=False, height=height or (150 + 26 * len(d)),
+        xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",
+                   tickprefix=tickprefix, ticksuffix=ticksuffix),
+        yaxis=dict(title=""), margin=dict(l=10, r=(70 if text else 20), t=20, b=70))
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=1,
+                           xanchor="right", y=-0.12, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig

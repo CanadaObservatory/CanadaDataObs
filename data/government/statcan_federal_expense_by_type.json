@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_federal_expense_by_type",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 10-10-0016-01",
+  "frequency": "annual",
+  "unit": "$ millions",
+  "retrieved_at": "2026-06-03T14:39:56.362977+00:00",
+  "latest_observation_date": "2024",
+  "transformations": [
+    "Federal government, transactions/flows, expense by economic type"
+  ],
+  "notes": null,
+  "row_count": 170
+}

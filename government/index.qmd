@@ -1,0 +1,396 @@
+---
+title: "Government Employment & the Public Service"
+description: "How many Canadians work for government — by level, and inside the federal public service"
+---
+
+Governments are large employers. This page asks a deceptively simple question —
+**how many people work for government, and doing what** — and answers it from the
+ground up: first across all levels of government, then drilling into the federal
+public service. A companion page covers [federal spending](spending.qmd), and the
+[Public Finances](../fiscal/index.qmd) page compares Canada's government finances
+with OECD peers.
+
+Two definitions matter throughout, because they are easy to conflate:
+
+- **Public administration** — the "core bureaucracy": people administering
+  government programs (NAICS sector 91). It does **not** include public-sector
+  teachers, nurses, or professors, who are counted in the education and health
+  industries.
+- **The public sector** — the broader universe: general government **plus**
+  health and social-service institutions, school boards, universities and
+  colleges, and government business enterprises (Crown corporations). It is
+  several times larger than public administration alone.
+
+The size of government and how it is staffed are matters of legitimate political
+debate. This page takes no position on whether government is "too big" or "too
+small": it reports counts, shares, peer benchmarks, and official definitions, and
+lets the reader judge.
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+from pipeline.config import get_data_date
+from pipeline.charts import (peer_comparison_line, ranked_bar, single_line,
+                             single_line_multi, lines_over_time, stacked_area, category_bar)
+```
+
+## Employment by Level of Government
+
+The chart below counts **jobs in public administration** — the core bureaucracy of
+each level of government — back to 1997. Local government (municipalities and
+regional/Indigenous administrations) and the federal government are the largest;
+provincial and territorial public administration is smaller, because so much of
+what provinces *fund* — schools, hospitals, universities — is delivered by
+institutions counted separately (see the next chart). The federal line includes
+National Defence, including the military; federal **civilian** public
+administration is roughly a quarter smaller.
+
+```{python}
+#| echo: false
+lvl_path = "data/government/statcan_govt_employment_by_level.csv"
+if os.path.exists(lvl_path):
+    df = pd.read_csv(lvl_path)
+    keep = ["Federal", "Provincial / territorial", "Local & Indigenous"]
+    fig = lines_over_time(
+        df[df["level"].isin(keep)], "year", "jobs", "level",
+        yaxis_title="Number of jobs",
+        colors={"Federal": "#d62728", "Provincial / territorial": "#4e79a7",
+                "Local & Indigenous": "#59a14f"},
+        group_order=keep,
+        source_note=f"Source: Statistics Canada 36-10-0489-01 (SNA jobs) — public administration (NAICS 91); federal includes the military | Data as of: {get_data_date(lvl_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## The Bureaucracy vs. the Whole Public Sector
+
+"Government workers" are far more than the bureaucracy. The Labour Force Survey
+counts everyone whose employer is a government, a public institution, or a
+government business enterprise — about **4.5 million people** in 2025. Grouped by
+industry, the two largest parts are **public education** (teachers and professors)
+and **public health care and social services** (nurses, hospital and long-term-care
+staff) — each employing *more* people than **public administration**, the core
+bureaucracy across all three levels of government combined. Crown corporations and
+other public services (utilities, public transit, and the like) make up the rest.
+
+```{python}
+#| echo: false
+comp_path = "data/government/statcan_public_sector_composition.csv"
+PILLARS = {"Educational services": "Educational services",
+           "Health care and social assistance": "Health care & social assistance",
+           "Public administration": "Public administration (the bureaucracy)"}
+OTHER = "Other (Crown corporations, utilities, transit, etc.)"
+if os.path.exists(comp_path):
+    df = pd.read_csv(comp_path)
+    df["bucket"] = df["sector"].map(PILLARS).fillna(OTHER)
+    area = df.groupby(["year", "bucket"], as_index=False)["employment"].sum()
+    order = ["Educational services", "Health care & social assistance",
+             "Public administration (the bureaucracy)", OTHER]
+    fig = stacked_area(area, "year", "employment", "bucket",
+        yaxis_title="Public-sector employees (thousands)", value_scale=1000, hover_decimals=0,
+        group_order=order, legend_orientation="h", height=560,
+        colors={"Educational services": "#4e79a7", "Health care & social assistance": "#59a14f",
+                "Public administration (the bureaucracy)": "#f28e2b", OTHER: "#bab0ac"},
+        source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey, public-sector employees by industry) | Data as of: {get_data_date(comp_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+Ranked for the latest year, public administration — the part most people picture as
+"government" — is only the third-largest part of the public-sector workforce, behind
+public education and public health care:
+
+```{python}
+#| echo: false
+if os.path.exists(comp_path):
+    df = pd.read_csv(comp_path)
+    yr = int(df["year"].max())
+    latest = df[df["year"] == yr].copy()
+    latest["sector"] = latest["sector"].replace(
+        {"Health care and social assistance": "Health care & social assistance"})
+    fig = category_bar(latest, "sector", "employment", top_n=10,
+        xaxis_title=f"Public-sector employees (thousands, {yr})", value_scale=1000, value_fmt=",.0f",
+        highlight={"Public administration"}, highlight_color="#f28e2b",
+        source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey) | Data as of: {get_data_date(comp_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+::: {.callout-note}
+## How "the public sector" is defined here
+This uses the Labour Force Survey's **class of worker**: a public-sector employee is
+anyone whose employer is a government department, a public institution (public
+schools, hospitals, universities), or a government business enterprise (Crown
+corporation). Broken down by **industry**, "public administration" is the
+civil-service bureaucracy of all three levels combined — the federal/provincial/
+local split is the chart above. (This replaces an older institutional-sector table
+that Statistics Canada discontinued in 2011.)
+:::
+
+## How Canada Compares
+
+Across the OECD, the share of total employment that works for **general
+government** (all levels combined, including public health and education staff)
+varies widely — from around 5% in Japan and South Korea to nearly 30% in the
+Nordic countries. Canada sits a little above the middle of its peer group. How
+large this share "should" be is a political choice, so it is shown without a
+favourable direction.
+
+```{python}
+#| echo: false
+emp_path = "data/government/oecd_govt_employment.csv"
+if os.path.exists(emp_path):
+    df = pd.read_csv(emp_path)
+    fig = peer_comparison_line(df, "year", "govt_emp_pct", title="",
+        yaxis_title="% of total employment", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Government at a Glance 2025 (general government employment) | Data as of: {get_data_date(emp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(emp_path):
+    df = pd.read_csv(emp_path)
+    fig = ranked_bar(df, "govt_emp_pct", "General government employment (% of total employment)",
+        f"Source: OECD Government at a Glance 2025 | Data as of: {get_data_date(emp_path)}",
+        hover_template="%{y}: %{x:.1f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+# Inside the Federal Public Service
+
+The rest of this page narrows to the **federal public service** as Treasury Board
+counts it: the core public administration plus separate agencies (such as the
+Canada Revenue Agency and Parks Canada), measured as a headcount on March 31 each
+year. It **excludes** the Canadian Armed Forces and RCMP regular and civilian
+members, who are reported under their own frameworks.
+
+## Total Headcount Over Time
+
+The federal public service has moved in waves: growth through the late 2000s, a
+contraction after the 2012 budget's spending review, and renewed growth since,
+reaching about 358,000 in 2025. Drag the **slider** to zoom to a period, and use
+the **dropdown** to switch between the total headcount and the number **per 1,000
+people** — which has risen far less, because Canada's population has grown quickly
+over the same years.
+
+```{python}
+#| echo: false
+pop_path = "data/government/tbs_fps_population.csv"
+canpop_path = "data/population/statcan_population_quarterly.csv"
+if os.path.exists(pop_path):
+    df = pd.read_csv(pop_path)
+    t = df[df["segment"] == "Total"].copy()
+    t["date"] = pd.to_datetime(t["year"], format="%Y")
+    opts = [dict(col="employees", label="Total headcount",
+                 yaxis_title="Employees (March 31)",
+                 hovertemplate="%{y:,.0f} employees<extra></extra>")]
+    if os.path.exists(canpop_path):                 # add the per-capita view
+        cp = pd.read_csv(canpop_path)
+        cp = cp[cp["geography"] == "Canada"].copy()
+        cp["year"] = pd.to_datetime(cp["date"]).dt.year
+        popyr = cp.groupby("year")["population"].mean()
+        t["per_1000"] = [e / popyr[y] * 1000 if y in popyr.index else None
+                         for e, y in zip(t["employees"], t["year"])]
+        opts.append(dict(col="per_1000", label="Per 1,000 population",
+                         yaxis_title="Federal public servants per 1,000 people",
+                         hovertemplate="%{y:.2f} per 1,000 people<extra></extra>"))
+    fig = single_line_multi(t, "date", opts, rangeslider=True,
+        source_note=f"Source: Treasury Board of Canada Secretariat — Federal public service statistics (core public administration + separate agencies); population from Statistics Canada 17-10-0009-01 | Data as of: {get_data_date(pop_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## Which Parts of the Public Service Grew
+
+The public service added roughly **75,000 people between 2010 and 2025**. The
+increase was concentrated in **benefits and service delivery** — Employment and
+Social Development Canada, which runs Service Canada, and the Canada Revenue Agency
+— together with **immigration** (Immigration, Refugees and Citizenship Canada and
+the Immigration and Refugee Board) and **procurement, border, and security**
+organizations.
+
+```{python}
+#| echo: false
+dgrow_path = "data/government/tbs_fps_by_department.csv"
+if os.path.exists(dgrow_path):
+    dep = pd.read_csv(dgrow_path)
+    y0, y1 = int(dep["year"].min()), int(dep["year"].max())
+    a = dep[dep["year"] == y0].set_index("department")["employees"]
+    b = dep[dep["year"] == y1].set_index("department")["employees"]
+    common = a.index.intersection(b.index)
+    chg = (b.reindex(common) - a.reindex(common)).reset_index()
+    chg.columns = ["department", "change"]
+    chg = chg[chg["change"] > 0]
+    fig = category_bar(chg, "department", "change", top_n=12,
+        xaxis_title=f"Increase in employees, {y0}→{y1}", value_fmt=",.0f",
+        source_note=f"Source: Treasury Board of Canada Secretariat — Federal public service statistics | Data as of: {get_data_date(dgrow_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+::: {.callout-note}
+## On "areas," and on reorganizations
+Federal jobs are not published by occupation or role over time, so this shows
+growth by **department** — the closest available view of *where* the workforce
+expanded. It compares departments that kept the same name across the period;
+machinery-of-government changes that created or split organizations (for example
+**Shared Services Canada** in 2011, and the 2017 split that created **Indigenous
+Services Canada**) shift staff between departments and so do not appear as "growth"
+here.
+:::
+
+## Where Federal Public Servants Work
+
+The largest federal employers are the service-delivery and operational
+organizations — the Canada Revenue Agency, Employment and Social Development
+Canada (which runs Service Canada), National Defence's civilian workforce,
+Correctional Service Canada, and the Canada Border Services Agency. Because
+departments are periodically renamed, merged, and split, this is shown as a
+current-year snapshot rather than a time series.
+
+```{python}
+#| echo: false
+dept_path = "data/government/tbs_fps_by_department.csv"
+if os.path.exists(dept_path):
+    df = pd.read_csv(dept_path)
+    latest = df[df["year"] == df["year"].max()]
+    yr = int(df["year"].max())
+    fig = category_bar(latest, "department", "employees", top_n=15,
+        xaxis_title=f"Employees ({yr})", value_fmt=",.0f",
+        source_note=f"Source: Treasury Board of Canada Secretariat — Federal public service statistics | Data as of: {get_data_date(dept_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## The Changing Shape of the Workforce
+
+Over time the federal public service has shifted toward more senior,
+knowledge-intensive work. One measure available as a consistent series is the
+**executive** cadre (the EX group): it has grown faster than the workforce as a
+whole and now makes up a little over 2.5% of all employees.
+
+```{python}
+#| echo: false
+exe_path = "data/government/infobase_fps_executive.csv"
+if os.path.exists(exe_path):
+    df = pd.read_csv(exe_path)
+    piv = df.pivot_table(index="year", columns="category", values="employees").reset_index()
+    piv["share"] = piv["Executive"] / (piv["Executive"] + piv["Non-executive"]) * 100
+    piv["date"] = pd.to_datetime(piv["year"], format="%Y")
+    fig = single_line(piv, "date", "share", title="",
+        yaxis_title="Executives (% of employees)",
+        hovertemplate="%{y:.2f}% executives<extra></extra>",
+        source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase), employee population by executive level | Data as of: {get_data_date(exe_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+::: {.callout-note}
+## What about scientists, economists, and front-line roles?
+Federal jobs are classified into [occupational groups](https://www.canada.ca/en/treasury-board-secretariat/services/collective-agreements/occupational-groups.html)
+— for example **EC** (Economics and Social Science Services, the economists and
+social-science researchers), **SE/AP** (the scientific and applied-science/
+engineering groups), **CS/IT** (information technology), **FB** (Border Services),
+**PA** (Program and Administrative Services — much of the front-line and
+administrative workforce), and **EX** (Executive).
+
+A clean, comparable count of these groups *over time* is, unfortunately, **not
+published as machine-readable open data**, and the classification itself has been
+reorganized repeatedly (the occupational *categories* were repealed in 1993; the
+1999 Universal Classification Standard consolidated some 72 groups into 29; the CS
+group was later converted to IT). Those breaks make a naive long-run series
+misleading, which is why this page does not chart one.
+
+The direction of travel is, however, well documented. According to Treasury
+Board's [Demographic Snapshot of the Federal Public Service, 2017](https://www.canada.ca/en/treasury-board-secretariat/services/innovation/human-resources-statistics/demographic-snapshot-federal-public-service-2017.html),
+the five largest knowledge-intensive groups (AS, PM, CS, EC and EX) grew from
+**31.8% of the core public administration in 2000 to 42.6% in 2017**, and the
+executive workforce grew **56%** over that period — consistent with the trend in
+the chart above.
+:::
+
+## Who the Public Service Is
+
+```{python}
+#| echo: false
+demo_path = "data/government/tbs_fps_demographics.csv"
+demo = pd.read_csv(demo_path) if os.path.exists(demo_path) else None
+demo_yr = int(demo["year"].max()) if demo is not None else None
+demo_src = f"Source: Treasury Board of Canada Secretariat — Federal public service statistics | Data as of: {get_data_date(demo_path)}" if demo is not None else ""
+```
+
+**Ageing.** Like much of the workforce, the federal public service has a large
+share of employees in their 40s and 50s — a wave of eventual retirements.
+
+```{python}
+#| echo: false
+if demo is not None:
+    order = ['<20', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49',
+             '50-54', '55-59', '60-64', '65+']
+    age = demo[(demo["dimension"] == "Age band") & (demo["category"] != "Unknown")]
+    fig = stacked_area(age, "year", "employees", "category",
+        yaxis_title="Employees (thousands)", value_scale=1000, group_order=order,
+        source_note=demo_src)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+**Tenure.** The large majority hold indeterminate (permanent) positions; terms,
+casuals, and students make up a smaller, more variable share.
+
+```{python}
+#| echo: false
+if demo is not None:
+    ten = demo[(demo["dimension"] == "Tenure") & (demo["category"] != "Unknown")]
+    fig = stacked_area(ten, "year", "employees", "category",
+        yaxis_title="Employees (thousands)", value_scale=1000,
+        group_order=["Indeterminate", "Term", "Casual", "Student"], source_note=demo_src)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+**Where they work.** The National Capital Region (Ottawa–Gatineau) is the single
+largest concentration — larger than any one province — but most public servants
+work outside it, delivering services across the country.
+
+```{python}
+#| echo: false
+if demo is not None:
+    reg = demo[(demo["dimension"] == "Region") & (~demo["category"].isin(["Unknown"]))
+               & (demo["year"] == demo_yr)]
+    fig = category_bar(reg, "category", "employees", xaxis_title=f"Employees ({demo_yr})",
+        value_fmt=",.0f", highlight={"National Capital Region (NCR)"}, source_note=demo_src)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+**Sex.** Women have been a majority of the federal public service throughout the
+series and their share has edged up.
+
+```{python}
+#| echo: false
+if demo is not None:
+    sx = demo[(demo["dimension"] == "Sex") & (demo["category"] != "Unknown")]
+    fig = lines_over_time(sx, "year", "employees", "category", yaxis_title="Employees",
+        colors={"Women": "#b07aa1", "Men": "#4e79a7"}, group_order=["Women", "Men"],
+        source_note=demo_src)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+## Download Data
+
+- [Government employment by level (CSV)](../data/government/statcan_govt_employment_by_level.csv) — Statistics Canada 36-10-0489-01
+- [Public sector by institutional sector (CSV)](../data/government/statcan_public_sector_composition.csv) — Statistics Canada 10-10-0025-01 (archived)
+- [General government employment vs OECD peers (CSV)](../data/government/oecd_govt_employment.csv) — OECD Government at a Glance
+- [Federal public service population (CSV)](../data/government/tbs_fps_population.csv) — Treasury Board of Canada Secretariat
+- [Federal public service by department (CSV)](../data/government/tbs_fps_by_department.csv) — Treasury Board of Canada Secretariat
+- [Federal public service demographics (CSV)](../data/government/tbs_fps_demographics.csv) — Treasury Board of Canada Secretariat
+- [Federal public service executives (CSV)](../data/government/infobase_fps_executive.csv) — GC InfoBase

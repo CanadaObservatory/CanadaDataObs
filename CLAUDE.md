@@ -40,7 +40,7 @@ chart block to the relevant `.qmd`. No new fetch function for OECD/StatCan serie
 ```
 DataCan/
 ├── CLAUDE.md              ← this file
-├── _quarto.yml            ← site config, nav (Population, Geography, Economy are dropdowns), theme
+├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances are dropdowns), theme
 ├── index.qmd  about.qmd   ← landing + methodology
 ├── population/index.qmd   ← **Population & Growth** (Population-dropdown landing): total, by-province, growth rate, components, non-permanent residents
 ├── population/diversity.qmd ← visible-minority tract map (Cividis, soft 0.6 fill; dropdown incl. "Not a visible minority") + diversity-over-time chart (census-year + geography dropdown) + per-metro DA diversity links
@@ -56,7 +56,9 @@ DataCan/
 ├── housing/neighbourhoods.qmd ← census-tract dwelling-value choropleth (heavy ~3MB; own page)
 ├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, income map (city) + link to neighbourhood-detail page
 ├── income/neighbourhoods.qmd ← census-tract income choropleth (heavy ~3MB; its own page so the index stays light)
-├── fiscal/index.qmd       ← govt gross debt, budget balance, revenue, interest costs, defence
+├── fiscal/index.qmd       ← **Government Finances** (Public-Finances dropdown): govt gross debt, budget balance, revenue, interest costs, defence (all vs OECD peers)
+├── government/index.qmd   ← **Government Employment** (Public-Finances dropdown): employment by level of government, full public-sector composition (archived), OECD peer comparison, federal public-service headcount/by-department/demographics/executives, + sourced occupational note
+├── government/spending.qmd ← **Federal Spending**: revenue & spending %GDP (1961–) + nominal, expense by economic type, by standard object, by department, by function (CCOFOG — all governments)
 ├── health/index.qmd       ← life expectancy, avoidable mortality, health spending (%GDP + per person), beds, physicians, nurses, MRI units
 ├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers  (titled "Education & Innovation")
 ├── environment/index.qmd  ← CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix
@@ -69,14 +71,16 @@ DataCan/
 │   ├── fetch_worldbank.py ← fetch_worldbank_indicator (generic WB API)
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover (not weekly)
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
+│   ├── fetch_government.py ← Government-section custom fetchers: StatCan workforce (employment by level 36-10-0489-01; public-sector composition by industry 14-10-0027-01 LFS) + federal finance (36-10-0477-01 1961– + GDP 36-10-0222-01; expense-by-type 10-10-0016-01; CCOFOG 10-10-0005-01) + TBS federal public service (open.canada.ca CKAN) + GC InfoBase (standard objects, by-dept, executives)
 │   └── run_pipeline.py    ← registry-driven orchestrator
 ├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
 ├── data/geo/              ← static 2021-census choropleth assets (CT income/dwelling-value/visible-minority/religion; CMA unemployment/dwelling-value/value-to-income/crime/visible-minority/religion; visible-minority-by-census-year history; **Geography:** province boundaries + density + %-freshwater, CMA density, ecozone boundaries + land-cover-by-ecozone, permafrost zones)
 ├── data/geography/        ← weekly/annual Geography series (NFDB wildfire, NSIDC sea ice)
+├── data/government/       ← Government section: StatCan workforce+finance, TBS federal public service, GC InfoBase spending/headcount (12 series)
 ├── .claude/launch.json    ← preview servers: `quarto-preview` (live) and `site` (static _site)
 ├── .github/workflows/update-data.yml  ← weekly cron: fetch → commit → deploy
 └── requirements.txt
@@ -104,7 +108,7 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (52 indicators / 10 sections)
+## Data sources (64 indicators / 11 sections)
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   components 17-10-0008-01, CPI 18-10-0004-01 (All-items + the "Rent" group),
@@ -162,6 +166,26 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   needed), **land cover by ecozone** (StatCan 38-10-0177-01, 2020; NRCan's 2.1 GB raster
   is unusable so this pre-summarised table is the path), and **permafrost** zones (NRCan
   Atlas of Canada 5th ed. shapefile, ~1995). See "Geography section maps" below.
+- **Government / Public Sector** (the Public-Finances "Government" pages; bespoke
+  `fetch_government.py`, all Open Government Licence – Canada). **Workforce:**
+  employment by level of government (StatCan **36-10-0489-01** SNA jobs, 1997– —
+  NAICS "public administration" = the civil-service bureaucracy only, and federal
+  [911] **includes the military**); the whole public-sector workforce by industry —
+  public administration vs. public education / health care / Crown corporations
+  (**14-10-0027-01**, Labour Force Survey "class of worker", *current*: education ≈
+  health > public administration, ~4.55M total); the federal public-service headcount + by-department / age / tenure /
+  region / language / sex (**Treasury Board "Federal public service statistics"**,
+  open.canada.ca CKAN `f0d12b41…`, 2010–, a March-31 snapshot of core public
+  administration + separate agencies, **excl. military/RCMP**); executives vs
+  non-executives (**GC InfoBase** `org_employee_ex_lvl`); and the OECD peer anchor —
+  general-government employment as a % of total employment (Government at a Glance
+  **`DSD_GOV@DF_GOV_EMPPS_REP_2025`**, key `A.{countries}.EMPG.PT_EMP.S13.2025.EMPPS_REP`).
+  **Spending:** federal revenue/expenditure/interest 1961– + % of GDP
+  (**36-10-0477-01** quarterly→annual flows + **36-10-0222-01** current-prices GDP),
+  federal expense by economic type incl. **compensation of employees** (**10-10-0016-01**,
+  2008–), spending by **standard object** + by **department** (**GC InfoBase**
+  `org_sobjs` + `igoc_en`, latest Public Accounts year), and spending by **function**
+  (**10-10-0005-01** CCOFOG — *all governments consolidated, not federal-only*).
 
 ## Peer group & comparator colours
 
@@ -210,6 +234,13 @@ the highlighted set or peer list is a one-line edit in config.py.
   that year in its label. Only assign a `good` direction where "favourable" is
   uncontroversial — current account and govt revenue are charted but kept off the
   scorecard because higher/lower isn't clearly better.
+- `lines_over_time`, `stacked_area`, `category_bar` — generic Government-section
+  builders (integer-year safe, neutral `SERIES_PALETTE`, Canada-red reserved for a
+  single highlighted series). `lines_over_time`: plain multi-line (no date
+  range-buttons) — employment by level, revenue-vs-spending. `stacked_area`:
+  composition of a total over time — public-sector sectors, federal expense by type.
+  `category_bar`: horizontal ranked bar for non-country categories (departments,
+  spending objects, sectors) with an optional `highlight` set.
 - Styling: Canada `#d62728`/width 3, peers `#bdbdbd`/width 1.5, average `#555`
   dashed; range buttons 1Y/2Y/5Y/10Y/20Y/All at `x=0,y=1.01`; no Plotly titles
   (Quarto `##` headings are the titles); source note at the bottom;
@@ -475,6 +506,35 @@ and NHPI tracks new-build builder prices, which understate the resale run-up.
   margin, so the legend sits **on top** (a bottom legend wraps and collides with
   the source note); like every chart here the bottom source note still clips at
   mobile widths (deferred mobile-layout work), but fits the ~800px desktop column.
+- **Federal workforce by occupation is NOT published as a reproducible series.**
+  GC InfoBase's People module has only tenure/age/EX-level/language/sex/region; TBS
+  open data and the PSC PSEA-population dataset have no occupational-group population;
+  and the classification itself broke (1993 categories repealed, 1999 Universal
+  Classification Standard 72→29 groups, CS→IT). The workforce page therefore uses the
+  **executive vs non-executive** split (the one clean role axis) plus a sourced note
+  (TBS Demographic Snapshot 2017: knowledge groups AS/PM/CS/EC/EX rose 31.8%→42.6% of
+  the core public administration, 2000→2017; executives +56%). Don't re-attempt an
+  occupation time series without a new authoritative source.
+- **No federal-only COFOG split** — 10-10-0005-01 only offers "consolidated Canadian
+  general government" (all levels) or P/T-local; the federal residual is contaminated
+  by the netting of transfers to provinces (it badly understates federal health), so
+  the by-function chart is labelled **all governments**.
+- **36-10-0477-01 is quarterly only** (unadjusted flows summed to annual) and has **no
+  compensation line** — use 10-10-0016-01 for federal compensation (2008–). GDP for the
+  %-of-GDP view is 36-10-0222-01 (1981–), so %-of-GDP starts 1981 while the dollar
+  series runs from 1961.
+- **GC InfoBase** spending is a **5-year rolling Public Accounts window** with no
+  in-file year labels (charts say "latest Public Accounts"); files are committed CSVs at
+  `github TBS-EACPD/infobase /data` (`master` moves ~weekly). Standard objects 1–12 are
+  budgetary (1=Personnel, 10=Transfers, 11=Public debt charges); 21/22 are
+  revenue-netting (excluded). `igoc_en.csv` is UTF-8, the People CSVs are latin-1/ASCII
+  (the fetcher tries utf-8-sig then latin-1); the SOBJ9 source label typo "equipement"
+  is corrected in the fetcher.
+- The "whole public sector" composition uses the **LFS class-of-worker** cube
+  **14-10-0027-01** ("Public sector employees" × NAICS industry, current to 2025) —
+  public administration (all levels) vs. public education / health care / Crown
+  corporations. It replaced the institutional-sector table 10-10-0025-01, which
+  StatCan discontinued in 2011 (that table is no longer used).
 
 ## Status & what's deferred
 
@@ -486,9 +546,18 @@ column and ~15 indicators: business investment (GFCF), current account, govt
 revenue + interest, defence (with the NATO 2% benchmark), nurses, avoidable
 mortality, real household disposable income, consumption-based CO2, housing starts
 + vacancy, food insecurity, Crime Severity Index + homicide, non-permanent residents.
+A **2026-06 addition built the Government section** (the "Public Finances" nav item is
+now a dropdown): a **public-service workforce** page (employment by level of government,
+the full public-sector composition, federal headcount + by-department + demographics +
+executives, and the OECD peer employment share) and a **federal spending** page
+(revenue/spending % of GDP since 1961 + nominal, expense by economic type, by standard
+object, by department, by function) — **12 new indicators** via `fetch_government.py`
+(StatCan + Treasury Board open data + GC InfoBase) plus 3 reusable chart builders.
 Deferred (candidates, not committed):
 **homeownership rate** (Census-only — no clean annual StatCan series; revisit when
 2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),
 PISA / tertiary attainment (no clean feed), CIHI wait-times (no automated feed),
 nurses/CT/ICU subdetail, absolute house prices by city + dwelling type (CREA MLS HPI
-— internal only), raw-vs-processed data split, dataset versioning.
+— internal only), raw-vs-processed data split, dataset versioning, **federal public
+service by occupational group over time** (no reproducible authoritative series — TBS
+Demographic Snapshots only; see the gotcha above).

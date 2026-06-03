@@ -1,0 +1,191 @@
+---
+title: "Federal Spending"
+description: "What the federal government raises and spends — over time, by type, by department, and by function"
+---
+
+This page looks at **federal** government spending: how it has grown, what it is
+spent on, and which departments it flows through. It complements the
+[Public Finances](../fiscal/index.qmd) page (which compares Canada's
+*general*-government finances with OECD peers) and the
+[Government Employment](index.qmd) page (the people behind the payroll line).
+
+As with the workforce, how much government *should* spend is a political question.
+The charts below describe the composition and trend without a favourable
+direction. A recurring theme: most federal spending is not the government
+operating itself — it is **transfers**, money moved to people (benefits like the
+Canada Child Benefit and elderly benefits) and to other governments (health and
+social transfers to the provinces).
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+from pipeline.config import get_data_date
+from pipeline.charts import single_line, lines_over_time, stacked_area, category_bar
+```
+
+## Revenue and Spending Over Time
+
+Measured against the size of the economy, federal revenue and spending have been
+relatively stable for decades — typically in the mid-to-high teens as a share of
+GDP — punctuated by sharp, temporary jumps in spending during recessions, most
+dramatically the COVID-19 response in 2020. The gap between the two lines is the
+budget surplus (revenue above spending) or deficit (spending above revenue).
+
+```{python}
+#| echo: false
+fin_path = "data/government/statcan_federal_finance.csv"
+if os.path.exists(fin_path):
+    fin = pd.read_csv(fin_path)
+    g = fin.dropna(subset=["revenue_pct_gdp"])
+    m = g.melt(id_vars="year", value_vars=["revenue_pct_gdp", "expenditure_pct_gdp"],
+               var_name="metric", value_name="pct")
+    m["metric"] = m["metric"].map({"revenue_pct_gdp": "Revenue",
+                                   "expenditure_pct_gdp": "Total spending"})
+    fig = lines_over_time(m, "year", "pct", "metric", yaxis_title="% of GDP",
+        yticksuffix="%", hover_decimals=1,
+        colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
+        group_order=["Total spending", "Revenue"], legend_orientation="h",
+        source_note=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+In dollar terms the federal government is far larger than it was in 1961 — but so
+is the economy and the population, which is why the share-of-GDP view above is the
+fairer measure of size. (These are nominal dollars, not adjusted for inflation.)
+
+```{python}
+#| echo: false
+if os.path.exists(fin_path):
+    fin = pd.read_csv(fin_path)
+    m = fin.melt(id_vars="year", value_vars=["revenue", "expenditure"],
+                 var_name="metric", value_name="val")
+    m["valb"] = m["val"] / 1000.0
+    m["metric"] = m["metric"].map({"revenue": "Revenue", "expenditure": "Total spending"})
+    fig = lines_over_time(m, "year", "valb", "metric", yaxis_title="$ billions (nominal)",
+        ytickprefix="$", hover_decimals=1,
+        colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
+        group_order=["Total spending", "Revenue"], legend_orientation="h",
+        source_note=f"Source: Statistics Canada 36-10-0477-01 (federal general government, nominal dollars) | Data as of: {get_data_date(fin_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+## What the Money Is Spent On — by Type
+
+The federal government's own statement of operations splits spending by economic
+type. **Transfers dominate**: grants (largely to other governments and
+organizations) plus social benefits (to individuals) are well over half of all
+spending. The cost of the federal **workforce** — compensation of employees, shown
+in red — is a comparatively modest share, smaller than the interest paid on the
+public debt in recent years.
+
+```{python}
+#| echo: false
+exp_path = "data/government/statcan_federal_expense_by_type.csv"
+EXP_COLORS = {
+    "Grants": "#f28e2b", "Social benefits": "#4e79a7",
+    "Compensation of employees": "#d62728", "Interest on debt": "#59a14f",
+    "Other expense": "#b07aa1", "Goods & services": "#76b7b2",
+    "Capital consumption": "#edc948", "Subsidies": "#9c755f",
+}
+if os.path.exists(exp_path):
+    df = pd.read_csv(exp_path)
+    d = df[df["category"].isin(EXP_COLORS)]
+    fig = stacked_area(d, "year", "value_millions", "category",
+        yaxis_title="$ billions", value_scale=1000.0, ytickprefix="$", hover_decimals=1,
+        colors=EXP_COLORS, group_order=list(EXP_COLORS.keys()),
+        source_note=f"Source: Statistics Canada 10-10-0016-01 (federal government, statement of operations) | Data as of: {get_data_date(exp_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+A more detailed breakdown, by **standard object** (the categories used in the
+Public Accounts of Canada), tells the same story for the most recent year:
+transfer payments are about three-fifths of spending, personnel about a seventh,
+and public debt charges about a tenth.
+
+```{python}
+#| echo: false
+obj_path = "data/government/infobase_federal_by_object.csv"
+if os.path.exists(obj_path):
+    df = pd.read_csv(obj_path)
+    fig = category_bar(df, "object", "value", xaxis_title="$ billions",
+        value_scale=1e9, value_fmt=",.1f", tickprefix="$",
+        highlight={"Personnel"},
+        source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase) / Public Accounts of Canada | Data as of: {get_data_date(obj_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## Which Departments the Money Flows Through
+
+Ranking departments by spending gives a very different picture from ranking them
+by **headcount** (on the [employment page](index.qmd)). The Department of Finance
+and Employment and Social Development Canada lead by a wide margin — not because
+they are large employers, but because the major transfers run through them: health
+and social transfers to the provinces and public debt charges (Finance), and
+elderly and family benefits (ESDC). People-heavy departments like National Defence
+and the Canada Revenue Agency spend far less per employee.
+
+Spending is also strikingly **concentrated**. The two largest departments alone
+account for about **half of all federal spending**, while most departments — even
+sizeable science and regulatory bodies like Environment and Climate Change Canada —
+each make up **well under 1%**. The chart shows the 25 largest; the percentage on
+each bar is that department's share of total federal spending.
+
+```{python}
+#| echo: false
+depts_path = "data/government/infobase_federal_by_dept.csv"
+if os.path.exists(depts_path):
+    df = pd.read_csv(depts_path)
+    df["share"] = df["value"] / df["value"].sum() * 100
+    fig = category_bar(df, "department", "value", top_n=25, xaxis_title="$ billions",
+        value_scale=1e9, value_fmt=",.1f", tickprefix="$", text_col="share", text_fmt="{:.1f}%",
+        source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase) / Public Accounts of Canada | Data as of: {get_data_date(depts_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## What Governments Spend On — by Function
+
+Finally, a functional view: what the public sector funds, classified by purpose.
+Social protection (pensions, benefits), health, and education are the largest
+functions — the core of the modern welfare state.
+
+::: {.callout-important}
+## This chart is all governments combined, not federal alone
+A clean **federal-only** functional breakdown is not published: Statistics
+Canada's functional series consolidates federal, provincial/territorial, and local
+government (and the Canada and Quebec Pension Plans) together. This matters because
+the federal government funds much of health and education *indirectly*, through
+transfers to the provinces that deliver those services. So read the chart below as
+"what Canadian governments collectively spend on," not "what Ottawa spends on."
+:::
+
+```{python}
+#| echo: false
+fn_path = "data/government/statcan_govt_spending_by_function.csv"
+if os.path.exists(fn_path):
+    df = pd.read_csv(fn_path)
+    latest = df[df["year"] == df["year"].max()]
+    yr = int(df["year"].max())
+    fig = category_bar(latest, "function", "value_millions", xaxis_title=f"$ billions ({yr}, all governments)",
+        value_scale=1000.0, value_fmt=",.0f", tickprefix="$",
+        source_note=f"Source: Statistics Canada 10-10-0005-01 (CCOFOG, consolidated Canadian general government) | Data as of: {get_data_date(fn_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## Download Data
+
+- [Federal revenue, spending & balance, 1961– (CSV)](../data/government/statcan_federal_finance.csv) — Statistics Canada 36-10-0477-01 / 36-10-0222-01
+- [Federal expense by economic type (CSV)](../data/government/statcan_federal_expense_by_type.csv) — Statistics Canada 10-10-0016-01
+- [Federal spending by standard object (CSV)](../data/government/infobase_federal_by_object.csv) — GC InfoBase / Public Accounts of Canada
+- [Federal spending by department (CSV)](../data/government/infobase_federal_by_dept.csv) — GC InfoBase / Public Accounts of Canada
+- [Government spending by function (CSV)](../data/government/statcan_govt_spending_by_function.csv) — Statistics Canada 10-10-0005-01 (CCOFOG)

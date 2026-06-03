@@ -1,0 +1,14 @@
+{
+  "dataset_id": "tbs_fps_demographics",
+  "source": "Treasury Board of Canada Secretariat",
+  "source_table": "TBS Federal public service statistics (open.canada.ca)",
+  "frequency": "annual",
+  "unit": "employees (March 31 headcount)",
+  "retrieved_at": "2026-06-03T14:39:53.336140+00:00",
+  "latest_observation_date": "2025",
+  "transformations": [
+    "age/tenure/region/language summed CPA+SA; sex from dept\u00d7sex cross-tab (Total rows dropped)"
+  ],
+  "notes": null,
+  "row_count": 603
+}

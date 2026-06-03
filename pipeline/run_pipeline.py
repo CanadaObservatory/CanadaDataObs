@@ -28,6 +28,13 @@ from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
 from pipeline.fetch_whr import fetch_happiness
 from pipeline.fetch_worldbank import fetch_worldbank_indicator
 from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
+from pipeline.fetch_government import (
+    fetch_govt_employment_by_level, fetch_public_sector_composition,
+    fetch_fps_population, fetch_fps_by_department, fetch_fps_demographics,
+    fetch_fps_executive, fetch_federal_finance_longrun, fetch_federal_expense_by_type,
+    fetch_govt_spending_by_function, fetch_federal_spending_by_object,
+    fetch_federal_spending_by_dept,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -43,6 +50,18 @@ CUSTOM_FETCHERS = {
     "fetch_provincial_electricity": fetch_provincial_electricity,
     "fetch_wildfire": fetch_wildfire,
     "fetch_sea_ice": fetch_sea_ice,
+    # Government (workforce + federal spending)
+    "fetch_govt_employment_by_level": fetch_govt_employment_by_level,
+    "fetch_public_sector_composition": fetch_public_sector_composition,
+    "fetch_fps_population": fetch_fps_population,
+    "fetch_fps_by_department": fetch_fps_by_department,
+    "fetch_fps_demographics": fetch_fps_demographics,
+    "fetch_fps_executive": fetch_fps_executive,
+    "fetch_federal_finance_longrun": fetch_federal_finance_longrun,
+    "fetch_federal_expense_by_type": fetch_federal_expense_by_type,
+    "fetch_govt_spending_by_function": fetch_govt_spending_by_function,
+    "fetch_federal_spending_by_object": fetch_federal_spending_by_object,
+    "fetch_federal_spending_by_dept": fetch_federal_spending_by_dept,
 }
 
 

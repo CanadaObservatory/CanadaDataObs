@@ -1,0 +1,14 @@
+{
+  "dataset_id": "tbs_fps_by_department",
+  "source": "Treasury Board of Canada Secretariat",
+  "source_table": "TBS Federal public service statistics (open.canada.ca)",
+  "frequency": "annual",
+  "unit": "employees (March 31 headcount)",
+  "retrieved_at": "2026-06-03T14:39:52.085962+00:00",
+  "latest_observation_date": "2025",
+  "transformations": [
+    "headcount by department, CPA+SA summed"
+  ],
+  "notes": null,
+  "row_count": 1476
+}

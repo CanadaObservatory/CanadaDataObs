@@ -101,7 +101,14 @@ Life satisfaction and the factors that underlie it.
 *Source: World Happiness Report*
 :::
 
-:::{.column width="34%"}
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Government & Public Finances](fiscal/)
+Debt and deficits, the size of the public-service workforce, and what the federal government spends.
+
+*Sources: Statistics Canada, OECD, Treasury Board*
 :::
 
 ::::

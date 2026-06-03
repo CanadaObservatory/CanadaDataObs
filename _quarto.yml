@@ -36,8 +36,14 @@ website:
             text: Housing & Cost of Living
           - href: income/index.qmd
             text: Income & Inequality
+      - text: Public Finances
+        menu:
           - href: fiscal/index.qmd
-            text: Public Finances
+            text: Government Finances
+          - href: government/index.qmd
+            text: Government Employment
+          - href: government/spending.qmd
+            text: Federal Spending
       - href: health/index.qmd
         text: Health
       - href: science/index.qmd

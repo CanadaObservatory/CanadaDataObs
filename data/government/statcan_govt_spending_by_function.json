@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_govt_spending_by_function",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 10-10-0005-01 (CCOFOG)",
+  "frequency": "annual",
+  "unit": "$ millions",
+  "retrieved_at": "2026-06-03T14:39:57.420654+00:00",
+  "latest_observation_date": "2024",
+  "transformations": [
+    "Consolidated Canadian general government, by COFOG division"
+  ],
+  "notes": "All levels of government consolidated \u2014 not federal-only.",
+  "row_count": 170
+}

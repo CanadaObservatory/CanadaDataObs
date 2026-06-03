@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_public_sector_composition",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 14-10-0027-01 (Labour Force Survey)",
+  "frequency": "annual",
+  "unit": "persons employed",
+  "retrieved_at": "2026-06-03T15:31:16.308764+00:00",
+  "latest_observation_date": "2025",
+  "transformations": [
+    "GEO=Canada, Public sector employees, by NAICS industry (aggregate rows dropped); thousands\u2192persons"
+  ],
+  "notes": null,
+  "row_count": 550
+}

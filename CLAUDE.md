@@ -71,7 +71,7 @@ DataCan/
 │   ├── fetch_worldbank.py ← fetch_worldbank_indicator (generic WB API)
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover (not weekly)
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)

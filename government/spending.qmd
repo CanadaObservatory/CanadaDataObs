@@ -21,7 +21,8 @@ social transfers to the provinces).
 import os
 import pandas as pd
 from pipeline.config import get_data_date
-from pipeline.charts import single_line, lines_over_time, stacked_area, category_bar
+from pipeline.charts import (single_line, lines_over_time, stacked_area,
+                             category_bar, category_bar_views)
 ```
 
 ## Revenue and Spending Over Time
@@ -134,16 +135,40 @@ and the Canada Revenue Agency spend far less per employee.
 Spending is also strikingly **concentrated**. The two largest departments alone
 account for about **half of all federal spending**, while most departments — even
 sizeable science and regulatory bodies like Environment and Climate Change Canada —
-each make up **well under 1%**. The chart shows the 25 largest; the percentage on
+each make up **well under 1%**. Use the **dropdown** to change the view: the 25 or
+50 largest departments, or thematic groups — science, research & the environment;
+public safety & security; or the regional development agencies. The percentage on
 each bar is that department's share of total federal spending.
 
 ```{python}
 #| echo: false
 depts_path = "data/government/infobase_federal_by_dept.csv"
+SCIENCE = ["Fisheries and Oceans Canada", "Innovation, Science and Economic Development Canada",
+    "Natural Resources Canada", "Agriculture and Agri-Food Canada",
+    "Environment and Climate Change Canada", "National Research Council Canada",
+    "Natural Sciences and Engineering Research Council of Canada", "Atomic Energy of Canada Limited",
+    "Canadian Institutes of Health Research", "Social Sciences and Humanities Research Council of Canada",
+    "Canadian Food Inspection Agency", "Statistics Canada", "Canadian Space Agency",
+    "Canadian Nuclear Safety Commission"]
+SAFETY = ["National Defence", "Royal Canadian Mounted Police", "Correctional Service Canada",
+    "Canada Border Services Agency", "Public Safety Canada",
+    "Communications Security Establishment Canada", "Canadian Security Intelligence Service",
+    "Parole Board of Canada"]
+REGIONAL = ["Atlantic Canada Opportunities Agency", "Prairies Economic Development Canada",
+    "Canada Economic Development for Quebec Regions",
+    "Federal Economic Development Agency for Southern Ontario",
+    "Pacific Economic Development Agency of Canada", "Canadian Northern Economic Development Agency",
+    "Federal Economic Development Agency for Northern Ontario"]
 if os.path.exists(depts_path):
     df = pd.read_csv(depts_path)
     df["share"] = df["value"] / df["value"].sum() * 100
-    fig = category_bar(df, "department", "value", top_n=25, xaxis_title="$ billions",
+    grp = lambda names: df[df["department"].isin(names)]
+    views = [("Top 25 departments", df.nlargest(25, "value")),
+             ("Top 50 departments", df.nlargest(50, "value")),
+             ("Science, research & environment", grp(SCIENCE)),
+             ("Public safety & security", grp(SAFETY)),
+             ("Regional development agencies", grp(REGIONAL))]
+    fig = category_bar_views(views, "department", "value", xaxis_title="$ billions",
         value_scale=1e9, value_fmt=",.1f", tickprefix="$", text_col="share", text_fmt="{:.1f}%",
         source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase) / Public Accounts of Canada | Data as of: {get_data_date(depts_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

@@ -32,8 +32,10 @@ website:
         menu:
           - href: economics/index.qmd
             text: Growth & Jobs
+          - href: economics/cost-of-living.qmd
+            text: Cost of Living
           - href: housing/index.qmd
-            text: Housing & Cost of Living
+            text: Housing
           - href: income/index.qmd
             text: Income & Inequality
       - text: Public Finances

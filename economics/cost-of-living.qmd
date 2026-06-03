@@ -1,0 +1,141 @@
+---
+title: "Cost of Living"
+description: "Inflation — overall, core, and food — against the Bank of Canada target"
+---
+
+The cost of living is consistently the issue Canadians name as their top concern.
+This page tracks consumer-price inflation: the headline **all-items** rate, the
+Bank of Canada's preferred **core** measure (CPI-trim), and **food** — the
+component households feel most. Related cost pressures have their own pages:
+[Housing](../housing/) and [Income & Inequality](../income/).
+
+```{python}
+#| echo: false
+import os
+import math
+from datetime import timedelta
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
+```
+
+## Inflation (CPI, Year-over-Year)
+
+Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
+
+```{python}
+#| echo: false
+try:
+    cpi = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in cpi.columns:
+        cpi = cpi[cpi["product_group"] == "All-items"]
+    cpi = cpi.sort_values("date").reset_index(drop=True)
+    cpi["cpi_value"] = pd.to_numeric(cpi["cpi_value"], errors="coerce")
+    cpi["inflation_yoy"] = cpi["cpi_value"].pct_change(periods=12) * 100
+    cpi = cpi.dropna(subset=["inflation_yoy"])
+
+    colors = []
+    for v in cpi["inflation_yoy"]:
+        if v > 3:
+            colors.append(CANADA_COLOR)
+        elif v < 1:
+            colors.append("#1f77b4")
+        else:
+            colors.append("#555555")
+
+    fig = go.Figure()
+    fig.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.4, line_width=0, layer="below")
+    fig.add_trace(go.Bar(x=cpi["date"], y=cpi["inflation_yoy"], marker_color=colors,
+        hovertemplate="<b>%{x|%b %Y}</b><br>Inflation: %{y:.1f}%<extra></extra>"))
+    fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.7)
+
+    latest = cpi["date"].max()
+    one_year_ago = latest - timedelta(days=365)
+    x_start = one_year_ago - timedelta(days=15)
+    x_end = latest + timedelta(days=31)
+    visible = cpi[cpi["date"] >= one_year_ago]["inflation_yoy"]
+    y_min_val, y_max_val = visible.min(), visible.max()
+    y_min = 0 if y_min_val >= 0 else math.floor(y_min_val * 2) / 2 - 0.5
+    y_max = math.ceil(max(y_max_val, 3.5) * 2) / 2 + 1.0
+
+    fig.update_layout(
+        xaxis_title="", yaxis_title="Inflation (%)", plot_bgcolor="white",
+        xaxis=dict(gridcolor="#e0e0e0", range=[x_start, x_end], tickformat="%b\n%Y",
+            rangeselector=dict(buttons=[
+                dict(count=1, label="1Y", step="year", stepmode="backward"),
+                dict(count=2, label="2Y", step="year", stepmode="backward"),
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01)),
+        yaxis=dict(gridcolor="#e0e0e0", range=[y_min, y_max]),
+        showlegend=False, margin=dict(b=100, t=40, r=80),
+        annotations=[
+            dict(text="2% target", xref="paper", yref="y", x=1.01, y=2,
+                 xanchor="left", showarrow=False, font=dict(size=11, color="#888")),
+            dict(text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
+                 xref="paper", yref="paper", x=0, y=-0.15, showarrow=False, font=dict(size=10, color="#999")),
+            dict(text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
+                 xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999")),
+        ])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("CPI data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Headline, Core, and Food
+
+Three views of the same question. **All-items** is the headline rate; **CPI-trim** is the Bank of Canada's preferred *core* measure, which strips out the most volatile price movements to show the underlying trend; **food** is the most-felt component, and has generally run hotter than overall inflation.
+
+```{python}
+#| echo: false
+try:
+    ai = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in ai.columns:
+        ai = ai[ai["product_group"] == "All-items"]
+    ai = ai.sort_values("date")
+    ai["yoy"] = pd.to_numeric(ai["cpi_value"], errors="coerce").pct_change(12) * 100
+    fd = pd.read_csv("data/economics/statcan_food_cpi.csv", parse_dates=["date"]).sort_values("date")
+    fd["yoy"] = pd.to_numeric(fd["food_index"], errors="coerce").pct_change(12) * 100
+    tr = pd.read_csv("data/economics/statcan_cpi_trim.csv", parse_dates=["date"]).sort_values("date")
+
+    figc = go.Figure()
+    figc.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.35, line_width=0, layer="below")
+    figc.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.6)
+    figc.add_trace(go.Scatter(x=ai["date"], y=ai["yoy"], name="All-items", mode="lines",
+        line=dict(color=CANADA_COLOR, width=3), hovertemplate="All-items: %{y:.1f}%<extra></extra>"))
+    figc.add_trace(go.Scatter(x=tr["date"], y=tr["cpi_trim_yoy"], name="CPI-trim (core)", mode="lines",
+        line=dict(color="#4e79a7", width=2), hovertemplate="CPI-trim: %{y:.1f}%<extra></extra>"))
+    figc.add_trace(go.Scatter(x=fd["date"], y=fd["yoy"], name="Food", mode="lines",
+        line=dict(color="#f28e2b", width=2), hovertemplate="Food: %{y:.1f}%<extra></extra>"))
+    latest = ai["date"].max()
+    figc.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%"),
+        xaxis=dict(title="", gridcolor="#e0e0e0", range=[pd.Timestamp("2015-01-01"), latest],
+            rangeselector=dict(buttons=[
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=120, r=20))
+    figc.add_annotation(
+        text=f"Source: Statistics Canada 18-10-0004-01 (all-items, food) and 18-10-0256-01 (CPI-trim) | Data as of: {get_data_date('data/economics/statcan_cpi_trim.csv')}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    figc.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("Core/food CPI data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Other Cost Pressures
+
+Inflation is only part of the cost-of-living picture. See also:
+
+- [Housing](../housing/) — house prices, the price-to-income gap, rent, and household debt
+- [Income & Inequality](../income/) — wages, median income, and low-income and food-insecurity rates
+
+## Download Data
+
+- [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada 18-10-0004-01
+- [Food CPI (CSV)](../data/economics/statcan_food_cpi.csv) — Statistics Canada 18-10-0004-01
+- [CPI-trim core inflation (CSV)](../data/economics/statcan_cpi_trim.csv) — Statistics Canada 18-10-0256-01

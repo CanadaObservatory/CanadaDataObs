@@ -265,12 +265,28 @@ INDICATORS = [
                                "Products and product groups": "Food"},
               output_subpath="statcan_food_cpi.csv",
               source_table="Statistics Canada 18-10-0004-01"),
+    # CPI-trim, the Bank of Canada's preferred core-inflation measure — published
+    # directly as a year-over-year % change (no computation needed).
+    Indicator("cpi_trim", "economics", "statcan",
+              "CPI-trim (core inflation)", "% (year-over-year)", "monthly",
+              value_col="cpi_trim_yoy", date_format="%Y-%m",
+              statcan_table="18-10-0256-01",
+              statcan_filters={"GEO": "Canada",
+                               "Alternative measures": "Measure of core inflation based on a trimmed mean approach, CPI-trim (year-over-year percent change)"},
+              output_subpath="statcan_cpi_trim.csv",
+              source_table="Statistics Canada 18-10-0256-01"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",
               "Government gross debt", "% of GDP", "annual",
               value_col="govt_debt", chart_recipe="ranked_bar",
               dataflow="OECD.ECO.MAD,DSD_EO@DF_EO", key=f"{_C}.GGFLQ.A",
+              transform=_drop_future_years,
+              source_table="OECD Economic Outlook"),
+    Indicator("net_debt", "fiscal", "oecd",
+              "Government net debt", "% of GDP", "annual",
+              value_col="net_debt", chart_recipe="ranked_bar",
+              dataflow="OECD.ECO.MAD,DSD_EO@DF_EO", key=f"{_C}.GNFLQ.A",
               transform=_drop_future_years,
               source_table="OECD Economic Outlook"),
     Indicator("govt_balance", "fiscal", "oecd",

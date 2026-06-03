@@ -60,6 +60,24 @@ if os.path.exists(debt_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Government Net Debt: Ranked
+
+Net debt subtracts the financial assets governments hold (such as public-pension reserves) from gross debt. On this measure Canada's general-government debt is far lower than its gross figure and among the lowest in the peer group — a different picture from the gross-debt and deficit headlines. Comparison is against the OECD peer set, not only the G7. (Norway is omitted: its sovereign wealth fund puts net debt at roughly −340% of GDP, far off this scale.)
+
+```{python}
+#| echo: false
+netdebt_path = "data/fiscal/oecd_net_debt.csv"
+if os.path.exists(netdebt_path):
+    nd = pd.read_csv(netdebt_path)
+    nd = nd[nd["country_code"] != "NOR"]
+    fig = ranked_bar(nd, "net_debt", "Net debt (% of GDP)",
+        f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(netdebt_path)}",
+        hover_template="%{y}: %{x:.0f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+else:
+    print("Net debt data not yet available. Run the data pipeline.")
+```
+
 ## Government Budget Balance
 
 General government net lending as a percentage of GDP. Positive values are surpluses; negative values are deficits. The dotted line marks a balanced budget (zero).

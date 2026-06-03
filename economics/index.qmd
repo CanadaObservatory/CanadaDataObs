@@ -51,9 +51,9 @@ else:
     print("Real GDP growth data not yet available. Run the data pipeline.")
 ```
 
-## Are We in a Recession? Quarterly GDP
+## Quarterly GDP Growth
 
-"Recession" is usually shorthand for the economy shrinking for two quarters in a row. This chart shows the **quarter-over-quarter change in real (inflation-adjusted) GDP** for Canada, every quarter back to 1961 — red bars are quarters the economy contracted. The long record puts the present in context: the deep contractions of the early 1980s and 1990s, the 2008–09 financial crisis, the record pandemic swing in 2020, and the most recent quarters. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
+Real (inflation-adjusted) gross domestic product, shown as the change from the previous quarter, for every quarter back to 1961. Red bars mark quarters in which the economy contracted. A **recession** is commonly defined as two consecutive quarters of declining real GDP. The full record places recent quarters alongside past downturns — the contractions of the early 1980s and early 1990s, the 2008–09 financial crisis, and the record swings of the 2020 pandemic. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
 
 ```{python}
 #| echo: false

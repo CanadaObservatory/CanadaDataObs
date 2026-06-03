@@ -122,6 +122,46 @@ fig = single_line(canada_growth, "date", "pop_yoy_pct", title="",
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
+## Where Canada's Population Growth Comes From
+
+Population growth breaks into three parts: **natural increase** (births minus deaths), **net permanent immigration** (new permanent residents minus people leaving), and **net temporary residents** (the non-permanent population — people on work and study permits, plus asylum claimants). Stacking them shows what actually drove growth each year. The surge of the early 2020s was overwhelmingly temporary residents; federal immigration levels plans have since reduced both streams, and the temporary component has turned negative.
+
+```{python}
+#| echo: false
+import os
+components_path = "data/population/statcan_population_components.csv"
+if os.path.exists(components_path):
+    comp = pd.read_csv(components_path, parse_dates=["date"])
+    comp = comp[comp["geography"] == "Canada"]
+    piv = comp.pivot_table(index="date", columns="component", values="value", aggfunc="sum").sort_index()
+    natural = piv["Births"] - piv["Deaths"]
+    permanent = piv["Immigrants"] - piv["Net emigration"]
+    temporary = piv["Net non-permanent residents"]
+    yrs = piv.index.year
+    cats = [("Natural increase (births − deaths)", natural, "#59a14f"),
+            ("Net permanent immigration", permanent, "#4e79a7"),
+            ("Net temporary residents", temporary, "#f28e2b")]
+    figp = go.Figure()
+    for name, series, col in cats:
+        figp.add_trace(go.Bar(x=yrs, y=series.values, name=name, marker_color=col,
+            hovertemplate=name + ": %{y:,.0f}<extra></extra>"))
+    figp.add_hline(y=0, line_color="#888", line_width=1)
+    figp.add_vline(x=2024.5, line_dash="dot", line_color="#999")
+    figp.add_annotation(x=2024.5, y=1.0, yref="paper", yanchor="bottom",
+        text="federal levels plans<br>reduce intake", showarrow=False,
+        font=dict(size=9, color="#999"), align="center")
+    figp.update_layout(barmode="relative", plot_bgcolor="white", height=480, bargap=0.15,
+        yaxis=dict(title="Persons per year", gridcolor="#e0e0e0", tickformat=",", zeroline=False),
+        xaxis=dict(title="", gridcolor="#e0e0e0"), hovermode="x unified",
+        legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="left", x=0),
+        margin=dict(t=40, b=120, r=20))
+    figp.add_annotation(text=f"Source: Statistics Canada, Table 17-10-0008-01 | Data as of: {get_data_date(components_path)}",
+        xref="paper", yref="paper", x=0, y=-0.30, showarrow=False, font=dict(size=10, color="#999"))
+    figp.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Population components data not yet available. Run the data pipeline.")
+```
+
 ## Components of Population Change
 
 Births, deaths, immigration, and emigration — the drivers behind Canada's population growth. Data from Statistics Canada's components of population growth table (quarterly estimates).

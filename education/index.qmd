@@ -33,9 +33,9 @@ if os.path.exists(tuition_path):
                   for row in tu.itertuples()]
 ```
 
-## Real Undergraduate Tuition Over Time
+## Undergraduate Tuition Over Time
 
-Average undergraduate tuition for Canadian students, in constant (inflation-adjusted) dollars, for Canada and the three provinces home to most of the country's largest universities. Quebec (and Newfoundland) hold tuition well below the national average; Ontario sits above it. Shown in real terms, so the lines isolate increases beyond general inflation.
+Average undergraduate tuition for Canadian students, for Canada and the three provinces home to most of the country's largest universities. Quebec (and Newfoundland) hold tuition well below the national average; Ontario sits above it. Use the dropdown to switch between **real** (inflation-adjusted, constant dollars) and **nominal** (current dollars) — real terms isolate increases beyond general inflation.
 
 ```{python}
 #| echo: false
@@ -47,6 +47,8 @@ if tu is not None:
         colors={"Canada": CANADA_COLOR, "Ontario": "#4e79a7", "Quebec": "#59a14f",
                 "British Columbia": "#b07aa1"},
         group_order=["Canada", "Ontario", "Quebec", "British Columbia"],
+        measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
+                  {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -55,7 +57,7 @@ else:
 
 ## Domestic vs. International Tuition
 
-International students pay several times what domestic students do, and that gap has widened sharply — international undergraduate fees have far outpaced inflation, becoming a significant revenue source for universities. All four series are shown in constant dollars (Canada-wide).
+International students pay several times what domestic students do, and that gap has widened sharply — international undergraduate fees have far outpaced inflation, becoming a significant revenue source for universities. Use the dropdown to switch between real (constant) and nominal (current) dollars (Canada-wide).
 
 ```{python}
 #| echo: false
@@ -67,6 +69,8 @@ if tu is not None:
                 "Canadian undergraduate": "#4e79a7", "Canadian graduate": "#76b7b2"},
         group_order=["International undergraduate", "International graduate",
                      "Canadian undergraduate", "Canadian graduate"],
+        measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
+                  {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```

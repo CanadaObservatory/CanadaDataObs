@@ -835,31 +835,50 @@ def _series_colors(groups, colors):
 def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
                     colors=None, group_order=None, source_note=None, height=460,
                     yaxis_tickformat=None, ytickprefix="", yticksuffix="",
-                    hover_decimals=0, legend_orientation="v", rangemode="tozero"):
+                    hover_decimals=0, legend_orientation="v", rangemode="tozero",
+                    measures=None):
     """Plain multi-line time series for annual data — integer-year safe (no
     date-axis range buttons, unlike the OECD peer charts). `df` is long:
     (x_col, group_col, value_col). Used for government employment by level and
-    federal revenue-vs-expenditure."""
+    federal revenue-vs-expenditure.
+
+    `measures`: optional list of {col, label, yaxis_title} — adds a dropdown that
+    switches every line between alternative value columns (e.g. nominal vs real),
+    re-scaling the y-axis and updating its title. When given, the first measure is
+    shown initially and `value_col` is ignored."""
     groups = group_order or list(df[group_col].drop_duplicates())
     cmap = _series_colors(groups, colors)
+    subsets = {g: df[df[group_col] == g].sort_values(x_col) for g in groups}
+    init_col = measures[0]["col"] if measures else value_col
+    init_title = measures[0].get("yaxis_title", yaxis_title) if measures else yaxis_title
     fig = go.Figure()
     for g in groups:
-        s = df[df[group_col] == g].sort_values(x_col)
+        s = subsets[g]
         fig.add_trace(go.Scatter(
-            x=s[x_col], y=s[value_col], name=str(g), mode="lines+markers",
+            x=s[x_col], y=s[init_col], name=str(g), mode="lines+markers",
             line=dict(color=cmap[g], width=2.5), marker=dict(size=5),
             hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
     legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
               if legend_orientation == "v"
               else dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5))
-    yaxis = dict(title=yaxis_title, gridcolor="#e0e0e0", rangemode=rangemode,
+    yaxis = dict(title=init_title, gridcolor="#e0e0e0", rangemode=rangemode,
                  tickprefix=ytickprefix, ticksuffix=yticksuffix)
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=dict(title="", gridcolor="#e0e0e0"), yaxis=yaxis, legend=legend,
-        margin=dict(l=10, r=(175 if legend_orientation == "v" else 20), t=30, b=80))
+        margin=dict(l=10, r=(175 if legend_orientation == "v" else 20),
+                    t=(60 if measures else 30), b=80))
+    if measures:
+        buttons = [dict(method="update", label=m["label"],
+                        args=[{"y": [subsets[g][m["col"]].tolist() for g in groups]},
+                              {"yaxis.title.text": m.get("yaxis_title", yaxis_title),
+                               "yaxis.autorange": True}])
+                   for m in measures]
+        fig.update_layout(updatemenus=[dict(buttons=buttons, active=0, x=0,
+            xanchor="left", y=1.14, yanchor="top", bgcolor="white",
+            bordercolor="#ccc", borderwidth=1, showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
                            xanchor="left", y=-0.18, showarrow=False,

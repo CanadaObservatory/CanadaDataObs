@@ -369,6 +369,57 @@ if os.path.exists(ca_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Trade Exposure to the United States
+
+About three-quarters of Canada's merchandise exports go to a single market — the United States — though that share has fallen over the long run and dropped sharply during the 2025 tariff conflict. (Customs basis, seasonally adjusted.)
+
+```{python}
+#| echo: false
+from pipeline.charts import single_line
+trade_path = "data/economics/statcan_trade_us.csv"
+if os.path.exists(trade_path):
+    tr = pd.read_csv(trade_path, parse_dates=["date"])
+    fig = single_line(tr, "date", "exports_us_share", title="",
+        yaxis_title="Exports to the US (% of total exports)", rangeslider=True,
+        yaxis_tickformat=".0f",
+        hovertemplate="%{x|%b %Y}: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada 12-10-0011-01 (Customs basis, seasonally adjusted) | Data as of: {get_data_date(trade_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Trade data not yet available. Run the data pipeline.")
+```
+
+## Trade Balance: the US vs. the Rest of the World
+
+Canada runs a large merchandise **surplus with the United States** and a **deficit with every other market combined** — so the overall trade balance hinges on the US relationship. (Monthly, seasonally adjusted; balance = exports − imports.)
+
+```{python}
+#| echo: false
+if os.path.exists(trade_path):
+    tr = pd.read_csv(trade_path, parse_dates=["date"])
+    figb = go.Figure()
+    figb.add_hline(y=0, line_color="#888", line_width=1)
+    figb.add_trace(go.Scatter(x=tr["date"], y=tr["balance_us"] / 1000, name="With the United States",
+        mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="US: $%{y:.1f}B<extra></extra>"))
+    figb.add_trace(go.Scatter(x=tr["date"], y=tr["balance_row"] / 1000, name="With the rest of the world",
+        mode="lines", line=dict(color="#888888", width=2), hovertemplate="Rest of world: $%{y:.1f}B<extra></extra>"))
+    figb.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+        yaxis=dict(title="Monthly trade balance ($ billions)", gridcolor="#e0e0e0", tickprefix="$", zeroline=False),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+            range=[pd.Timestamp("2005-01-01"), tr["date"].max()],
+            rangeselector=dict(buttons=[
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=120, r=20))
+    figb.add_annotation(
+        text=f"Source: Statistics Canada 12-10-0011-01 (Customs basis, SA; balance = exports − imports) | Data as of: {get_data_date(trade_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
 ## Download Data
 
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
@@ -378,3 +429,4 @@ if os.path.exists(ca_path):
 - [Employment Rate (CSV)](../data/economics/oecd_employment_rate.csv) — OECD Labour Force Statistics
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts
 - [Current Account Balance (CSV)](../data/economics/oecd_current_account.csv) — OECD Economic Outlook
+- [Merchandise Trade with the US (CSV)](../data/economics/statcan_trade_us.csv) — Statistics Canada 12-10-0011-01

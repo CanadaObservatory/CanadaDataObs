@@ -23,11 +23,13 @@ from pipeline.fetch_statcan import (
     fetch_statcan_indicator,
     fetch_population_quarterly, fetch_population_components, fetch_cpi,
     fetch_provincial_electricity, fetch_tuition, fetch_tuition_by_field,
+    fetch_trade_us,
 )
 from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
 from pipeline.fetch_whr import fetch_happiness
 from pipeline.fetch_worldbank import fetch_worldbank_indicator
 from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
+from pipeline.fetch_environment import fetch_ghg, fetch_ghg_by_sector
 from pipeline.fetch_government import (
     fetch_govt_employment_by_level, fetch_public_sector_composition,
     fetch_fps_population, fetch_fps_by_department, fetch_fps_demographics,
@@ -50,8 +52,11 @@ CUSTOM_FETCHERS = {
     "fetch_provincial_electricity": fetch_provincial_electricity,
     "fetch_tuition": fetch_tuition,
     "fetch_tuition_by_field": fetch_tuition_by_field,
+    "fetch_trade_us": fetch_trade_us,
     "fetch_wildfire": fetch_wildfire,
     "fetch_sea_ice": fetch_sea_ice,
+    "fetch_ghg": fetch_ghg,
+    "fetch_ghg_by_sector": fetch_ghg_by_sector,
     # Government (workforce + federal spending)
     "fetch_govt_employment_by_level": fetch_govt_employment_by_level,
     "fetch_public_sector_composition": fetch_public_sector_composition,

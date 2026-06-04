@@ -371,6 +371,56 @@ def fetch_tuition():
     return df
 
 
+def fetch_trade_us():
+    """Merchandise trade with the United States vs. all countries (StatCan
+    12-10-0011-01, Customs basis, seasonally adjusted, $ millions, monthly 1997–).
+    Computes the US export share and trade balances (exports − imports, since the
+    by-partner 'Trade Balance' rows are sparse). Tidy wide: date + columns."""
+    logger.info("Fetching StatCan merchandise trade (US vs. world)...")
+    try:
+        df = _get_table("12-10-0011-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch trade table: {e}")
+        return None
+    PART = "Principal trading partners"
+    validate_columns(df, ["REF_DATE", "GEO", "Trade", "Basis",
+                          "Seasonal adjustment", PART, "VALUE"], "trade_us")
+    df = df[(df["GEO"] == "Canada") & (df["Basis"] == "Customs")
+            & (df["Seasonal adjustment"] == "Seasonally adjusted")].copy()
+    df["VALUE"] = pd.to_numeric(df["VALUE"], errors="coerce")
+
+    def ser(trade, partner):
+        s = df[(df["Trade"] == trade) & (df[PART] == partner)][["REF_DATE", "VALUE"]]
+        return s.dropna().set_index("REF_DATE")["VALUE"]
+
+    out = pd.DataFrame({
+        "exports_us": ser("Export", "United States"),
+        "imports_us": ser("Import", "United States"),
+        "exports_total": ser("Export", "All countries"),
+        "imports_total": ser("Import", "All countries"),
+    }).dropna()
+    if out.empty:
+        return None
+    out["exports_us_share"] = out["exports_us"] / out["exports_total"] * 100
+    out["balance_us"] = out["exports_us"] - out["imports_us"]
+    out["balance_total"] = out["exports_total"] - out["imports_total"]
+    out["balance_row"] = out["balance_total"] - out["balance_us"]   # rest of world
+    out = out.reset_index().rename(columns={"REF_DATE": "date"})
+    out["date"] = pd.to_datetime(out["date"], format="%Y-%m", errors="coerce")
+    out = out.dropna(subset=["date"]).sort_values("date").reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "statcan_trade_us.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="date",
+        source="Statistics Canada", source_table="Statistics Canada 12-10-0011-01",
+        frequency="monthly", unit="$ millions (Customs basis, seasonally adjusted)",
+        transformations=["US vs. all-countries exports/imports; US export share; "
+                         "balances computed as exports − imports"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
 def fetch_tuition_by_field():
     """Canadian undergraduate tuition by field of study (StatCan 37-10-0003-01,
     TLAC), current dollars. Tidy: year, geography, field, tuition."""

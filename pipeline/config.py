@@ -275,6 +275,12 @@ INDICATORS = [
                                "Alternative measures": "Measure of core inflation based on a trimmed mean approach, CPI-trim (year-over-year percent change)"},
               output_subpath="statcan_cpi_trim.csv",
               source_table="Statistics Canada 18-10-0256-01"),
+    # Merchandise trade with the US (export dependence + balances) — bespoke
+    # multi-series; the salient US-tariff/trade exposure indicator.
+    Indicator("trade_us", "economics", "custom",
+              "Merchandise trade with the US", "$ millions", "monthly",
+              fetch_fn="fetch_trade_us", output_subpath="statcan_trade_us.csv",
+              source_table="Statistics Canada 12-10-0011-01"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",
@@ -603,6 +609,16 @@ INDICATORS = [
               fetch_fn="fetch_provincial_electricity",
               output_subpath="statcan_provincial_electricity.csv",
               source_table="Statistics Canada 25-10-0015-01"),
+    # GHG emissions (ECCC National Inventory Report basis — the series the 2030
+    # target is defined against). Year-stamped URL; bump GHG_RELEASE each spring.
+    Indicator("ghg_total", "environment", "custom",
+              "GHG emissions (national, NIR basis)", "Mt CO2e", "annual",
+              fetch_fn="fetch_ghg", output_subpath="eccc_ghg.csv",
+              source_table="ECCC National Inventory Report / CESI"),
+    Indicator("ghg_by_sector", "environment", "custom",
+              "GHG emissions by economic sector", "Mt CO2e", "annual",
+              fetch_fn="fetch_ghg_by_sector", output_subpath="eccc_ghg_by_sector.csv",
+              source_table="ECCC CESI (by economic sector)"),
 
     # ----- Society & Well-being (bespoke XLSX parse) -----
     Indicator("happiness", "wellbeing", "custom",

@@ -78,6 +78,7 @@ DataCan/
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
+│   ├── fetch_environment.py ← registry custom fetchers: GHG emissions national total + by economic sector (ECCC National Inventory Report / CESI; year-stamped URL — bump GHG_RELEASE each spring)
 │   ├── fetch_government.py ← Government-section custom fetchers: StatCan workforce (employment by level 36-10-0489-01; public-sector composition by industry 14-10-0027-01 LFS) + federal finance (36-10-0477-01 1961– + GDP 36-10-0222-01; expense-by-type 10-10-0016-01; CCOFOG 10-10-0005-01) + TBS federal public service (open.canada.ca CKAN) + GC InfoBase (standard objects, by-dept, executives)
 │   └── run_pipeline.py    ← registry-driven orchestrator
 ├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
@@ -122,6 +123,14 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   housing starts 34-10-0143-01 + rental vacancy 34-10-0127-01 (CMHC), food insecurity
   13-10-0835-01, Crime Severity Index 35-10-0026-01, homicide rate 35-10-0068-01,
   non-permanent residents 17-10-0121-01 (all generic single-series `fetch_statcan_indicator`).
+  Bespoke multi-series StatCan fetchers: quarterly real GDP 36-10-0104-01 (recession
+  chart), university tuition (TLAC 37-10-0045-01 by level + 37-10-0003-01 by field),
+  food + CPI-trim core inflation (18-10-0004-01 / 18-10-0256-01), and merchandise
+  trade with the US 12-10-0011-01 (export share + balances).
+- **Environment & Climate Change Canada** (`fetch_environment.py`, OGL-Canada): GHG
+  emissions — national total + by economic sector — on the National Inventory Report
+  basis (the series Canada's 40–45%-below-2005 2030 target is defined against; ECCC
+  CESI year-stamped CSVs).
 - **OECD SDMX** (`fetch_oecd_indicator`): R&D/BERD/researchers (MSTI
   `DSD_MSTI@DF_MSTI`), GDP/capita (`DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC`),
   productivity (`DSD_PDB@DF_PDB_LV`), unemployment (`DSD_KEI@DF_KEI`), employment

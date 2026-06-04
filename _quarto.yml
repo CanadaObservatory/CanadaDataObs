@@ -53,7 +53,9 @@ website:
           - href: education/index.qmd
             text: Education
           - href: science/index.qmd
-            text: Science & Innovation
+            text: Science
+          - href: innovation/index.qmd
+            text: Innovation
       - href: environment/index.qmd
         text: Environment
       - href: wellbeing/index.qmd

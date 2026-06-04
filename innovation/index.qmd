@@ -1,0 +1,55 @@
+---
+title: "Innovation"
+description: "Business research and development — Canada and OECD peers"
+---
+
+Innovation turns research into new products, processes, and growth. A core measure
+is how much businesses themselves invest in R&D — a signal of how research-intensive
+a country's industries are. For the broader research base (total R&D and the
+research workforce) see [Science](../science/); for business investment overall, see
+[Economy](../economics/). This page is a starting point and will grow over time.
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date
+from pipeline.charts import peer_comparison_line, ranked_bar
+```
+
+## Business R&D (BERD, % of GDP)
+
+Business Enterprise Expenditure on R&D — the portion of R&D performed by the private sector, and a standard gauge of business-led innovation.
+
+```{python}
+#| echo: false
+berd_path = "data/science/oecd_berd.csv"
+if os.path.exists(berd_path):
+    df = pd.read_csv(berd_path)
+    fig = peer_comparison_line(df, "year", "berd_pct_gdp",
+        title="", yaxis_title="Business R&D (% of GDP)", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD MSTI | Data as of: {get_data_date(berd_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Business R&D data not yet available. Run the data pipeline.")
+```
+
+## Latest Business R&D: Ranked
+
+```{python}
+#| echo: false
+if os.path.exists(berd_path):
+    df = pd.read_csv(berd_path)
+    fig = ranked_bar(df, "berd_pct_gdp", "Business R&D (% of GDP)",
+        f"Source: OECD MSTI | Data as of: {get_data_date(berd_path)}",
+        min_countries=15, hover_template="%{y}: %{x:.2f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Download Data
+
+- [Business R&D, BERD (CSV)](../data/science/oecd_berd.csv) — OECD MSTI

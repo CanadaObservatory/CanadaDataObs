@@ -675,7 +675,6 @@ SNAPSHOT_SPECS = {
     ],
     "science": [
         ("R&D spending", "data/science/oecd_rd_expenditure.csv", "rd_pct_gdp", "{:.2f}% GDP", "high"),
-        ("Business R&D", "data/science/oecd_berd.csv", "berd_pct_gdp", "{:.2f}% GDP", "high"),
         ("Researchers", "data/science/oecd_researchers.csv", "researchers_per_1000", "{:.1f}/1k", "high"),
     ],
     "environment": [

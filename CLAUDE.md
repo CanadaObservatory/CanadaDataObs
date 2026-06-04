@@ -61,7 +61,8 @@ DataCan/
 ├── government/spending.qmd ← **Federal Spending**: revenue & spending %GDP (1961–) + nominal, expense by economic type, by standard object, by department, by function (CCOFOG — all governments)
 ├── health/index.qmd       ← life expectancy, avoidable mortality, health spending (%GDP + per person), beds, physicians, nurses, MRI units
 ├── education/index.qmd   ← **Education** (Education-&-Science nav dropdown): university tuition — real by province, domestic vs international, by field (StatCan TLAC 37-10-0045-01 / 37-10-0003-01, bespoke fetch_tuition/_by_field)
-├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers (titled "Science & Innovation"; Education-&-Science dropdown)
+├── science/index.qmd      ← **Science** (Education-&-Science dropdown): R&D (GERD), researchers
+├── innovation/index.qmd   ← **Innovation** (Education-&-Science dropdown): business R&D (BERD) — starter page to grow
 ├── environment/index.qmd  ← CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix
 ├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide + by-city map)
 ├── pipeline/

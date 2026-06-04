@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_tuition",
+  "source": "Statistics Canada",
+  "source_table": "Statistics Canada 37-10-0045-01 (TLAC)",
+  "frequency": "annual",
+  "unit": "average tuition, current dollars",
+  "retrieved_at": "2026-06-04T01:32:48.656074+00:00",
+  "latest_observation_date": "2025/2026",
+  "transformations": [
+    "tidy: year, geography, level of study, tuition (current $)"
+  ],
+  "notes": null,
+  "row_count": 888
+}

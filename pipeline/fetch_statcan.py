@@ -337,6 +337,70 @@ def fetch_provincial_electricity():
     return g
 
 
+def fetch_tuition():
+    """University tuition fees by province and level of study (domestic /
+    international, undergraduate / graduate). StatCan 37-10-0045-01 (TLAC survey),
+    current dollars, academic years 2006/2007–. Multi-series, so bespoke rather
+    than the generic single-series fetcher. Tidy: year, geography, level, tuition.
+    """
+    logger.info("Fetching StatCan university tuition (by level)...")
+    try:
+        df = _get_table("37-10-0045-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch tuition table: {e}")
+        return None
+    LEVEL = "Level of study"
+    validate_columns(df, ["REF_DATE", "GEO", LEVEL, "VALUE"], "tuition")
+    df = df.rename(columns={"GEO": "geography", LEVEL: "level", "VALUE": "tuition"})
+    # REF_DATE is the academic year "2006/2007"; key on the starting calendar year.
+    df["year"] = df["REF_DATE"].astype(str).str[:4].astype(int)
+    df["tuition"] = pd.to_numeric(df["tuition"], errors="coerce")
+    df = (df.dropna(subset=["tuition"])[["year", "geography", "level", "tuition"]]
+            .sort_values(["geography", "level", "year"]).reset_index(drop=True))
+    if df.empty:
+        return None
+    out_path = DATA_DIR / "education" / "statcan_tuition.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    maxy = int(df["year"].max())
+    save_metadata(out_path, df=df, latest_observation_date=f"{maxy}/{maxy + 1}",
+        source="Statistics Canada", source_table="Statistics Canada 37-10-0045-01 (TLAC)",
+        frequency="annual", unit="average tuition, current dollars",
+        transformations=["tidy: year, geography, level of study, tuition (current $)"])
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
+    return df
+
+
+def fetch_tuition_by_field():
+    """Canadian undergraduate tuition by field of study (StatCan 37-10-0003-01,
+    TLAC), current dollars. Tidy: year, geography, field, tuition."""
+    logger.info("Fetching StatCan university tuition (by field of study)...")
+    try:
+        df = _get_table("37-10-0003-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch tuition-by-field table: {e}")
+        return None
+    FIELD = "Field of study"
+    validate_columns(df, ["REF_DATE", "GEO", FIELD, "VALUE"], "tuition_by_field")
+    df = df.rename(columns={"GEO": "geography", FIELD: "field", "VALUE": "tuition"})
+    df["year"] = df["REF_DATE"].astype(str).str[:4].astype(int)
+    df["tuition"] = pd.to_numeric(df["tuition"], errors="coerce")
+    df = (df.dropna(subset=["tuition"])[["year", "geography", "field", "tuition"]]
+            .sort_values(["geography", "field", "year"]).reset_index(drop=True))
+    if df.empty:
+        return None
+    out_path = DATA_DIR / "education" / "statcan_tuition_by_field.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    maxy = int(df["year"].max())
+    save_metadata(out_path, df=df, latest_observation_date=f"{maxy}/{maxy + 1}",
+        source="Statistics Canada", source_table="Statistics Canada 37-10-0003-01 (TLAC)",
+        frequency="annual", unit="average undergraduate tuition, current dollars",
+        transformations=["tidy: year, geography, field of study, tuition (current $)"])
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
+    return df
+
+
 if __name__ == "__main__":
     fetch_population_quarterly()
     fetch_population_components()

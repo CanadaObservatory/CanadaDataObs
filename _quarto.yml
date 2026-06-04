@@ -48,8 +48,12 @@ website:
             text: Federal Spending
       - href: health/index.qmd
         text: Health
-      - href: science/index.qmd
-        text: Education & Innovation
+      - text: Education & Science
+        menu:
+          - href: education/index.qmd
+            text: Education
+          - href: science/index.qmd
+            text: Science & Innovation
       - href: environment/index.qmd
         text: Environment
       - href: wellbeing/index.qmd

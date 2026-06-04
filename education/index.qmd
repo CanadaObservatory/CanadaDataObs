@@ -1,0 +1,98 @@
+---
+title: "Education"
+description: "University tuition and the affordability of higher education in Canada"
+---
+
+The cost of a university education is a growing part of the affordability story. These
+charts track average tuition fees from Statistics Canada's annual survey — over time and
+in real (inflation-adjusted) terms, by province, for domestic and international students,
+and by field of study. (Fees are reported by province and nationally; Statistics Canada
+does not publish tuition for individual institutions.)
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import lines_over_time, category_bar
+
+# Load tuition and deflate to constant dollars of the latest year, using the
+# all-items CPI (annual average) — so the trend charts show *real* tuition.
+tuition_path = "data/education/statcan_tuition.csv"
+tu = None
+if os.path.exists(tuition_path):
+    tu = pd.read_csv(tuition_path)
+    cpi = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in cpi.columns:
+        cpi = cpi[cpi["product_group"] == "All-items"]
+    cpi_annual = cpi.assign(yr=cpi["date"].dt.year).groupby("yr")["cpi_value"].mean()
+    base_year = int(tu["year"].max())
+    tu["real"] = [row.tuition * cpi_annual[base_year] / cpi_annual[row.year]
+                  if row.year in cpi_annual.index else float("nan")
+                  for row in tu.itertuples()]
+```
+
+## Real Undergraduate Tuition Over Time
+
+Average undergraduate tuition for Canadian students, in constant (inflation-adjusted) dollars, for Canada and the three provinces home to most of the country's largest universities. Quebec (and Newfoundland) hold tuition well below the national average; Ontario sits above it. Shown in real terms, so the lines isolate increases beyond general inflation.
+
+```{python}
+#| echo: false
+if tu is not None:
+    ug = tu[(tu["level"] == "Canadian undergraduate")
+            & (tu["geography"].isin(["Canada", "Ontario", "Quebec", "British Columbia"]))].dropna(subset=["real"])
+    fig = lines_over_time(ug, "year", "real", "geography",
+        yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
+        colors={"Canada": CANADA_COLOR, "Ontario": "#4e79a7", "Quebec": "#59a14f",
+                "British Columbia": "#b07aa1"},
+        group_order=["Canada", "Ontario", "Quebec", "British Columbia"],
+        source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Tuition data not yet available. Run the data pipeline.")
+```
+
+## Domestic vs. International Tuition
+
+International students pay several times what domestic students do, and that gap has widened sharply — international undergraduate fees have far outpaced inflation, becoming a significant revenue source for universities. All four series are shown in constant dollars (Canada-wide).
+
+```{python}
+#| echo: false
+if tu is not None:
+    ca = tu[tu["geography"] == "Canada"].dropna(subset=["real"])
+    fig = lines_over_time(ca, "year", "real", "level",
+        yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
+        colors={"International undergraduate": "#e15759", "International graduate": "#f28e2b",
+                "Canadian undergraduate": "#4e79a7", "Canadian graduate": "#76b7b2"},
+        group_order=["International undergraduate", "International graduate",
+                     "Canadian undergraduate", "Canadian graduate"],
+        source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+## Undergraduate Tuition by Field of Study
+
+What students pay varies widely by program. Professional fields — dentistry, medicine, law, pharmacy — sit far above the average, while education and the humanities are lowest. (Canada-wide, Canadian undergraduate students, latest year.)
+
+```{python}
+#| echo: false
+field_path = "data/education/statcan_tuition_by_field.csv"
+if os.path.exists(field_path):
+    bf = pd.read_csv(field_path)
+    bf = bf[(bf["geography"] == "Canada") & (bf["field"] != "Total, field of study")]
+    latest = int(bf["year"].max())
+    bf = bf[bf["year"] == latest]
+    fig = category_bar(bf, "field", "tuition",
+        xaxis_title=f"Average undergraduate tuition, {latest}/{latest + 1} ($)",
+        tickprefix="$", value_fmt=",.0f",
+        source_note=f"Source: Statistics Canada 37-10-0003-01 | Data as of: {get_data_date(field_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Tuition-by-field data not yet available. Run the data pipeline.")
+```
+
+## Download Data
+
+- [University tuition by level & province (CSV)](../data/education/statcan_tuition.csv) — Statistics Canada 37-10-0045-01
+- [Undergraduate tuition by field of study (CSV)](../data/education/statcan_tuition_by_field.csv) — Statistics Canada 37-10-0003-01

@@ -40,7 +40,7 @@ chart block to the relevant `.qmd`. No new fetch function for OECD/StatCan serie
 ```
 DataCan/
 ├── CLAUDE.md              ← this file
-├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances are dropdowns), theme
+├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances, Education & Science are dropdowns), theme
 ├── index.qmd  about.qmd   ← landing + methodology
 ├── population/index.qmd   ← **Population & Growth** (Population-dropdown landing): total, by-province, growth rate, components, non-permanent residents
 ├── population/diversity.qmd ← visible-minority tract map (Cividis, soft 0.6 fill; dropdown incl. "Not a visible minority") + diversity-over-time chart (census-year + geography dropdown) + per-metro DA diversity links
@@ -60,7 +60,8 @@ DataCan/
 ├── government/index.qmd   ← **Government Employment** (Public-Finances dropdown): employment by level of government, full public-sector composition (archived), OECD peer comparison, federal public-service headcount/by-department/demographics/executives, + sourced occupational note
 ├── government/spending.qmd ← **Federal Spending**: revenue & spending %GDP (1961–) + nominal, expense by economic type, by standard object, by department, by function (CCOFOG — all governments)
 ├── health/index.qmd       ← life expectancy, avoidable mortality, health spending (%GDP + per person), beds, physicians, nurses, MRI units
-├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers  (titled "Education & Innovation")
+├── education/index.qmd   ← **Education** (Education-&-Science nav dropdown): university tuition — real by province, domestic vs international, by field (StatCan TLAC 37-10-0045-01 / 37-10-0003-01, bespoke fetch_tuition/_by_field)
+├── science/index.qmd      ← R&D (GERD), business R&D (BERD), researchers (titled "Science & Innovation"; Education-&-Science dropdown)
 ├── environment/index.qmd  ← CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix
 ├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide + by-city map)
 ├── pipeline/

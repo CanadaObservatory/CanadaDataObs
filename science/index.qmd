@@ -1,5 +1,5 @@
 ---
-title: "Education & Innovation"
+title: "Science & Innovation"
 description: "R&D, business research, and researchers — Canada and OECD peers"
 ---
 

@@ -560,6 +560,16 @@ INDICATORS = [
               key=f"{_C}.A.T_RS.10P3EMP.._Z",
               source_table="OECD MSTI"),
 
+    # ----- Education (university tuition; StatCan TLAC — bespoke multi-series) -----
+    Indicator("tuition", "education", "custom",
+              "University tuition by level & province", "current $", "annual",
+              fetch_fn="fetch_tuition", output_subpath="statcan_tuition.csv",
+              source_table="Statistics Canada 37-10-0045-01"),
+    Indicator("tuition_by_field", "education", "custom",
+              "Undergraduate tuition by field of study", "current $", "annual",
+              fetch_fn="fetch_tuition_by_field", output_subpath="statcan_tuition_by_field.csv",
+              source_table="Statistics Canada 37-10-0003-01"),
+
     # ----- Environment (OECD Green Growth) -----
     Indicator("co2_per_capita", "environment", "oecd",
               "CO2 emissions per capita", "tonnes CO2 per capita", "annual",

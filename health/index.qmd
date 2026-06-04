@@ -296,13 +296,26 @@ if os.path.exists(mri_path):
     fig.show(config={"displaylogo": False})
 ```
 
-::: {.callout-note}
-Direct wait-time series (e.g. surgical and diagnostic waits) are published by the
-Canadian Institute for Health Information (CIHI) but are not yet available through
-an automated data feed, so they are not charted here. The capacity measures above
-— beds, physicians, and imaging units — are the closest internationally
-comparable proxies.
-:::
+## Wait Times for Priority Procedures
+
+The share of patients treated within the agreed **pan-Canadian benchmark** time, for five priority procedures (Canada-wide). Higher is better — more patients treated on time. The pandemic sharply cut access to scheduled surgeries (hip, knee, cataract) in 2020, and most have only partly recovered since; emergency hip-fracture repair and radiation therapy held up. Unlike most charts on this page, this is a **Canada-only** series — there is no comparable peer feed — and the Canadian Institute for Health Information (CIHI) publishes it **annually each spring**, so it is refreshed once a year rather than weekly with the rest of the site.
+
+```{python}
+#| echo: false
+from pipeline.charts import lines_over_time
+wt_path = "data/health/cihi_wait_times.csv"
+if os.path.exists(wt_path):
+    wt = pd.read_csv(wt_path)
+    fig = lines_over_time(wt, "year", "pct_meeting_benchmark", "procedure",
+        yaxis_title="% treated within benchmark", yticksuffix="%", hover_decimals=0,
+        rangemode="tozero",
+        source_note=f"Source: CIHI, Wait Times for Priority Procedures in Canada (April–September) | Data as of: {get_data_date(wt_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Wait-times data not yet available. Run: python -m pipeline.build_wait_times")
+```
+
+The capacity measures above — beds, physicians, and imaging units — are the closest internationally comparable proxies; the benchmark series here adds the domestic, access-focused view that the public most directly experiences.
 
 ## Download Data
 
@@ -314,3 +327,4 @@ comparable proxies.
 - [Practising Nurses (CSV)](../data/health/oecd_nurses.csv) — OECD Health Statistics
 - [MRI Units (CSV)](../data/health/oecd_mri_units.csv) — OECD Health Statistics
 - [Avoidable Mortality (CSV)](../data/health/oecd_avoidable_mortality.csv) — OECD Health Statistics
+- [Wait Times — % Meeting Benchmark (CSV)](../data/health/cihi_wait_times.csv) — CIHI Wait Times for Priority Procedures

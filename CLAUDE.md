@@ -74,6 +74,7 @@ DataCan/
 │   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover (not weekly)
+│   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
 │   ├── fetch_government.py ← Government-section custom fetchers: StatCan workforce (employment by level 36-10-0489-01; public-sector composition by industry 14-10-0027-01 LFS) + federal finance (36-10-0477-01 1961– + GDP 36-10-0222-01; expense-by-type 10-10-0016-01; CCOFOG 10-10-0005-01) + TBS federal public service (open.canada.ca CKAN) + GC InfoBase (standard objects, by-dept, executives)
 │   └── run_pipeline.py    ← registry-driven orchestrator
@@ -488,7 +489,11 @@ and NHPI tracks new-build builder prices, which understate the resale run-up.
 - PISA / tertiary attainment deferred: the OECD education attainment dataflow mixes
   national survey methodologies (excluded Canada from a fixed-methodology key);
   needs harmonisation. PISA has no clean SDMX feed.
-- CIHI wait-times have no automated feed (beds/physicians/MRI are the proxies).
+- CIHI wait-times have no automated feed, so they are NOT in the weekly pipeline;
+  the Health page charts the % meeting the pan-Canadian benchmark via
+  `build_wait_times.py` — an **annual manual builder** (downloads CIHI's XLSX data
+  tables; bump `CIHI_URL` each spring). Beds/physicians/MRI remain the
+  internationally comparable proxies.
 - Energy: nuclear in *primary energy* (~6% for Canada) looks low because primary
   energy is dominated by transport/heating fuels — that's the denominator, not a
   bug. The page leads with *electricity* shares where nuclear is ~13% (Ontario
@@ -556,7 +561,7 @@ object, by department, by function) — **12 new indicators** via `fetch_governm
 Deferred (candidates, not committed):
 **homeownership rate** (Census-only — no clean annual StatCan series; revisit when
 2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),
-PISA / tertiary attainment (no clean feed), CIHI wait-times (no automated feed),
+PISA / tertiary attainment (no clean feed),
 nurses/CT/ICU subdetail, absolute house prices by city + dwelling type (CREA MLS HPI
 — internal only), raw-vs-processed data split, dataset versioning, **federal public
 service by occupational group over time** (no reproducible authoritative series — TBS

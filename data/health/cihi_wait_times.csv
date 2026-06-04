@@ -1,0 +1,77 @@
+procedure,year,pct_meeting_benchmark
+Cataract Surgery,2010,82.7198273121479
+Cataract Surgery,2011,82.4768022089597
+Cataract Surgery,2012,83.3207219861221
+Cataract Surgery,2013,81.3716325811001
+Cataract Surgery,2014,80.1234887429197
+Cataract Surgery,2015,75.5953140801657
+Cataract Surgery,2016,72.5048054300772
+Cataract Surgery,2017,70.8900375441306
+Cataract Surgery,2018,70.1030637372297
+Cataract Surgery,2019,70.4132384815711
+Cataract Surgery,2020,44.859871031746
+Cataract Surgery,2021,66.042345769354
+Cataract Surgery,2022,65.4660352764532
+Cataract Surgery,2023,69.5843384281546
+Cataract Surgery,2024,68.95253040408
+Hip Fracture Repair,2009,79.0
+Hip Fracture Repair,2010,78.0
+Hip Fracture Repair,2011,79.0
+Hip Fracture Repair,2012,81.0
+Hip Fracture Repair,2013,83.0
+Hip Fracture Repair,2014,84.0
+Hip Fracture Repair,2015,87.0
+Hip Fracture Repair,2016,86.0
+Hip Fracture Repair,2017,86.6925781972978
+Hip Fracture Repair,2018,87.9504397994893
+Hip Fracture Repair,2019,85.8426189859204
+Hip Fracture Repair,2020,85.5668314684708
+Hip Fracture Repair,2021,84.6467737821984
+Hip Fracture Repair,2022,81.941215543009
+Hip Fracture Repair,2023,81.0
+Hip Fracture Repair,2024,83.0967238689548
+Hip Replacement,2010,84.0
+Hip Replacement,2011,83.0
+Hip Replacement,2012,81.0
+Hip Replacement,2013,82.0
+Hip Replacement,2014,82.14
+Hip Replacement,2015,80.86
+Hip Replacement,2016,78.25
+Hip Replacement,2017,75.6701242682551
+Hip Replacement,2018,75.2514903129657
+Hip Replacement,2019,74.9510049678684
+Hip Replacement,2020,56.2757722636186
+Hip Replacement,2021,65.2194283929408
+Hip Replacement,2022,57.4039826244032
+Hip Replacement,2023,65.5113986444855
+Hip Replacement,2024,67.9025769272589
+Knee Replacement,2010,80.0
+Knee Replacement,2011,76.0
+Knee Replacement,2012,76.0
+Knee Replacement,2013,77.0
+Knee Replacement,2014,78.02
+Knee Replacement,2015,76.55
+Knee Replacement,2016,72.24
+Knee Replacement,2017,68.38
+Knee Replacement,2018,69.4800149635982
+Knee Replacement,2019,69.5185037803422
+Knee Replacement,2020,47.0717768573376
+Knee Replacement,2021,59.2136392654625
+Knee Replacement,2022,50.3341540626099
+Knee Replacement,2023,58.922791846819
+Knee Replacement,2024,61.436182752605
+Radiation Therapy,2010,96.0
+Radiation Therapy,2011,97.0
+Radiation Therapy,2012,97.0
+Radiation Therapy,2013,97.1908776119403
+Radiation Therapy,2014,97.7611950907454
+Radiation Therapy,2015,97.50027414785708
+Radiation Therapy,2016,97.28965439603738
+Radiation Therapy,2017,97.0643035673711
+Radiation Therapy,2018,94.9331668783228
+Radiation Therapy,2019,97.0057114060138
+Radiation Therapy,2020,97.5995925507651
+Radiation Therapy,2021,96.6516460132682
+Radiation Therapy,2022,95.614644518832
+Radiation Therapy,2023,93.0987505352069
+Radiation Therapy,2024,94.0996366453326

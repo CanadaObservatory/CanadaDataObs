@@ -23,8 +23,33 @@ import geopandas as gpd
 GEO_DIR = "data/geo"
 BND_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/"
            "boundary-limites/files-fichiers/lct_000a21a_e.zip")
-SIMPLIFY_TOL = 0.0005   # ~35 m; balances shape fidelity vs file size
-COORD_DECIMALS = 4      # ~11 m precision
+SIMPLIFY_TOL = 0.0003      # CT ~33 m; topology-preserving (see _toposimplify). Inlined into
+                           # several pages, so kept near the old file size — the sliver fix comes
+                           # from the topology, not the tolerance; DAs get the finer tolerance below.
+COORD_DECIMALS = 4         # ~11 m precision for CT/CMA (finer than the CT tolerance above)
+DA_SIMPLIFY_TOL = 0.0001   # DA ~11 m — dissemination areas are single blocks; keep edges on the street
+DA_COORD_DECIMALS = 5      # ~1 m precision for DAs (must stay finer than the DA tolerance)
+
+
+def _toposimplify(gdf, tolerance):
+    """Topology-preserving simplification. Shapely's per-feature `.simplify()`
+    simplifies each polygon independently, so a border shared by two areas is
+    simplified differently on each side and the two no longer coincide — that is
+    what leaves the thin white slivers/gaps between tracts and DAs. topojson
+    instead builds the shared boundaries as arcs and simplifies each arc ONCE, so
+    neighbours stay welded together. Self-intersections the simplification can
+    introduce are repaired with buffer(0). Returns a GeoDataFrame in the same CRS.
+
+    Requires the `topojson` package — an extra dependency of this one-time builder
+    (like geopandas, it is intentionally NOT in requirements.txt / the weekly CI;
+    install it when re-running the census build: `pip install topojson`)."""
+    import topojson as tp
+    out = tp.Topology(gdf, prequantize=False).toposimplify(tolerance).to_gdf()
+    out = out.set_crs(gdf.crs, allow_override=True)
+    invalid = ~out.geometry.is_valid
+    if invalid.any():
+        out.loc[invalid, "geometry"] = out.loc[invalid, "geometry"].buffer(0)
+    return out
 
 
 def build_income():
@@ -56,9 +81,8 @@ def build_boundaries(income_ctuids):
     gdf = gpd.read_file(f"/tmp/ct_bnd/{shp}")
     ctcol = [c for c in gdf.columns if c.upper() == "CTUID"][0]
     gdf = gdf.to_crs(epsg=4326)
-    gdf["geometry"] = gdf["geometry"].simplify(SIMPLIFY_TOL, preserve_topology=True)
     gdf["ctuid"] = gdf[ctcol].astype(str)
-    gdf = gdf[["ctuid", "geometry"]]
+    gdf = _toposimplify(gdf[["ctuid", "geometry"]], SIMPLIFY_TOL)
     bnd_ids = set(gdf["ctuid"])
     print(f"boundaries: {len(bnd_ids)} CTs | matched to income: {len(bnd_ids & income_ctuids)}")
 
@@ -776,12 +800,18 @@ DA_PROFILE_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/pro
                   "download-telecharger/comp/GetFile.cfm?Lang=E&FILETYPE=CSV&GEONO={geono}")
 
 
-def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouver"):
+def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouver",
+                     geometry_only=False):
     """Visible-minority AND religion shares + boundaries at dissemination-area level
     for ONE CMA. One pass over the (large) provincial DA Census Profile produces both
     layers (like build_ct_from_profile), filtered to the CMA via the existing
     cma_2021.geojson polygon. `pruid`/`geono` accept a list for split-province CMAs
-    (Ottawa–Gatineau: pruid=["35","24"], geono=["006_Ontario","006_Quebec"])."""
+    (Ottawa–Gatineau: pruid=["35","24"], geono=["006_Ontario","006_Quebec"]).
+
+    `geometry_only=True` rebuilds ONLY the boundary geojson (re-simplified), reusing
+    the existing per-CMA ethnicity/religion CSVs to choose which DAs to keep — so the
+    multi-GB provincial profile is NOT re-downloaded or re-parsed. Use it to refresh
+    the map geometry (e.g. a finer simplify tolerance) without re-fetching the data."""
     pruids = [pruid] if isinstance(pruid, str) else list(pruid)
     geonos = [geono] if isinstance(geono, str) else list(geono)
     cma = gpd.read_file(f"{GEO_DIR}/cma_2021.geojson")
@@ -802,68 +832,77 @@ def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouve
         g = g[g[cmac[0]].astype(str) == cmauid].copy()
     else:
         g = g[g.geometry.representative_point().within(poly)].copy()
-    g["geometry"] = g["geometry"].simplify(0.0004, preserve_topology=True)
     g = g[["dauid", "geometry"]]
     da_ids = set(g["dauid"])
     print(f"DA boundaries ({slug}): {len(da_ids)} DAs in CMA {cmauid}")
 
-    # --- DA profile (visible minority + religion) from the provincial split(s),
-    #     chunk-read like the CT build; concatenated across provinces for split CMAs ---
-    needed = ({cid for cid, _, _ in VM_GROUPS} | {1683}
-              | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE})
-    keep = []
-    for gn in geonos:
-        pz = zipfile.ZipFile(_download_cache(DA_PROFILE_URL.format(geono=gn),
-                                             f"/tmp/da_profile_{gn}.zip", f"DA profile {gn} (large)"))
-        # provincial-split profile names its data file "..._CSV_data_<Province>.csv"
-        csvn = [n for n in pz.namelist()
-                if n.lower().endswith(".csv") and "data" in n.lower() and "geo" not in n.lower()][0]
-        for chunk in pd.read_csv(pz.open(csvn), usecols=["DGUID", "CHARACTERISTIC_ID", "C1_COUNT_TOTAL"],
-                                 dtype=str, encoding="latin-1", chunksize=400_000):
-            chunk = chunk[chunk["DGUID"].str.contains("S0512", na=False)]
-            if chunk.empty:
-                continue
-            cid = pd.to_numeric(chunk["CHARACTERISTIC_ID"], errors="coerce")
-            chunk = chunk[cid.isin(needed)]
-            if not chunk.empty:
-                keep.append(chunk)
-    prof = pd.concat(keep, ignore_index=True)
-    prof["cid"] = pd.to_numeric(prof["CHARACTERISTIC_ID"], errors="coerce")
-    prof["dauid"] = prof["DGUID"].astype(str).str.replace("2021S0512", "", regex=False)
-    prof["v"] = pd.to_numeric(prof["C1_COUNT_TOTAL"], errors="coerce")
-    prof = prof[prof["dauid"].isin(da_ids)]
+    if geometry_only:
+        # reuse the existing per-CMA data CSVs to know which DAs to map (no re-parse)
+        keep_ids = set()
+        for layer in ("ethnicity", "religion"):
+            p = f"{GEO_DIR}/statcan_da_{slug}_{layer}.csv"
+            if os.path.exists(p):
+                keep_ids |= set(pd.read_csv(p, dtype={"dauid": str})["dauid"])
+        print(f"DA geometry-only ({slug}): reusing {len(keep_ids)} DA ids from existing CSVs")
+    else:
+        # --- DA profile (visible minority + religion) from the provincial split(s),
+        #     chunk-read like the CT build; concatenated across provinces for split CMAs ---
+        needed = ({cid for cid, _, _ in VM_GROUPS} | {1683}
+                  | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE})
+        keep = []
+        for gn in geonos:
+            pz = zipfile.ZipFile(_download_cache(DA_PROFILE_URL.format(geono=gn),
+                                                 f"/tmp/da_profile_{gn}.zip", f"DA profile {gn} (large)"))
+            # provincial-split profile names its data file "..._CSV_data_<Province>.csv"
+            csvn = [n for n in pz.namelist()
+                    if n.lower().endswith(".csv") and "data" in n.lower() and "geo" not in n.lower()][0]
+            for chunk in pd.read_csv(pz.open(csvn), usecols=["DGUID", "CHARACTERISTIC_ID", "C1_COUNT_TOTAL"],
+                                     dtype=str, encoding="latin-1", chunksize=400_000):
+                chunk = chunk[chunk["DGUID"].str.contains("S0512", na=False)]
+                if chunk.empty:
+                    continue
+                cid = pd.to_numeric(chunk["CHARACTERISTIC_ID"], errors="coerce")
+                chunk = chunk[cid.isin(needed)]
+                if not chunk.empty:
+                    keep.append(chunk)
+        prof = pd.concat(keep, ignore_index=True)
+        prof["cid"] = pd.to_numeric(prof["CHARACTERISTIC_ID"], errors="coerce")
+        prof["dauid"] = prof["DGUID"].astype(str).str.replace("2021S0512", "", regex=False)
+        prof["v"] = pd.to_numeric(prof["C1_COUNT_TOTAL"], errors="coerce")
+        prof = prof[prof["dauid"].isin(da_ids)]
 
-    def ser(cid):
-        return prof[prof["cid"] == cid].drop_duplicates("dauid").set_index("dauid")["v"]
-    base = ser(1683)
-    eth = pd.DataFrame(index=sorted(da_ids))
-    eth.index.name = "dauid"
-    for cid, col, _ in VM_GROUPS:
-        eth[col] = (ser(cid) / base * 100).round(1)
-    eth["name"] = "StatCan area #" + eth.index.astype(str)
-    eth = eth.dropna(subset=["all_vm"])
-    os.makedirs(GEO_DIR, exist_ok=True)
-    eth.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_ethnicity.csv", index=False)
-    print(f"DA ethnicity ({slug}): {len(eth)} DAs with data")
+        def ser(cid):
+            return prof[prof["cid"] == cid].drop_duplicates("dauid").set_index("dauid")["v"]
+        base = ser(1683)
+        eth = pd.DataFrame(index=sorted(da_ids))
+        eth.index.name = "dauid"
+        for cid, col, _ in VM_GROUPS:
+            eth[col] = (ser(cid) / base * 100).round(1)
+        eth["name"] = "StatCan area #" + eth.index.astype(str)
+        eth = eth.dropna(subset=["all_vm"])
+        os.makedirs(GEO_DIR, exist_ok=True)
+        eth.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_ethnicity.csv", index=False)
+        print(f"DA ethnicity ({slug}): {len(eth)} DAs with data")
 
-    # --- religion shares (same DAs; religion population base 1949) ---
-    rbase = ser(RELIGION_BASE)
-    rel = pd.DataFrame(index=sorted(da_ids))
-    rel.index.name = "dauid"
-    for cid, col, _ in RELIGION_GROUPS:
-        rel[col] = (ser(cid) / rbase * 100).round(1)
-    rel["name"] = "StatCan area #" + rel.index.astype(str)
-    rel = rel.dropna(subset=["christian"])
-    rel.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_religion.csv", index=False)
-    print(f"DA religion ({slug}): {len(rel)} DAs with data")
+        # --- religion shares (same DAs; religion population base 1949) ---
+        rbase = ser(RELIGION_BASE)
+        rel = pd.DataFrame(index=sorted(da_ids))
+        rel.index.name = "dauid"
+        for cid, col, _ in RELIGION_GROUPS:
+            rel[col] = (ser(cid) / rbase * 100).round(1)
+        rel["name"] = "StatCan area #" + rel.index.astype(str)
+        rel = rel.dropna(subset=["christian"])
+        rel.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_religion.csv", index=False)
+        print(f"DA religion ({slug}): {len(rel)} DAs with data")
+        keep_ids = set(eth.index) | set(rel.index)
 
-    # --- geojson (DAs present in either layer), id = DAUID ---
-    g = g[g["dauid"].isin(set(eth.index) | set(rel.index))]
+    # --- geojson (DAs present in either layer), topology-simplified, id = DAUID ---
+    g = _toposimplify(g[g["dauid"].isin(keep_ids)], DA_SIMPLIFY_TOL)
     gj = json.loads(g.to_json())
 
     def rnd(o):
         if isinstance(o, float):
-            return round(o, COORD_DECIMALS)
+            return round(o, DA_COORD_DECIMALS)
         if isinstance(o, list):
             return [rnd(x) for x in o]
         return o

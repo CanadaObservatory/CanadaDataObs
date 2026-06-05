@@ -363,6 +363,27 @@ def page_snapshot(section, **kwargs):
     return ranking_strip(SNAPSHOT_SPECS.get(section, []), **kwargs)
 
 
+# CARTO's free, token-less raster basemap, split into two layers so place/street
+# names render ON TOP of the choropleth fill instead of being washed out beneath it
+# (the orientation problem on the dense tract/DA maps). The no-labels base is drawn
+# below the data (`below="traces"`); the labels-only layer omits `below`, which
+# Plotly inserts above every trace. Visually identical to the built-in
+# "carto-positron" style, just with the labels lifted above the fill.
+_CARTO = "https://a.basemaps.cartocdn.com"
+_BASEMAP_ATTR = "© OpenStreetMap contributors © CARTO"
+
+
+def _labelled_basemap():
+    return [
+        {"sourcetype": "raster", "below": "traces",
+         "source": [f"{_CARTO}/light_nolabels/{{z}}/{{x}}/{{y}}.png"],
+         "sourceattribution": _BASEMAP_ATTR},
+        {"sourcetype": "raster",          # no `below` → drawn above the choropleth
+         "source": [f"{_CARTO}/light_only_labels/{{z}}/{{x}}/{{y}}.png"],
+         "sourceattribution": _BASEMAP_ATTR},
+    ]
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
@@ -412,7 +433,8 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{customdata[{vidx}]:{value_fmt}}}{value_suffix}<extra></extra>",
     ))
     fig.update_layout(
-        mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
+        mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
+        mapbox_zoom=zoom, mapbox_center=center,
         margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
     )
     if source_note:
@@ -425,11 +447,24 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
 def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
                           colorscale="Cividis", source_note=None,
                           center=None, zoom=2.6, height=660, cap_quantiles=(0.0, 1.0),
-                          opacity=0.82):
+                          opacity=0.82, breakdown=True, breakdown_min=0.5,
+                          breakdown_exclude=()):
     """Choropleth with a dropdown to switch the mapped variable across `groups`
     (list of (column, label)). Used for the descriptive share maps (visible
     minority, religion, land cover); values are percentages and each option
     rescales its own colour range + colorbar.
+
+    `breakdown=True` (default) makes the hover show the area's **full composition**
+    across every group — all visible-minority groups, all religions, or all
+    land-cover classes — sorted high→low, dropping anything below `breakdown_min`
+    percent. So hovering any neighbourhood reads as a profile ("Not a vis. min. 62%,
+    Chinese 12%, South Asian 9%…") regardless of which group the dropdown is
+    colouring; the map colour shows the selected group, the hover gives the whole
+    picture. Set `breakdown=False` to fall back to a single selected-group hover
+    (for non-compositional group sets where a full breakdown would be meaningless).
+    `breakdown_exclude` lists columns to keep OUT of the composition — pass the
+    aggregate "all visible minorities" total there so it isn't double-counted
+    alongside its own component groups.
 
     `cap_quantiles` = the (low, high) quantiles each group's colour range is clipped
     to. Default (0, 1) = the group's true min–max — correct for *share* layers where
@@ -440,9 +475,10 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     typical range. The default colour scale is **Cividis** — perceptually uniform and
     colourblind-safe, with no red/green valence — so wide spreads stay legible while
     these sensitive layers keep a neutral, descriptive reading."""
+    import numpy as np
+    import pandas as pd
     center = center or {"lat": 56.0, "lon": -96.0}
     locs = df[location_col]
-    custom = df[[name_col]].to_numpy()
     qlo, qhi = cap_quantiles
 
     def rng(col):
@@ -450,24 +486,43 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
 
     c0, l0 = groups[0]
     lo0, hi0 = rng(c0)
+
+    # Hover content: either the area's full composition across every group (default)
+    # or a single selected-group readout. The breakdown is baked per-area into
+    # customdata so it stays put as the dropdown swaps which group colours the map.
+    if breakdown:
+        excl = set(breakdown_exclude)
+        def _profile(row):
+            pairs = [(lab, row[col]) for col, lab in groups
+                     if col not in excl and pd.notna(row[col]) and row[col] >= breakdown_min]
+            pairs.sort(key=lambda t: t[1], reverse=True)
+            return "<br>".join(f"{lab}: {v:.1f}%" for lab, v in pairs)
+        custom = np.column_stack([df[name_col].to_numpy(),
+                                  df.apply(_profile, axis=1).to_numpy()])
+        hovertemplate = "<b>%{customdata[0]}</b><br>%{customdata[1]}<extra></extra>"
+    else:
+        custom = df[[name_col]].to_numpy()
+        hovertemplate = f"<b>%{{customdata[0]}}</b><br>{l0}: %{{z:.1f}}%<extra></extra>"
+
     fig = go.Figure(go.Choroplethmapbox(
         geojson=geojson, locations=locs, z=df[c0].tolist(), featureidkey="id",
         colorscale=colorscale, zmin=lo0, zmax=hi0,
         marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=opacity),
         colorbar=dict(title=f"% {l0}", ticksuffix="%"),
         customdata=custom,
-        hovertemplate=f"<b>%{{customdata[0]}}</b><br>{l0}: %{{z:.1f}}%<extra></extra>",
+        hovertemplate=hovertemplate,
     ))
     buttons = []
     for col, label in groups:
         lo, hi = rng(col)
-        buttons.append(dict(method="restyle", label=label, args=[{
-            "z": [df[col].tolist()], "zmin": lo, "zmax": hi,
-            "colorbar.title.text": f"% {label}",
-            "hovertemplate": f"<b>%{{customdata[0]}}</b><br>{label}: %{{z:.1f}}%<extra></extra>",
-        }]))
+        args = {"z": [df[col].tolist()], "zmin": lo, "zmax": hi,
+                "colorbar.title.text": f"% {label}"}
+        if not breakdown:   # keep the full-composition hover stable across the dropdown
+            args["hovertemplate"] = f"<b>%{{customdata[0]}}</b><br>{label}: %{{z:.1f}}%<extra></extra>"
+        buttons.append(dict(method="restyle", label=label, args=[args]))
     fig.update_layout(
-        mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
+        mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
+        mapbox_zoom=zoom, mapbox_center=center,
         margin=dict(l=0, r=0, t=46, b=36), height=height,
         updatemenus=[dict(buttons=buttons, active=0, x=0.01, y=0.99,
                           xanchor="left", yanchor="top", bgcolor="white",
@@ -538,7 +593,8 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     if legend_title:
         legend["title"] = dict(text=legend_title)
     fig.update_layout(
-        mapbox_style="carto-positron", mapbox_zoom=zoom, mapbox_center=center,
+        mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
+        mapbox_zoom=zoom, mapbox_center=center,
         margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
         legend=legend, showlegend=True,
     )

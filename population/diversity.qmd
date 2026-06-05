@@ -32,7 +32,7 @@ if os.path.exists(eth_geo) and os.path.exists(eth_path):
               ("southeast_asian", "Southeast Asian"), ("west_asian", "West Asian"),
               ("korean", "Korean"), ("japanese", "Japanese"),
               ("not_vm", "Not a visible minority")]
-    fig = choropleth_groups_map(geo, eth, "ctuid", groups, name_col="name", colorscale="Cividis", opacity=0.6,
+    fig = choropleth_groups_map(geo, eth, "ctuid", groups, name_col="name", breakdown_exclude=["all_vm"], colorscale="Cividis", opacity=0.6,
         source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. 'Visible minority' is StatCan's term; 'Not a visible minority' includes white and Indigenous people. Descriptive only.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

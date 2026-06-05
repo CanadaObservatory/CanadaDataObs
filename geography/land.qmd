@@ -56,7 +56,7 @@ if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
               ("barren", "Barren land"), ("sparse_veg", "Sparsely vegetated"),
               ("snow_ice", "Snow & ice"), ("built_up", "Built-up"),
               ("treed_disturb", "Recent treed disturbance")]
-    fig = choropleth_groups_map(ez_geo, ez, "fid", groups, name_col="ecozone", colorscale="YlGn",
+    fig = choropleth_groups_map(ez_geo, ez, "fid", groups, name_col="ecozone", breakdown=False, colorscale="YlGn",
         center={"lat": 63, "lon": -96}, zoom=2.2,
         source_note="Source: Statistics Canada Table 38-10-0177-01 (land cover by ecozone, 2020). Share of each ecozone's area.")
     fig.show(config=MAP_CONFIG)

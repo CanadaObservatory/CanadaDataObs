@@ -2,8 +2,12 @@ name: Update Data and Deploy
 
 on:
   schedule:
-    # Weekly on Monday at 6am UTC (1am EST)
-    - cron: '0 6 * * 1'
+    # Daily at 14:00 UTC — after StatCan's 08:30 ET release window (12:30 UTC EDT /
+    # 13:30 UTC EST), so same-day releases are picked up. Catches monthly/quarterly
+    # numbers within a day instead of up to a week (releases span Tue/Thu/Fri, so no
+    # single weekly day suffices). The commit step is gated on real data changes
+    # (git diff --staged --quiet), so quiet days are no-ops — no commit, no deploy.
+    - cron: '0 14 * * *'
   workflow_dispatch:  # Allow manual trigger
   push:
     branches: [main]

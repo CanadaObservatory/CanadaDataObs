@@ -126,7 +126,8 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   Bespoke multi-series StatCan fetchers: quarterly real GDP 36-10-0104-01 (recession
   chart), university tuition (TLAC 37-10-0045-01 by level + 37-10-0003-01 by field),
   food + CPI-trim core inflation (18-10-0004-01 / 18-10-0256-01), and merchandise
-  trade with the US 12-10-0011-01 (export share + balances).
+  trade with the US 12-10-0011-01 (export shares for the US, EU and China — scaling
+  US dominance against the next-largest markets — + US-vs-rest-of-world balances).
 - **Environment & Climate Change Canada** (`fetch_environment.py`, OGL-Canada): GHG
   emissions — national total + by economic sector — on the National Inventory Report
   basis (the series Canada's 40–45%-below-2005 2030 target is defined against; ECCC

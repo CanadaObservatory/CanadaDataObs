@@ -86,8 +86,13 @@ if os.path.exists(fin_path):
     b["balance"] = b["revenue_pct_gdp"] - b["expenditure_pct_gdp"]
     b = b.sort_values("year")
     bal_colors = ["#4e79a7" if v >= 0 else "#d62728" for v in b["balance"]]
+    # Pre-format the hover in Python: Quarto's bundled Plotly drops the '+' sign-format
+    # in hovertemplate (see the economics quarterly-GDP chart), and the surplus/deficit
+    # sign is the point here. <0.05 rounds to a clean "0.0%" (no "-0.0%").
+    b["hover"] = [f"{int(yr)}: {'0.0' if abs(v) < 0.05 else format(v, '+.1f')}% of GDP"
+                  for yr, v in zip(b["year"], b["balance"])]
     figb = go.Figure(go.Bar(x=b["year"], y=b["balance"], marker_color=bal_colors,
-        hovertemplate="%{x}: %{y:+.1f}% of GDP<extra></extra>"))
+        customdata=b["hover"], hovertemplate="%{customdata}<extra></extra>"))
     # Neutral by-era bands (successive federal governments) — descriptive only.
     eras = [(1981, "Trudeau"), (1984, "Mulroney"), (1993, "Chrétien / Martin"),
             (2006, "Harper"), (2015, "Trudeau")]

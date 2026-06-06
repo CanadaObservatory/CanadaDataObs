@@ -63,6 +63,12 @@ if os.path.exists(gdpq_path):
     q["growth"] = q["gdp"].pct_change() * 100
     q = q.dropna(subset=["growth"]).copy()
     q["qlabel"] = q["date"].dt.year.astype(str) + " Q" + q["date"].dt.quarter.astype(str)
+    # Pre-format the hover text in Python: Quarto's bundled Plotly does not reliably
+    # honour a d3 number-format inside hovertemplate (same family as the window.Plotly
+    # quirk), so bake the rounded value into the string. <0.05 rounds to a clean "0.0%"
+    # (avoids a "-0.0%" for near-flat quarters).
+    q["hover"] = [f"{lbl}: {'0.0' if abs(g) < 0.05 else format(g, '+.1f')}%"
+                  for lbl, g in zip(q["qlabel"], q["growth"])]
     bar_colors = ["#d62728" if v < 0 else "#4e79a7" for v in q["growth"]]
     import math
     # Clip the y-axis to normal quarters so past recessions stay legible; the
@@ -70,17 +76,23 @@ if os.path.exists(gdpq_path):
     # otherwise crush the whole series into a flat band near zero.
     _normal = q.loc[q["growth"].abs() <= 5, "growth"]
     _ylo, _yhi = math.floor(_normal.min()) - 0.5, math.ceil(_normal.max()) + 0.5
+    # Open on the most recent ~10 years — recent trends draw the most attention
+    # for this chart; the slider still spans the full 1961– record and "All" resets
+    # it. The ±2-month pad keeps the first/last quarterly bars from clipping.
+    _xmax = q["date"].max()
+    _xlo = _xmax - pd.DateOffset(years=10, months=2)
+    _xhi = _xmax + pd.DateOffset(months=2)
     figq = go.Figure(go.Bar(
         x=q["date"], y=q["growth"], marker_color=bar_colors,
-        customdata=q["qlabel"],
-        hovertemplate="%{customdata}: %{y:+.1f}%<extra></extra>"))
+        customdata=q["hover"],
+        hovertemplate="%{customdata}<extra></extra>"))
     figq.add_hline(y=0, line_color="#888", line_width=1)
     figq.update_layout(
         plot_bgcolor="white", showlegend=False, height=460, bargap=0.15,
         yaxis=dict(title="Real GDP, quarter-over-quarter % change",
                    gridcolor="#e0e0e0", ticksuffix="%", zeroline=False,
                    range=[_ylo, _yhi]),
-        xaxis=dict(title="", gridcolor="#e0e0e0",
+        xaxis=dict(title="", gridcolor="#e0e0e0", range=[_xlo, _xhi],
                    rangeselector=dict(buttons=[
                        dict(count=10, label="10Y", step="year", stepmode="backward"),
                        dict(count=20, label="20Y", step="year", stepmode="backward"),
@@ -88,7 +100,7 @@ if os.path.exists(gdpq_path):
                    rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
         margin=dict(t=40, b=120))
     figq.add_annotation(
-        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, chained 2017 $, seasonally adjusted) | Data as of: {get_data_date(gdpq_path)}",
+        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted) | Data as of: {q['qlabel'].iloc[-1]}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
         font=dict(size=10, color="#999"))
     if (q["growth"].abs() > 5).any():
@@ -371,20 +383,36 @@ if os.path.exists(ca_path):
 
 ## Trade Exposure to the United States
 
-About three-quarters of Canada's merchandise exports go to a single market — the United States — though that share has fallen over the long run and dropped sharply during the 2025 tariff conflict. (Customs basis, seasonally adjusted.)
+The United States takes about two-thirds of Canada's merchandise exports — a share that peaked near 88% around 2000, drifted down over the following two decades, and dropped sharply during the 2025 tariff conflict. Shown for scale, the **European Union** and **China** — Canada's next-largest export markets — each account for only about 5–6%, a measure of how concentrated Canada's trade is on a single partner. (Customs basis, seasonally adjusted.)
 
 ```{python}
 #| echo: false
-from pipeline.charts import single_line
 trade_path = "data/economics/statcan_trade_us.csv"
 if os.path.exists(trade_path):
     tr = pd.read_csv(trade_path, parse_dates=["date"])
-    fig = single_line(tr, "date", "exports_us_share", title="",
-        yaxis_title="Exports to the US (% of total exports)", rangeslider=True,
-        yaxis_tickformat=".0f",
-        hovertemplate="%{x|%b %Y}: %{y:.1f}%<extra></extra>",
-        source_note=f"Source: Statistics Canada 12-10-0011-01 (Customs basis, seasonally adjusted) | Data as of: {get_data_date(trade_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+    fige = go.Figure()
+    for col, name, clr, w in [
+        ("exports_us_share", "United States", "#1f77b4", 3),
+        ("exports_eu_share", "European Union", "#59a14f", 2),
+        ("exports_china_share", "China", "#f28e2b", 2)]:
+        fige.add_trace(go.Scatter(x=tr["date"], y=tr[col], name=name, mode="lines",
+            line=dict(color=clr, width=w), hovertemplate=name + ": %{y:.1f}%<extra></extra>"))
+    fige.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="Share of total merchandise exports (%)", gridcolor="#e0e0e0",
+            ticksuffix="%", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+            rangeselector=dict(buttons=[
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(yanchor="middle", y=0.5, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=120, r=20))
+    fige.add_annotation(
+        text=f"Source: Statistics Canada 12-10-0011-01 (Customs basis, seasonally adjusted) | Data as of: {get_data_date(trade_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    fige.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Trade data not yet available. Run the data pipeline.")
 ```

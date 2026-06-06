@@ -396,12 +396,18 @@ def fetch_trade_us():
     out = pd.DataFrame({
         "exports_us": ser("Export", "United States"),
         "imports_us": ser("Import", "United States"),
+        "exports_china": ser("Export", "China"),
+        "exports_eu": ser("Export", "European Union"),
         "exports_total": ser("Export", "All countries"),
         "imports_total": ser("Import", "All countries"),
     }).dropna()
     if out.empty:
         return None
+    # Export shares for the three largest destinations, to scale US dominance
+    # against Canada's next-largest markets (the EU and China).
     out["exports_us_share"] = out["exports_us"] / out["exports_total"] * 100
+    out["exports_china_share"] = out["exports_china"] / out["exports_total"] * 100
+    out["exports_eu_share"] = out["exports_eu"] / out["exports_total"] * 100
     out["balance_us"] = out["exports_us"] - out["imports_us"]
     out["balance_total"] = out["exports_total"] - out["imports_total"]
     out["balance_row"] = out["balance_total"] - out["balance_us"]   # rest of world
@@ -415,8 +421,8 @@ def fetch_trade_us():
     save_metadata(out_path, df=out, date_column="date",
         source="Statistics Canada", source_table="Statistics Canada 12-10-0011-01",
         frequency="monthly", unit="$ millions (Customs basis, seasonally adjusted)",
-        transformations=["US vs. all-countries exports/imports; US export share; "
-                         "balances computed as exports − imports"])
+        transformations=["US vs. all-countries exports/imports; export shares for "
+                         "the US, China and the EU; balances computed as exports − imports"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
 

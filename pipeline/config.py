@@ -281,6 +281,13 @@ INDICATORS = [
               "Merchandise trade with the US", "$ millions", "monthly",
               fetch_fn="fetch_trade_us", output_subpath="statcan_trade_us.csv",
               source_table="Statistics Canada 12-10-0011-01"),
+    # Unemployment + employment rate by age bracket (one OECD LFS flow → two CSVs;
+    # out_path tracks the unemployment file for the STALE fallback).
+    Indicator("labour_by_age", "economics", "custom",
+              "Unemployment & employment rate by age", "%", "annual",
+              fetch_fn="fetch_labour_by_age",
+              output_subpath="oecd_unemployment_by_age.csv",
+              source_table="OECD Labour Force Statistics (DSD_LFS@DF_IALFS_INDIC)"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",

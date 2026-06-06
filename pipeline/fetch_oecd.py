@@ -12,7 +12,7 @@ import io
 import requests
 import pandas as pd
 from pipeline.config import (
-    PEER_CODES, PEER_COUNTRIES, OECD_REQUEST_DELAY_SECONDS,
+    PEER_CODES, PEER_COUNTRIES, OECD_REQUEST_DELAY_SECONDS, DATA_DIR,
 )
 from pipeline.metadata import save_metadata, validate_columns
 import logging
@@ -112,3 +112,68 @@ def fetch_oecd_indicator(ind):
     )
     logger.info(f"  saved {len(df)} rows -> {out_path.name}")
     return df
+
+
+# Age brackets for the labour-market by-age charts (OECD LFS codes -> friendly
+# labels). "Total (15–64)" is the working-age aggregate shown by default.
+LABOUR_AGE_LABELS = {
+    "Y15T24": "Youth (15–24)",
+    "Y25T54": "Prime-age (25–54)",
+    "Y55T64": "Older (55–64)",
+    "Y15T64": "Total (15–64)",
+}
+
+
+def fetch_labour_by_age():
+    """Unemployment and employment rates by age bracket for the peer group.
+
+    One OECD LFS indicators flow (DSD_LFS@DF_IALFS_INDIC) carries both the
+    unemployment rate (UNE_LF, % of labour force) and the employment rate
+    (EMP_WAP, % of working-age population) by age, annual, for all 17 peers.
+    Writes two tidy long CSVs (country_code, year, age, <rate>, country_name) that
+    drive the age-dropdown trend + ranked-bar charts on the economics page. The
+    total (15–64) unemployment line matches the headline KEI series to <0.3 pp,
+    so this LFS basis is used for the whole age family for internal consistency.
+    """
+    logger.info("OECD: unemployment + employment rates by age (LFS indicators)...")
+    peers = "+".join(PEER_CODES)
+    ages = "+".join(LABOUR_AGE_LABELS)
+    # dims: REF_AREA.MEASURE.UNIT.TRANSFORMATION.ADJUSTMENT.SEX.AGE.ACTIVITY.FREQ
+    key = (f"{peers}.UNE_LF+EMP_WAP.PT_LF_SUB+PT_WAP_SUB..Y._T.{ages}..A")
+    df = _fetch_oecd_csv("OECD.SDD.TPS,DSD_LFS@DF_IALFS_INDIC", key, start_period=2000)
+    if df is None or df.empty:
+        return None
+    validate_columns(df, ["REF_AREA", "MEASURE", "AGE", "TIME_PERIOD", "OBS_VALUE"],
+                     "labour_by_age")
+    df = df[df["ADJUSTMENT"].astype(str) == "Y"].copy()   # one adjustment only
+    df["year"] = pd.to_numeric(df["TIME_PERIOD"], errors="coerce").astype("Int64")
+    df["value"] = pd.to_numeric(df["OBS_VALUE"], errors="coerce")
+    df["age"] = df["AGE"].map(LABOUR_AGE_LABELS)
+    df["country_name"] = df["REF_AREA"].map(PEER_COUNTRIES)
+    df = df.dropna(subset=["year", "value", "age"])
+
+    written = []
+    for measure, value_col, fname in [
+        ("UNE_LF", "unemployment_rate", "oecd_unemployment_by_age.csv"),
+        ("EMP_WAP", "employment_rate", "oecd_employment_by_age.csv"),
+    ]:
+        sub = (df[df["MEASURE"] == measure]
+               [["REF_AREA", "year", "age", "value", "country_name"]]
+               .rename(columns={"REF_AREA": "country_code", "value": value_col}))
+        sub = (sub.drop_duplicates(subset=["country_code", "year", "age"], keep="last")
+                  .sort_values(["country_code", "age", "year"])
+                  .reset_index(drop=True))
+        sub["year"] = sub["year"].astype(int)
+        if sub.empty:
+            continue
+        out_path = DATA_DIR / "economics" / fname
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        sub.to_csv(out_path, index=False)
+        save_metadata(out_path, df=sub, date_column="year", source="OECD",
+            source_table="OECD Labour Force Statistics (DSD_LFS@DF_IALFS_INDIC)",
+            frequency="annual", unit="% (harmonised, by age bracket)",
+            transformations=["unemployment (% of labour force) / employment "
+                             "(% of working-age pop) by age, OECD peer group"])
+        logger.info(f"  saved {len(sub)} rows -> {out_path.name}")
+        written.append(sub)
+    return written if written else None

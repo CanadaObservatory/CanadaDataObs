@@ -233,6 +233,157 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
     return fig
 
 
+def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
+                                ages, default_age,
+                                country_col="country_code", name_col="country_name",
+                                show_average=True, avg_name="OECD peer average",
+                                hover_suffix="%", hover_decimals=1):
+    """Peer-comparison line chart with an age-bracket dropdown.
+
+    Same Canada-red / comparator / grey-cloud styling and peer-average logic as
+    `peer_comparison_line`, but `df` is long over an extra `age_col`; a Plotly
+    dropdown restyles every trace to the selected bracket. `ages` is the dropdown
+    order; `default_age` is shown initially (typically the working-age total)."""
+    highlight = [HIGHLIGHT_COUNTRY]
+
+    def _name(code):
+        s = df[df[country_col] == code]
+        return s[name_col].iloc[0] if (name_col in df.columns and not s.empty) else code
+
+    codes = list(df[country_col].unique())
+    comparators = sorted([c for c in codes
+                          if c in COMPARATOR_COLORS and c not in highlight], key=_name)
+    others = sorted([c for c in codes
+                     if c not in COMPARATOR_COLORS and c not in highlight], key=_name)
+
+    def series(code, age):
+        s = df[(df[country_col] == code) & (df[age_col] == age)].sort_values(x_col)
+        return s[x_col].tolist(), s[y_col].tolist()
+
+    def avg_series(age):
+        d = df[df[age_col] == age]
+        n = d[country_col].nunique()
+        counts = d.dropna(subset=[y_col]).groupby(x_col)[y_col].count()
+        valid = counts[counts >= n / 2].index
+        a = d[d[x_col].isin(valid)].groupby(x_col)[y_col].mean()
+        return a.index.tolist(), a.values.tolist()
+
+    # Fixed trace order (used for both add-order and the per-age restyle arrays):
+    # grey others, [average], coloured comparators, Canada on top.
+    order = [("other", c) for c in others]
+    if show_average:
+        order.append(("avg", None))
+    order += [("cmp", c) for c in comparators]
+    order += [("can", HIGHLIGHT_COUNTRY)]
+
+    def _hov(label, bold=False):
+        lab = f"<b>{label}</b>" if bold else label
+        return f"{lab}: %{{y:.{hover_decimals}f}}{hover_suffix}<extra></extra>"
+
+    fig = go.Figure()
+    oi = 0
+    for kind, code in order:
+        x, y = (avg_series(default_age) if kind == "avg" else series(code, default_age))
+        if kind == "other":
+            name = _name(code)
+            fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
+                line=dict(color=PEER_COLOR, width=PEER_WIDTH), opacity=0.8,
+                legendrank=100 + oi, hovertemplate=_hov(name)))
+            oi += 1
+        elif kind == "avg":
+            fig.add_trace(go.Scatter(x=x, y=y, name=avg_name, mode="lines",
+                line=dict(color=OECD_AVG_COLOR, width=2, dash="dash"),
+                legendrank=300, hovertemplate=_hov(avg_name)))
+        elif kind == "cmp":
+            name = _name(code)
+            fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
+                line=dict(color=COMPARATOR_COLORS[code], width=2),
+                legendrank=10 + comparators.index(code), hovertemplate=_hov(name, True)))
+        else:
+            name = _name(code)
+            fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines+markers",
+                line=dict(color=CANADA_COLOR, width=HIGHLIGHT_WIDTH), marker=dict(size=5),
+                legendrank=1, hovertemplate=_hov(name, True)))
+
+    buttons = []
+    for age in ages:
+        xs, ys = [], []
+        for kind, code in order:
+            x, y = (avg_series(age) if kind == "avg" else series(code, age))
+            xs.append(x); ys.append(y)
+        buttons.append(dict(method="restyle", label=age, args=[{"x": xs, "y": ys}]))
+
+    fig.update_layout(_base_layout("", yaxis_title))
+    fig.update_layout(
+        margin_t=70,  # room for the dropdown + label above the plot
+        updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
+            direction="down", showactive=True, x=1, xanchor="right",
+            y=1.13, yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1)])
+    fig.add_annotation(text="Age group:", xref="paper", yref="paper",
+        x=1, xanchor="right", y=1.17, yanchor="bottom", showarrow=False,
+        font=dict(size=11, color="#666"))
+    return fig
+
+
+def ranked_bar_by_age(df, value_col, age_col, xaxis_title, source_note, *,
+                      ages, default_age, country_col="country_code",
+                      name_col="country_name", year_col="year", ascending=True,
+                      min_countries=10, tickformat=None, hover_template=None,
+                      height=600):
+    """Ranked horizontal bar with an age-bracket dropdown. Each bracket re-ranks on
+    its own latest comparable year (Canada always kept), and the dropdown reorders
+    the bars, recolours them (Canada red), and updates the year in the footnote."""
+    def _bar_color(c):
+        return CANADA_COLOR if c == HIGHLIGHT_COUNTRY else COMPARATOR_COLORS.get(c, PEER_COLOR)
+
+    per_age = {}
+    for age in ages:
+        d = df[df[age_col] == age]
+        year = _latest_year_with_coverage(d, value_col, year_col, min_countries,
+                                          country_col=country_col,
+                                          require_code=HIGHLIGHT_COUNTRY)
+        latest = (d[d[year_col] == year].dropna(subset=[value_col])
+                  .sort_values(value_col, ascending=ascending))
+        names = (latest[name_col] if name_col in latest.columns
+                 else latest[country_col]).tolist()
+        per_age[age] = dict(x=latest[value_col].tolist(), y=names,
+                            colors=[_bar_color(c) for c in latest[country_col]],
+                            year=int(year))
+
+    d0 = per_age[default_age]
+    fig = go.Figure(go.Bar(x=d0["x"], y=d0["y"], orientation="h",
+        marker_color=d0["colors"],
+        hovertemplate=hover_template or "%{y}: %{x}<extra></extra>"))
+
+    xaxis = dict(gridcolor="#e0e0e0", title=xaxis_title)
+    if tickformat:
+        xaxis["tickformat"] = tickformat
+
+    buttons = []
+    for age in ages:
+        a = per_age[age]
+        buttons.append(dict(method="update", label=age,
+            args=[{"x": [a["x"]], "y": [a["y"]], "marker.color": [a["colors"]]},
+                  {"yaxis.categoryarray": a["y"], "yaxis.categoryorder": "array",
+                   "annotations[0].text": f"{source_note} &nbsp;({a['year']})"}]))
+
+    fig.update_layout(
+        xaxis=xaxis,
+        yaxis=dict(title="", categoryorder="array", categoryarray=d0["y"]),
+        plot_bgcolor="white", showlegend=False, height=height,
+        margin=dict(t=60, b=60, l=10, r=20),
+        updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
+            direction="down", showactive=True, x=1, xanchor="right",
+            y=1.06, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1)],
+        annotations=[dict(text=f"{source_note} &nbsp;({d0['year']})",
+            xref="paper", yref="paper", x=1, y=-0.09, showarrow=False,
+            font=dict(size=10, color="#999"))])
+    fig.add_annotation(text="Age group:", xref="paper", yref="paper",
+        x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
+        font=dict(size=11, color="#666"))
+    return fig
+
+
 def ranking_strip(items, source_note=None, year_col="year",
                   country_col="country_code", name_col="country_name",
                   min_countries=8, height=None):

@@ -51,7 +51,7 @@ DataCan/
 ├── geography/land.qmd     ← 15 ecozones (categorical) + land cover by ecozone (dropdown)
 ├── geography/water.qmd    ← % freshwater area by province
 ├── geography/fire-ice.qmd ← wildfire (national 1959– + 2023 by-province %-of-land) + permafrost zones (categorical) + Arctic sea-ice extent
-├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate, current account
+├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate (unemployment + employment have an **age-bracket dropdown**: youth/prime/older/total), current account
 ├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
 ├── housing/neighbourhoods.qmd ← census-tract dwelling-value choropleth (heavy ~3MB; own page)
 ├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, income map (city) + link to neighbourhood-detail page
@@ -73,7 +73,7 @@ DataCan/
 │   ├── fetch_worldbank.py ← fetch_worldbank_indicator (generic WB API)
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
@@ -135,7 +135,13 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
 - **OECD SDMX** (`fetch_oecd_indicator`): R&D/BERD/researchers (MSTI
   `DSD_MSTI@DF_MSTI`), GDP/capita (`DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC`),
   productivity (`DSD_PDB@DF_PDB_LV`), unemployment (`DSD_KEI@DF_KEI`), employment
-  rate (`DSD_LFS@DF_IALFS_EMP_WAP_Q`), and from the Economic Outlook (`DSD_EO@DF_EO`,
+  rate (`DSD_LFS@DF_IALFS_EMP_WAP_Q`) — note the **single-total** KEI/EMP_WAP series
+  drive only the scorecard + are kept for the headline; the **age-bracket** trend +
+  ranked-bar charts (youth 15–24 / prime 25–54 / older 55–64 / total 15–64, dropdown)
+  come from the unified LFS indicators flow `DSD_LFS@DF_IALFS_INDIC` (bespoke
+  `fetch_oecd.fetch_labour_by_age` → `oecd_unemployment_by_age.csv` +
+  `oecd_employment_by_age.csv`; UNE_LF total ≈ KEI within 0.3 pp). And from the
+  Economic Outlook (`DSD_EO@DF_EO`,
   key `{countries}.MEASURE.A`, all `transform=_drop_future_years`): real GDP growth
   GDPV_ANNPCT, gross debt GGFLQ, budget balance NLGQ, current account CBGDPR,
   govt revenue YRGTQ, net interest GNINTQ (the `Q`/PT_B1GQ variants are %GDP), house

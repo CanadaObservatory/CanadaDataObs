@@ -12,7 +12,13 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar
+from pipeline.charts import (
+    peer_comparison_line, ranked_bar,
+    peer_comparison_line_by_age, ranked_bar_by_age,
+)
+
+# Age brackets for the labour-market charts (display order; total shown first).
+LABOUR_AGES = ["Total (15–64)", "Youth (15–24)", "Prime-age (25–54)", "Older (55–64)"]
 ```
 
 How fast the economy is growing, how large it is per person, how productive an
@@ -226,29 +232,23 @@ if os.path.exists(prod_path):
 
 ## Unemployment Rate
 
-Harmonised unemployment rate as a percentage of the labour force, allowing consistent comparison across countries.
+Harmonised unemployment rate as a percentage of the labour force, allowing consistent comparison across countries. **Use the dropdown to switch age bracket** — youth (15–24) unemployment runs far above the prime-age rate, and the peer ranking shifts with it.
 
 ```{python}
 #| echo: false
-unemp_path = "data/economics/oecd_unemployment.csv"
+unemp_path = "data/economics/oecd_unemployment_by_age.csv"
 if os.path.exists(unemp_path):
     unemp = pd.read_csv(unemp_path)
-
-    fig = peer_comparison_line(
-        unemp, x_col="year", y_col="unemployment_rate",
-        title="", yaxis_title="% of labour force",
-    )
-    fig.update_layout(
-        yaxis_tickformat=".1f",
-        annotations=[dict(
-            text=f"Source: OECD Key Economic Indicators | Data as of: {get_data_date(unemp_path)}",
-            xref="paper", yref="paper", x=0, y=-0.52,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
+    fig = peer_comparison_line_by_age(
+        unemp, x_col="year", y_col="unemployment_rate", age_col="age",
+        yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0])
+    fig.add_annotation(
+        text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(unemp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.52,
+        showarrow=False, font=dict(size=10, color="#999"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
-    print("Unemployment data not yet available. Run the data pipeline to fetch it.")
+    print("Unemployment-by-age data not yet available. Run the data pipeline to fetch it.")
 ```
 
 ## Latest Unemployment Rate: Ranked
@@ -257,8 +257,9 @@ else:
 #| echo: false
 if os.path.exists(unemp_path):
     df = pd.read_csv(unemp_path)
-    fig = ranked_bar(df, "unemployment_rate", "% of labour force",
-        f"Source: OECD Key Economic Indicators | Data as of: {get_data_date(unemp_path)}",
+    fig = ranked_bar_by_age(df, "unemployment_rate", "age", "% of labour force",
+        "Source: OECD Labour Force Statistics (harmonised, by age)",
+        ages=LABOUR_AGES, default_age=LABOUR_AGES[0],
         hover_template="%{y}: %{x:.1f}%<extra></extra>")
     fig.show(config={"displaylogo": False})
 ```
@@ -286,21 +287,23 @@ else:
     print("City unemployment map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Employment Rate (15–64)
+## Employment Rate
 
-The share of the working-age population (15–64) that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work.
+The share of an age group that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work. **Use the dropdown to switch age bracket:** older-worker (55–64) employment, in particular, has trended up across most peers.
 
 ```{python}
 #| echo: false
-emp_path = "data/economics/oecd_employment_rate.csv"
+emp_path = "data/economics/oecd_employment_by_age.csv"
 if os.path.exists(emp_path):
     df = pd.read_csv(emp_path)
-    fig = peer_comparison_line(df, "year", "employment_rate",
-        title="", yaxis_title="% of population aged 15–64", show_average=True)
-    fig.update_layout(annotations=[dict(
-        text=f"Source: OECD Labour Force Statistics | Data as of: {get_data_date(emp_path)}",
+    fig = peer_comparison_line_by_age(
+        df, x_col="year", y_col="employment_rate", age_col="age",
+        yaxis_title="% of population in age group",
+        ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True)
+    fig.add_annotation(
+        text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(emp_path)}",
         xref="paper", yref="paper", x=0, y=-0.52,
-        showarrow=False, font=dict(size=10, color="#999"))])
+        showarrow=False, font=dict(size=10, color="#999"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Employment rate data not yet available. Run the data pipeline.")
@@ -312,8 +315,9 @@ else:
 #| echo: false
 if os.path.exists(emp_path):
     df = pd.read_csv(emp_path)
-    fig = ranked_bar(df, "employment_rate", "% of population aged 15–64",
-        f"Source: OECD Labour Force Statistics | Data as of: {get_data_date(emp_path)}",
+    fig = ranked_bar_by_age(df, "employment_rate", "age", "% of population in age group",
+        "Source: OECD Labour Force Statistics (harmonised, by age)",
+        ages=LABOUR_AGES, default_age=LABOUR_AGES[0],
         hover_template="%{y}: %{x:.1f}%<extra></extra>")
     fig.show(config={"displaylogo": False})
 ```
@@ -453,8 +457,8 @@ if os.path.exists(trade_path):
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
 - [GDP per Capita (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts, PPP current USD
 - [Labour Productivity (CSV)](../data/economics/oecd_labour_productivity.csv) — OECD Productivity Database
-- [Unemployment Rate (CSV)](../data/economics/oecd_unemployment.csv) — OECD Key Economic Indicators
-- [Employment Rate (CSV)](../data/economics/oecd_employment_rate.csv) — OECD Labour Force Statistics
+- [Unemployment Rate by age (CSV)](../data/economics/oecd_unemployment_by_age.csv) — OECD Labour Force Statistics
+- [Employment Rate by age (CSV)](../data/economics/oecd_employment_by_age.csv) — OECD Labour Force Statistics
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts
 - [Current Account Balance (CSV)](../data/economics/oecd_current_account.csv) — OECD Economic Outlook
 - [Merchandise Trade with the US (CSV)](../data/economics/statcan_trade_us.csv) — Statistics Canada 12-10-0011-01

@@ -281,6 +281,13 @@ INDICATORS = [
               "Merchandise trade with the US", "$ millions", "monthly",
               fetch_fn="fetch_trade_us", output_subpath="statcan_trade_us.csv",
               source_table="Statistics Canada 12-10-0011-01"),
+    # Current unemployment rate by CMA (LFS 3-month moving average) — the live
+    # by-city map source, replacing the frozen 2021-Census snapshot.
+    Indicator("cma_unemployment", "economics", "custom",
+              "Unemployment rate by CMA (current)", "%", "monthly",
+              fetch_fn="fetch_cma_unemployment",
+              output_subpath="statcan_cma_unemployment.csv",
+              source_table="Statistics Canada 14-10-0459-01 (Labour Force Survey)"),
     # Unemployment + employment rate by age bracket (one OECD LFS flow → two CSVs;
     # out_path tracks the unemployment file for the STALE fallback).
     Indicator("labour_by_age", "economics", "custom",

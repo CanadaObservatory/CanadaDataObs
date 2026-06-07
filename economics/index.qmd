@@ -266,25 +266,25 @@ if os.path.exists(unemp_path):
 
 ## Unemployment by City
 
-The national rate hides large regional differences. This map shows the unemployment rate in each metropolitan area from the 2021 Census — **zoom and pan to your area.** City-level (CMA/CA); a 2021 Census snapshot, so it sits a few years behind the national series above.
+The national rate hides large regional differences. This map shows the **current** unemployment rate in each of Canada's largest metropolitan areas — **zoom and pan to your area.** From the monthly Labour Force Survey (three-month moving average, seasonally adjusted), so it stays current with the national series above; it covers the ~40 largest CMAs (smaller centres aren't separately estimated by the LFS).
 
 ```{python}
 #| echo: false
 import json
 from pipeline.charts import choropleth_map
 cma_geo_path = "data/geo/cma_2021.geojson"
-cma_path = "data/geo/statcan_cma_indicators.csv"
-if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
+cma_unemp_path = "data/economics/statcan_cma_unemployment.csv"
+if os.path.exists(cma_geo_path) and os.path.exists(cma_unemp_path):
     cma_geo = json.load(open(cma_geo_path))
-    cma = pd.read_csv(cma_path, dtype={"cmauid": str})
-    sub = cma.dropna(subset=["unemployment"])
+    sub = pd.read_csv(cma_unemp_path, dtype={"cmauid": str}).dropna(subset=["unemployment"])
+    period = pd.to_datetime(str(sub["period"].iloc[0]) + "-01").strftime("%b %Y")
     fig = choropleth_map(cma_geo, sub, "cmauid", "unemployment", name_col="name",
         colorbar_title="Unemployment rate", value_suffix="%", value_fmt=".1f", colorscale="YlOrRd",
         zmin=float(sub["unemployment"].quantile(0.05)), zmax=float(sub["unemployment"].quantile(0.95)),
-        source_note="Source: 2021 Census (Statistics Canada). City-level (CMA/CA) snapshot.")
+        source_note=f"Source: Statistics Canada Labour Force Survey 14-10-0459-01 (3-month moving average, seasonally adjusted) | 3 months ending {period}")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
-    print("City unemployment map not yet available — run `python -m pipeline.build_census_geo`.")
+    print("City unemployment map not yet available. Run the data pipeline.")
 ```
 
 ## Employment Rate

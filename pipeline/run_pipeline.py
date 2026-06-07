@@ -23,7 +23,7 @@ from pipeline.fetch_statcan import (
     fetch_statcan_indicator,
     fetch_population_quarterly, fetch_population_components, fetch_cpi,
     fetch_provincial_electricity, fetch_tuition, fetch_tuition_by_field,
-    fetch_trade_us,
+    fetch_trade_us, fetch_cma_unemployment,
 )
 from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
 from pipeline.fetch_whr import fetch_happiness
@@ -53,6 +53,7 @@ CUSTOM_FETCHERS = {
     "fetch_tuition": fetch_tuition,
     "fetch_tuition_by_field": fetch_tuition_by_field,
     "fetch_trade_us": fetch_trade_us,
+    "fetch_cma_unemployment": fetch_cma_unemployment,
     "fetch_labour_by_age": fetch_labour_by_age,
     "fetch_wildfire": fetch_wildfire,
     "fetch_sea_ice": fetch_sea_ice,

@@ -295,9 +295,13 @@ use: **median household income by census tract** on the income page (the
 (unemployment, median dwelling value, value-to-income, Crime Severity Index per CMA). Sources:
 the comprehensive **CMA census profile** (GEONO=002, has Unemployment rate + "Median value of
 dwellings ($)" + household income) and crime from 35-10-0026-01 (CSI joined on the 3-digit CMA
-code parsed from the `[35535]`-style GEO labels — ~40 CMAs report CSI). Four maps drawn from it:
-unemployment (Economy), Crime Severity (Society & Well-being), and **median dwelling value +
-value-to-income** (Housing). The housing two answer "can we map house prices?" — **yes**, via
+code parsed from the `[35535]`-style GEO labels — ~40 CMAs report CSI). Maps drawn from it:
+Crime Severity (Society & Well-being) and **median dwelling value + value-to-income** (Housing).
+**The by-city unemployment map no longer uses this census snapshot** — switched 2026-06 to the
+**live LFS series 14-10-0459-01** (3-month moving average, SA; bespoke
+`fetch_statcan.fetch_cma_unemployment` → `data/economics/statcan_cma_unemployment.csv`, **weekly**),
+covering the ~41 largest CMAs, joined to `cma_2021.geojson` via the CMA code in the DGUID
+(`2021S0503<cmauid>`). The `unemployment` column in `statcan_cma_indicators.csv` is now vestigial. The housing two answer "can we map house prices?" — **yes**, via
 the census's *owner-estimated* dwelling value (not sale prices; CREA sale prices stay
 internal-only), and value÷income is the affordability map (Vancouver ~11.7×, Toronto ~10× vs
 Calgary ~4.6×). Crime/unemployment/housing aren't available at census-tract level cheaply

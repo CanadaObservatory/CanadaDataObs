@@ -427,6 +427,50 @@ def fetch_trade_us():
     return out
 
 
+def fetch_cma_unemployment():
+    """Current unemployment rate by census metropolitan area (StatCan Labour Force
+    Survey 14-10-0459-01, 3-month moving average, seasonally adjusted).
+    Replaces the frozen 2021-Census snapshot on the by-city unemployment map with a
+    live, weekly-updating series for the ~41 largest CMAs. Joins to cma_2021.geojson
+    via the CMA code parsed from the DGUID (2021S0503<cmauid>); Canada/province rows
+    (non-S0503 DGUIDs) drop out."""
+    logger.info("Fetching StatCan LFS unemployment by CMA (14-10-0459-01)...")
+    try:
+        df = _get_table("14-10-0459-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch LFS CMA table: {e}")
+        return None
+    validate_columns(df, ["REF_DATE", "GEO", "DGUID", "Labour force characteristics",
+                          "Statistics", "Data type", "VALUE"], "cma_unemployment")
+    sub = df[(df["Labour force characteristics"] == "Unemployment rate")
+             & (df["Statistics"] == "Estimate")
+             & (df["Data type"] == "Seasonally adjusted")].copy()
+    sub["VALUE"] = pd.to_numeric(sub["VALUE"], errors="coerce")
+    sub["cmauid"] = sub["DGUID"].astype(str).str.extract(r"2021S0503(\d+)$")[0].str.zfill(3)
+    sub = sub.dropna(subset=["cmauid", "VALUE"])
+    if sub.empty:
+        return None
+    latest = sub["REF_DATE"].max()                       # 3-month MA ending this month
+    sub = sub[sub["REF_DATE"] == latest]
+    out = (pd.DataFrame({
+                "cmauid": sub["cmauid"].values,
+                "name": sub["GEO"].str.split(",").str[0].str.strip().values,
+                "unemployment": sub["VALUE"].values,
+                "period": str(latest)})
+           .drop_duplicates("cmauid").sort_values("cmauid").reset_index(drop=True))
+
+    out_path = DATA_DIR / "economics" / "statcan_cma_unemployment.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, source="Statistics Canada",
+        source_table="Statistics Canada 14-10-0459-01 (Labour Force Survey)",
+        frequency="monthly", unit="unemployment rate (%), 3-month moving average, SA",
+        transformations=["LFS unemployment rate by CMA, latest 3-month moving average; "
+                         "CMA code parsed from DGUID 2021S0503<cmauid>"])
+    logger.info(f"  saved {len(out)} CMAs ({latest}) -> {out_path.name}")
+    return out
+
+
 def fetch_tuition_by_field():
     """Canadian undergraduate tuition by field of study (StatCan 37-10-0003-01,
     TLAC), current dollars. Tidy: year, geography, field, tuition."""

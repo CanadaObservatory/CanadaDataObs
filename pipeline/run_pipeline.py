@@ -28,6 +28,7 @@ from pipeline.fetch_statcan import (
 from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
 from pipeline.fetch_whr import fetch_happiness
 from pipeline.fetch_worldbank import fetch_worldbank_indicator
+from pipeline.fetch_boc import fetch_boc_indicator
 from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
 from pipeline.fetch_environment import fetch_ghg, fetch_ghg_by_sector
 from pipeline.fetch_government import (
@@ -81,6 +82,8 @@ def _run_one(ind):
         return fetch_statcan_indicator(ind)
     if ind.source == "worldbank":
         return fetch_worldbank_indicator(ind)
+    if ind.source == "boc":
+        return fetch_boc_indicator(ind)
     if ind.source == "custom":
         return CUSTOM_FETCHERS[ind.fetch_fn]()
     raise ValueError(f"Unknown source '{ind.source}' for indicator {ind.id}")

@@ -1,0 +1,14 @@
+{
+  "dataset_id": "boc_policy_rate",
+  "source": "Bank of Canada",
+  "source_table": "Bank of Canada (Bank Rate, V122530)",
+  "frequency": "monthly",
+  "unit": "%",
+  "retrieved_at": "2026-06-07T14:45:42.329599+00:00",
+  "latest_observation_date": "2026-05-01",
+  "transformations": [
+    "BoC Valet series V122530 -> wide CSV"
+  ],
+  "notes": null,
+  "row_count": 1097
+}

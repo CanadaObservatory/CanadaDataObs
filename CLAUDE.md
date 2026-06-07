@@ -71,6 +71,7 @@ DataCan/
 │   ├── fetch_statcan.py   ← fetch_statcan_indicator (generic) + bespoke population/CPI
 │   ├── fetch_owid.py      ← OWID energy mix + consumption CO2 (bespoke)
 │   ├── fetch_worldbank.py ← fetch_worldbank_indicator (generic WB API)
+│   ├── fetch_boc.py       ← fetch_boc_indicator (generic Bank of Canada Valet API; source="boc", Indicator.boc_series = {col: valet_code})
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
 │   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views
@@ -162,6 +163,19 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   capital formation %GDP (`NE.GDI.FTOT.ZS`) and defence spending %GDP
   (`MS.MIL.XPND.GD.ZS`, WB-sourced from SIPRI so all 17 peers are covered, not just
   NATO; the defence chart draws the NATO 2%-of-GDP guideline as a benchmark line).
+- **Bank of Canada Valet API** (`fetch_boc_indicator`, source="boc", `boc_series`
+  = {output_col: Valet series code}; JSON, reproduction permitted with attribution —
+  every chart carries "Source: Bank of Canada"). One generic fetcher pulls all of an
+  indicator's codes in one request → a wide `[date, cols…]` CSV. Four series (Canada-only,
+  auto-updating weekly): **policy rate** (Bank Rate `V122530`, 1935– — the consistent
+  long-run policy series, charted vs CPI inflation on cost-of-living.qmd; the early-80s
+  ~21% peak); **CAD/US$ exchange rate** (`FXUSDCAD`, 2017–, *CAD per USD* as published →
+  higher = weaker loonie; economics page, pairs with US-trade); **prime + conventional
+  5-year mortgage rate** (`V80691311` + `V80691335`, 1980–; housing page); and **GoC
+  benchmark bond yields by term** (`BD.CDN.{2,3,5,7,10,LONG}YR.DQ.YLD`, 2001–; housing
+  page via `single_line_multi` term dropdown — 5-year default, maps to fixed-mortgage
+  terms). Note: the daily overnight-target `V39079` starts only 2009, so the long-run
+  chart uses the Bank Rate; FX daily series has a 2017 methodology break.
 - **Our World in Data** — consumption-based CO2 per capita (`fetch_consumption_co2`,
   OWID CO2 dataset / Global Carbon Project), and the energy mix CSV (Energy Institute + Ember + EIA): both
   electricity-generation shares (`*_share_elec`, `low_carbon_share_elec`) and

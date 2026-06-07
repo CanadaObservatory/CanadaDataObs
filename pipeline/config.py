@@ -141,6 +141,8 @@ class Indicator:
     start_period: int = 2000
     # --- World Bank API (generic, fetch_worldbank_indicator) ---
     wb_indicator: Optional[str] = None  # e.g. "NE.GDI.FTOT.ZS"
+    # --- Bank of Canada Valet API (generic, fetch_boc_indicator) ---
+    boc_series: dict = field(default_factory=dict)  # output column -> Valet series code
     # --- StatCan generic single-series ---
     statcan_table: Optional[str] = None
     statcan_filters: dict = field(default_factory=dict)  # column -> exact value
@@ -295,6 +297,32 @@ INDICATORS = [
               fetch_fn="fetch_labour_by_age",
               output_subpath="oecd_unemployment_by_age.csv",
               source_table="OECD Labour Force Statistics (DSD_LFS@DF_IALFS_INDIC)"),
+
+    # ----- Bank of Canada (Valet API) — interest rates, exchange rate -----
+    # Policy rate: the Bank Rate (V122530) is the consistent long-run series (1935–),
+    # charted against CPI inflation on the cost-of-living page.
+    Indicator("boc_policy_rate", "economics", "boc",
+              "Bank of Canada policy rate", "%", "monthly",
+              boc_series={"policy_rate": "V122530"}, start_period=1935,
+              output_subpath="boc_policy_rate.csv",
+              source_table="Bank of Canada (Bank Rate, V122530)"),
+    Indicator("boc_usdcad", "economics", "boc",
+              "CAD/US dollar exchange rate", "USD per CAD", "daily",
+              boc_series={"usdcad": "FXUSDCAD"}, start_period=2017,
+              output_subpath="boc_usdcad.csv",
+              source_table="Bank of Canada (daily average exchange rate)"),
+    Indicator("boc_rates", "housing", "boc",
+              "Prime & 5-year mortgage rate", "%", "weekly",
+              boc_series={"prime": "V80691311", "mortgage_5yr": "V80691335"},
+              start_period=1980, output_subpath="boc_rates.csv",
+              source_table="Bank of Canada (prime rate; conventional 5-year mortgage rate)"),
+    Indicator("boc_bond_yields", "economics", "boc",
+              "Government of Canada bond yields by term", "%", "daily",
+              boc_series={"y2": "BD.CDN.2YR.DQ.YLD", "y3": "BD.CDN.3YR.DQ.YLD",
+                          "y5": "BD.CDN.5YR.DQ.YLD", "y7": "BD.CDN.7YR.DQ.YLD",
+                          "y10": "BD.CDN.10YR.DQ.YLD", "ylong": "BD.CDN.LONG.DQ.YLD"},
+              start_period=2001, output_subpath="boc_bond_yields.csv",
+              source_table="Bank of Canada (Government of Canada benchmark bond yields)"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",

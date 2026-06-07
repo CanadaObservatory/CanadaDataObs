@@ -452,6 +452,26 @@ if os.path.exists(trade_path):
     figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
+## The Canadian Dollar
+
+The exchange rate against the **US dollar** — Canada's dominant trading partner (see the trade-exposure chart above). Shown as the Bank of Canada publishes it: **Canadian dollars per US dollar**, so a *higher* line means a *weaker* loonie. The daily average series begins in 2017.
+
+```{python}
+#| echo: false
+from pipeline.charts import single_line
+fx_path = "data/economics/boc_usdcad.csv"
+if os.path.exists(fx_path):
+    fx = pd.read_csv(fx_path, parse_dates=["date"])
+    fig = single_line(fx, "date", "usdcad", title="",
+        yaxis_title="Canadian dollars per US dollar", rangeslider=True,
+        yaxis_tickformat=".2f",
+        hovertemplate="%{x|%b %Y}: C$%{y:.4f} per US$<extra></extra>",
+        source_note=f"Source: Bank of Canada (daily average exchange rate) | Data as of: {get_data_date(fx_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Exchange-rate data not yet available. Run the data pipeline.")
+```
+
 ## Download Data
 
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
@@ -462,3 +482,4 @@ if os.path.exists(trade_path):
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts
 - [Current Account Balance (CSV)](../data/economics/oecd_current_account.csv) — OECD Economic Outlook
 - [Merchandise Trade with the US (CSV)](../data/economics/statcan_trade_us.csv) — Statistics Canada 12-10-0011-01
+- [CAD/US dollar exchange rate (CSV)](../data/economics/boc_usdcad.csv) — Bank of Canada

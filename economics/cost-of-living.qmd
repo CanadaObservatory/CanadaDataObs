@@ -127,6 +127,48 @@ except FileNotFoundError:
     print("Core/food CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## The Policy Rate vs. Inflation
+
+The Bank of Canada raises its **policy interest rate** to cool inflation and lowers it to support the economy — so the two move together over time. This pairs the policy rate (the **Bank Rate**, the consistent series back to 1935) with year-over-year inflation, both on one scale. The early-1980s spike — the rate above **20%** against double-digit inflation — and the 2022–23 tightening cycle stand out. The grey band is the 1–3% inflation target.
+
+```{python}
+#| echo: false
+try:
+    pr = pd.read_csv("data/economics/boc_policy_rate.csv", parse_dates=["date"]).sort_values("date")
+    ci = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in ci.columns:
+        ci = ci[ci["product_group"] == "All-items"]
+    ci = ci.sort_values("date")
+    ci["yoy"] = pd.to_numeric(ci["cpi_value"], errors="coerce").pct_change(12) * 100
+    ci = ci.dropna(subset=["yoy"])
+    ci = ci[ci["date"] >= pr["date"].min()]   # align both lines to the rate's start (1935)
+
+    figr = go.Figure()
+    figr.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.35, line_width=0, layer="below")
+    figr.add_trace(go.Scatter(x=ci["date"], y=ci["yoy"], name="Inflation (CPI, year-over-year)",
+        mode="lines", line=dict(color=CANADA_COLOR, width=2),
+        hovertemplate="Inflation: %{y:.1f}%<extra></extra>"))
+    figr.add_trace(go.Scatter(x=pr["date"], y=pr["policy_rate"], name="Policy rate (Bank Rate)",
+        mode="lines", line=dict(color="#1f77b4", width=2.5),
+        hovertemplate="Policy rate: %{y:.2f}%<extra></extra>"))
+    figr.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="Percent", gridcolor="#e0e0e0", ticksuffix="%", zeroline=True, zerolinecolor="#ccc"),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+            rangeselector=dict(buttons=[
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(yanchor="top", y=0.98, xanchor="right", x=0.98, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=120, r=20))
+    figr.add_annotation(
+        text=f"Source: Bank of Canada (Bank Rate) and Statistics Canada 18-10-0004-01 | Data as of: {get_data_date('data/economics/boc_policy_rate.csv')}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    figr.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("Policy-rate data not yet available. Run the data pipeline to fetch it.")
+```
+
 ## Other Cost Pressures
 
 Inflation is only part of the cost-of-living picture. See also:
@@ -139,3 +181,4 @@ Inflation is only part of the cost-of-living picture. See also:
 - [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada 18-10-0004-01
 - [Food CPI (CSV)](../data/economics/statcan_food_cpi.csv) — Statistics Canada 18-10-0004-01
 - [CPI-trim core inflation (CSV)](../data/economics/statcan_cpi_trim.csv) — Statistics Canada 18-10-0256-01
+- [Bank of Canada policy rate (CSV)](../data/economics/boc_policy_rate.csv) — Bank of Canada (Bank Rate)

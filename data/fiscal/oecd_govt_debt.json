@@ -4,7 +4,7 @@
   "source_table": "OECD Economic Outlook",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-05-30T01:08:58.947523+00:00",
+  "retrieved_at": "2026-06-07T15:29:02.294989+00:00",
   "latest_observation_date": "2026",
   "transformations": [
     "filtered to Government gross debt for OECD peer group"

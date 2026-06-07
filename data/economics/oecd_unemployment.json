@@ -4,7 +4,7 @@
   "source_table": "OECD Key Economic Indicators (KEI)",
   "frequency": "annual",
   "unit": "% of labour force",
-  "retrieved_at": "2026-05-30T00:24:45.986772+00:00",
+  "retrieved_at": "2026-06-07T15:27:28.402825+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to Unemployment rate for OECD peer group"

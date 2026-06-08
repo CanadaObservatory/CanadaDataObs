@@ -498,6 +498,38 @@ def build_agriculture():
           f"cropland share {out['cropland_share'].min():.0f}–{out['cropland_share'].max():.0f}%")
 
 
+DRAINAGE_URL = "https://www150.statcan.gc.ca/n1/en/pub/16-201-x/2017000/sec-1/m-c/m-c-1.1.zip"
+
+
+def build_drainage():
+    """Canada's drainage regions (Statistics Canada 16-201-X, OGL): 25 drainage regions
+    nested under the 5 **ocean drainage areas** — Pacific, Arctic, Hudson Bay, Atlantic and
+    the Gulf of Mexico. Writes drainage_2017.geojson (id=dr_code, props dr_name/oda_name) +
+    a small CSV, for a 'Canada by watershed, not province' categorical map. Static geographic
+    facts — NOT weekly."""
+    print("Building drainage regions (StatCan 16-201-X) ...")
+    z = zipfile.ZipFile(_download_cache(DRAINAGE_URL, "/tmp/drainage.zip", "drainage regions"))
+    z.extractall("/tmp/drainage")
+    shp = [n for n in z.namelist() if n.lower().endswith(".shp")][0]
+    g = gpd.read_file(f"/tmp/drainage/{shp}").to_crs(epsg=4326)
+    g["dr_code"] = g["DR_Code"].astype(str)
+    g = g.rename(columns={"DR_Name": "dr_name", "ODA_Name": "oda_name"})
+    g[["dr_code", "dr_name", "oda_name"]].to_csv(f"{GEO_DIR}/statcan_drainage.csv", index=False)
+    # The file is dominated by the *count* of tiny Arctic islands, not vertices per polygon.
+    # For a national overview, explode to single polygons in an equal-area CRS, keep parts
+    # ≥ 50 km² (mainland + major islands), dissolve back, then generalise — keeps it light.
+    parts = g.to_crs("ESRI:102001").explode(index_parts=False)
+    parts = parts[parts.geometry.area / 1e6 >= 50]
+    g = parts.dissolve(by="dr_code", aggfunc="first").reset_index().to_crs(epsg=4326)
+    g["geometry"] = g["geometry"].simplify(0.05, preserve_topology=True).buffer(0)
+    gj = json.loads(g[["dr_code", "dr_name", "oda_name", "geometry"]].to_json())
+    for f in gj["features"]:
+        f["id"] = f["properties"]["dr_code"]
+        f["geometry"]["coordinates"] = _rnd(f["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/drainage_2017.geojson")
+    print(f"  {len(g)} drainage regions / {g['oda_name'].nunique()} ocean basins")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -507,4 +539,5 @@ if __name__ == "__main__":
     build_lakes()
     build_climate_normals()
     build_agriculture()
+    build_drainage()
     print("build_geography complete.")

@@ -1,6 +1,6 @@
 ---
 title: "Water"
-description: "Fresh water across Canada — the country's major lakes"
+description: "Fresh water across Canada — its major lakes, rivers and watersheds"
 ---
 
 ```{python}
@@ -54,6 +54,34 @@ else:
     print("Lakes data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
+## Where the water goes
+
+Provinces are political lines; **watersheds** are the natural ones. Almost every drop of
+rain or snow in Canada eventually drains toward one of five destinations — the **Pacific**,
+the **Arctic**, **Hudson Bay**, the **Atlantic**, or (for a small corner of the southern
+Prairies) the **Gulf of Mexico**. Seen this way the country reorganises itself entirely:
+the **Hudson Bay** basin alone gathers water from Alberta to Quebec. The map groups
+Statistics Canada's 25 drainage regions by the ocean each one ultimately reaches.
+
+```{python}
+#| echo: false
+dgeo, dcsv = "data/geo/drainage_2017.geojson", "data/geo/statcan_drainage.csv"
+if os.path.exists(dgeo) and os.path.exists(dcsv):
+    dg = json.load(open(dgeo))
+    dd = pd.read_csv(dcsv, dtype={"dr_code": str})
+    oda_colors = {"Pacific Ocean": "#3182bd", "Arctic Ocean": "#80cdc1",
+                  "Hudson Bay": "#542788", "Atlantic Ocean": "#2ca25f",
+                  "Gulf of Mexico": "#e6550d"}
+    fig = choropleth_categorical(dg, dd, "dr_code", "oda_name", name_col="dr_name",
+        ordered=list(oda_colors), color_map=oda_colors, legend_title="Drains to",
+        center={"lat": 62, "lon": -96}, zoom=2.2,
+        source_note="Source: Statistics Canada — Drainage regions of Canada (16-201-X). The 25 drainage regions, grouped by the ocean drainage area each ultimately flows to.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Drainage data not yet available — run `python -m pipeline.build_geography`.")
+```
+
 ## Download data
 
 - [Major lakes — surface area (CSV)](../data/geo/lakes_major.csv) — NRCan Atlas of Canada 1:1,000,000 waterbodies
+- [Drainage regions (CSV)](../data/geo/statcan_drainage.csv) — Statistics Canada, 16-201-X

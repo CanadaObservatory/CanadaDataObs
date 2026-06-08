@@ -10,7 +10,7 @@ Order: **temperature → agriculture → watersheds → protected areas → elev
 ## Status tracker
 - [x] 1. Temperature (climate normals) — `geography/climate.qmd` ✅ DONE (658 stations)
 - [x] 2. Agriculture (type / cropland) — `geography/agriculture.qmd` ✅ DONE (72 CARs)
-- [ ] 3. Watersheds (drainage regions) — add to `geography/water.qmd`
+- [x] 3. Watersheds (drainage regions) — added to `geography/water.qmd` ✅ DONE
 - [ ] 4. Protected areas (% conserved) — `geography/protected.qmd`
 - [ ] 5. Elevation (distribution chart + best-effort relief) — `geography/elevation.qmd`
 
@@ -71,4 +71,10 @@ but EPSG:3978 (Plotly needs 3857) → projection snag.
   few large farms. Alternatives to consider: by **area**, or a **specialization / location-quotient**
   index (would surface dairy in QC/ON, fruit in Niagara, etc.). I did NOT pick one — owner's call.
   Cropland-share map (YlGn) is clean and intuitive. Page prose states both caveats.
+- **MAP 3 Watersheds — DONE.** StatCan Drainage regions (16-201-X): 25 regions × 5 ocean
+  basins → categorical map ("Where the water goes" section on `water.qmd`), Hudson Bay basin
+  dominates. `build_drainage()` → `drainage_2017.geojson`. **Size fix:** raw file was 3.1 MB
+  (thousands of tiny Arctic islands by *count*); explode→drop parts <50 km²→dissolve got it to
+  **0.30 MB**. **Owner review:** region names from the source DBF have a dropped-separator glitch
+  (e.g. "FraserLower Mainland" should be "Fraser–Lower Mainland") — only in hover; left as-is.
 - elevation outcome:

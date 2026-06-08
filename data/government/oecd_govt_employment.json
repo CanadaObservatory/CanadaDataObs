@@ -4,7 +4,7 @@
   "source_table": "OECD Government at a Glance 2025",
   "frequency": "annual",
   "unit": "% of total employment",
-  "retrieved_at": "2026-06-07T15:29:32.079512+00:00",
+  "retrieved_at": "2026-06-08T17:27:01.327965+00:00",
   "latest_observation_date": "2023",
   "transformations": [
     "filtered to Government employment for OECD peer group"

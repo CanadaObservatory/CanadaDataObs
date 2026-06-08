@@ -4,7 +4,7 @@
   "source_table": "OECD Health Statistics",
   "frequency": "annual",
   "unit": "deaths per 100,000",
-  "retrieved_at": "2026-05-30T19:28:32.840940+00:00",
+  "retrieved_at": "2026-06-08T17:28:39.736108+00:00",
   "latest_observation_date": "2023",
   "transformations": [
     "filtered to Avoidable mortality for OECD peer group"

@@ -4,7 +4,7 @@
   "source_table": "OECD Economic Outlook",
   "frequency": "annual",
   "unit": "annual % change",
-  "retrieved_at": "2026-06-07T15:27:32.644356+00:00",
+  "retrieved_at": "2026-06-08T17:26:08.198486+00:00",
   "latest_observation_date": "2026",
   "transformations": [
     "filtered to Real GDP growth for OECD peer group"

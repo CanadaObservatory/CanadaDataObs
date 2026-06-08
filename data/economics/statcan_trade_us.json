@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 12-10-0011-01",
   "frequency": "monthly",
   "unit": "$ millions (Customs basis, seasonally adjusted)",
-  "retrieved_at": "2026-06-07T15:28:49.145240+00:00",
+  "retrieved_at": "2026-06-08T17:26:28.663859+00:00",
   "latest_observation_date": "2026-03-01",
   "transformations": [
     "US vs. all-countries exports/imports; export shares for the US, China and the EU; balances computed as exports \u2212 imports"

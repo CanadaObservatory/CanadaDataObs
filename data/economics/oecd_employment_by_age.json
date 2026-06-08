@@ -4,7 +4,7 @@
   "source_table": "OECD Labour Force Statistics (DSD_LFS@DF_IALFS_INDIC)",
   "frequency": "annual",
   "unit": "% (harmonised, by age bracket)",
-  "retrieved_at": "2026-06-07T15:28:58.767776+00:00",
+  "retrieved_at": "2026-06-08T17:26:36.450883+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "unemployment (% of labour force) / employment (% of working-age pop) by age, OECD peer group"

@@ -595,16 +595,19 @@ def _labelled_basemap():
 
 def _hover_toggle():
     """Two-button menu (floated bottom-left of a map) to show/hide the hover tooltip —
-    the review noted it is useful but sometimes distracting. "Off" sets hoverinfo to
-    "skip" (suppresses the tooltip); "On" restores it (the hovertemplate stays set, so
-    it reappears unchanged). Returned as one updatemenus entry; append to a map's
-    `updatemenus` list (it composes with a group/dropdown menu)."""
+    the review noted it is useful but sometimes distracting. Toggles the layout-level
+    `hovermode` via relayout ("closest" on / `False` off). We must NOT toggle the
+    trace's `hoverinfo` here: a Choroplethmapbox/Scattermapbox with a `hovertemplate`
+    set ignores `hoverinfo` (the template wins, even `hoverinfo="skip"`), so that does
+    nothing — whereas `hovermode=False` reliably suppresses hover for the whole map.
+    Returned as one updatemenus entry; append to a map's `updatemenus` list (it
+    composes with a group/dropdown menu)."""
     return dict(type="buttons", direction="right", showactive=True, active=0,
                 x=0.01, y=0.01, xanchor="left", yanchor="bottom",
                 pad=dict(t=2, b=2, l=2, r=2), bgcolor="white", bordercolor="#ccc",
                 borderwidth=1, font=dict(size=11),
-                buttons=[dict(label="Hover on", method="restyle", args=[{"hoverinfo": "all"}]),
-                         dict(label="Hover off", method="restyle", args=[{"hoverinfo": "skip"}])])
+                buttons=[dict(label="Hover on", method="relayout", args=[{"hovermode": "closest"}]),
+                         dict(label="Hover off", method="relayout", args=[{"hovermode": False}])])
 
 
 # A handful of major cities to orient the physical-geography maps (name, lat, lon).

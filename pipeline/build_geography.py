@@ -572,6 +572,57 @@ def build_protected_areas():
           f"({prov['pct_conserved'].min():.1f}–{prov['pct_conserved'].max():.1f}%)")
 
 
+MRDEM_VRT = "/vsicurl/https://canelevation-dem.s3.ca-central-1.amazonaws.com/mrdem-30/mrdem-30-dtm.vrt"
+
+
+def build_elevation(width=1100):
+    """Elevation/terrain from NRCan's Medium-Resolution DEM (MRDEM-30, CanElevation, OGL).
+    The national grid is ~30 m / multi-TB and "designed for streaming, not downloading", so
+    we never download it — we open the DTM mosaic VRT through GDAL `/vsicurl/` and read only a
+    COARSE downsampled overview of the whole country. Writes elevation_distribution.csv (share
+    of land area by elevation band + cumulative 'below X m') and elevation_by_prov.csv (median
+    elevation per province/territory, approximate). Static — NOT weekly. Needs rasterio."""
+    import numpy as np
+    import rasterio
+    from rasterio.enums import Resampling
+    from rasterio.features import rasterize
+    print("Building elevation (MRDEM-30 coarse national read) ...")
+    os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
+                      GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
+    with rasterio.open(MRDEM_VRT) as src:
+        h = int(src.height * width / src.width)
+        elev = src.read(1, out_shape=(h, width), resampling=Resampling.average).astype("float64")
+        transform = src.transform * rasterio.Affine.scale(src.width / width, src.height / h)
+        nodata = src.nodata
+    prov = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson").to_crs(3979)
+    pr = rasterize([(g, int(u)) for g, u in zip(prov.geometry, prov["pruid"])],
+                   out_shape=(h, width), transform=transform, fill=0, dtype="int32")
+    land = (pr > 0) & np.isfinite(elev) & (elev != nodata) & (elev > -100) & (elev < 7000)
+
+    edges = [0, 200, 500, 1000, 1500, 2000, 3000, 6000]
+    counts, _ = np.histogram(np.clip(elev[land], 0, None), bins=edges)
+    tot = int(counts.sum())
+    rows, cum = [], 0.0
+    for i in range(len(edges) - 1):
+        pct = counts[i] / tot * 100
+        cum += pct
+        lab = f"{edges[i]:,}–{edges[i+1]:,} m" if edges[i + 1] < 6000 else f"over {edges[i]:,} m"
+        rows.append(dict(band=lab, lower=edges[i], upper=edges[i + 1],
+                         pct=round(pct, 2), cumulative_below=round(cum, 2)))
+    pd.DataFrame(rows).to_csv(f"{GEO_DIR}/elevation_distribution.csv", index=False)
+
+    prov_rows = []
+    for u in sorted({int(x) for x in prov["pruid"]}):
+        mask = land & (pr == u)
+        if mask.sum():
+            prov_rows.append(dict(pruid=str(u),
+                                  median_elev=int(np.median(np.clip(elev[mask], 0, None)))))
+    pd.DataFrame(prov_rows).to_csv(f"{GEO_DIR}/elevation_by_prov.csv", index=False)
+    print(f"  below 500 m: {rows[0]['pct'] + rows[1]['pct']:.0f}% of land | "
+          f"{len(prov_rows)} provinces | median-elev range "
+          f"{min(r['median_elev'] for r in prov_rows)}–{max(r['median_elev'] for r in prov_rows)} m")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -583,4 +634,5 @@ if __name__ == "__main__":
     build_agriculture()
     build_drainage()
     build_protected_areas()
+    build_elevation()
     print("build_geography complete.")

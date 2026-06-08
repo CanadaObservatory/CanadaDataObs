@@ -12,7 +12,7 @@ Order: **temperature → agriculture → watersheds → protected areas → elev
 - [x] 2. Agriculture (type / cropland) — `geography/agriculture.qmd` ✅ DONE (72 CARs)
 - [x] 3. Watersheds (drainage regions) — added to `geography/water.qmd` ✅ DONE
 - [x] 4. Protected areas (% conserved) — `geography/protected.qmd` ✅ DONE
-- [ ] 5. Elevation (distribution chart + best-effort relief) — `geography/elevation.qmd`
+- [x] 5. Elevation — `geography/elevation.qmd` ✅ DONE (chart + province map; relief deferred)
 
 ## 1. Temperature  [EASY]
 ECCC Canadian Climate Normals — station POINT data, OGL-Canada. 1981-2010 subset has a
@@ -82,4 +82,20 @@ but EPSG:3978 (Plotly needs 3857) → projection snag.
   target line). `build_protected_areas()` → 2 small CSVs. **Owner review:** CESI URL is
   **year-stamped** (`.../2025/...`) → bump `CESI_CONS_BASE` each release (like the GHG fetch);
   could move to the weekly registry (fetch_geography.py) for auto-refresh instead of build_geography.
-- elevation outcome:
+- **MAP 5 Elevation — DONE (the achievable parts; relief map DEFERRED).** `pip install rasterio`
+  succeeded. Read NRCan **MRDEM-30** national DTM mosaic VRT (`/vsicurl/…mrdem-30-dtm.vrt`, EPSG:3979)
+  at a COARSE overview (no multi-TB download) → `build_elevation()`. Shipped: **distribution chart**
+  (% of land by elevation band — 41% 0-200 m, 76% below 500 m, 0.5% above 2 km) + **median elevation
+  by province** choropleth (BC 1056 m → PEI 13 m). Both Canadian-primary (MRDEM), clearly labelled
+  "coarse/approximate". **DEFERRED — the photographic hillshade/relief map:** genuinely blocked — the
+  only NRCan hillshade tile service is **EPSG:3978** and Plotly needs Web-Mercator 3857 (no 3857
+  hillshade exists). The viable path is to reproject the coarse MRDEM array 3979→3857, colour-map to a
+  PNG, and drop it in as a Plotly mapbox **image layer** — but the geographic-corner alignment needs a
+  visual check, so I left it for a collaborative pass rather than spinning on it unattended.
+
+## ✅ ALL 5 MAPS DONE — overnight build complete
+Branch `geography-maps-expansion` (off `lakes-map-and-homepage-polish`), **NOT pushed**. 5 commits,
+one per map. New nav under Geography: Climate, Agriculture, Elevation, Protected Areas; Watersheds
+added to Water. New `charts.point_value_map` builder. **Top review items:** (1) Agriculture farm-type
+metric (by-count vs area/specialization); (2) elevation relief image-overlay (deferred); (3) colour
+scales + prose throughout; (4) Protected-areas could move to the weekly registry. See per-map notes above.

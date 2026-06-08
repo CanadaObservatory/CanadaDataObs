@@ -1,0 +1,71 @@
+---
+title: "Elevation"
+description: "How high Canada is — the distribution of land by elevation, and where the high ground lies"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.charts import choropleth_map
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+dist_csv = "data/geo/elevation_distribution.csv"
+prov_geo = "data/geo/prov_2021.geojson"
+elev_csv = "data/geo/elevation_by_prov.csv"
+prov_names = "data/geo/statcan_prov_geography.csv"
+```
+
+## How high is Canada?
+
+For all its mountains, Canada is a remarkably **low-lying** country. About **three-quarters of
+its land sits below 500 metres**, and barely **half a percent rises above 2,000 metres** — the
+high peaks of the western Cordillera and the Arctic make up a tiny share of the total area. The
+chart shows how the country's land is distributed across elevation bands.
+
+```{python}
+#| echo: false
+if os.path.exists(dist_csv):
+    d = pd.read_csv(dist_csv)
+    fig = go.Figure(go.Bar(
+        y=d["band"], x=d["pct"], orientation="h", marker_color="#8c6d31",
+        text=[f"{p:.0f}%" for p in d["pct"]], textposition="auto",
+        hovertemplate="%{y}: %{x:.1f}% of land area<extra></extra>"))
+    fig.update_layout(
+        plot_bgcolor="white", height=380, margin=dict(l=10, r=10, t=10, b=44),
+        xaxis=dict(title="Share of Canada's land area", ticksuffix="%", gridcolor="#e0e0e0"),
+        yaxis=dict(autorange="reversed"))
+    fig.add_annotation(text="Source: Natural Resources Canada — Medium-Resolution Digital Elevation Model (MRDEM-30, CanElevation), coarse national read. Land area within province/territory boundaries.",
+        xref="paper", yref="paper", x=0, xanchor="left", y=-0.18, showarrow=False,
+        font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False})
+else:
+    print("Elevation data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## Where the high ground lies
+
+Median elevation makes the east–west tilt of the country plain: **British Columbia** and the
+**Yukon** stand highest, the Prairies step down from the Rockies toward Manitoba, and the
+Maritimes and the vast **Arctic lowlands** sit near sea level. (Median elevation is a coarse
+summary of very large, varied regions.)
+
+```{python}
+#| echo: false
+if os.path.exists(prov_geo) and os.path.exists(elev_csv):
+    g = json.load(open(prov_geo))
+    e = pd.read_csv(elev_csv, dtype={"pruid": str})
+    nm = pd.read_csv(prov_names, dtype={"pruid": str})[["pruid", "name"]]
+    e = e.merge(nm, on="pruid", how="left")
+    fig = choropleth_map(g, e, "pruid", "median_elev", name_col="name",
+        colorbar_title="Median elev.", colorscale="YlOrBr", value_suffix=" m", value_fmt=",.0f",
+        zoom=2.3, source_note="Source: Natural Resources Canada — MRDEM-30 (CanElevation). Median elevation within each province/territory, from a coarse national read (approximate).")
+    fig.show(config=MAP_CONFIG)
+```
+
+## Download data
+
+- [Land area by elevation band (CSV)](../data/geo/elevation_distribution.csv) — NRCan MRDEM-30
+- [Median elevation by province (CSV)](../data/geo/elevation_by_prov.csv) — NRCan MRDEM-30

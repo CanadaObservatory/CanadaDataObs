@@ -48,7 +48,7 @@ if os.path.exists(path):
         show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -85,7 +85,7 @@ if os.path.exists(path2):
         show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path2)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -324,7 +324,7 @@ if os.path.exists(debt_path):
         show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Household Dashboard | Data as of: {get_data_date(debt_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

@@ -1,6 +1,6 @@
 ---
 title: "Water"
-description: "Fresh water across Canada — lakes and rivers as a share of each province’s area"
+description: "Fresh water across Canada — the major lakes and how much of each province is water"
 ---
 
 ```{python}
@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, add_city_markers
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -18,7 +18,27 @@ prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_g
 
 ## A country of fresh water
 
-Canada holds close to **20% of the world's fresh water** and more lake area than any other country. How much of each province or territory is actually *covered* by inland water varies widely: nearly **15% of Ontario and Manitoba** is fresh water, against around 2% of Alberta and British Columbia. Prince Edward Island has effectively none.
+Canada holds close to **20% of the world's fresh water** and **more lake area than any other country on Earth**. The map below highlights the **40 largest lakes**, shaded by surface area: the shared **Great Lakes** along the southern border, and the great northern lakes — **Great Bear** and **Great Slave** in the Northwest Territories, and **Athabasca**, **Winnipeg** and **Reindeer** across the Prairies and Canadian Shield. Hover any lake for its name and surface area; zoom and pan to explore.
+
+```{python}
+#| echo: false
+lakes_geo, lakes_csv = "data/geo/lakes_major.geojson", "data/geo/lakes_major.csv"
+if os.path.exists(lakes_geo) and os.path.exists(lakes_csv):
+    lg = json.load(open(lakes_geo))
+    ld = pd.read_csv(lakes_csv, dtype={"lakeid": str})
+    fig = choropleth_map(lg, ld, "lakeid", "area_km2", name_col="name",
+        colorbar_title="Surface area", colorscale="Blues", value_suffix=" km²", value_fmt=",.0f",
+        log=True, center={"lat": 59, "lon": -98}, zoom=2.4,
+        source_note="Source: Natural Resources Canada, Atlas of Canada 1:1,000,000 waterbodies. The 40 largest named natural lakes touching Canada (shared Great Lakes included; reservoirs excluded). Surface area approximate, from 1:1M-scale outlines; colour on a log scale.")
+    add_city_markers(fig)
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Lakes data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+### Fresh water by province
+
+Another way to see it: how much of each province or territory is actually *covered* by inland water. It varies widely — nearly **15% of Ontario and Manitoba** is fresh water, against around 2% of Alberta and British Columbia. Prince Edward Island has effectively none.
 
 ```{python}
 #| echo: false
@@ -36,4 +56,5 @@ else:
 
 ## Download data
 
+- [Major lakes — surface area (CSV)](../data/geo/lakes_major.csv) — NRCan Atlas of Canada 1:1,000,000 waterbodies
 - [Land & freshwater area by province (CSV)](../data/geo/statcan_prov_geography.csv) — NRCan / Statistics Canada

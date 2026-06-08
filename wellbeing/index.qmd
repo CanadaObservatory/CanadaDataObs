@@ -32,7 +32,7 @@ if os.path.exists(whr_path):
         title="", yaxis_title="Life Evaluation (0–10)", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

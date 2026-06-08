@@ -46,11 +46,12 @@ gdpg_path = "data/economics/oecd_real_gdp_growth.csv"
 if os.path.exists(gdpg_path):
     df = pd.read_csv(gdpg_path)
     fig = peer_comparison_line(df, "year", "real_gdp_growth",
-        title="", yaxis_title="Real GDP growth (annual %)", show_average=True)
+        title="", yaxis_title="Real GDP growth (annual %)", show_average=True,
+        initial_start=2015)
     fig.add_hline(y=0, line_dash="dot", line_color="#888", opacity=0.5)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(gdpg_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -95,7 +96,7 @@ if os.path.exists(gdpq_path):
     figq.add_hline(y=0, line_color="#888", line_width=1)
     figq.update_layout(
         plot_bgcolor="white", showlegend=False, height=460, bargap=0.15,
-        yaxis=dict(title="Real GDP, quarter-over-quarter % change",
+        yaxis=dict(title="Quarter-over-quarter % change",
                    gridcolor="#e0e0e0", ticksuffix="%", zeroline=False,
                    range=[_ylo, _yhi]),
         xaxis=dict(title="", gridcolor="#e0e0e0", range=[_xlo, _xhi],
@@ -128,10 +129,10 @@ gdppc_path = "data/economics/oecd_gdp_per_capita.csv"
 if os.path.exists(gdppc_path):
     df = pd.read_csv(gdppc_path)
     fig = peer_comparison_line(df, "year", "gdp_per_capita",
-        title="", yaxis_title="USD (PPP)", show_average=True)
+        title="", yaxis_title="USD (PPP)", show_average=True, initial_start=2015)
     fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
         text=f"Source: OECD National Accounts | Data as of: {get_data_date(gdppc_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -150,7 +151,7 @@ if os.path.exists(gdppc_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Are We Falling Behind? GDP per Capita Relative to the US and Peers
+## GDP per Capita Relative to the US and Peers
 
 One of the most-discussed economic questions is whether Canadian living standards are slipping behind. This chart answers it directly: Canada's GDP per capita (PPP) shown **as a percentage of the United States** and **of the peer-group average** (the other 16 OECD economies), over time. A value of 100% means parity; below 100% means Canada trails. We compare against the full peer group rather than the narrower G7, with the United States shown as a single named comparator.
 
@@ -179,8 +180,10 @@ if os.path.exists(gdppc_path):
         yticksuffix="%", hover_decimals=1, rangemode="normal",
         source_note=f"Source: OECD National Accounts (GDP per capita, PPP) | Data as of: {get_data_date(gdppc_path)}",
     )
-    _lo = rel["value"].min()
-    fig.update_yaxes(range=[max(0, _lo - 3), 102])
+    # Span the full data: early years sit above 100% (Canada once led the peer
+    # average), so the top must clear the series max, not a hard 102.
+    _lo, _hi = rel["value"].min(), rel["value"].max()
+    fig.update_yaxes(range=[max(0, _lo - 3), max(102, _hi + 2)])
     fig.add_hline(y=100, line_dash="dot", line_color="#999",
                   annotation_text="parity (100%)", annotation_position="top right")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -209,7 +212,7 @@ if os.path.exists(prod_path):
         yaxis_tickformat="$,.1f",
         annotations=[dict(
             text=f"Source: OECD Productivity Database | Data as of: {get_data_date(prod_path)}",
-            xref="paper", yref="paper", x=0, y=-0.52,
+            xref="paper", yref="paper", x=0, y=-0.34,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
@@ -244,7 +247,7 @@ if os.path.exists(unemp_path):
         yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0])
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(unemp_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -302,7 +305,7 @@ if os.path.exists(emp_path):
         ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True)
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(emp_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -335,7 +338,7 @@ if os.path.exists(inv_path):
         title="", yaxis_title="% of GDP", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: World Bank / OECD National Accounts | Data as of: {get_data_date(inv_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Business investment data not yet available. Run the data pipeline.")
@@ -367,7 +370,7 @@ if os.path.exists(ca_path):
     fig.add_hline(y=0, line_dash="dash", line_color="#888", opacity=0.5)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(ca_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Current account data not yet available. Run the data pipeline.")
@@ -402,7 +405,7 @@ if os.path.exists(trade_path):
         fige.add_trace(go.Scatter(x=tr["date"], y=tr[col], name=name, mode="lines",
             line=dict(color=clr, width=w), hovertemplate=name + ": %{y:.1f}%<extra></extra>"))
     fige.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
-        yaxis=dict(title="Share of total merchandise exports (%)", gridcolor="#e0e0e0",
+        yaxis=dict(title="Share of total exports (%)", gridcolor="#e0e0e0",
             ticksuffix="%", rangemode="tozero"),
         xaxis=dict(title="", gridcolor="#e0e0e0",
             rangeselector=dict(buttons=[

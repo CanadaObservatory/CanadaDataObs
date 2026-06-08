@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, add_city_markers
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -37,6 +37,7 @@ if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
         color_map=ECOZONE_COLORS, ordered=list(ECOZONE_COLORS.keys()),
         center={"lat": 63, "lon": -96}, zoom=2.2,
         source_note="Source: National Ecological Framework for Canada (Agriculture and Agri-Food Canada / ECCC). Terrestrial ecozones.")
+    add_city_markers(fig)
     fig.show(config=MAP_CONFIG)
 else:
     print("Ecozones not yet available — run `python -m pipeline.build_geography`.")
@@ -59,6 +60,7 @@ if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
     fig = choropleth_groups_map(ez_geo, ez, "fid", groups, name_col="ecozone", breakdown=False, colorscale="YlGn",
         center={"lat": 63, "lon": -96}, zoom=2.2,
         source_note="Source: Statistics Canada Table 38-10-0177-01 (land cover by ecozone, 2020). Share of each ecozone's area.")
+    add_city_markers(fig)
     fig.show(config=MAP_CONFIG)
 else:
     print("Land-cover data not yet available — run `python -m pipeline.build_geography`.")

@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, bubble_map
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -45,24 +45,21 @@ else:
     print("Wildfire data not yet available — run the data pipeline.")
 ```
 
-In that record 2023 season, the burning was spread across the country. Mapping each province and territory's burned area **as a share of its own land area** — rather than raw hectares, which would simply track the size of the big northern provinces — shows that several provinces lost **2–4% of their entire land area** to fire in a single year.
+In that record 2023 season, the burning was concentrated in the boreal forest. The map below plots **every wildfire recorded that year as a single point, sized by the area it burned** — zoom and pan to your region. A handful of enormous fires in Quebec, the Northwest Territories and British Columbia account for most of the 17.6 million hectares, while thousands of smaller fires speckle the rest of the country. (Marker area is proportional to hectares burned, so the giant fires stand out from the many small ones.)
 
 ```{python}
 #| echo: false
-if os.path.exists(wf_path) and os.path.exists(prov_geo_path) and os.path.exists(prov_csv):
-    prov_geo = json.load(open(prov_geo_path))
-    pg = pd.read_csv(prov_csv, dtype={"pruid": str})
-    w = pd.read_csv(wf_path)
-    w23 = (w[(w["year"] == 2023) & (w["geography"] != "Canada")]
-           .merge(pg[["pruid", "name", "land_area_km2"]], left_on="geography", right_on="name", how="right"))
-    w23["pct_burned"] = w23["area_burned_ha"] / w23["land_area_km2"]   # ha/100 km² ÷ land km² × 100
-    fig = choropleth_map(prov_geo, w23, "pruid", "pct_burned", name_col="name",
-        colorbar_title="% of land burned, 2023", colorscale="OrRd", value_suffix="%", value_fmt=".2f",
-        center={"lat": 62, "lon": -96}, zoom=2.3,
-        source_note="Source: NRCan Canadian National Fire Database; land area NRCan/StatCan. Area burned in 2023 ÷ provincial land area. Nunavut has no point-fire data.")
+fp_path = "data/geo/nfdb_fire_points_2023.csv"
+if os.path.exists(fp_path):
+    fp = pd.read_csv(fp_path)
+    fig = bubble_map(fp, "lat", "lon", "size_ha", color="#e3492a",
+        customdata=fp[["province", "size_ha", "cause"]].to_numpy(),
+        hovertemplate="<b>%{customdata[0]}</b><br>%{customdata[1]:,.0f} ha burned · %{customdata[2]}<extra></extra>",
+        center={"lat": 60, "lon": -100}, zoom=2.3,
+        source_note="Source: NRCan Canadian National Fire Database (NFDB), individual fire points, 2023. Each dot is one fire; marker area ∝ hectares burned.")
     fig.show(config=MAP_CONFIG)
 else:
-    print("Wildfire-by-province data not yet available.")
+    print("Wildfire-points data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
 ### Permafrost

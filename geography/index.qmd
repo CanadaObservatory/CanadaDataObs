@@ -21,26 +21,7 @@ Canada is a country defined by its physical extent. At **9.98 million km²** it 
 
 ## Where Canadians live
 
-Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Because that range spans several orders of magnitude, the map is shaded on a **logarithmic** scale (each step is ten times denser). The pattern is unmistakable: the country fills in toward its southern border and empties out to the north.
-
-```{python}
-#| echo: false
-prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
-if os.path.exists(prov_geo_path) and os.path.exists(prov_csv):
-    prov_geo = json.load(open(prov_geo_path))
-    pg = pd.read_csv(prov_csv, dtype={"pruid": str})
-    fig = choropleth_map(prov_geo, pg, "pruid", "density", name_col="name",
-        colorbar_title="People per km²", colorscale="YlOrRd", value_fmt=",.2f", log=True,
-        center={"lat": 62, "lon": -96}, zoom=2.3,
-        source_note="Source: 2021 Census, Statistics Canada (population density per km²). Colour scale is logarithmic.")
-    fig.show(config=MAP_CONFIG)
-else:
-    print("Province geography not yet available — run `python -m pipeline.build_geography`.")
-```
-
-### Population density within cities
-
-Zooming in, the same measure reveals how compact each metropolitan area is. Density here is people per square kilometre **within** each census metropolitan area or agglomeration — a rough read on how tightly a city is built. Pan and zoom to your own region.
+Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Most Canadians live in a narrow band along the southern border, and the country empties out to the north. The map below zooms into that pattern at the level of individual cities: density here is people per square kilometre **within** each census metropolitan area or agglomeration — a read on how compactly each city is built. Because the range spans several orders of magnitude it is shaded on a **logarithmic** scale (each step is ten times denser). Pan and zoom to your own region.
 
 ```{python}
 #| echo: false

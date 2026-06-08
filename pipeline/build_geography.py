@@ -286,9 +286,104 @@ def build_permafrost():
     print(f"permafrost: {len(rows)} zones")
 
 
+# ---------------------------------------------------------------------------
+# D. Wildfire ignition POINTS for one record year (2023) — NRCan NFDB
+#    The "where the fires actually were" map that replaces the coarse by-province
+#    % view: every recorded wildfire that year as a point sized by area burned.
+# ---------------------------------------------------------------------------
+NFDB_PNT_URL = ("https://cwfis.cfs.nrcan.gc.ca/downloads/nfdb/fire_pnt/"
+                "current_version/NFDB_point.zip")
+WILDFIRE_YEAR = 2023        # the record 17.6-million-hectare season
+_FIRE_AGENCY = {
+    "AB": "Alberta", "BC": "British Columbia", "MB": "Manitoba", "NB": "New Brunswick",
+    "NL": "Newfoundland and Labrador", "NS": "Nova Scotia", "NT": "Northwest Territories",
+    "NU": "Nunavut", "ON": "Ontario", "PC": "Parks Canada", "PE": "Prince Edward Island",
+    "QC": "Quebec", "SK": "Saskatchewan", "YT": "Yukon"}
+
+
+def build_wildfire_points(year=WILDFIRE_YEAR):
+    """Individual wildfire points for one year (default 2023, the record season) from
+    NRCan's National Fire Database point archive — same authoritative NFDB source
+    (OGL-Canada) as the weekly area-burned series, just the per-fire locations rather
+    than provincial totals. Writes a light CSV (lat, lon, size_ha, province, cause);
+    the page plots them as a Scattermapbox sized by area burned, so the few enormous
+    boreal fires that drove the 17.6 Mha total stand out from the thousands of small
+    ones. Point geometry is reprojected from the Atlas-Lambert source to WGS84."""
+    print(f"Building {year} wildfire points (NRCan NFDB) ...")
+    z = zipfile.ZipFile(_download_cache(NFDB_PNT_URL, "/tmp/nfdb_point.zip", "NFDB point archive"))
+    z.extractall("/tmp/nfdb_point")
+    shp = [n for n in z.namelist() if n.lower().endswith(".shp")][0]
+    g = gpd.read_file(f"/tmp/nfdb_point/{shp}")
+    g = g[(g["YEAR"] == year) & g["SIZE_HA"].notna() & (g["SIZE_HA"] > 0)].to_crs(epsg=4326)
+    cause = {"L": "Lightning", "H": "Human", "H-PB": "Prescribed burn", "U": "Unknown"}
+    out = pd.DataFrame({
+        "lat": g.geometry.y.round(4), "lon": g.geometry.x.round(4),
+        "size_ha": g["SIZE_HA"].round(1),
+        "province": g["SRC_AGENCY"].map(_FIRE_AGENCY).fillna(g["SRC_AGENCY"]),
+        "cause": g["CAUSE"].map(cause).fillna("Other / unknown") if "CAUSE" in g else "Unknown",
+        "year": int(year),
+    })
+    out = out[out["lat"].between(40, 84) & out["lon"].between(-141, -52)]   # sane CA bounds
+    out = out.sort_values("size_ha")          # big fires drawn last → on top
+    path = f"{GEO_DIR}/nfdb_fire_points_{year}.csv"
+    out.to_csv(path, index=False)
+    print(f"  wrote {path}: {len(out)} fires, {round(os.path.getsize(path) / 1e6, 2)} MB; "
+          f"total area {out['size_ha'].sum() / 1e6:.1f} Mha")
+
+
+# ---------------------------------------------------------------------------
+# E. Major lakes — NRCan Atlas of Canada 1:1,000,000 waterbodies (OGL-Canada)
+#    Canada has more lake area than any country; this highlights the largest named
+#    lakes with their surface area (computed from the official outlines).
+# ---------------------------------------------------------------------------
+LAKES_URL = ("https://ftp.geogratis.gc.ca/pub/nrcan_rncan/vector/framework_cadre/"
+             "Atlas_of_Canada_1M/hydrology/AC_1M_Waterbodies.shp.zip")
+
+
+def build_lakes(top_n=40):
+    """The largest lakes of Canada as highlighted polygons with surface-area stats,
+    from NRCan's Atlas of Canada 1:1,000,000 waterbodies (OGL-Canada). Keeps the
+    `top_n` largest **named, natural** lakes (reservoirs excluded) that touch Canada —
+    so the shared Great Lakes are kept but wholly-US Lake Michigan is dropped — and
+    computes each one's surface area in an equal-area projection. Writes a GeoJSON
+    (id=lakeid, props.name/area_km2) the Water page maps as a blue choropleth shaded
+    by area, plus a CSV. Areas are approximate (1:1M-scale outlines)."""
+    print("Building major lakes (NRCan Atlas 1:1M waterbodies) ...")
+    z = zipfile.ZipFile(_download_cache(LAKES_URL, "/tmp/ac1m_water.shp.zip", "1:1M waterbodies"))
+    z.extractall("/tmp/ac1m_water")
+    shp = [n for n in z.namelist() if n.lower().endswith(".shp") and "Waterbodies" in n][0]
+    g = gpd.read_file(f"/tmp/ac1m_water/{shp}")
+    g = g[g["NAME"].notna() & (g["RESERVOIR"].astype(str).str.lower() != "yes")].copy()
+
+    def _fix(s):     # the dbf carries UTF-8 bytes tagged latin-1 → "RÃ©servoir" etc.
+        try:
+            return s.encode("latin-1").decode("utf-8")
+        except Exception:
+            return s
+    g["NAME"] = g["NAME"].map(_fix)
+    g = g.dissolve(by="NAME", as_index=False)                     # merge multi-part lakes
+    g["area_km2"] = g.to_crs("ESRI:102001").area / 1e6            # Canada Albers equal-area
+    cand = g.sort_values("area_km2", ascending=False).head(top_n + 15).to_crs(epsg=4326)
+    canada = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson").to_crs(epsg=4326).union_all()
+    cand = cand[cand.intersects(canada)].head(top_n).reset_index(drop=True)
+    cand["geometry"] = cand["geometry"].simplify(0.01, preserve_topology=True).buffer(0)
+    cand["lakeid"] = cand.index.astype(str)
+    cand["area_km2"] = cand["area_km2"].round(0)
+    keep = cand[["lakeid", "NAME", "area_km2", "geometry"]].rename(columns={"NAME": "name"})
+    gj = json.loads(keep.to_json())
+    for ft in gj["features"]:
+        ft["id"] = ft["properties"]["lakeid"]
+        ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/lakes_major.geojson")
+    keep.drop(columns="geometry").to_csv(f"{GEO_DIR}/lakes_major.csv", index=False)
+    print(f"  {len(keep)} lakes; largest {keep.iloc[0]['name']} {keep.iloc[0]['area_km2']:,.0f} km²")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
     build_ecozones()
     build_permafrost()
+    build_wildfire_points()
+    build_lakes()
     print("build_geography complete.")

@@ -29,6 +29,6 @@ else:
     print("Toronto DA religion map not available — run build_da_profile in pipeline.build_census_geo.")
 ```
 
-*Download: [Toronto DA religion shares (CSV)](../data/geo/statcan_da_toronto_religion.csv) — 2021 Census (Statistics Canada).*
+*Blank areas have no published data — either no residents (water, parks, industrial land) or a small but populated block whose detailed counts Statistics Canada suppresses for confidentiality. Download: [Toronto DA religion shares (CSV)](../data/geo/statcan_da_toronto_religion.csv) — 2021 Census (Statistics Canada).*
 
 [← Back to Religion](religion.qmd)

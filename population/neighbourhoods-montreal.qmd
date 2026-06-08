@@ -30,6 +30,6 @@ else:
     print("Montréal DA diversity map not available — run build_da_profile in pipeline.build_census_geo.")
 ```
 
-*Download: [Montréal DA population-group shares (CSV)](../data/geo/statcan_da_montreal_ethnicity.csv) — 2021 Census (Statistics Canada).*
+*Blank areas have no published data — either no residents (water, parks, industrial land) or a small but populated block whose detailed counts Statistics Canada suppresses for confidentiality. Download: [Montréal DA population-group shares (CSV)](../data/geo/statcan_da_montreal_ethnicity.csv) — 2021 Census (Statistics Canada).*
 
 [← Back to Diversity](diversity.qmd)

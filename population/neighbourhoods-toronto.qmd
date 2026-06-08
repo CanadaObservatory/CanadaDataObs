@@ -30,6 +30,6 @@ else:
     print("Toronto DA diversity map not available — run build_da_profile(cmauid='535', pruid='35', geono='006_Ontario', slug='toronto').")
 ```
 
-*Dissemination areas with very small or suppressed populations are omitted. Download: [Toronto DA population-group shares (CSV)](../data/geo/statcan_da_toronto_ethnicity.csv) — 2021 Census (Statistics Canada).*
+*Blank areas have no published data — either no residents (water, parks, industrial land) or a small but populated block whose detailed counts Statistics Canada suppresses for confidentiality. Download: [Toronto DA population-group shares (CSV)](../data/geo/statcan_da_toronto_ethnicity.csv) — 2021 Census (Statistics Canada).*
 
 [← Back to Diversity](diversity.qmd)

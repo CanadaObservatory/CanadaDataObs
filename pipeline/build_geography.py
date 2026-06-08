@@ -530,6 +530,48 @@ def build_drainage():
     print(f"  {len(g)} drainage regions / {g['oda_name'].nunique()} ocean basins")
 
 
+CESI_CONS_BASE = ("https://www.canada.ca/content/dam/eccc/documents/csv/cesindicators/"
+                  "canada-conserved-areas/2025")   # year-stamped folder — bump each release
+PRUID_BY_NAME = {
+    "Newfoundland and Labrador": "10", "Prince Edward Island": "11", "Nova Scotia": "12",
+    "New Brunswick": "13", "Quebec": "24", "Ontario": "35", "Manitoba": "46",
+    "Saskatchewan": "47", "Alberta": "48", "British Columbia": "59", "Yukon": "60",
+    "Northwest Territories": "61", "Nunavut": "62",
+}
+
+
+def build_protected_areas():
+    """Conserved areas (ECCC Canadian Environmental Sustainability Indicators, OGL) — the
+    series Canada's **30%-by-2030 ("30 by 30")** target is tracked against. Writes a national
+    time series (% of terrestrial + marine area conserved, 1990–) and a by-province snapshot
+    (% of each province/territory's land conserved, latest year) → protected_areas_national.csv
+    + protected_areas_by_prov.csv. Annual; the source URL is year-stamped (bump CESI_CONS_BASE).
+    CSVs are latin-1 with a 2-row banner."""
+    print("Building protected/conserved areas (ECCC CESI) ...")
+    nat = pd.read_csv(_download_cache(f"{CESI_CONS_BASE}/1-conserved-areas-proportion.csv",
+                                      "/tmp/cons_national.csv", "CESI conserved (national)"),
+                      skiprows=2, encoding="latin-1")
+    out_nat = pd.DataFrame({
+        "year": pd.to_numeric(nat.iloc[:, 0], errors="coerce"),
+        "terrestrial_pct": pd.to_numeric(nat.iloc[:, 4], errors="coerce"),
+        "marine_pct": pd.to_numeric(nat.iloc[:, 8], errors="coerce"),
+    }).dropna(subset=["year"])
+    out_nat["year"] = out_nat["year"].astype(int)
+    out_nat.to_csv(f"{GEO_DIR}/protected_areas_national.csv", index=False)
+
+    prov = pd.read_csv(_download_cache(f"{CESI_CONS_BASE}/4-conserved-areas-terrestrial-province-territory.csv",
+                                       "/tmp/cons_prov.csv", "CESI conserved (by province)"),
+                       skiprows=2, encoding="latin-1").iloc[:, [0, 6]]
+    prov.columns = ["name", "pct_conserved"]
+    prov = prov[prov["name"].isin(PRUID_BY_NAME)].copy()
+    prov["pruid"] = prov["name"].map(PRUID_BY_NAME)
+    prov["pct_conserved"] = pd.to_numeric(prov["pct_conserved"], errors="coerce")
+    prov[["pruid", "name", "pct_conserved"]].to_csv(f"{GEO_DIR}/protected_areas_by_prov.csv", index=False)
+    print(f"  national {out_nat['year'].min()}–{out_nat['year'].max()}: terrestrial "
+          f"{out_nat['terrestrial_pct'].iloc[-1]:.1f}% conserved | {len(prov)} provinces "
+          f"({prov['pct_conserved'].min():.1f}–{prov['pct_conserved'].max():.1f}%)")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -540,4 +582,5 @@ if __name__ == "__main__":
     build_climate_normals()
     build_agriculture()
     build_drainage()
+    build_protected_areas()
     print("build_geography complete.")

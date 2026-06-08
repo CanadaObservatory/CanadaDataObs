@@ -11,7 +11,7 @@ Order: **temperature → agriculture → watersheds → protected areas → elev
 - [x] 1. Temperature (climate normals) — `geography/climate.qmd` ✅ DONE (658 stations)
 - [x] 2. Agriculture (type / cropland) — `geography/agriculture.qmd` ✅ DONE (72 CARs)
 - [x] 3. Watersheds (drainage regions) — added to `geography/water.qmd` ✅ DONE
-- [ ] 4. Protected areas (% conserved) — `geography/protected.qmd`
+- [x] 4. Protected areas (% conserved) — `geography/protected.qmd` ✅ DONE
 - [ ] 5. Elevation (distribution chart + best-effort relief) — `geography/elevation.qmd`
 
 ## 1. Temperature  [EASY]
@@ -77,4 +77,9 @@ but EPSG:3978 (Plotly needs 3857) → projection snag.
   (thousands of tiny Arctic islands by *count*); explode→drop parts <50 km²→dissolve got it to
   **0.30 MB**. **Owner review:** region names from the source DBF have a dropped-separator glitch
   (e.g. "FraserLower Mainland" should be "Fraser–Lower Mainland") — only in hover; left as-is.
+- **MAP 4 Protected areas — DONE.** ECCC CESI conserved areas: by-province choropleth (Greens,
+  2024, PEI 5% → Yukon 21%) + national "30 by 30" trend (Land + Ocean, 1990–2024, with the 30%
+  target line). `build_protected_areas()` → 2 small CSVs. **Owner review:** CESI URL is
+  **year-stamped** (`.../2025/...`) → bump `CESI_CONS_BASE` each release (like the GHG fetch);
+  could move to the weekly registry (fetch_geography.py) for auto-refresh instead of build_geography.
 - elevation outcome:

@@ -32,6 +32,8 @@ website:
             text: Fire & Ice
           - href: geography/climate.qmd
             text: Climate
+          - href: geography/protected.qmd
+            text: Protected Areas
       - text: Economy
         menu:
           - href: economics/index.qmd

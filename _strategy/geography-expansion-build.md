@@ -9,7 +9,7 @@ Order: **temperature → agriculture → watersheds → protected areas → elev
 
 ## Status tracker
 - [x] 1. Temperature (climate normals) — `geography/climate.qmd` ✅ DONE (658 stations)
-- [ ] 2. Agriculture (type / cropland) — `geography/agriculture.qmd`
+- [x] 2. Agriculture (type / cropland) — `geography/agriculture.qmd` ✅ DONE (72 CARs)
 - [ ] 3. Watersheds (drainage regions) — add to `geography/water.qmd`
 - [ ] 4. Protected areas (% conserved) — `geography/protected.qmd`
 - [ ] 5. Elevation (distribution chart + best-effort relief) — `geography/elevation.qmd`
@@ -62,5 +62,13 @@ but EPSG:3978 (Plotly needs 3857) → projection snag.
   RdBu reversed, cmid=0 → blue<0<red) + precip map (Blues). Dropdown restyle verified working.
   **Owner review:** colour scales (RdBu/Blues), marker size/opacity, prose, whether to add the
   Climate page elsewhere in nav. Only 1981-2010 normals are on the Datamart (1991-2020 not there).
-- per-map: data source result, aesthetic defaults chosen for owner review, blockers
+- **MAP 2 Agriculture — DONE.** Census of Ag 2021 by Census Agricultural Region (72 CARs):
+  dominant farm type (32-10-0231-01) + cropland share (32-10-0249-01 ÷ CAR land area). Boundary
+  `lcar000a21a_e.zip` → `car_2021.geojson` (0.14 MB). Split NAICS [1121] into beef (112110) vs
+  dairy (112120). **#1 REVIEW ITEM — the farm-type METRIC:** it's "dominant **by number of
+  farms**", which has two quirks: (a) **dairy never tops a region** by farm count (Quebec leads
+  with the broad **"Other crop"** catch-all), and (b) small specialty operations can outvote a
+  few large farms. Alternatives to consider: by **area**, or a **specialization / location-quotient**
+  index (would surface dairy in QC/ON, fruit in Niagara, etc.). I did NOT pick one — owner's call.
+  Cropland-share map (YlGn) is clean and intuitive. Page prose states both caveats.
 - elevation outcome:

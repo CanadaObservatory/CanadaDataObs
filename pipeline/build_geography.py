@@ -423,6 +423,81 @@ def build_climate_normals():
           f"| Jul {df.jul_temp.min():.1f}..{df.jul_temp.max():.1f}°C")
 
 
+CAR_BND_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/"
+               "boundary-limites/files-fichiers/lcar000a21a_e.zip")
+AG_FARMTYPE_URL = "https://www150.statcan.gc.ca/n1/tbl/csv/32100231-eng.zip"
+AG_LANDUSE_URL = "https://www150.statcan.gc.ca/n1/tbl/csv/32100249-eng.zip"
+# Farm-type categories by NAICS code. Cattle [1121] is split into its 6-digit children so
+# dairy (112120) reads distinctly from beef (112110): at the 4-digit level [1121] lumps the
+# two, which would mislabel dairy regions (Ontario/Quebec) as "cattle ranching".
+FARM_CODES = {
+    "1111": "Oilseed & grain", "1112": "Vegetable & melon", "1113": "Fruit & tree nut",
+    "1114": "Greenhouse & nursery", "1119": "Other crop",
+    "112110": "Beef cattle", "112120": "Dairy",
+    "1122": "Hog & pig", "1123": "Poultry & egg", "1124": "Sheep & goat",
+    "1129": "Other animal",
+}
+
+
+def build_agriculture():
+    """Census of Agriculture 2021 (StatCan, OGL) by Census Agricultural Region (CAR, the
+    natural agricultural geography, 72 regions). Writes car_2021.geojson (id=CARUID) +
+    statcan_car_agriculture.csv with the **dominant farm type** (NAICS 4-digit farm type
+    with the most farms; table 32-10-0231-01) and **cropland share** (land in crops ÷ CAR
+    land area; 32-10-0249-01, hectares). Census = 5-yearly, NOT weekly."""
+    print("Building agriculture (Census of Ag 2021 by CAR) ...")
+    naics = "North American Industry Classification System (NAICS)"
+    z = zipfile.ZipFile(_download_cache(AG_FARMTYPE_URL, "/tmp/ag_farmtype.zip", "Census of Ag farm type"))
+    ft = pd.read_csv(z.open("32100231.csv"), dtype=str)
+    ft = ft[ft["DGUID"].str.contains("S0501", na=False)].copy()   # CAR rows only
+    ft["caruid"] = ft["DGUID"].str[9:]
+    ft["code"] = ft[naics].str.extract(r"\[(\d+)\]")
+    name_by_car = (ft.drop_duplicates("caruid").set_index("caruid")["GEO"]
+                   .str.replace(r"\s*\[[^\]]*\]", "", regex=True))
+    fc = ft[ft["code"].isin(FARM_CODES)].copy()                   # curated farm-type set
+    fc["VALUE"] = pd.to_numeric(fc["VALUE"], errors="coerce")
+    fc = fc.dropna(subset=["VALUE"])
+    dom = (fc.loc[fc.groupby("caruid")["VALUE"].idxmax()]
+           .set_index("caruid")["code"].map(FARM_CODES))
+    total = (ft[ft[naics].str.startswith("Total number of farms")]
+             .assign(v=lambda x: pd.to_numeric(x["VALUE"], errors="coerce"))
+             .drop_duplicates("caruid").set_index("caruid")["v"])
+
+    z2 = zipfile.ZipFile(_download_cache(AG_LANDUSE_URL, "/tmp/ag_landuse.zip", "Census of Ag land use"))
+    lu = pd.read_csv(z2.open("32100249.csv"), dtype=str)
+    lu = lu[lu["DGUID"].str.contains("S0501", na=False)
+            & lu["Land use"].str.startswith("Land in crops")
+            & (lu["Unit of measure"] == "Hectares")].copy()
+    lu["caruid"] = lu["DGUID"].str[9:]
+    crop_ha = (lu.assign(v=lambda x: pd.to_numeric(x["VALUE"], errors="coerce"))
+               .drop_duplicates("caruid").set_index("caruid")["v"])
+
+    bz = zipfile.ZipFile(_download_cache(CAR_BND_URL, "/tmp/lcar.zip", "CAR boundaries"))
+    bz.extractall("/tmp/car_bnd")
+    shp = [f for f in bz.namelist() if f.endswith(".shp")][0]
+    g = gpd.read_file(f"/tmp/car_bnd/{shp}").to_crs(epsg=4326)
+    g["caruid"] = g["CARUID"].astype(str)
+
+    out = pd.DataFrame({"caruid": g["caruid"]})
+    out["name"] = out["caruid"].map(name_by_car)
+    out["province"] = out["name"].str.split(",").str[-1].str.strip()
+    out["dominant_ftype"] = out["caruid"].map(dom)
+    out["total_farms"] = out["caruid"].map(total)
+    out["land_area_km2"] = out["caruid"].map(g.set_index("caruid")["LANDAREA"]).round(0)
+    out["cropland_ha"] = out["caruid"].map(crop_ha)
+    out["cropland_share"] = (out["cropland_ha"] / out["land_area_km2"]).round(2)  # %, 1 km²=100 ha
+    out.to_csv(f"{GEO_DIR}/statcan_car_agriculture.csv", index=False)
+
+    g["geometry"] = g["geometry"].simplify(SIMPLIFY_TOL, preserve_topology=True)
+    gj = json.loads(g[["caruid", "geometry"]].to_json())
+    for f in gj["features"]:
+        f["id"] = f["properties"]["caruid"]
+        f["geometry"]["coordinates"] = _rnd(f["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/car_2021.geojson")
+    print(f"  {len(out)} CARs | {out['dominant_ftype'].dropna().nunique()} farm types | "
+          f"cropland share {out['cropland_share'].min():.0f}–{out['cropland_share'].max():.0f}%")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -431,4 +506,5 @@ if __name__ == "__main__":
     build_wildfire_points()
     build_lakes()
     build_climate_normals()
+    build_agriculture()
     print("build_geography complete.")

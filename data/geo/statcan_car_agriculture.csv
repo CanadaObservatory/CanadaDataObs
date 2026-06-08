@@ -1,0 +1,73 @@
+caruid,name,province,dominant_ftype,total_farms,land_area_km2,cropland_ha,cropland_share
+1001,"Census Agricultural Region 1, Newfoundland and Labrador",Newfoundland and Labrador,Vegetable & melon,173.0,15020.0,2916.0,0.19
+1002,"Census Agricultural Region 2, Newfoundland and Labrador",Newfoundland and Labrador,Vegetable & melon,91.0,54149.0,1604.0,0.03
+1003,"Census Agricultural Region 3, Newfoundland and Labrador",Newfoundland and Labrador,Vegetable & melon,80.0,289001.0,3290.0,0.01
+1101,"Census Agricultural Region 1, Prince Edward Island",Prince Edward Island,Fruit & tree nut,203.0,1688.0,25827.0,15.3
+1102,"Census Agricultural Region 2, Prince Edward Island",Prince Edward Island,Beef cattle,588.0,1987.0,58908.0,29.65
+1103,"Census Agricultural Region 3, Prince Edward Island",Prince Edward Island,Vegetable & melon,404.0,2006.0,67079.0,33.44
+4604,"Census Agricultural Region 4, Manitoba",Manitoba,Oilseed & grain,679.0,4707.0,224987.0,47.8
+4605,"Census Agricultural Region 5, Manitoba",Manitoba,Oilseed & grain,582.0,9826.0,224931.0,22.89
+4606,"Census Agricultural Region 6, Manitoba",Manitoba,Oilseed & grain,1124.0,13631.0,360110.0,26.42
+4607,"Census Agricultural Region 7, Manitoba",Manitoba,Oilseed & grain,1754.0,10767.0,662749.0,61.55
+4608,"Census Agricultural Region 8, Manitoba",Manitoba,Oilseed & grain,2355.0,9775.0,794824.0,81.31
+4609,"Census Agricultural Region 9, Manitoba",Manitoba,Oilseed & grain,1579.0,6842.0,340273.0,49.73
+4610,"Census Agricultural Region 10, Manitoba",Manitoba,Oilseed & grain,423.0,14802.0,85694.0,5.79
+4611,"Census Agricultural Region 11, Manitoba",Manitoba,Oilseed & grain,730.0,4496.0,224167.0,49.86
+4612,"Census Agricultural Region 12, Manitoba",Manitoba,Beef cattle,1145.0,438082.0,236398.0,0.54
+4701,"Census Agricultural Region 1, Saskatchewan",Saskatchewan,Oilseed & grain,7291.0,55870.0,3224317.0,57.71
+4702,"Census Agricultural Region 2, Saskatchewan",Saskatchewan,Oilseed & grain,4394.0,33899.0,2265506.0,66.83
+4703,"Census Agricultural Region 3, Saskatchewan",Saskatchewan,Oilseed & grain,7624.0,80533.0,4296138.0,53.35
+4704,"Census Agricultural Region 4, Saskatchewan",Saskatchewan,Oilseed & grain,5902.0,47573.0,3149332.0,66.2
+4705,"Census Agricultural Region 5, Saskatchewan",Saskatchewan,Oilseed & grain,2316.0,33676.0,993453.0,29.5
+4706,"Census Agricultural Region 6, Saskatchewan",Saskatchewan,Oilseed & grain,6582.0,63229.0,2380111.0,37.64
+4707,"Census Agricultural Region 7, Saskatchewan",Saskatchewan,Oilseed & grain,19.0,262281.0,5358.0,0.02
+4810,"Census Agricultural Region 1, Alberta",Alberta,Beef cattle,2543.0,41333.0,1094427.0,26.48
+4820,"Census Agricultural Region 2, Alberta",Alberta,Oilseed & grain,5348.0,34108.0,2198202.0,64.45
+4830,"Census Agricultural Region 3, Alberta",Alberta,Beef cattle,5880.0,54609.0,1041686.0,19.08
+4840,"Census Agricultural Region 4A, Alberta",Alberta,Beef cattle,2911.0,18910.0,918244.0,48.56
+4841,"Census Agricultural Region 4B, Alberta",Alberta,Oilseed & grain,4569.0,20134.0,1228304.0,61.01
+4850,"Census Agricultural Region 5, Alberta",Alberta,Beef cattle,9024.0,44471.0,1259765.0,28.33
+4860,"Census Agricultural Region 6, Alberta",Alberta,Beef cattle,6148.0,177101.0,994939.0,5.62
+4870,"Census Agricultural Region 7, Alberta",Alberta,Oilseed & grain,5082.0,243993.0,1644890.0,6.74
+5901,"Vancouver Island-Coast, British Columbia",British Columbia,Other crop,2158.0,84052.0,17325.0,0.21
+5902,"Lower Mainland-Southwest, British Columbia",British Columbia,Fruit & tree nut,4648.0,36262.0,64350.0,1.77
+5903,"Thompson-Okanagan, British Columbia",British Columbia,Fruit & tree nut,4415.0,94039.0,75369.0,0.8
+5904,"Kootenay, British Columbia",British Columbia,Other crop,1017.0,57673.0,21021.0,0.36
+5905,"Cariboo, British Columbia",British Columbia,Beef cattle,1357.0,130955.0,52170.0,0.4
+5906,"North Coast, British Columbia",British Columbia,Other animal,88.0,124018.0,975.0,0.01
+5907,"Nechako, British Columbia",British Columbia,Other crop,739.0,191612.0,48103.0,0.25
+5908,"Peace River, British Columbia",British Columbia,Other crop,1419.0,202076.0,277696.0,1.37
+6001,,,,,472345.0,,
+6101,,,,,1127712.0,,
+6201,,,,,1836994.0,,
+1201,"Census Agricultural Region 1, Nova Scotia",Nova Scotia,Greenhouse & nursery,396.0,12396.0,4857.0,0.39
+1202,"Census Agricultural Region 2, Nova Scotia",Nova Scotia,Fruit & tree nut,886.0,8353.0,41091.0,4.92
+1203,"Census Agricultural Region 3, Nova Scotia",Nova Scotia,Fruit & tree nut,879.0,13381.0,35420.0,2.65
+1204,"Census Agricultural Region 4, Nova Scotia",Nova Scotia,Beef cattle,395.0,8338.0,13587.0,1.63
+1205,"Census Agricultural Region 5, Nova Scotia",Nova Scotia,Beef cattle,185.0,10357.0,5018.0,0.48
+1301,"Census Agricultural Region 1, New Brunswick",New Brunswick,Other crop,625.0,20352.0,67101.0,3.3
+1302,"Census Agricultural Region 2, New Brunswick",New Brunswick,Beef cattle,468.0,14736.0,23110.0,1.57
+1303,"Census Agricultural Region 3, New Brunswick",New Brunswick,Beef cattle,445.0,10016.0,23271.0,2.32
+1304,"Census Agricultural Region 4, New Brunswick",New Brunswick,Fruit & tree nut,313.0,26145.0,16728.0,0.64
+2401,"Bas-Saint-Laurent, Quebec",Quebec,Other crop,2017.0,22188.0,159109.0,7.17
+2402,"Saguenay--Lac-Saint-Jean--Côte-Nord, Quebec",Quebec,Fruit & tree nut,1329.0,329985.0,130995.0,0.4
+2403,"Québec, Quebec",Quebec,Other crop,1126.0,18685.0,54053.0,2.89
+2404,"Mauricie, Quebec",Quebec,Oilseed & grain,1000.0,35476.0,82207.0,2.32
+2405,"Estrie, Quebec",Quebec,Other crop,3009.0,10198.0,118447.0,11.61
+2406,"Montréal--Laval, Quebec",Quebec,Greenhouse & nursery,155.0,744.0,4231.0,5.69
+2407,"Lanaudière, Quebec",Quebec,Oilseed & grain,1539.0,12301.0,114780.0,9.33
+2408,"Outaouais, Quebec",Quebec,Beef cattle,955.0,30458.0,54535.0,1.79
+2409,"Laurentides, Quebec",Quebec,Other crop,1265.0,20557.0,64742.0,3.15
+2410,"Abitibi-Témiscamingue--Nord-du-Québec, Quebec",Quebec,Other crop,588.0,764632.0,73660.0,0.1
+2411,"Gaspésie--Îles-de-la-Madeleine, Quebec",Quebec,Other crop,224.0,20271.0,13079.0,0.65
+2412,"Chaudière-Appalaches, Quebec",Quebec,Other crop,6090.0,15072.0,218344.0,14.49
+2413,"Montérégie, Quebec",Quebec,Oilseed & grain,6762.0,11112.0,548674.0,49.38
+2414,"Centre-du-Québec, Quebec",Quebec,Other crop,3321.0,6921.0,233719.0,33.77
+3501,"Southern Ontario Region, Ontario",Ontario,Oilseed & grain,17031.0,21492.0,1386554.0,64.51
+3502,"Western Ontario Region, Ontario",Ontario,Oilseed & grain,16483.0,26745.0,1191184.0,44.54
+3503,"Central Ontario Region, Ontario",Ontario,Beef cattle,6330.0,37660.0,394195.0,10.47
+3504,"Eastern Ontario Region, Ontario",Ontario,Oilseed & grain,6720.0,28320.0,552043.0,19.49
+3505,"Northern Ontario Region, Ontario",Ontario,Beef cattle,1782.0,778195.0,138838.0,0.18
+4601,"Census Agricultural Region 1, Manitoba",Manitoba,Oilseed & grain,1167.0,8282.0,525736.0,63.48
+4602,"Census Agricultural Region 2, Manitoba",Manitoba,Oilseed & grain,1684.0,10357.0,574374.0,55.46
+4603,"Census Agricultural Region 3, Manitoba",Manitoba,Oilseed & grain,1321.0,8745.0,447514.0,51.17

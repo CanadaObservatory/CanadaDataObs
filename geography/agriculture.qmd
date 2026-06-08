@@ -1,0 +1,74 @@
+---
+title: "Agriculture"
+description: "Canada's agricultural geography — what is farmed where, and how much of the land is cropland"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import choropleth_categorical, choropleth_map
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+geo = "data/geo/car_2021.geojson"
+csv = "data/geo/statcan_car_agriculture.csv"
+```
+
+## What is farmed where
+
+Canadian agriculture is strongly regional. The map below shows the **most common type of
+farm** in each of Statistics Canada's **census agricultural regions** — the standard
+geography for farm data — from the **2021 Census of Agriculture**. **Oilseed and grain**
+farming is the most numerous type across the Prairies; **beef cattle** operations lead
+through the Alberta foothills, the British Columbia interior, and much of Ontario and the
+North; and pockets of **fruit**, **vegetable**, and **greenhouse** production mark the
+specialty regions — the Niagara and Okanagan valleys, the Atlantic, and the urban fringes.
+
+*Two caveats worth keeping in mind. "Most common" here means by **number of farms**, not by
+area or value — so many small operations can outweigh a few large ones. And **dairy**, though
+central to the farm economy of Quebec and Ontario, is rarely the single most-numerous type in
+a region, so it does not headline this by-count view; a broad **"other crop"** category (hay,
+maple, and mixed farms) leads across much of Quebec instead.*
+
+```{python}
+#| echo: false
+if os.path.exists(geo) and os.path.exists(csv):
+    g = json.load(open(geo))
+    d = pd.read_csv(csv, dtype={"caruid": str})
+    dd = d.dropna(subset=["dominant_ftype"])
+    colors = {"Oilseed & grain": "#e3b341", "Beef cattle": "#a0522d",
+              "Dairy": "#6baed6", "Other crop": "#bdb76b", "Fruit & tree nut": "#d6604d",
+              "Vegetable & melon": "#74c476", "Greenhouse & nursery": "#3a9c8f",
+              "Other animal": "#9b8cb5"}
+    order = [c for c in colors if c in set(dd["dominant_ftype"])]
+    fig = choropleth_categorical(g, dd, "caruid", "dominant_ftype", name_col="name",
+        ordered=order, color_map=colors, legend_title="Most common farm type", zoom=2.5,
+        source_note="Source: Statistics Canada, 2021 Census of Agriculture (table 32-10-0231-01), by census agricultural region. Most common farm type by number of farms (NAICS).")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Agriculture data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## How much of the land is cropland
+
+The type of farming is one thing; how much of a region is actually under crops is another.
+This map shows **land in crops as a share of each region's total land area**. It peaks in
+the southern Prairies and parts of southern Ontario and Quebec — where well over half the
+land is cropped — and falls away quickly toward the Shield, the mountains, and the North,
+where farmland is a thin ribbon in a vast landscape.
+
+```{python}
+#| echo: false
+if os.path.exists(geo) and os.path.exists(csv):
+    g = json.load(open(geo))
+    d = pd.read_csv(csv, dtype={"caruid": str})
+    fig = choropleth_map(g, d, "caruid", "cropland_share", name_col="name",
+        colorbar_title="Cropland", colorscale="YlGn", value_suffix="%", value_fmt=".0f",
+        zoom=2.5, source_note="Source: Statistics Canada, 2021 Census of Agriculture (land in crops, table 32-10-0249-01) ÷ census land area, by census agricultural region.")
+    fig.show(config=MAP_CONFIG)
+```
+
+## Download data
+
+- [Agriculture by census agricultural region (CSV)](../data/geo/statcan_car_agriculture.csv) — StatCan Census of Agriculture 2021 (dominant farm type, cropland share)

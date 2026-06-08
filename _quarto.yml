@@ -24,6 +24,8 @@ website:
             text: Where People Live
           - href: geography/land.qmd
             text: The Land
+          - href: geography/agriculture.qmd
+            text: Agriculture
           - href: geography/water.qmd
             text: Water
           - href: geography/fire-ice.qmd

@@ -5,10 +5,10 @@ description: "How high Canada is — the distribution of land by elevation, and 
 
 ```{python}
 #| echo: false
-import os, json
+import os, json, base64
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.charts import choropleth_map
+from pipeline.charts import choropleth_map, relief_map
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -16,6 +16,30 @@ dist_csv = "data/geo/elevation_distribution.csv"
 prov_geo = "data/geo/prov_2021.geojson"
 elev_csv = "data/geo/elevation_by_prov.csv"
 prov_names = "data/geo/statcan_prov_geography.csv"
+```
+
+## The shape of the land
+
+Seen whole, Canada's surface resolves into a few great physiographic regions: the high, folded
+**Western Cordillera** along the Pacific; the flat-then-rising **Interior Plains** of the
+Prairies; the ancient, low **Canadian Shield** wrapped around Hudson Bay; the **lowlands** of
+the St. Lawrence and Hudson Bay; and the worn **Appalachian** uplands of the east. The relief
+map colours the land by elevation — green lowlands through tan and brown to the near-white high
+ground of the Rockies, the Coast Mountains, and the Arctic ranges.
+
+```{python}
+#| echo: false
+relief_png, relief_meta = "data/geo/elevation_relief.png", "data/geo/elevation_relief.json"
+if os.path.exists(relief_png) and os.path.exists(relief_meta):
+    uri = "data:image/png;base64," + base64.b64encode(open(relief_png, "rb").read()).decode()
+    coords = json.load(open(relief_meta))["coordinates"]
+    prov = json.load(open(prov_geo)) if os.path.exists(prov_geo) else None
+    fig = relief_map(uri, coords, boundary_geojson=prov, boundary_color="#7c8088",
+        boundary_width=0.5, center={"lat": 60, "lon": -96}, zoom=2.3,
+        source_note="Source: Natural Resources Canada — Medium-Resolution DEM (MRDEM-30, CanElevation). Coarse national read, reprojected to Web Mercator; colour = elevation.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Relief image not yet available — run `python -m pipeline.build_geography`.")
 ```
 
 ## How high is Canada?
@@ -69,3 +93,4 @@ if os.path.exists(prov_geo) and os.path.exists(elev_csv):
 
 - [Land area by elevation band (CSV)](../data/geo/elevation_distribution.csv) — NRCan MRDEM-30
 - [Median elevation by province (CSV)](../data/geo/elevation_by_prov.csv) — NRCan MRDEM-30
+- [Relief image (PNG)](../data/geo/elevation_relief.png) — NRCan MRDEM-30, hypsometric tint

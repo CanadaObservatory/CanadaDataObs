@@ -680,6 +680,33 @@ def add_line_features(fig, geojson, *, name_key="name", color="#0d2b5e", width=1
     return fig
 
 
+def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color="#8a8f96",
+               boundary_width=0.5, source_note=None, center=None, zoom=2.3, height=660):
+    """Raster-image overlay map: places a pre-rendered **Web-Mercator** image (e.g. the
+    elevation relief PNG, warped to EPSG:3857) over the free carto basemap as a mapbox
+    `image` layer, positioned by its lon/lat **corner coordinates** (clockwise TL, TR, BR,
+    BL — the order Plotly expects; the image is rendered in 3857 but the corners are WGS84).
+    `boundary_geojson` draws province/territory lines over the image; place labels stay on
+    top. The image is the surface, so there's no hover or legend — an invisible
+    Scattermapbox trace just anchors the mapbox subplot."""
+    center = center or {"lat": 62.0, "lon": -96.0}
+    base = _labelled_basemap()
+    layers = [base[0],
+              dict(sourcetype="image", source=image_uri, coordinates=coordinates, below="traces")]
+    if boundary_geojson is not None:
+        layers.append(dict(sourcetype="geojson", source=boundary_geojson, type="line",
+                           color=boundary_color, line=dict(width=boundary_width), below="traces"))
+    layers.append(base[1])
+    fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
+    fig.update_layout(mapbox_style="white-bg", mapbox_layers=layers,
+                      mapbox_zoom=zoom, mapbox_center=center,
+                      margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white")
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,

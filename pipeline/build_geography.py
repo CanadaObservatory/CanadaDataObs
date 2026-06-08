@@ -672,6 +672,63 @@ def build_rivers():
     print(f"  {len(g)} river features (clipped to Canada)")
 
 
+def build_elevation_relief(width=1500):
+    """National relief image for the elevation page. Streams a COARSE overview of MRDEM-30,
+    reprojects it from EPSG:3979 to **Web-Mercator (3857)** so it aligns with Plotly's
+    basemap, applies a muted hypsometric tint (green low → tan/brown → near-white peaks),
+    masks to Canada (transparent elsewhere), and writes elevation_relief.png + the image's
+    lon/lat **corner coordinates** (clockwise TL,TR,BR,BL — what a Plotly mapbox `image`
+    layer expects). The image is rendered in Mercator; the corners passed to the page are
+    WGS84. Static; needs rasterio + matplotlib."""
+    import numpy as np
+    import rasterio
+    from rasterio.enums import Resampling
+    from rasterio.warp import reproject, transform as warp_transform, transform_bounds
+    from rasterio.features import rasterize
+    from matplotlib.colors import LinearSegmentedColormap
+    import matplotlib.image as mpimg
+    print("Building elevation relief (MRDEM-30 → 3857 hypsometric PNG) ...")
+    os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
+                      GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
+    with rasterio.open(MRDEM_VRT) as src:           # read coarse in the source CRS (3979)
+        h0 = int(src.height * width / src.width)
+        elev0 = src.read(1, out_shape=(h0, width), resampling=Resampling.average).astype("float32")
+        st = src.transform * rasterio.Affine.scale(src.width / width, src.height / h0)
+        scrs = src.crs
+        nd = src.nodata if src.nodata is not None else -32767.0
+    # Target a TIGHT Canada extent in 3857 — the full 3979 bbox reprojects to a huge,
+    # mostly-empty box that wastes resolution; use the province bounds instead.
+    prov = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson")
+    minx, miny, maxx, maxy = prov.to_crs(epsg=4326).total_bounds
+    # The province polygons carry Arctic "sector" boundary lines to the North Pole, so
+    # total_bounds maxy ≈ 90°; cap at the northernmost land (Ellesmere, ~83.1°N) or the
+    # Mercator image becomes absurdly tall.
+    maxy = min(maxy, 83.5)
+    l3857, b3857, r3857, t3857 = transform_bounds("EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy)
+    dw = width
+    dh = int(dw * (t3857 - b3857) / (r3857 - l3857))
+    dt = rasterio.transform.from_bounds(l3857, b3857, r3857, t3857, dw, dh)
+    dst = np.full((dh, dw), nd, dtype="float32")     # warp the small array into that 3857 grid
+    reproject(elev0, dst, src_transform=st, src_crs=scrs, dst_transform=dt, dst_crs="EPSG:3857",
+              resampling=Resampling.bilinear, src_nodata=nd, dst_nodata=nd)
+    canada = rasterize([(g, 1) for g in prov.to_crs(epsg=3857).geometry], out_shape=(dh, dw),
+                       transform=dt, fill=0, dtype="uint8").astype(bool)
+    valid = canada & np.isfinite(dst) & (dst != nd) & (dst > -100) & (dst < 7000)
+    e = np.sqrt(np.clip(np.where(valid, dst, 0.0), 0, 2500) / 2500.0)   # sqrt → more low-land range
+    cmap = LinearSegmentedColormap.from_list("relief", [
+        (0.00, "#6c8b66"), (0.18, "#8aa06b"), (0.42, "#c2b280"),
+        (0.65, "#a98c6b"), (0.85, "#cabfb2"), (1.00, "#f2efe9")])
+    rgba = cmap(e)
+    rgba[..., 3] = np.where(valid, 1.0, 0.0)         # transparent off Canada
+    mpimg.imsave(f"{GEO_DIR}/elevation_relief.png", (rgba * 255).astype("uint8"))
+    lons, lats = warp_transform("EPSG:3857", "EPSG:4326",   # 3857 bounds → lon/lat corners
+                                [l3857, r3857, r3857, l3857], [t3857, t3857, b3857, b3857])
+    coords = [[round(lons[i], 5), round(lats[i], 5)] for i in range(4)]   # TL, TR, BR, BL
+    json.dump({"coordinates": coords}, open(f"{GEO_DIR}/elevation_relief.json", "w"))
+    print(f"  3857 grid {dw}×{dh} | PNG {os.path.getsize(f'{GEO_DIR}/elevation_relief.png')/1e3:.0f} KB "
+          f"| land px {int(valid.sum()):,} | corners {coords}")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -685,4 +742,5 @@ if __name__ == "__main__":
     build_rivers()
     build_protected_areas()
     build_elevation()
+    build_elevation_relief()
     print("build_geography complete.")

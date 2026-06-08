@@ -1,6 +1,6 @@
 ---
 title: "Water"
-description: "Fresh water across Canada — the major lakes and how much of each province is water"
+description: "Fresh water across Canada — the country's major lakes"
 ---
 
 ```{python}
@@ -9,16 +9,15 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, add_city_markers
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, add_city_markers, add_boundaries
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
-prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
 ```
 
 ## A country of fresh water
 
-Canada holds close to **20% of the world's fresh water** and **more lake area than any other country on Earth**. The map below highlights the **40 largest lakes**, shaded by surface area: the shared **Great Lakes** along the southern border, and the great northern lakes — **Great Bear** and **Great Slave** in the Northwest Territories, and **Athabasca**, **Winnipeg** and **Reindeer** across the Prairies and Canadian Shield. Hover any lake for its name and surface area; zoom and pan to explore.
+Canada holds close to **20% of the world's fresh water** and **more lake area than any other country on Earth**. The map below highlights the **40 largest lakes and rivers**, shaded by surface area: the shared **Great Lakes** along the southern border, and the great northern lakes — **Great Bear** and **Great Slave** in the Northwest Territories, and **Athabasca**, **Winnipeg** and **Reindeer** across the Prairies and Canadian Shield. The three largest **rivers** in the set — the Mackenzie, Yukon and Peace — are drawn in a flat blue, so they read as flowing water. Hover any feature for its name and surface area; zoom and pan to explore.
 
 ```{python}
 #| echo: false
@@ -26,35 +25,35 @@ lakes_geo, lakes_csv = "data/geo/lakes_major.geojson", "data/geo/lakes_major.csv
 if os.path.exists(lakes_geo) and os.path.exists(lakes_csv):
     lg = json.load(open(lakes_geo))
     ld = pd.read_csv(lakes_csv, dtype={"lakeid": str})
-    fig = choropleth_map(lg, ld, "lakeid", "area_km2", name_col="name",
+    # A few of the "largest waterbodies" are rivers (Mackenzie, Yukon, Peace). Split them
+    # out and draw them as flat blue ribbons so they read as flowing water rather than
+    # lakes or — with the dark lake outline — political borders.
+    is_river = ld["name"].str.contains("River")
+    lakes_df, rivers_df = ld[~is_river], ld[is_river]
+    fig = choropleth_map(lg, lakes_df, "lakeid", "area_km2", name_col="name",
         colorbar_title="Surface area", colorscale="Blues", value_suffix=" km²", value_fmt=",.0f",
         log=True, center={"lat": 59, "lon": -98}, zoom=2.4,
-        source_note="Source: Natural Resources Canada, Atlas of Canada 1:1,000,000 waterbodies. The 40 largest named natural lakes touching Canada (shared Great Lakes included; reservoirs excluded). Surface area approximate, from 1:1M-scale outlines; colour on a log scale.")
-    add_city_markers(fig)
+        line_color="#222", line_width=0.8,
+        source_note="Source: Natural Resources Canada, Atlas of Canada 1:1,000,000 waterbodies. The 40 largest named natural lakes and rivers touching Canada (shared Great Lakes included; reservoirs excluded). Surface area approximate, from 1:1M-scale outlines; lakes coloured on a log scale.")
+    if len(rivers_df):
+        river_area = rivers_df["area_km2"].map(lambda v: f"{v:,.0f}").tolist()
+        fig.add_trace(go.Choroplethmapbox(
+            geojson=lg, locations=rivers_df["lakeid"].tolist(), z=[1] * len(rivers_df),
+            zmin=0, zmax=1, featureidkey="id",
+            colorscale=[[0, "#6baed6"], [1, "#6baed6"]], showscale=False,
+            marker=dict(line=dict(width=0.5, color="#3182bd"), opacity=0.85),
+            customdata=list(zip(rivers_df["name"].tolist(), river_area)),
+            hovertemplate="<b>%{customdata[0]}</b> (river)<br>Surface area: %{customdata[1]} km²<extra></extra>",
+            name="rivers"))
+    # Light province/territory boundaries for orientation (a touch lighter than before);
+    # their southern edges trace the Canada–US border, while coasts come from the basemap.
+    if os.path.exists("data/geo/prov_2021.geojson"):
+        add_boundaries(fig, json.load(open("data/geo/prov_2021.geojson")), color="#b4b8bd", width=0.6)
     fig.show(config=MAP_CONFIG)
 else:
     print("Lakes data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
-### Fresh water by province
-
-Another way to see it: how much of each province or territory is actually *covered* by inland water. It varies widely — nearly **15% of Ontario and Manitoba** is fresh water, against around 2% of Alberta and British Columbia. Prince Edward Island has effectively none.
-
-```{python}
-#| echo: false
-if os.path.exists(prov_geo_path) and os.path.exists(prov_csv):
-    prov_geo = json.load(open(prov_geo_path))
-    pg = pd.read_csv(prov_csv, dtype={"pruid": str})
-    fig = choropleth_map(prov_geo, pg, "pruid", "pct_freshwater", name_col="name",
-        colorbar_title="% fresh water", colorscale="Blues", value_suffix="%", value_fmt=".1f",
-        center={"lat": 62, "lon": -96}, zoom=2.3,
-        source_note="Source: Natural Resources Canada / Statistics Canada land and freshwater area. Inland lakes & rivers as a share of total area.")
-    fig.show(config=MAP_CONFIG)
-else:
-    print("Freshwater data not yet available — run `python -m pipeline.build_geography`.")
-```
-
 ## Download data
 
 - [Major lakes — surface area (CSV)](../data/geo/lakes_major.csv) — NRCan Atlas of Canada 1:1,000,000 waterbodies
-- [Land & freshwater area by province (CSV)](../data/geo/statcan_prov_geography.csv) — NRCan / Statistics Canada

@@ -640,10 +640,25 @@ def add_city_markers(fig, cities=MAJOR_CITIES, textposition="top center"):
     return fig
 
 
+def add_boundaries(fig, geojson, *, color="#9aa0a6", width=0.8, below="traces"):
+    """Overlay administrative boundaries (province/territory or national) on a map by
+    adding the polygon GeoJSON as a mapbox **line** layer — the polygon rings render as
+    outlines. Inserted with `below="traces"` so the data fills (e.g. the lakes) and the
+    place labels stay on top; call it twice to layer a light internal-division set under
+    a heavier national outline (the later call draws above the earlier where they share
+    the perimeter). Returns the figure for chaining."""
+    layer = dict(sourcetype="geojson", source=geojson, type="line",
+                 color=color, line=dict(width=width), below=below)
+    existing = [l.to_plotly_json() for l in (fig.layout.mapbox.layers or [])]
+    fig.update_layout(mapbox_layers=existing + [layer])
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
-                   center=None, zoom=2.6, height=640, zmin=None, zmax=None, log=False):
+                   center=None, zoom=2.6, height=640, zmin=None, zmax=None, log=False,
+                   line_color="rgba(255,255,255,0.4)", line_width=0.2, opacity=0.82):
     """Zoomable choropleth map (Plotly Choroplethmapbox, free carto-positron
     basemap — no API token). The `geojson` features must carry a top-level `id`
     equal to df[location_col]. Used for the census-tract maps so users can pan/
@@ -653,7 +668,12 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     population density, where a few dense provinces would otherwise flatten the
     rest); the colourbar ticks are relabelled to the real values and zmin/zmax are
     ignored. The hover always shows the true (un-logged) value, read from
-    customdata so the displayed number is identical whether or not log is set."""
+    customdata so the displayed number is identical whether or not log is set.
+
+    `line_color`/`line_width` style the polygon outline (default a hairline white
+    separator, right for dense tract maps); pass a dark colour + a slightly larger
+    width for sparse polygons over a basemap (e.g. the major-lakes map) so small,
+    light-filled features still read. `opacity` is the polygon fill opacity."""
     import math
     import numpy as np
     import pandas as pd
@@ -683,7 +703,7 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         geojson=geojson, locations=df[location_col], z=z_,
         zmin=zmin_, zmax=zmax_,
         featureidkey="id", colorscale=colorscale, reversescale=reversescale,
-        marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
+        marker=dict(line=dict(width=line_width, color=line_color), opacity=opacity),
         colorbar=colorbar,
         customdata=customdata,
         hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{customdata[{vidx}]:{value_fmt}}}{value_suffix}<extra></extra>",

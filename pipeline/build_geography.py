@@ -16,7 +16,8 @@ Outputs (committed to data/geo/):
   permafrost_zones.csv              fid -> zone label (drives the categorical map)
 
 Run:  /opt/anaconda3/bin/python -m pipeline.build_geography
-      (any interpreter with geopandas + pyogrio; not in the weekly pipeline)
+      (any interpreter with geopandas + pyogrio + rasterio; not in the weekly pipeline.
+       rasterio is needed only by build_elevation, which streams the MRDEM-30 DTM mosaic.)
 """
 
 import os

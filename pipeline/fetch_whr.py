@@ -112,8 +112,13 @@ def fetch_happiness():
     df["country_code"] = df["country_name"].map(WHR_COUNTRY_MAP)
     df = df[df["country_code"].notna()].copy()
 
-    # Use our standard country names
+    # Use our standard country names, and KEEP ONLY current peers: WHR_COUNTRY_MAP
+    # may still list countries since dropped from PEER_COUNTRIES (e.g. Austria,
+    # Belgium, Ireland removed 2026-05). Those map to a NaN name here; left in, the
+    # NaN name later crashes the peer chart's name-sort (str vs float). Drop them so
+    # this fetcher self-tracks the peer group.
     df["country_name"] = df["country_code"].map(PEER_COUNTRIES)
+    df = df[df["country_name"].notna()].copy()
 
     # Convert types
     df["year"] = df["year"].astype(int)

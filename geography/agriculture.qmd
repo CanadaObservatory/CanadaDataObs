@@ -24,6 +24,8 @@ farming is the most numerous type across the Prairies; **beef cattle** operation
 through the Alberta foothills, the British Columbia interior, and much of Ontario and the
 North; and pockets of **fruit**, **vegetable**, and **greenhouse** production mark the
 specialty regions — the Niagara and Okanagan valleys, the Atlantic, and the urban fringes.
+Switch **hover** on (top-left of the map) to see each region's full farm-type mix — the share
+of every type, not just the most common.
 
 *Two caveats worth keeping in mind. "Most common" here means by **number of farms**, not by
 area or value — so many small operations can outweigh a few large ones. And **dairy**, though
@@ -44,7 +46,14 @@ if os.path.exists(geo) and os.path.exists(csv):
     order = [c for c in colors if c in set(dd["dominant_ftype"])]
     fig = choropleth_categorical(g, dd, "caruid", "dominant_ftype", name_col="name",
         ordered=order, color_map=colors, legend_title="Most common farm type", zoom=2.5,
-        source_note="Source: Statistics Canada, 2021 Census of Agriculture (table 32-10-0231-01), by census agricultural region. Most common farm type by number of farms (NAICS).")
+        detail_col="hover_detail",
+        source_note="Source: Statistics Canada, Census of Agriculture 2021 (32-10-0231-01); most common type by farm count.")
+    # Hover off on load (the "Hover on" button enables it): the breakdown tooltip is rich, so
+    # don't fire it as the cursor sweeps the national view.
+    fig.update_layout(hovermode=False)
+    for m in fig.layout.updatemenus:
+        if m.buttons and m.buttons[0].label == "Hover on":
+            m.active = 1
     fig.show(config=MAP_CONFIG)
 else:
     print("Agriculture data not yet available — run `python -m pipeline.build_geography`.")

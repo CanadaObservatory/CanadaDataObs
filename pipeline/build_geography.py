@@ -464,6 +464,20 @@ def build_agriculture():
              .assign(v=lambda x: pd.to_numeric(x["VALUE"], errors="coerce"))
              .drop_duplicates("caruid").set_index("caruid")["v"])
 
+    # Per-region farm-type breakdown for the hover: each type's share of total farms, sorted
+    # high→low, top 6 above 2% (the dominant type colours the map; the hover gives the full
+    # mix, like the diversity/religion maps). One pre-formatted string per CAR.
+    fc["lbl"] = fc["code"].map(FARM_CODES)
+    detail = {}
+    for cid, grp in fc.groupby("caruid"):
+        tf = total.get(cid)
+        denom = tf if (pd.notna(tf) and tf > 0) else grp["VALUE"].sum()
+        parts = [f"{r.lbl} {r.VALUE / denom * 100:.0f}%"
+                 for r in grp.sort_values("VALUE", ascending=False).itertuples()
+                 if r.VALUE / denom * 100 >= 2][:6]
+        nf = int(tf) if pd.notna(tf) else int(grp["VALUE"].sum())
+        detail[cid] = f"{nf:,} farms<br>" + " · ".join(parts)
+
     z2 = zipfile.ZipFile(_download_cache(AG_LANDUSE_URL, "/tmp/ag_landuse.zip", "Census of Ag land use"))
     lu = pd.read_csv(z2.open("32100249.csv"), dtype=str)
     lu = lu[lu["DGUID"].str.contains("S0501", na=False)
@@ -484,6 +498,7 @@ def build_agriculture():
     out["province"] = out["name"].str.split(",").str[-1].str.strip()
     out["dominant_ftype"] = out["caruid"].map(dom)
     out["total_farms"] = out["caruid"].map(total)
+    out["hover_detail"] = out["caruid"].map(detail)
     out["land_area_km2"] = out["caruid"].map(g.set_index("caruid")["LANDAREA"]).round(0)
     out["cropland_ha"] = out["caruid"].map(crop_ha)
     out["cropland_share"] = (out["cropland_ha"] / out["land_area_km2"]).round(2)  # %, 1 km²=100 ha

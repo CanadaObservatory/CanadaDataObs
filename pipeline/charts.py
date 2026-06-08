@@ -870,7 +870,7 @@ CATEGORICAL_PALETTE = [
 def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
                            color_map=None, ordered=None, source_note=None,
                            center=None, zoom=2.4, height=660, legend_title=None,
-                           legend_orientation="v"):
+                           legend_orientation="v", detail_col=None):
     """Categorical choropleth — each polygon coloured by a *discrete* category
     rather than a continuous value (used for ecozones and permafrost zones).
 
@@ -881,7 +881,9 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     Pass `ordered` to fix the legend order (and, for an ordinal ramp like the
     permafrost zones, the colour order); `color_map` to set exact colours, else
     CATEGORICAL_PALETTE is cycled. `geojson` features must carry a top-level `id`
-    equal to df[location_col]; `name_col` adds a per-feature hover label."""
+    equal to df[location_col]; `name_col` adds a per-feature hover label. Pass `detail_col`
+    to show a custom per-feature string (e.g. a full composition breakdown, like the
+    diversity/religion maps) in the hover instead of the bare category."""
     center = center or {"lat": 62.0, "lon": -96.0}
     cats = list(ordered) if ordered else sorted(df[cat_col].dropna().unique())
     if color_map is None:
@@ -893,7 +895,9 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     for i, c in enumerate(cats):
         colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
 
-    custom = (df[[name_col, cat_col]].to_numpy() if name_col else df[[cat_col]].to_numpy())
+    hover_col = detail_col or cat_col   # detail_col (e.g. a composition breakdown) shows in
+    custom = (df[[name_col, hover_col]].to_numpy() if name_col   # the hover instead of the
+              else df[[hover_col]].to_numpy())                    # bare category
     name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
     cat_idx = 1 if name_col else 0
     fig = go.Figure(go.Choroplethmapbox(

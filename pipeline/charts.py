@@ -934,6 +934,57 @@ def bubble_map(df, lat_col, lon_col, size_col, *, color="#e3492a", opacity=0.5,
     return fig
 
 
+def point_value_map(df, lat_col, lon_col, groups, *, colorscale="RdBu", reversescale=False,
+                    cmid=None, cmin=None, cmax=None, cbar_title="", value_suffix="",
+                    value_fmt=".1f", marker_size=7, opacity=0.9, name_col=None,
+                    source_note=None, center=None, zoom=2.3, height=640):
+    """Coloured-point map — one constant-size dot per row, **coloured** by value on a shared
+    scale, with an optional dropdown to switch the coloured variable across `groups` (list of
+    (col, label)). Unlike `bubble_map` (size ∝ value, for magnitudes), this colours a fixed
+    marker, so it suits **diverging** quantities like temperature — pass a diverging
+    `colorscale` + `cmid` (e.g. RdBu, reversescale=True, cmid=0 → blue below freezing, red
+    above). Hover shows `name_col` + the selected value (pre-formatted to dodge the bundled-
+    Plotly d3-format quirk). Same labelled basemap + hover-toggle as the choropleths."""
+    import pandas as pd
+    center = center or {"lat": 60.0, "lon": -96.0}
+
+    def vals(col):
+        return pd.to_numeric(df[col], errors="coerce").tolist()
+
+    def cdata(col):
+        v = pd.to_numeric(df[col], errors="coerce")
+        names = list(df[name_col]) if name_col else [""] * len(df)
+        return [[n, ("—" if pd.isna(x) else f"{x:{value_fmt}}")] for n, x in zip(names, v)]
+
+    name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    htmpl = f"{name_line}{cbar_title}: %{{customdata[1]}}{value_suffix}<extra></extra>"
+    c0 = groups[0][0]
+    fig = go.Figure(go.Scattermapbox(
+        lat=df[lat_col], lon=df[lon_col], mode="markers",
+        marker=dict(size=marker_size, color=vals(c0), colorscale=colorscale,
+                    reversescale=reversescale, cmid=cmid, cmin=cmin, cmax=cmax,
+                    opacity=opacity, colorbar=dict(title=cbar_title, ticksuffix=value_suffix)),
+        customdata=cdata(c0), hovertemplate=htmpl, name=""))
+    menus = [_hover_toggle()]
+    if len(groups) > 1:
+        menus.append(dict(
+            type="dropdown", direction="down", showactive=True, x=0.01, y=0.99,
+            xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1,
+            buttons=[dict(label=label, method="restyle",
+                          args=[{"marker.color": [vals(col)], "customdata": [cdata(col)]}, [0]])
+                     for col, label in groups]))
+    fig.update_layout(
+        mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
+        mapbox_zoom=zoom, mapbox_center=center,
+        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        updatemenus=menus)
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.04, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
 # Dropdown order for the diversity ("population groups") maps — CMA, census-tract and
 # dissemination-area. Leads with the three-way partition that tiles to exactly 100%
 # (All visible minorities · White · Indigenous), then the visible-minority subgroups.

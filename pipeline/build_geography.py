@@ -379,6 +379,50 @@ def build_lakes(top_n=40):
     print(f"  {len(keep)} lakes; largest {keep.iloc[0]['name']} {keep.iloc[0]['area_km2']:,.0f} km²")
 
 
+CLIMATE_NORMALS_API = "https://api.weather.gc.ca/collections/climate-normals/items"
+
+
+def build_climate_normals():
+    """ECCC Canadian Climate Normals 1981-2010 — station POINT data (OGL-Canada), pulled
+    from the MSC GeoMet **OGC API – Features** endpoint (decimal lat/lon, no DMS parsing).
+    Mean daily temperature is NORMAL_ID=1 and total precipitation NORMAL_ID=56; MONTH 1=Jan,
+    7=Jul, 13=annual. Writes a tidy point CSV (climate_id, station, province, lat, lon,
+    jan_temp, jul_temp, annual_temp, annual_precip) for the proportional/coloured-point
+    climate map. ~660 stations carry a temperature normal. Decennial — NOT weekly."""
+    print("Building climate normals (ECCC 1981-2010, GeoMet OGC API) ...")
+
+    def fetch(normal_id, month):
+        url = f"{CLIMATE_NORMALS_API}?NORMAL_ID={normal_id}&MONTH={month}&limit=10000&f=json"
+        r = requests.get(url, timeout=120)
+        r.raise_for_status()
+        return r.json()["features"]
+
+    rows = {}
+    for f in fetch(1, 1):                     # Jan mean temp = base (geometry + name)
+        p = f["properties"]
+        cid = p["CLIMATE_IDENTIFIER"]
+        lon, lat = f["geometry"]["coordinates"]
+        rows[cid] = dict(climate_id=cid, station=str(p["STATION_NAME"]).title(),
+                         province=p["PROVINCE_CODE"], lat=round(lat, 4), lon=round(lon, 4),
+                         jan_temp=p["VALUE"])
+
+    def add(normal_id, month, col):
+        for f in fetch(normal_id, month):
+            p = f["properties"]
+            cid = p["CLIMATE_IDENTIFIER"]
+            if cid in rows:
+                rows[cid][col] = p["VALUE"]
+
+    add(1, 7, "jul_temp")
+    add(1, 13, "annual_temp")
+    add(56, 13, "annual_precip")
+    df = pd.DataFrame(rows.values()).dropna(subset=["jan_temp", "jul_temp"])
+    os.makedirs(GEO_DIR, exist_ok=True)
+    df.to_csv(f"{GEO_DIR}/climate_normals.csv", index=False)
+    print(f"  {len(df)} stations | Jan {df.jan_temp.min():.1f}..{df.jan_temp.max():.1f}°C "
+          f"| Jul {df.jul_temp.min():.1f}..{df.jul_temp.max():.1f}°C")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -386,4 +430,5 @@ if __name__ == "__main__":
     build_permafrost()
     build_wildfire_points()
     build_lakes()
+    build_climate_normals()
     print("build_geography complete.")

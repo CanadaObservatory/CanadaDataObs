@@ -1,0 +1,68 @@
+---
+title: "Climate"
+description: "Canada's climate geography — how temperature and precipitation vary across the country"
+---
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+from pipeline.charts import point_value_map
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+norm = "data/geo/climate_normals.csv"
+```
+
+## How warm, how cold
+
+Canada stretches across more than 40 degrees of latitude, and its climate varies
+enormously from south to north and coast to interior. The map below shows the
+**1981–2010 climate normals** — the 30-year averages used as the standard reference —
+at roughly 660 weather stations. Use the dropdown to switch between **January**, **July**,
+and the **annual** mean daily temperature. Blue is below freezing, red is above; hover any
+station for its value, and zoom or pan to explore.
+
+The contrast between the two seasons is the story: a January map that is almost entirely
+blue — dipping below **−30 °C** across the North — and a July map where nearly the whole
+country sits in comfortable double digits. That seasonal swing shapes how much energy
+Canadians use to heat their homes, where and what can be farmed, and how infrastructure is
+built.
+
+```{python}
+#| echo: false
+if os.path.exists(norm):
+    df = pd.read_csv(norm)
+    fig = point_value_map(df, "lat", "lon",
+        groups=[("jan_temp", "January"), ("jul_temp", "July"), ("annual_temp", "Annual")],
+        colorscale="RdBu", reversescale=True, cmid=0,
+        cbar_title="Mean temp", value_suffix=" °C", name_col="station", zoom=2.3,
+        source_note="Source: Environment and Climate Change Canada — Canadian Climate Normals 1981–2010 (station data, via the MSC GeoMet API). Each dot is a weather station; colour = mean daily temperature for the selected period; diverging scale centred at 0 °C.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Climate normals not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## How wet, how dry
+
+Precipitation is just as uneven. The **Pacific coast** is among the wettest places in the
+country — parts of coastal British Columbia exceed **3,000 mm** a year — while the southern
+**Prairies** and the **High Arctic** are genuinely dry, closer to **300 mm** or less. The
+map shows annual total precipitation (rain plus the water equivalent of snow) at the same
+stations.
+
+```{python}
+#| echo: false
+if os.path.exists(norm):
+    dp = pd.read_csv(norm).dropna(subset=["annual_precip"])
+    fig = point_value_map(dp, "lat", "lon",
+        groups=[("annual_precip", "Annual precipitation")],
+        colorscale="Blues", cmin=0, cbar_title="Precip", value_suffix=" mm",
+        value_fmt=",.0f", name_col="station", zoom=2.3,
+        source_note="Source: Environment and Climate Change Canada — Canadian Climate Normals 1981–2010 (station data). Annual total precipitation (rainfall + snow-water equivalent).")
+    fig.show(config=MAP_CONFIG)
+```
+
+## Download data
+
+- [Climate normals by station (CSV)](../data/geo/climate_normals.csv) — ECCC Canadian Climate Normals 1981–2010 (mean temperature + precipitation)

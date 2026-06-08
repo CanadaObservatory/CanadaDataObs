@@ -28,6 +28,8 @@ website:
             text: Water
           - href: geography/fire-ice.qmd
             text: Fire & Ice
+          - href: geography/climate.qmd
+            text: Climate
       - text: Economy
         menu:
           - href: economics/index.qmd

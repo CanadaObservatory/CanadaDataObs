@@ -924,7 +924,7 @@ RELIGION_MAP_GROUPS = [
     ("christian", "Christian"),
     ("muslim", "Muslim"), ("hindu", "Hindu"), ("sikh", "Sikh"),
     ("buddhist", "Buddhist"), ("jewish", "Jewish"),
-    ("indigenous_spirituality", "Traditional Indigenous spirituality"),
+    ("indigenous_spirituality", "Indigenous"),
     ("other_religion", "Other religions & spiritual traditions"),
 ]
 
@@ -932,7 +932,7 @@ RELIGION_HISTORY_COLORS = {
     "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
     "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#d62728",
     "Buddhist": "#9467bd", "Jewish": "#8c564b",
-    "Traditional Indigenous spirituality": "#e377c2", "Other religions": "#17becf",
+    "Indigenous": "#e377c2", "Other religions": "#17becf",
 }
 
 

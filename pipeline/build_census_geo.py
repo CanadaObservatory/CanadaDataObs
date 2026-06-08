@@ -193,9 +193,7 @@ def build_cma():
 
 # Visible-minority groups: (census CHARACTERISTIC_ID in the 2021 profile, column, label).
 # Descriptive only — no evaluative direction. "Visible minority" is StatCan's term.
-# 1683 is the population base (denominator); 1684 = all VM; 1697 = "Not a visible
-# minority" — the residual category that includes white AND Indigenous people (StatCan
-# has no distinct "White" group). It shares the same base, so its % is consistent.
+# 1683 is the population base (denominator); 1684 = all VM. The 10 subgroups follow.
 VM_GROUPS = [
     (1684, "all_vm", "All visible minorities"),
     (1685, "south_asian", "South Asian"),
@@ -208,8 +206,37 @@ VM_GROUPS = [
     (1692, "west_asian", "West Asian"),
     (1693, "korean", "Korean"),
     (1694, "japanese", "Japanese"),
-    (1697, "not_vm", "Not a visible minority"),
 ]
+
+# Derived "population group" columns appended to every diversity layer so the maps
+# carry explicit White and Indigenous categories. StatCan's visible-minority variable
+# has no distinct White group and folds Indigenous people into a single "Not a visible
+# minority" residual (1697). We split that residual using the single-response
+# Indigenous-identity variable (1403), both on the SAME population base — 1683
+# (visible minority) ≡ 1402 (Indigenous), verified identical — so the three top-level
+# groups tile to exactly 100%:
+#     indigenous = Indigenous identity (1403)                       / base
+#     white      = (Not a visible minority 1697 − Indigenous 1403)  / base
+# White is therefore a DERIVED residual: the non-Indigenous, non-visible-minority
+# population (what the Employment Equity framework treats as the Caucasian/white
+# group). It is NOT the ethnic-origin "Caucasian (White)" write-in (id 1715 ≈ 1% —
+# a multiple-response field that cannot be summed to a clean share). Output columns,
+# in dropdown order, are charts.DIVERSITY_MAP_GROUPS.
+NOT_VM_ID = 1697          # "Not a visible minority" = White + Indigenous (residual)
+INDIGENOUS_ID = 1403      # "Indigenous identity" (single response)
+DERIVED_GROUPS = [("white", "White"), ("indigenous", "Indigenous")]
+
+
+def _derived_population_groups(get, denom):
+    """White + Indigenous % shares from a per-geography count accessor `get(cid)`
+    (Series indexed like `denom`) and the visible-minority population base `denom`.
+    White is the non-Indigenous remainder of "Not a visible minority", clamped at 0
+    for the rare small-area case where StatCan's random rounding makes it slightly
+    negative. Returns (white_pct, indigenous_pct)."""
+    indig = get(INDIGENOUS_ID)
+    white = get(NOT_VM_ID) - indig
+    return ((white / denom * 100).round(1).clip(lower=0),
+            (indig / denom * 100).round(1))
 
 # Religion: top-level 2021-Census groups (CHARACTERISTIC_ID, column, label). 1949 is
 # the population base (denominator); the Christian sub-denominations 1952–1966 are
@@ -226,7 +253,7 @@ RELIGION_GROUPS = [
     (1970, "sikh", "Sikh"),
     (1950, "buddhist", "Buddhist"),
     (1968, "jewish", "Jewish"),
-    (1971, "indigenous_spirituality", "Traditional Indigenous spirituality"),
+    (1971, "indigenous_spirituality", "Indigenous"),
     (1972, "other_religion", "Other religions & spiritual traditions"),
 ]
 
@@ -255,6 +282,7 @@ def build_cma_ethnicity():
     out = pd.DataFrame({"name": names})
     for cid, col, _ in VM_GROUPS:
         out[col] = (by_id(cid) / denom * 100).round(1)
+    out["white"], out["indigenous"] = _derived_population_groups(by_id, denom)
     out.index.name = "cmauid"
     out = out.dropna(subset=["all_vm"])
     os.makedirs(GEO_DIR, exist_ok=True)
@@ -326,7 +354,7 @@ def build_ct_from_profile():
     z = zipfile.ZipFile(cache)
     csvn = [n for n in z.namelist() if n.endswith("_data.csv")][0]
 
-    needed_ids = ({cid for cid, _, _ in VM_GROUPS} | {1683}
+    needed_ids = ({cid for cid, _, _ in VM_GROUPS} | {1683, NOT_VM_ID, INDIGENOUS_ID}
                   | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE})
     cols = ["DGUID", "GEO_NAME", "CHARACTERISTIC_ID", "CHARACTERISTIC_NAME", "C1_COUNT_TOTAL"]
     keep = []
@@ -362,6 +390,7 @@ def build_ct_from_profile():
     eth = pd.DataFrame({"name": names})
     for cid, col, _ in VM_GROUPS:
         eth[col] = (ct_series(cid) / base * 100).round(1)
+    eth["white"], eth["indigenous"] = _derived_population_groups(ct_series, base)
     eth.index.name = "ctuid"
     eth = eth.dropna(subset=["all_vm"])
     eth.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_ethnicity_2021.csv", index=False)
@@ -521,7 +550,7 @@ def _vm_history_2001():
 REL_GROUP_LABELS = {           # output key -> display label (also the chart order)
     "christian": "Christian", "no_religion": "No religion / secular",
     "muslim": "Muslim", "hindu": "Hindu", "sikh": "Sikh", "buddhist": "Buddhist",
-    "jewish": "Jewish", "indigenous_spirituality": "Traditional Indigenous spirituality",
+    "jewish": "Jewish", "indigenous_spirituality": "Indigenous",
     "other_religion": "Other religions",
 }
 REL_MAP_2021 = {               # 2021 cube religion column-name -> key
@@ -566,6 +595,70 @@ def _rel_geo(geo, is_cma_source=False):
         if lbl:
             return ("cma", lbl)
     return None
+
+
+# --- 2001 religion by geography ---------------------------------------------
+# 2001 Census topic-based tabulation 97F0022XCB2001001 ("Religion (95) and Sex (3)
+# … for Canada, Provinces, Territories, CMAs and CAs"), as the Generic SDMX product
+# on the Open Government download. Lets the by-place chart reach back to 2001 (it was
+# previously 2011 + 2021 only). The 95-category religion variable's top-level subtotals
+# map cleanly to our nine groups; children are excluded to avoid double-counting.
+REL_2001_URL = "https://www12.statcan.gc.ca/open-gc-ouvert/2001/97F0022XCB2001001.ZIP"
+REL_2001_GROUPS = {                # ReligWI subtotal code(s) -> our group key
+    "christian": {"2", "7", "58", "68"},   # Catholic + Protestant + Orthodox + Christian n.i.e.
+    "no_religion": {"90"}, "muslim": {"69"}, "hindu": {"72"}, "sikh": {"73"},
+    "buddhist": {"71"}, "jewish": {"70"}, "indigenous_spirituality": {"81"},  # Aboriginal spirituality
+    "other_religion": {"74", "82", "83", "84", "85", "86", "87", "88", "89"},
+}
+
+
+def _religion_2001_rows():
+    """2001 religion counts for Canada / 13 provinces-territories / the 8 big CMAs,
+    parsed from the 2001 Census SDMX product. Returns (geography, geo_level, 2001,
+    group_key, count) tuples in the same shape as the 2011/2021 rows so the share
+    logic in build_religion_history handles them. The whole Ottawa–Hull CMA (code
+    35505) is used, not its province parts; "Yukon Territory" is aliased to "Yukon".
+    Verified: 2001 Canada reproduces the published shares (Christian 77%, No religion
+    16%, etc.) and the nine groups sum to ~100%."""
+    from lxml import etree
+    SNS = {"s": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/structure"}
+    G = "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/generic"
+    z = zipfile.ZipFile(_download_cache(REL_2001_URL, "/tmp/rel2001.zip",
+                                        "2001 Census religion (SDMX)"))
+    struct = etree.fromstring(z.read("Structure_97F0022XCB2001001.xml"))
+    cl = struct.find(".//s:CodeList[@id='CL_GEO']", SNS)
+    code2name = {c.get("value"): c.findtext("s:Description", namespaces=SNS)
+                 for c in cl.findall("s:Code", SNS)}
+    target = {}                                  # GEO code -> (geo_level, label)
+    for code, nm in code2name.items():
+        if not nm:
+            continue
+        en = nm.split(" - ")[0].strip().replace("Yukon Territory", "Yukon")
+        if en == "Canada":
+            target[code] = ("national", "Canada")
+        elif en in PROV_TERR and len(code) <= 2:
+            target[code] = ("province", en)
+        elif len(code) == 5 and _rel_city_label(en):
+            target.setdefault(code, ("cma", _rel_city_label(en)))
+    acc = {c: {} for c in target}                # GEO code -> {ReligWI code: count}
+    for _, el in etree.iterparse(z.open("Generic_97F0022XCB2001001.xml"),
+                                 tag="{%s}Series" % G):
+        kv = {v.get("concept"): v.get("value") for v in el.iter("{%s}Value" % G)}
+        if kv.get("GEO") in acc and kv.get("Sex") == "1":
+            ov = el.find(".//{%s}ObsValue" % G)
+            if ov is not None and ov.get("value"):
+                acc[kv["GEO"]][kv["ReligWI"]] = float(ov.get("value"))
+        el.clear()
+    rows = []
+    for code, (level, label) in target.items():
+        v = acc[code]
+        if "1" not in v:                         # "1" = Total - Religion (denominator)
+            continue
+        rows.append((label, level, 2001, "_base_", v["1"]))
+        for key, codes in REL_2001_GROUPS.items():
+            rows.append((label, level, 2001, key, sum(v.get(c, 0) for c in codes)))
+    print(f"  religion_history 2001: {len(target)} geographies parsed")
+    return rows
 
 
 def build_religion_history():
@@ -630,6 +723,12 @@ def build_religion_history():
             parse_2011(url, cache, label, is_cma)
         except Exception as e:
             print(f"  religion_history {label} failed: {e}")
+
+    # --- 2001: SDMX topic-based tabulation (Canada / provinces / 8 big CMAs) ---
+    try:
+        rows.extend(_religion_2001_rows())
+    except Exception as e:
+        print(f"  religion_history 2001 failed: {e}")
 
     long = pd.DataFrame(rows, columns=["geography", "geo_level", "year", "group_key", "count"])
     long["count"] = pd.to_numeric(long["count"], errors="coerce")
@@ -847,7 +946,7 @@ def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouve
     else:
         # --- DA profile (visible minority + religion) from the provincial split(s),
         #     chunk-read like the CT build; concatenated across provinces for split CMAs ---
-        needed = ({cid for cid, _, _ in VM_GROUPS} | {1683}
+        needed = ({cid for cid, _, _ in VM_GROUPS} | {1683, NOT_VM_ID, INDIGENOUS_ID}
                   | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE})
         keep = []
         for gn in geonos:
@@ -878,6 +977,7 @@ def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouve
         eth.index.name = "dauid"
         for cid, col, _ in VM_GROUPS:
             eth[col] = (ser(cid) / base * 100).round(1)
+        eth["white"], eth["indigenous"] = _derived_population_groups(ser, base)
         eth["name"] = "StatCan area #" + eth.index.astype(str)
         eth = eth.dropna(subset=["all_vm"])
         os.makedirs(GEO_DIR, exist_ok=True)
@@ -913,6 +1013,30 @@ def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouve
     with open(path, "w") as f:
         f.write(json.dumps(gj, separators=(",", ":")))
     print(f"wrote {path}: {round(os.path.getsize(path) / 1e6, 2)} MB")
+
+
+# Canonical per-metro DA build calls (visible minority + religion). Heavy + one-time
+# (re-run on a new census), NOT in the weekly pipeline. GEONO=006 is split into 6
+# *regional* files, not one per province — single-province names (006_Alberta) 404; AB
+# rides in 006_Prairies, BC is 006_BC_CB (Colombie-Britannique). build_da_profile then
+# filters each regional file to the target CMA. Ordered so Ontario/Quebec download once
+# and Ottawa reuses them from the /tmp cache.
+DA_METROS = [
+    dict(cmauid="535", pruid="35", geono="006_Ontario", slug="toronto"),
+    dict(cmauid="462", pruid="24", geono="006_Quebec", slug="montreal"),
+    dict(cmauid="505", pruid=["35", "24"], geono=["006_Ontario", "006_Quebec"], slug="ottawa"),
+    dict(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouver"),
+    dict(cmauid="825", pruid="48", geono="006_Prairies", slug="calgary"),
+]
+
+
+def build_all_da():
+    """Rebuild every dissemination-area metro layer (see DA_METROS). ~2 GB of
+    provincial profile downloads + multi-GB chunked parses — run deliberately, not
+    weekly."""
+    for j in DA_METROS:
+        print(f"\n===== building DA: {j['slug']} =====", flush=True)
+        build_da_profile(**j)
 
 
 if __name__ == "__main__":

@@ -78,9 +78,9 @@ else:
     print("Long-run religion data not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-### By province and city, 2011 vs 2021
+### By province and city, 2001 to 2021
 
-The series above is national. To compare places, the chart below switches between Canada, each province and territory, and the eight largest metro areas for the two most recent censuses. Shares are of the total population; the smaller groups sit near the bottom of the axis — click legend entries to isolate them.
+The series above is national. To compare places, the chart below switches between Canada, each province and territory, and the eight largest metro areas across the **three most recent censuses — 2001, 2011 and 2021** (the 2026 Census will add a fourth point when it is released in 2027). Shares are of the total population; the smaller groups sit near the bottom of the axis — click legend entries to isolate them. **2011** was the voluntary National Household Survey (flagged on the chart), and metropolitan-area boundaries shift a little between censuses, so read each city's trajectory as indicative rather than exact.
 
 ```{python}
 #| echo: false
@@ -89,7 +89,7 @@ if os.path.exists(relh_path):
     relh = pd.read_csv(relh_path)
     fig = history_lines(relh, group_colors=RELIGION_HISTORY_COLORS,
         thick_group="Christian", yaxis_title="% of population",
-        source_note="Source: 2021 Census (Table 98-10-0353) + 2011 National Household Survey profiles, Statistics Canada. Self-reported religion, % of population in private households. 2011 = voluntary NHS.")
+        source_note="Sources: 2001 Census (catalogue 97F0022XCB2001001), 2011 National Household Survey, and 2021 Census (Table 98-10-0353), Statistics Canada.<br>Self-reported religion, % of population. 2011 = voluntary NHS; metropolitan-area boundaries shift slightly between censuses.")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Religion-over-time data not yet available — run `python -m pipeline.build_census_geo`.")

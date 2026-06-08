@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, add_city_markers, add_boundaries
+from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, add_city_markers, add_boundaries, add_line_features
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -81,7 +81,13 @@ if os.path.exists(dgeo) and os.path.exists(dcsv):
         source_note="Source: Statistics Canada — Drainage regions of Canada (16-201-X); rivers from the Natural Resources Canada Atlas of Canada (1:15,000,000). Drainage regions grouped by the ocean drainage area each flows to; major rivers drawn on top.")
     rgeo = "data/geo/rivers_major.geojson"
     if os.path.exists(rgeo):
-        add_boundaries(fig, json.load(open(rgeo)), color="#0d2b5e", width=0.9, below=None)
+        add_line_features(fig, json.load(open(rgeo)), color="#0d2b5e", width=1.1, name="rivers")
+    # Default hover OFF (the "Hover on" button re-enables it) so the ~150 river labels don't
+    # crowd the national view; basins + rivers both become hoverable on demand.
+    fig.update_layout(hovermode=False)
+    for m in fig.layout.updatemenus:
+        if m.buttons and m.buttons[0].label == "Hover on":
+            m.active = 1
     fig.show(config=MAP_CONFIG)
 else:
     print("Drainage data not yet available — run `python -m pipeline.build_geography`.")

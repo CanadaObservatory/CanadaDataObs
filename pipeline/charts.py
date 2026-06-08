@@ -656,6 +656,30 @@ def add_boundaries(fig, geojson, *, color="#9aa0a6", width=0.8, below="traces"):
     return fig
 
 
+def add_line_features(fig, geojson, *, name_key="name", color="#0d2b5e", width=1.1,
+                      name="lines"):
+    """Overlay line features (e.g. rivers) from a LineString/MultiLineString GeoJSON as a
+    Scattermapbox trace. Unlike `add_boundaries` (a static mapbox line *layer*, no hover),
+    this is a real trace, so each feature carries a hover label from `name_key`. Segments are
+    joined with None breaks so separate features don't connect. Drawn above the choropleth
+    fills but below the basemap place-labels. Kept out of the legend. Returns the figure."""
+    lats, lons, cd = [], [], []
+    for f in geojson.get("features", []):
+        nm = (f.get("properties") or {}).get(name_key) or ""
+        geom = f.get("geometry") or {}
+        coords = geom.get("coordinates") or []
+        segs = coords if geom.get("type") == "MultiLineString" else [coords]
+        for seg in segs:
+            for pt in seg:
+                lons.append(pt[0]); lats.append(pt[1]); cd.append(nm)
+            lons.append(None); lats.append(None); cd.append(None)
+    fig.add_trace(go.Scattermapbox(
+        lat=lats, lon=lons, mode="lines", line=dict(color=color, width=width),
+        customdata=cd, hovertemplate="<b>%{customdata}</b><extra></extra>",
+        name=name, showlegend=False))
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,

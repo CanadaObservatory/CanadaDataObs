@@ -648,7 +648,9 @@ def add_boundaries(fig, geojson, *, color="#9aa0a6", width=0.8, below="traces"):
     a heavier national outline (the later call draws above the earlier where they share
     the perimeter). Returns the figure for chaining."""
     layer = dict(sourcetype="geojson", source=geojson, type="line",
-                 color=color, line=dict(width=width), below=below)
+                 color=color, line=dict(width=width))
+    if below is not None:
+        layer["below"] = below   # below=None → drawn on top (e.g. rivers over basin fills)
     existing = [l.to_plotly_json() for l in (fig.layout.mapbox.layers or [])]
     fig.update_layout(mapbox_layers=existing + [layer])
     return fig

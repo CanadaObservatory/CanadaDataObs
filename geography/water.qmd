@@ -61,7 +61,10 @@ rain or snow in Canada eventually drains toward one of five destinations — the
 the **Arctic**, **Hudson Bay**, the **Atlantic**, or (for a small corner of the southern
 Prairies) the **Gulf of Mexico**. Seen this way the country reorganises itself entirely:
 the **Hudson Bay** basin alone gathers water from Alberta to Quebec. The map groups
-Statistics Canada's 25 drainage regions by the ocean each one ultimately reaches.
+Statistics Canada's 25 drainage regions by the ocean each one ultimately reaches, with the
+major **rivers** drawn on top so you can trace the actual flow — the Saskatchewan and Nelson
+feeding Hudson Bay, the Mackenzie draining the North to the Arctic, and the Fraser and
+Columbia running to the Pacific.
 
 ```{python}
 #| echo: false
@@ -75,7 +78,10 @@ if os.path.exists(dgeo) and os.path.exists(dcsv):
     fig = choropleth_categorical(dg, dd, "dr_code", "oda_name", name_col="dr_name",
         ordered=list(oda_colors), color_map=oda_colors, legend_title="Drains to",
         center={"lat": 62, "lon": -96}, zoom=2.2,
-        source_note="Source: Statistics Canada — Drainage regions of Canada (16-201-X). The 25 drainage regions, grouped by the ocean drainage area each ultimately flows to.")
+        source_note="Source: Statistics Canada — Drainage regions of Canada (16-201-X); rivers from the Natural Resources Canada Atlas of Canada (1:15,000,000). Drainage regions grouped by the ocean drainage area each flows to; major rivers drawn on top.")
+    rgeo = "data/geo/rivers_major.geojson"
+    if os.path.exists(rgeo):
+        add_boundaries(fig, json.load(open(rgeo)), color="#0d2b5e", width=0.9, below=None)
     fig.show(config=MAP_CONFIG)
 else:
     print("Drainage data not yet available — run `python -m pipeline.build_geography`.")
@@ -85,3 +91,4 @@ else:
 
 - [Major lakes — surface area (CSV)](../data/geo/lakes_major.csv) — NRCan Atlas of Canada 1:1,000,000 waterbodies
 - [Drainage regions (CSV)](../data/geo/statcan_drainage.csv) — Statistics Canada, 16-201-X
+- [Major rivers (GeoJSON)](../data/geo/rivers_major.geojson) — NRCan Atlas of Canada, 1:15,000,000

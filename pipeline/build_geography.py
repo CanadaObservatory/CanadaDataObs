@@ -624,6 +624,32 @@ def build_elevation(width=1100):
           f"{min(r['median_elev'] for r in prov_rows)}–{max(r['median_elev'] for r in prov_rows)} m")
 
 
+RIVERS_URL = ("https://ftp.geogratis.gc.ca/pub/nrcan_rncan/vector/framework_cadre/"
+              "Atlas_of_Canada_15M/hydrology/AC_15M_Rivers.shp.zip")
+
+
+def build_rivers():
+    """Major rivers — NRCan Atlas of Canada 1:15,000,000 'sparse' rivers (~150 named major
+    rivers; the line companion to the 1:1M waterbodies the lakes come from, OGL-Canada).
+    Clipped to Canada and written as rivers_major.geojson (props: name), to overlay on the
+    watershed map so the flow toward each ocean basin is visible. Static — NOT weekly."""
+    print("Building major rivers (NRCan Atlas 1:15M sparse) ...")
+    z = zipfile.ZipFile(_download_cache(RIVERS_URL, "/tmp/ac15m_rivers.shp.zip", "1:15M rivers"))
+    z.extractall("/tmp/ac15m_rivers")
+    shp = [n for n in z.namelist() if n.endswith(".shp") and "Rivers_sparse" in n][0]
+    g = gpd.read_file(f"/tmp/ac15m_rivers/{shp}").to_crs(epsg=4326)
+    g = g.rename(columns={"NAME": "name"})[["name", "geometry"]]
+    canada = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson").to_crs(epsg=4326).union_all()
+    g = gpd.clip(g, canada)                                  # drop US-only rivers; trim transboundary
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    g["geometry"] = g["geometry"].simplify(0.01, preserve_topology=True)
+    gj = json.loads(g.to_json())
+    for f in gj["features"]:
+        f["geometry"]["coordinates"] = _rnd(f["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/rivers_major.geojson")
+    print(f"  {len(g)} river features (clipped to Canada)")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -634,6 +660,7 @@ if __name__ == "__main__":
     build_climate_normals()
     build_agriculture()
     build_drainage()
+    build_rivers()
     build_protected_areas()
     build_elevation()
     print("build_geography complete.")

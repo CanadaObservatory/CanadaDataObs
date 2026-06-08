@@ -147,7 +147,7 @@ if os.path.exists(emp_path):
         yaxis_title="% of total employment", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Government at a Glance 2025 (general government employment) | Data as of: {get_data_date(emp_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")

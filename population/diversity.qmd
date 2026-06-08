@@ -1,6 +1,6 @@
 ---
 title: "Diversity"
-description: "Where Canada’s visible-minority communities live, and how the country’s diversity has changed (Census)"
+description: "Where Canada’s population groups live (incl. White & Indigenous), and how the country’s diversity has changed (Census)"
 ---
 
 ```{python}
@@ -11,29 +11,25 @@ import pandas as pd
 
 ## Diversity by Neighbourhood
 
-Where Canada's visible-minority communities live, down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area (tracts are labelled by their Statistics Canada ID). This is a descriptive picture of residential geography — "visible minority" is Statistics Canada's term, and it is a separate concept from Indigenous identity. There is no "good" or "bad" reading here; it simply shows where people live. The **"Not a visible minority"** option is StatCan's residual category — it includes white *and* Indigenous people; the census has no distinct "White" group.
+Where Canada's population groups live, down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area (tracts are labelled by their Statistics Canada ID). This is a descriptive picture of residential geography; there is no "good" or "bad" reading here, it simply shows where people live. Census tracts are defined only for larger urban areas (census metropolitan areas and agglomerations), so rural and remote regions are left blank — that is a Statistics Canada geography convention, not a gap in this site.
 
-For an even finer view — Statistics Canada's smallest standard areas (**dissemination areas**, roughly 400–700 people each, the granularity neighbourhood apps like HouseSigma use) — open a metro's dedicated map (each kept on its own page for load speed):
+**How the groups are assembled.** Statistics Canada's "visible minority" variable (its term) has no distinct White category and folds Indigenous people into a single "Not a visible minority" residual. To show **White** and **Indigenous** explicitly, we split that residual using the 2021 Census on a common population base: **Indigenous** is StatCan's single-response *Indigenous identity* count, and **White** is a **derived** figure — "Not a visible minority" *minus* Indigenous identity (i.e. the non-Indigenous, non-visible-minority population). The three top-level groups — *All visible minorities*, *White* and *Indigenous* — therefore sum to 100%. Visible minority remains a separate concept from Indigenous identity.
+
+For an even finer view — Statistics Canada's smallest standard areas (**dissemination areas**, roughly 400–700 people each, the granularity used by neighbourhood-level mapping tools) — open a metro's dedicated map (each kept on its own page for load speed):
 
 **→ Diversity by dissemination area:** [Vancouver](neighbourhoods.qmd) · [Toronto](neighbourhoods-toronto.qmd) · [Montréal](neighbourhoods-montreal.qmd) · [Calgary](neighbourhoods-calgary.qmd) · [Ottawa–Gatineau](neighbourhoods-ottawa.qmd)
 
 ```{python}
 #| echo: false
 import os, json
-from pipeline.charts import choropleth_groups_map
+from pipeline.charts import choropleth_groups_map, DIVERSITY_MAP_GROUPS
 eth_geo = "data/geo/ct_2021.geojson"
 eth_path = "data/geo/statcan_ct_ethnicity_2021.csv"
 if os.path.exists(eth_geo) and os.path.exists(eth_path):
     geo = json.load(open(eth_geo))
     eth = pd.read_csv(eth_path, dtype={"ctuid": str})
-    groups = [("all_vm", "All visible minorities"), ("south_asian", "South Asian"),
-              ("chinese", "Chinese"), ("black", "Black"), ("filipino", "Filipino"),
-              ("arab", "Arab"), ("latin_american", "Latin American"),
-              ("southeast_asian", "Southeast Asian"), ("west_asian", "West Asian"),
-              ("korean", "Korean"), ("japanese", "Japanese"),
-              ("not_vm", "Not a visible minority")]
-    fig = choropleth_groups_map(geo, eth, "ctuid", groups, name_col="name", breakdown_exclude=["all_vm"], colorscale="Cividis", opacity=0.6,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. 'Visible minority' is StatCan's term; 'Not a visible minority' includes white and Indigenous people. Descriptive only.")
+    fig = choropleth_groups_map(geo, eth, "ctuid", DIVERSITY_MAP_GROUPS, name_col="name", breakdown_exclude=["all_vm"], colorscale="Viridis", opacity=0.6,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. 'Visible minority' is StatCan's term. 'White' is derived (Not a visible minority − Indigenous identity); 'Indigenous' is Indigenous identity; with 'All visible minorities' they sum to 100%. Descriptive only.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Diversity map not yet available — run `python -m pipeline.build_census_geo`.")
@@ -43,7 +39,7 @@ else:
 
 Canada's visible-minority population has grown from roughly one in eight people in the early 2000s to more than one in four. This chart traces each group's share across recent censuses. **Use the dropdown to switch geography** — Canada, a province, or a major city — and click legend entries to add or remove groups (the "Not a visible minority" majority starts hidden so the smaller groups are legible; click it on to see the full composition).
 
-A few notes for honest reading: shares here are of the **population aged 15 and over** (the basis of the only consistent multi-census table), so they differ slightly from the all-ages maps above; **2011** was the *voluntary* National Household Survey rather than the mandatory census, so its point is flagged and less directly comparable; and sub-group definitions have shifted modestly over the decades, so the **"All visible minorities"** total is the most comparable line.
+A few notes for honest reading: the series **begins in 2006** — that is the earliest census the consistent visible-minority-by-census-year table (98-10-0429-01) covers, and earlier 2001 products aren't available in a comparable machine-readable form. Shares here are of the **population aged 15 and over** (the basis of that table), so they differ slightly from the all-ages maps above; an **age breakdown isn't offered** because the table reports the 15-plus population only. **2011** was the *voluntary* National Household Survey rather than the mandatory census, so its point is flagged and less directly comparable; and sub-group definitions have shifted modestly over the decades, so the **"All visible minorities"** total is the most comparable line. Unlike the maps above, this trend uses Statistics Canada's visible-minority categories only — White and Indigenous are not broken out here, because that consistent multi-census table doesn't carry them; doing so would require splicing a separate Indigenous-identity series onto a different population base, which would not be like-for-like.
 
 ```{python}
 #| echo: false
@@ -63,6 +59,6 @@ else:
 
 ## Download Data
 
-- [Visible-Minority Groups by City (CSV)](../data/geo/statcan_cma_ethnicity.csv) — 2021 Census (Statistics Canada)
-- [Visible-Minority Groups by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_ethnicity_2021.csv) — 2021 Census (Statistics Canada)
+- [Population Groups by City — incl. White & Indigenous (CSV)](../data/geo/statcan_cma_ethnicity.csv) — 2021 Census (Statistics Canada)
+- [Population Groups by Neighbourhood / census tract — incl. White & Indigenous (CSV)](../data/geo/statcan_ct_ethnicity_2021.csv) — 2021 Census (Statistics Canada)
 - [Visible-Minority Composition by Census Year (CSV)](../data/geo/statcan_vm_history.csv) — Statistics Canada Table 98-10-0429-01 (population aged 15+)

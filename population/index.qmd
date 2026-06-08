@@ -19,29 +19,31 @@ Canada's population has grown steadily since the mid-20th century. This chart sh
 #| echo: false
 df = pd.read_csv("data/population/statcan_population_quarterly.csv", parse_dates=["date"])
 
-# National total — Canada
+# National total — Canada. Plot in millions for readability; open on the full record.
 canada = df[df["geography"] == "Canada"].copy()
+canada["pop_m"] = canada["population"] / 1e6
 
-fig = single_line(canada, "date", "population", title="", yaxis_title="Population",
-                  rangeslider=True, yaxis_tickformat=",",
+fig = single_line(canada, "date", "pop_m", title="", yaxis_title="Population (millions)",
+                  rangeslider=True, initial_full=True, yaxis_tickformat=".0f",
                   customdata=canada["date"].dt.quarter,
-                  hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Population: %{y:,.0f}<extra></extra>",
+                  hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Population: %{y:.2f} million<extra></extra>",
                   source_note=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}")
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
 ## Population by Province and Territory
 
-Select provinces to compare using the legend. Click a name to toggle it; double-click to isolate one province.
+Select provinces and territories to compare using the legend. Click a name to toggle it; double-click to isolate one. The three territories appear as low, near-flat lines: together they are home to under 0.13 million people, against more than 15 million in Ontario.
 
 ```{python}
 #| echo: false
-# Provincial breakdown
+# Provincial + territorial breakdown (all 13; shown in millions)
 provinces = df[df["geography"] != "Canada"].copy()
+provinces["pop_m"] = provinces["population"] / 1e6
 
-# Get latest date for sorting
+# Order by latest population (largest first); include every province AND territory
 latest = provinces.groupby("geography")["population"].last().sort_values(ascending=False)
-top_provinces = latest.head(10).index.tolist()
+top_provinces = latest.index.tolist()
 
 # Color palette
 colors = [
@@ -55,18 +57,17 @@ for i, geo in enumerate(top_provinces):
     subset = provinces[provinces["geography"] == geo]
     fig.add_trace(go.Scatter(
         x=subset["date"],
-        y=subset["population"],
+        y=subset["pop_m"],
         name=geo,
         mode="lines",
         line=dict(color=colors[i % len(colors)], width=2),
-        hovertemplate=f"<b>{geo}</b><br>%{{x|%Y}} Q%{{customdata}}: %{{y:,.0f}}<extra></extra>",
+        hovertemplate=f"<b>{geo}</b><br>%{{x|%Y}} Q%{{customdata}}: %{{y:.2f}} million<extra></extra>",
         customdata=subset["date"].dt.quarter,
     ))
 
 fig.update_layout(
     xaxis_title="",
-    yaxis_title="Population",
-    yaxis_tickformat=",",
+    yaxis_title="Population (millions)",
     plot_bgcolor="white",
     xaxis=dict(
         gridcolor="#e0e0e0",
@@ -124,7 +125,7 @@ fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "se
 
 ## Where Canada's Population Growth Comes From
 
-Population growth breaks into three parts: **natural increase** (births minus deaths), **net permanent immigration** (new permanent residents minus people leaving), and **net temporary residents** (the non-permanent population — people on work and study permits, plus asylum claimants). Stacking them shows what actually drove growth each year. The surge of the early 2020s was overwhelmingly temporary residents; federal immigration levels plans have since reduced both streams, and the temporary component has turned negative.
+Population growth breaks into three parts: **natural increase** (births minus deaths), **net permanent immigration** (new permanent residents minus people leaving), and **net temporary residents** (the non-permanent population — people on work and study permits, plus asylum claimants). Stacking them shows what actually drove growth each year; the surge of the early 2020s was overwhelmingly temporary residents, and that component has since turned negative. **Use the dropdown to isolate a single component** or view all three stacked. For a sense of scale, a net change of about 170,000 people in a year is roughly a city the size of Guelph, Kingston, or Greater Sudbury.
 
 ```{python}
 #| echo: false
@@ -138,120 +139,38 @@ if os.path.exists(components_path):
     permanent = piv["Immigrants"] - piv["Net emigration"]
     temporary = piv["Net non-permanent residents"]
     yrs = piv.index.year
-    cats = [("Natural increase (births − deaths)", natural, "#59a14f"),
-            ("Net permanent immigration", permanent, "#4e79a7"),
-            ("Net temporary residents", temporary, "#f28e2b")]
+    # Plot in thousands of persons for readability.
+    cats = [("Natural increase (births − deaths)", natural / 1e3, "#59a14f"),
+            ("Net permanent immigration", permanent / 1e3, "#4e79a7"),
+            ("Net temporary residents", temporary / 1e3, "#f28e2b")]
     figp = go.Figure()
     for name, series, col in cats:
         figp.add_trace(go.Bar(x=yrs, y=series.values, name=name, marker_color=col,
-            hovertemplate=name + ": %{y:,.0f}<extra></extra>"))
+            hovertemplate=name + ": %{y:,.0f}k<extra></extra>"))
     figp.add_hline(y=0, line_color="#888", line_width=1)
-    figp.add_vline(x=2024.5, line_dash="dot", line_color="#999")
-    figp.add_annotation(x=2024.5, y=1.0, yref="paper", yanchor="bottom",
-        text="federal levels plans<br>reduce intake", showarrow=False,
-        font=dict(size=9, color="#999"), align="center")
+    # Dropdown: all three stacked (default) or one component on its own.
+    n = len(cats)
+    sel = [dict(label="All components (stacked)", method="update",
+                args=[{"visible": [True] * n}])]
+    for k, (nm, _, _) in enumerate(cats):
+        sel.append(dict(label=nm, method="update",
+                        args=[{"visible": [j == k for j in range(n)]}]))
     figp.update_layout(barmode="relative", plot_bgcolor="white", height=480, bargap=0.15,
-        yaxis=dict(title="Persons per year", gridcolor="#e0e0e0", tickformat=",", zeroline=False),
+        yaxis=dict(title="Net change per year (thousands of persons)", gridcolor="#e0e0e0",
+                   tickformat=",", zeroline=False),
         xaxis=dict(title="", gridcolor="#e0e0e0"), hovermode="x unified",
         legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="left", x=0),
-        margin=dict(t=40, b=120, r=20))
+        margin=dict(t=70, b=120, r=20),
+        updatemenus=[dict(buttons=sel, active=0, x=1, xanchor="right", y=1.14,
+                          yanchor="top", bgcolor="white", bordercolor="#ccc",
+                          borderwidth=1, showactive=True)])
+    figp.add_annotation(text="Show:", xref="paper", yref="paper", x=1, xanchor="right",
+                        y=1.18, yanchor="bottom", showarrow=False, font=dict(size=11, color="#666"))
     figp.add_annotation(text=f"Source: Statistics Canada, Table 17-10-0008-01 | Data as of: {get_data_date(components_path)}",
         xref="paper", yref="paper", x=0, y=-0.30, showarrow=False, font=dict(size=10, color="#999"))
     figp.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Population components data not yet available. Run the data pipeline.")
-```
-
-## Components of Population Change
-
-Births, deaths, immigration, and emigration — the drivers behind Canada's population growth. Data from Statistics Canada's components of population growth table (quarterly estimates).
-
-```{python}
-#| echo: false
-import os
-
-components_path = "data/population/statcan_population_components.csv"
-if os.path.exists(components_path):
-    comp = pd.read_csv(components_path, parse_dates=["date"])
-    comp = comp[comp["geography"] == "Canada"].copy()
-
-    # Keep the main components for clarity
-    main_components = [
-        "Births",
-        "Deaths",
-        "Immigrants",
-        "Emigrants",
-        "Net interprovincial migration",
-        "Non-permanent residents",
-    ]
-    # Try matching — StatCan component names may vary slightly
-    available = comp["component"].unique()
-    keep = [c for c in available if any(m.lower() in c.lower() for m in main_components)]
-    if not keep:
-        # Fallback: show top components by absolute value
-        top = comp.groupby("component")["value"].apply(lambda x: x.abs().mean()).nlargest(6)
-        keep = top.index.tolist()
-
-    comp_filtered = comp[comp["component"].isin(keep)]
-
-    colors_map = {
-        "Births": "#2ca02c",
-        "Deaths": "#d62728",
-        "Immigrants": "#1f77b4",
-        "Emigrants": "#ff7f0e",
-    }
-
-    fig = go.Figure()
-    for component_name in keep:
-        subset = comp_filtered[comp_filtered["component"] == component_name].sort_values("date")
-        color = next((v for k, v in colors_map.items() if k.lower() in component_name.lower()), None)
-        fig.add_trace(go.Scatter(
-            x=subset["date"],
-            y=subset["value"],
-            name=component_name,
-            mode="lines",
-            line=dict(color=color, width=2) if color else dict(width=2),
-            hovertemplate=f"<b>{component_name}</b><br>%{{x|%Y}} Q%{{customdata}}: %{{y:,.0f}}<extra></extra>",
-            customdata=subset["date"].dt.quarter,
-        ))
-
-    fig.update_layout(
-        xaxis_title="",
-        yaxis_title="Persons (quarterly)",
-        yaxis_tickformat=",",
-        plot_bgcolor="white",
-        xaxis=dict(
-            gridcolor="#e0e0e0",
-            rangeselector=dict(
-                buttons=[
-                    dict(count=5, label="5Y", step="year", stepmode="backward"),
-                    dict(count=10, label="10Y", step="year", stepmode="backward"),
-                    dict(count=20, label="20Y", step="year", stepmode="backward"),
-                    dict(step="all", label="All"),
-                ],
-                x=0, xanchor="left", y=1.01,
-            ),
-            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5"),
-            range=["1999-01-01", comp["date"].max()],
-        ),
-        yaxis=dict(gridcolor="#e0e0e0"),
-        hovermode="x unified",
-        legend=dict(
-            orientation="v", yanchor="top", y=1,
-            xanchor="left", x=1.02,
-            itemclick="toggle", itemdoubleclick="toggleothers",
-        ),
-        margin=dict(b=110, t=40, r=200),
-        annotations=[dict(
-            text=f"Source: Statistics Canada, Table 17-10-0014-01 | Data as of: {get_data_date(components_path)}",
-            xref="paper", yref="paper", x=0, y=-0.30,
-            showarrow=False, font=dict(size=10, color="#999"),
-        )],
-    )
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    from IPython.display import Markdown
-    display(Markdown("*Population components data not yet available. Run the data pipeline to fetch this dataset.*"))
 ```
 
 ## Non-Permanent Residents
@@ -264,8 +183,11 @@ import os
 npr_path = "data/population/statcan_temp_residents.csv"
 if os.path.exists(npr_path):
     df = pd.read_csv(npr_path, parse_dates=["date"])
-    fig = single_line(df, "date", "npr_count", title="",
-                      yaxis_title="Non-permanent residents", yaxis_tickformat=",",
+    df["npr_m"] = df["npr_count"] / 1e6
+    fig = single_line(df, "date", "npr_m", title="",
+                      yaxis_title="Non-permanent residents (millions)", rangeslider=True,
+                      yaxis_tickformat=".1f",
+                      hovertemplate="<b>%{x|%Y}</b><br>%{y:.2f} million non-permanent residents<extra></extra>",
                       source_note=f"Source: Statistics Canada, Table 17-10-0121-01 | Data as of: {get_data_date(npr_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

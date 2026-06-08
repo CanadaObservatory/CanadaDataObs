@@ -43,14 +43,14 @@ DataCan/
 ├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances, Education & Science are dropdowns), theme
 ├── index.qmd  about.qmd   ← landing + methodology
 ├── population/index.qmd   ← **Population & Growth** (Population-dropdown landing): total, by-province, growth rate, components, non-permanent residents
-├── population/diversity.qmd ← visible-minority tract map (Cividis, soft 0.6 fill; dropdown incl. "Not a visible minority") + diversity-over-time chart (census-year + geography dropdown) + per-metro DA diversity links
-├── population/religion.qmd  ← religion tract map (Cividis, soft fill) + religion trends (1871–2021 long-run, 1981→2021 change, 2021 composition, 2011-vs-2021 by place) + per-metro DA religion links
+├── population/diversity.qmd ← population-group tract map (Viridis, soft 0.6 fill; dropdown incl. derived White & Indigenous) + diversity-over-time chart (census-year + geography dropdown) + per-metro DA diversity links
+├── population/religion.qmd  ← religion tract map (Viridis, soft fill) + religion trends (1871–2021 long-run, 1981→2021 change, 2021 composition, 2011-vs-2021 by place) + per-metro DA religion links
 ├── population/neighbourhoods*.qmd ← per-metro **dissemination-area diversity** maps — Vancouver/Toronto/Montréal/Calgary/Ottawa (DA = StatCan's finest ~400–700-person geography; ~1–3 MB each, built by build_da_profile)
 ├── population/religion-neighbourhoods*.qmd ← per-metro **DA religion** maps, same 5 metros (religion-neighbourhoods.qmd = Vancouver)
 ├── geography/index.qmd    ← **Where People Live** (Geography-dropdown landing): population density (province log-scale + by-city) + "Canada in the world" framing
 ├── geography/land.qmd     ← 15 ecozones (categorical) + land cover by ecozone (dropdown)
-├── geography/water.qmd    ← % freshwater area by province
-├── geography/fire-ice.qmd ← wildfire (national 1959– + 2023 by-province %-of-land) + permafrost zones (categorical) + Arctic sea-ice extent
+├── geography/water.qmd    ← **major lakes** (40 largest, NRCan Atlas 1:1M, shaded by area) + % freshwater area by province
+├── geography/fire-ice.qmd ← wildfire (national 1959– bar + **2023 fire locations**: every NFDB fire point sized by area burned) + permafrost zones (categorical) + Arctic sea-ice extent
 ├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate (unemployment + employment have an **age-bracket dropdown**: youth/prime/older/total), current account
 ├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
 ├── housing/neighbourhoods.qmd ← census-tract dwelling-value choropleth (heavy ~3MB; own page)
@@ -74,9 +74,9 @@ DataCan/
 │   ├── fetch_boc.py       ← fetch_boc_indicator (generic Bank of Canada Valet API; source="boc", Indicator.boc_series = {col: valet_code})
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, bubble_map (proportional-symbol map, e.g. wildfire points), add_city_markers (orient physical-geography maps), history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views. Every choropleth/bubble map carries a **hover on/off toggle** (`_hover_toggle`); ranked bars show one clearly-labelled year (no duplicate "Data as of")
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
-│   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover (not weekly)
+│   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover, **major lakes (build_lakes, NRCan 1:1M waterbodies) + 2023 wildfire points (build_wildfire_points, NFDB)** (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
 │   ├── fetch_environment.py ← registry custom fetchers: GHG emissions national total + by economic sector (ECCC National Inventory Report / CESI; year-stamped URL — bump GHG_RELEASE each spring)
@@ -252,9 +252,15 @@ the highlighted set or peer list is a one-line edit in config.py.
   anchors it); the slider still spans all history and "All" resets the view.
 - Multi-line charts that get a slider (population by province & components, Canada
   energy mix over time) move the legend to the **right** (`orientation="v", x=1.02`)
-  to free the bottom for the slider + source — no overlap. The 17-country peer
-  line charts deliberately keep range buttons only (a right-side 17-name legend is
-  unwieldy and their ~25-35yr span is well served by the buttons).
+  to free the bottom for the slider + source — no overlap. **The 17-country peer
+  line charts now follow the same idiom** (2026-06 review): `peer_comparison_line`
+  /`_by_age` plot the year axis as real dates so they carry a draggable **range
+  slider** + range-selector buttons, move the legend to the **right**, drop the
+  "Year" x-title, **own the source note** (`source_note=` param, placed below the
+  slider), and by default (`hide_peers=True`) show only Canada + the colour
+  comparators + the peer average at load — the grey peers start `legendonly` and the
+  reader adds them via the legend, which de-clutters the busy 17-line charts. Pass
+  `initial_start=<year>` to open on a recent window (e.g. 2015 for the GDP charts).
 - `page_snapshot(section)` (wraps `ranking_strip`) — the "Where Canada Stands"
   scorecard at the top of each peer-comparison page: one row per indicator, every
   peer a dot ordered **by rank** so further right = more favourable (lower-is-better
@@ -333,25 +339,37 @@ tract maps — so high-share areas never clamp and the colourbar always matches 
 reads differently from a 30% city, and a 98.5% census tract reaches the top instead of being pinned under a
 90% ceiling. A `cap_quantiles` param exists to clip a long tail if a specific layer ever needs it.) First use: **visible-minority
 groups by city** on the Population page (`build_cma_ethnicity()` → `data/geo/statcan_cma_ethnicity.csv`,
-CHARACTERISTIC_IDs 1684–1694 **+ 1697** from the CMA census profile: All VM / South Asian / Chinese / Black /
-Filipino / Arab / Latin American / SE Asian / W Asian / Korean / Japanese / **Not a visible minority**). All
-shares use the population base id **1683** as denominator. **Most sensitive layer —
-deliberately descriptive:** neutral perceptually-uniform **Cividis** scale (colourblind-safe, no red/green valence), no scorecard, no
+CHARACTERISTIC_IDs 1684–1694 from the CMA census profile: All VM / South Asian / Chinese / Black /
+Filipino / Arab / Latin American / SE Asian / W Asian / Korean / Japanese, **plus two derived groups, White &
+Indigenous** — see below). All shares use the population base id **1683** as denominator. **Most sensitive layer —
+deliberately descriptive:** neutral perceptually-uniform **Viridis** scale (colourblind-safe, no red/green valence), no scorecard, no
 "good/bad" direction, StatCan's own "visible minority" term, and a note that it's separate from
-Indigenous identity and shows only residential geography. **"Not a visible minority" (id 1697)** is StatCan's
-residual category — it includes white *and* Indigenous people; the visible-minority variable has **no distinct
-"White" group** (the only "Caucasian (White)" value, id 1715, lives in the separate multiple-response
-ethnic-origin block and must NOT be mixed in). This same group list drives the **tract-level** diversity map —
-now the **main** Population-page map (Cividis + 0.6 fill, true-range colour) — plus per-metro
+Indigenous identity and shows only residential geography. **White & Indigenous are *derived*** (added 2026-06):
+StatCan's visible-minority variable has no distinct White group and folds Indigenous people into a single "Not a
+visible minority" residual (id **1697**). We split that residual with the single-response **Indigenous identity**
+variable (id **1403**) on the same base (1683 ≡ Indigenous base 1402, verified identical): `indigenous =
+1403/base`, `white = (1697 − 1403)/base` (clamped ≥0 for small-area rounding). So **White is a derived residual**
+(the non-Indigenous, non-VM population — what Employment Equity treats as "white") and the three top-level groups
+— All visible minorities / White / Indigenous — tile to **exactly 100%** (`_derived_population_groups` in
+build_census_geo; dropdown order = `charts.DIVERSITY_MAP_GROUPS`; the derivation method is stated in the page
+prose + source notes). Do **NOT** substitute the ethnic-origin "Caucasian (White)" value (id 1715, ≈1%) — it's a
+multiple-response write-in, not a population share. This same group list drives the **tract-level** diversity map —
+now the **main** Population-page map (Viridis + 0.6 fill, true-range colour) — plus per-metro
 **dissemination-area** pages (`population/neighbourhoods-*.qmd` — five metros — each linked from the main page). DAs are StatCan's finest standard
 geography (~400–700 people, ~57k nationally), built one CMA at a time by
 `build_census_geo.build_da_profile(cmauid, pruid, geono, slug)` — one pass writes both the visible-minority and religion CSVs: boundary `lda_000a21a_e.zip` (~98 MB, no
 per-CMA download → spatial-filter to the CMA polygon from `cma_2021.geojson`); data from the DA Census Profile
-**GEONO=006** *provincial* splits (BC `006_BC_CB` ~293 MB; the data CSV is named `*_CSV_data_<Province>.csv`,
-~3.6 GB uncompressed → chunk-read, filter DGUID `2021S0512`); VM characteristic IDs are identical to the CT
-profile. **Five metros are built** — Vancouver, Toronto, Montréal, Calgary, Ottawa–Gatineau (~1–3 MB each).
-Ottawa is split-province, so `pruid`/`geono` are passed as lists (`["35","24"]` / `["006_Ontario","006_Quebec"]`)
-and the CMA polygon is the dissolved 505; add another metro by calling with its CMA/PR/GEONO. One page per metro
+**GEONO=006** *regional* splits (the data CSV is named `*_CSV_data_<Province>.csv`, ~3.6 GB uncompressed →
+chunk-read, filter DGUID `2021S0512`); VM characteristic IDs are identical to the CT profile. **GEONO gotcha:
+the GEONO=006 download groups provinces into 6 regional files, NOT one per province** — single-province names
+(`006_Alberta`, `006_Manitoba`) 404. The valid tokens (from the download page) are `006_Ontario`, `006_Quebec`,
+`006_BC_CB` (=Colombie-Britannique, ~307 MB), `006_Prairies` (MB+SK+**AB**, ~447 MB), `006_Atlantic_Atlantique`,
+`006_Territories_Territoires`; `build_da_profile` then filters to the target CMA by `pruid` + the CMA polygon, so
+a regional file is fine. **Five metros are built** — Vancouver (`933`/`59`/`006_BC_CB`), Toronto
+(`535`/`35`/`006_Ontario`), Montréal (`462`/`24`/`006_Quebec`), Calgary (`825`/`48`/`006_Prairies`),
+Ottawa–Gatineau (~1–3 MB each). Ottawa is split-province, so `pruid`/`geono` are passed as lists (`["35","24"]` /
+`["006_Ontario","006_Quebec"]`) and the CMA polygon is the dissolved 505; add another metro by calling with its
+CMA/PR/GEONO. The 5 canonical calls live in `build_census_geo.build_all_da()`. One page per metro
 per topic; a single-page city *selector* (a metro-dropdown swapping geojson+centre alongside the group dropdown)
 is deferred. Structure rationale: the coarse city (CMA) map was dropped from the main page in favour of the tract
 map, with DA as the finer linked tier. **Religion now mirrors diversity exactly** — tract map on the main page
@@ -379,7 +397,7 @@ extra download). Top-level 2021-Census groups (`RELIGION_GROUPS`, base id **1949
 religion-secular / Muslim / Hindu / Sikh / Buddhist / Jewish / Traditional Indigenous spirituality / Other —
 the Christian sub-denominations (1952–1966) are rolled into the Christian total (1951). Same deliberately
 neutral framing (self-reported, asked only **decennially**, no scorecard/valence); shares the same neutral
-perceptually-uniform **Cividis** scale as the diversity map (colourblind-safe, no red/green valence). Drives the city map on
+perceptually-uniform **Viridis** scale as the diversity map (colourblind-safe, no red/green valence). Drives the city map on
 `population/index.qmd` + the CT map on `population/religion-neighbourhoods.qmd`. Toronto sanity: Christian
 46.4% / No religion 26.6% / Muslim 10.2%.
 
@@ -463,7 +481,8 @@ combined `data/geo/ct_income_2021.geojson` as a data download.)
 (`statcan_ct_ethnicity_2021.csv`, 6,158 tracts) come from the **same** one-time download — the comprehensive
 Census Profile *for census tracts*, **98-401-X2021007** (`GetFile.cfm?…&GEONO=007`, ~238 MB zip, multi-GB
 uncompressed). It's read in **chunks** (keep only `DGUID` contains `S0507` = CT rows + the needed
-characteristics: dwelling-value id 1488 resolved by name, VM ids 1683–1697) so memory stays bounded, and the
+characteristics: dwelling-value id 1488 resolved by name, VM ids 1683–1697 + Indigenous-identity id 1403 for the
+derived White/Indigenous split) so memory stays bounded, and the
 zip is cached to `/tmp` so re-runs are cheap. CTUIDs are derived `DGUID.replace("2021S0507","")` — identical to
 `build_income()`, so they match the existing `ct_2021.geojson` geometry (which is **reused**, no new boundary
 download; both new CSVs join 100%). Pages: `housing/neighbourhoods.qmd` (dwelling value, `choropleth_map`) and

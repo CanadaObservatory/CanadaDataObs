@@ -107,7 +107,7 @@ if os.path.exists(wage_path):
         title="", yaxis_title="USD PPP (constant prices)", show_average=True)
     fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
         text=f"Source: OECD Average Annual Wages | Data as of: {get_data_date(wage_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -139,7 +139,7 @@ if os.path.exists(disp_path):
         title="", yaxis_title="Index (2007 = 100, real)", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Household Dashboard | Data as of: {get_data_date(disp_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Disposable income data not yet available. Run the data pipeline.")
@@ -172,7 +172,7 @@ if os.path.exists(gini_path):
         title="", yaxis_title="Gini coefficient (0–1)", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Income Distribution Database | Data as of: {get_data_date(gini_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -206,7 +206,7 @@ if os.path.exists(pov_path):
         title="", yaxis_title="% below 50% of median income", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Income Distribution Database | Data as of: {get_data_date(pov_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -243,7 +243,7 @@ fi_path = "data/income/statcan_food_insecurity.csv"
 if os.path.exists(fi_path):
     df = pd.read_csv(fi_path, parse_dates=["date"])
     fig = single_line(df, "date", "food_insecurity_rate", title="",
-                      yaxis_title="% of persons in food-insecure households",
+                      yaxis_title="% of persons in food-insecure households", rangeslider=True,
                       source_note=f"Source: Statistics Canada, Table 13-10-0835-01 (Canadian Income Survey) | Data as of: {get_data_date(fi_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

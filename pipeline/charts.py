@@ -11,9 +11,13 @@ from pipeline.config import (
 )
 
 
-def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
+def _base_layout(title, yaxis_title, xaxis_title="", range_slider=True,
                   has_legend=True, data_date=None):
-    """Standard layout for all DataCan charts."""
+    """Standard layout for all DataCan charts.
+
+    `xaxis_title` defaults to empty: on a time series the x-axis is self-evidently
+    years, and a "Year" title only collides with the legend/source note below it.
+    """
     xaxis_config = dict(title=xaxis_title, gridcolor="#e0e0e0")
     if range_slider:
         xaxis_config["rangeselector"] = dict(
@@ -67,26 +71,64 @@ def _base_layout(title, yaxis_title, xaxis_title="Year", range_slider=True,
     )
 
 
+def _year_to_dt(years):
+    """Plot an integer-year axis as real Jan-1 dates so Plotly's range slider and
+    range-selector buttons (which only work on date axes) function; the axis and
+    hover are formatted back to bare years (%Y)."""
+    import pandas as pd
+    return list(pd.to_datetime(pd.Index(years).astype(int).astype(str), format="%Y"))
+
+
+def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
+                            rangeslider, initial_start, extra_top=40):
+    """Shared layout for the peer-comparison line charts: right-hand vertical legend
+    (so a draggable range slider can own the bottom without colliding), range-
+    selector buttons + slider on a year axis shown as %Y, and a builder-owned source
+    note below the slider. `initial_start` (a year) opens the view on a recent window
+    while the slider still spans all history."""
+    xaxis = dict(
+        title="", gridcolor="#e0e0e0", type="date", tickformat="%Y", hoverformat="%Y",
+        rangeselector=dict(buttons=[
+            dict(count=5, label="5Y", step="year", stepmode="backward"),
+            dict(count=10, label="10Y", step="year", stepmode="backward"),
+            dict(count=20, label="20Y", step="year", stepmode="backward"),
+            dict(step="all", label="All"),
+        ], x=0, xanchor="left", y=1.01),
+    )
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
+    if initial_start is not None:
+        xaxis["range"] = [_year_to_dt([initial_start])[0],
+                          _year_to_dt([int(df[x_col].max())])[0]]
+    fig.update_layout(
+        xaxis=xaxis,
+        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
+        plot_bgcolor="white", hovermode="x unified", height=520,
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02,
+                    itemclick="toggle", itemdoubleclick="toggleothers"),
+        margin=dict(l=10, r=175, t=extra_top, b=(120 if rangeslider else 80)),
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           y=(-0.34 if rangeslider else -0.18), showarrow=False,
+                           font=dict(size=10, color="#999"))
+
+
 def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
                          country_col="country_code", name_col="country_name",
                          highlight=None, show_average=False,
-                         avg_name="OECD peer average"):
+                         avg_name="OECD peer average", source_note=None,
+                         rangeslider=True, initial_start=None, hide_peers=True):
     """
     Line chart comparing Canada against OECD peers.
-    Canada is highlighted in red; peers are grey; legend toggles on/off.
 
-    Parameters
-    ----------
-    df : DataFrame with columns for country, x-axis, and y-axis values
-    x_col : column name for x-axis (typically 'year')
-    y_col : column name for y-axis values
-    title : chart title
-    yaxis_title : y-axis label
-    country_col : column with country codes
-    name_col : column with country display names
-    highlight : list of country codes to highlight (default: just Canada)
-    show_average : if True, add a dashed blue peer-average line
-    avg_name : legend label for the average line
+    Canada is red; named comparators get distinct colours; the rest of the peer group
+    is light grey. By default (`hide_peers=True`) only Canada, the coloured comparators
+    and the peer average are drawn at load — the grey peers start legend-hidden and the
+    reader adds them by clicking the right-hand legend, which keeps the busy 17-line
+    charts legible. A draggable range slider sits below the chart; `initial_start`
+    (a year) opens the view on a recent window while the slider still spans all history.
+    Pass `source_note` and the builder places it below the slider.
     """
     if highlight is None:
         highlight = [HIGHLIGHT_COUNTRY]
@@ -103,14 +145,15 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
 
     fig = go.Figure()
 
-    # 1) Non-highlighted peers: light grey, drawn behind; alphabetical in legend
+    # 1) Non-highlighted peers: light grey, behind; hidden at load when hide_peers
+    #    (added back via the legend), so only Canada/comparators/average show first.
     for i, code in enumerate(others):
         s = df[df[country_col] == code]
         name = _name(code)
         fig.add_trace(go.Scatter(
-            x=s[x_col], y=s[y_col], name=name, mode="lines",
+            x=_year_to_dt(s[x_col]), y=s[y_col], name=name, mode="lines",
             line=dict(color=PEER_COLOR, width=PEER_WIDTH), opacity=0.8,
-            legendrank=100 + i,
+            legendrank=100 + i, visible=("legendonly" if hide_peers else True),
             hovertemplate=f"{name}: %{{y:.2f}}<extra></extra>",
         ))
 
@@ -123,7 +166,7 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
         avg = (df[df[x_col].isin(valid_years)]
                .groupby(x_col)[y_col].mean().reset_index())
         fig.add_trace(go.Scatter(
-            x=avg[x_col], y=avg[y_col], name=avg_name, mode="lines",
+            x=_year_to_dt(avg[x_col]), y=avg[y_col], name=avg_name, mode="lines",
             line=dict(color=OECD_AVG_COLOR, width=2, dash="dash"),
             legendrank=300,
             hovertemplate=f"{avg_name}: %{{y:.2f}}<extra></extra>",
@@ -134,7 +177,7 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
         s = df[df[country_col] == code]
         name = _name(code)
         fig.add_trace(go.Scatter(
-            x=s[x_col], y=s[y_col], name=name, mode="lines",
+            x=_year_to_dt(s[x_col]), y=s[y_col], name=name, mode="lines",
             line=dict(color=COMPARATOR_COLORS[code], width=2),
             legendrank=10 + i,
             hovertemplate=f"<b>{name}</b>: %{{y:.2f}}<extra></extra>",
@@ -147,13 +190,14 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
             continue
         name = _name(code)
         fig.add_trace(go.Scatter(
-            x=s[x_col], y=s[y_col], name=name, mode="lines+markers",
+            x=_year_to_dt(s[x_col]), y=s[y_col], name=name, mode="lines+markers",
             line=dict(color=CANADA_COLOR, width=HIGHLIGHT_WIDTH), marker=dict(size=5),
             legendrank=1,
             hovertemplate=f"<b>{name}: %{{y:.2f}}</b><extra></extra>",
         ))
 
-    fig.update_layout(_base_layout(title, yaxis_title))
+    _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
+                            rangeslider, initial_start)
     return fig
 
 
@@ -180,6 +224,16 @@ def _latest_year_with_coverage(df, value_col, year_col="year", min_countries=10,
     return int(df[year_col].max())
 
 
+def _ranked_footnote(source_note, year):
+    """A ranked bar shows exactly one year. Drop a trailing "| Data as of: <year>"
+    the caller appended (which duplicated the ranked year — the "year twice" the
+    review flagged) and label the displayed year once, clearly."""
+    import re
+    src = re.sub(r"\s*\|\s*Data as of:.*$", "", source_note or "").rstrip()
+    sep = " &nbsp;·&nbsp; " if src else ""
+    return f"{src}{sep}{year} data"
+
+
 def ranked_bar(df, value_col, xaxis_title, source_note,
                country_col="country_code", name_col="country_name",
                year_col="year", ascending=True, min_countries=10,
@@ -189,8 +243,9 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
 
     Replaces the bar-chart block that was previously copy-pasted into every page.
     `source_note` is the full footer string (the caller builds it, typically
-    f"Source: ... | Data as of: {get_data_date(path)}"); the chosen year is
-    appended automatically.
+    f"Source: ... | Data as of: {get_data_date(path)}"). A ranked bar shows exactly
+    one year, so the builder strips any trailing "| Data as of: <year>" the caller
+    appended (it duplicated the ranked year) and shows the displayed year once.
     """
     year = _latest_year_with_coverage(df, value_col, year_col, min_countries,
                                       country_col=country_col,
@@ -223,10 +278,10 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
         plot_bgcolor="white",
         showlegend=False,
         height=height,
-        margin=dict(t=30, b=60, l=10, r=20),
+        margin=dict(t=30, b=90, l=10, r=20),
         annotations=[dict(
-            text=f"{source_note} &nbsp;({year})",
-            xref="paper", yref="paper", x=1, y=-0.09,
+            text=_ranked_footnote(source_note, year),
+            xref="paper", yref="paper", x=1, y=-0.15,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
@@ -237,13 +292,15 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
                                 ages, default_age,
                                 country_col="country_code", name_col="country_name",
                                 show_average=True, avg_name="OECD peer average",
-                                hover_suffix="%", hover_decimals=1):
+                                hover_suffix="%", hover_decimals=1,
+                                source_note=None, rangeslider=True,
+                                initial_start=None, hide_peers=True):
     """Peer-comparison line chart with an age-bracket dropdown.
 
-    Same Canada-red / comparator / grey-cloud styling and peer-average logic as
-    `peer_comparison_line`, but `df` is long over an extra `age_col`; a Plotly
-    dropdown restyles every trace to the selected bracket. `ages` is the dropdown
-    order; `default_age` is shown initially (typically the working-age total)."""
+    Same declutter as `peer_comparison_line` (Canada/comparators/average shown, grey
+    peers legend-hidden, right-hand legend, range slider, builder-owned source note),
+    but `df` is long over an extra `age_col`; a Plotly dropdown restyles every trace
+    to the selected bracket. `ages` is the dropdown order; `default_age` shows first."""
     highlight = [HIGHLIGHT_COUNTRY]
 
     def _name(code):
@@ -258,7 +315,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
 
     def series(code, age):
         s = df[(df[country_col] == code) & (df[age_col] == age)].sort_values(x_col)
-        return s[x_col].tolist(), s[y_col].tolist()
+        return _year_to_dt(s[x_col]), s[y_col].tolist()
 
     def avg_series(age):
         d = df[df[age_col] == age]
@@ -266,7 +323,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
         counts = d.dropna(subset=[y_col]).groupby(x_col)[y_col].count()
         valid = counts[counts >= n / 2].index
         a = d[d[x_col].isin(valid)].groupby(x_col)[y_col].mean()
-        return a.index.tolist(), a.values.tolist()
+        return _year_to_dt(a.index), a.values.tolist()
 
     # Fixed trace order (used for both add-order and the per-age restyle arrays):
     # grey others, [average], coloured comparators, Canada on top.
@@ -288,7 +345,8 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
             name = _name(code)
             fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
                 line=dict(color=PEER_COLOR, width=PEER_WIDTH), opacity=0.8,
-                legendrank=100 + oi, hovertemplate=_hov(name)))
+                legendrank=100 + oi, visible=("legendonly" if hide_peers else True),
+                hovertemplate=_hov(name)))
             oi += 1
         elif kind == "avg":
             fig.add_trace(go.Scatter(x=x, y=y, name=avg_name, mode="lines",
@@ -313,9 +371,9 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
             xs.append(x); ys.append(y)
         buttons.append(dict(method="restyle", label=age, args=[{"x": xs, "y": ys}]))
 
-    fig.update_layout(_base_layout("", yaxis_title))
+    _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
+                            rangeslider, initial_start, extra_top=70)
     fig.update_layout(
-        margin_t=70,  # room for the dropdown + label above the plot
         updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.13, yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1)])
@@ -365,18 +423,18 @@ def ranked_bar_by_age(df, value_col, age_col, xaxis_title, source_note, *,
         buttons.append(dict(method="update", label=age,
             args=[{"x": [a["x"]], "y": [a["y"]], "marker.color": [a["colors"]]},
                   {"yaxis.categoryarray": a["y"], "yaxis.categoryorder": "array",
-                   "annotations[0].text": f"{source_note} &nbsp;({a['year']})"}]))
+                   "annotations[0].text": _ranked_footnote(source_note, a['year'])}]))
 
     fig.update_layout(
         xaxis=xaxis,
         yaxis=dict(title="", categoryorder="array", categoryarray=d0["y"]),
         plot_bgcolor="white", showlegend=False, height=height,
-        margin=dict(t=60, b=60, l=10, r=20),
+        margin=dict(t=60, b=90, l=10, r=20),
         updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.06, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1)],
-        annotations=[dict(text=f"{source_note} &nbsp;({d0['year']})",
-            xref="paper", yref="paper", x=1, y=-0.09, showarrow=False,
+        annotations=[dict(text=_ranked_footnote(source_note, d0['year']),
+            xref="paper", yref="paper", x=1, y=-0.15, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.add_annotation(text="Age group:", xref="paper", yref="paper",
         x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
@@ -535,6 +593,47 @@ def _labelled_basemap():
     ]
 
 
+def _hover_toggle():
+    """Two-button menu (floated bottom-left of a map) to show/hide the hover tooltip —
+    the review noted it is useful but sometimes distracting. Toggles the layout-level
+    `hovermode` via relayout ("closest" on / `False` off). We must NOT toggle the
+    trace's `hoverinfo` here: a Choroplethmapbox/Scattermapbox with a `hovertemplate`
+    set ignores `hoverinfo` (the template wins, even `hoverinfo="skip"`), so that does
+    nothing — whereas `hovermode=False` reliably suppresses hover for the whole map.
+    Returned as one updatemenus entry; append to a map's `updatemenus` list (it
+    composes with a group/dropdown menu)."""
+    return dict(type="buttons", direction="right", showactive=True, active=0,
+                x=0.01, y=0.01, xanchor="left", yanchor="bottom",
+                pad=dict(t=2, b=2, l=2, r=2), bgcolor="white", bordercolor="#ccc",
+                borderwidth=1, font=dict(size=11),
+                buttons=[dict(label="Hover on", method="relayout", args=[{"hovermode": "closest"}]),
+                         dict(label="Hover off", method="relayout", args=[{"hovermode": False}])])
+
+
+# A handful of major cities to orient the physical-geography maps (name, lat, lon).
+MAJOR_CITIES = [
+    ("Vancouver", 49.28, -123.12), ("Calgary", 51.05, -114.07),
+    ("Edmonton", 53.55, -113.49), ("Winnipeg", 49.90, -97.14),
+    ("Toronto", 43.65, -79.38), ("Ottawa", 45.42, -75.70),
+    ("Montréal", 45.50, -73.57), ("Halifax", 44.65, -63.58),
+    ("St. John's", 47.56, -52.71), ("Whitehorse", 60.72, -135.06),
+    ("Yellowknife", 62.45, -114.37), ("Iqaluit", 63.75, -68.52),
+]
+
+
+def add_city_markers(fig, cities=MAJOR_CITIES, textposition="top center"):
+    """Overlay major cities (small dark dots + labels) to orient the physical-geography
+    maps (ecozones, land cover, wildfire), where the data carries no city names. Drawn
+    above the choropleth fill and kept out of the legend."""
+    fig.add_trace(go.Scattermapbox(
+        lat=[c[1] for c in cities], lon=[c[2] for c in cities],
+        mode="markers+text", text=[c[0] for c in cities],
+        textposition=textposition, textfont=dict(size=9, color="#222"),
+        marker=dict(size=6, color="#111"), hoverinfo="skip", showlegend=False,
+        name="cities"))
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
@@ -587,6 +686,7 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
         margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        updatemenus=[_hover_toggle()],
     )
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper",
@@ -596,7 +696,7 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
 
 
 def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
-                          colorscale="Cividis", source_note=None,
+                          colorscale="Viridis", source_note=None,
                           center=None, zoom=2.6, height=660, cap_quantiles=(0.0, 1.0),
                           opacity=0.82, breakdown=True, breakdown_min=0.5,
                           breakdown_exclude=()):
@@ -623,8 +723,9 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     differently from Calgary's 39% instead of both clamping to the darkest colour).
     Pass a high quantile < 1 (e.g. (0, 0.98)) for the ~6,000-tract maps, where a few
     near-100% enclave tracts would otherwise stretch the scale and flatten the
-    typical range. The default colour scale is **Cividis** — perceptually uniform and
-    colourblind-safe, with no red/green valence — so wide spreads stay legible while
+    typical range. The default colour scale is **Viridis** — perceptually uniform and
+    colourblind-safe, with no red/green valence, and higher contrast than Cividis so
+    the socially meaningful mid-range (e.g. 3% vs 13%) stays distinguishable while
     these sensitive layers keep a neutral, descriptive reading."""
     import numpy as np
     import pandas as pd
@@ -677,7 +778,8 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
         margin=dict(l=0, r=0, t=46, b=36), height=height,
         updatemenus=[dict(buttons=buttons, active=0, x=0.01, y=0.99,
                           xanchor="left", yanchor="top", bgcolor="white",
-                          bordercolor="#ccc", borderwidth=1, showactive=True)],
+                          bordercolor="#ccc", borderwidth=1, showactive=True),
+                     _hover_toggle()],
     )
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
@@ -747,7 +849,7 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
         margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
-        legend=legend, showlegend=True,
+        legend=legend, showlegend=True, updatemenus=[_hover_toggle()],
     )
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
@@ -756,6 +858,54 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     return fig
 
 
+def bubble_map(df, lat_col, lon_col, size_col, *, color="#e3492a", opacity=0.5,
+               max_px=42, customdata=None, hovertemplate=None, source_note=None,
+               center=None, zoom=2.3, height=640):
+    """Proportional-symbol ("bubble") map — points sized by `size_col`, drawn over the
+    same labelled basemap and with the same hover on/off toggle as the choropleths.
+    Marker AREA is proportional to the value (Plotly `sizemode="area"`), so a fire that
+    burned 4× the area shows ~2× the radius; tiny values clamp to a 2-px floor. First
+    use: the 2023 wildfire-locations map, where a handful of enormous boreal fires must
+    visibly dominate the thousands of small ones."""
+    center = center or {"lat": 60.0, "lon": -100.0}
+    s = df[size_col]
+    sizeref = 2.0 * float(s.max()) / (max_px ** 2) if float(s.max()) > 0 else 1
+    fig = go.Figure(go.Scattermapbox(
+        lat=df[lat_col], lon=df[lon_col], mode="markers",
+        marker=dict(size=s, sizemode="area", sizeref=sizeref, sizemin=2,
+                    color=color, opacity=opacity),
+        customdata=customdata,
+        hovertemplate=hovertemplate or "%{customdata}<extra></extra>"))
+    fig.update_layout(
+        mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
+        mapbox_zoom=zoom, mapbox_center=center,
+        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        updatemenus=[_hover_toggle()])
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.04, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
+# Dropdown order for the diversity ("population groups") maps — CMA, census-tract and
+# dissemination-area. Leads with the three-way partition that tiles to exactly 100%
+# (All visible minorities · White · Indigenous), then the visible-minority subgroups.
+# `white` and `indigenous` are derived in build_census_geo (see DERIVED_GROUPS): White
+# is the non-Indigenous remainder of "Not a visible minority", Indigenous is the
+# single-response identity count. Shared by every diversity .qmd so the layers stay in
+# lockstep; pair with breakdown_exclude=["all_vm"] so the hover composition (White +
+# Indigenous + the visible-minority subgroups) isn't double-counted by the aggregate.
+DIVERSITY_MAP_GROUPS = [
+    ("all_vm", "All visible minorities"),
+    ("white", "White"),
+    ("indigenous", "Indigenous"),
+    ("south_asian", "South Asian"), ("chinese", "Chinese"), ("black", "Black"),
+    ("filipino", "Filipino"), ("arab", "Arab"), ("latin_american", "Latin American"),
+    ("southeast_asian", "Southeast Asian"), ("west_asian", "West Asian"),
+    ("korean", "Korean"), ("japanese", "Japanese"),
+]
+
 VM_GROUP_COLORS = {
     "All visible minorities": "#111111",   # headline (thick)
     "Not a visible minority": "#9e9e9e",
@@ -763,18 +913,34 @@ VM_GROUP_COLORS = {
     "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
 }
 
+# Dropdown order for the religion ("religious affiliation") share maps — CMA,
+# census-tract and dissemination-area. Shared by every religion .qmd so the layers
+# stay in lockstep. Leads with **No religion / secular** (not Christian) so the map
+# opens on a neutral default rather than implying a preferred faith — a deliberate
+# editorial choice for this descriptive, non-partisan layer. The many Christian
+# denominations are rolled into a single "Christian" total upstream.
+RELIGION_MAP_GROUPS = [
+    ("no_religion", "No religion / secular"),
+    ("christian", "Christian"),
+    ("muslim", "Muslim"), ("hindu", "Hindu"), ("sikh", "Sikh"),
+    ("buddhist", "Buddhist"), ("jewish", "Jewish"),
+    ("indigenous_spirituality", "Indigenous"),
+    ("other_religion", "Other religions & spiritual traditions"),
+]
+
 RELIGION_HISTORY_COLORS = {
     "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
     "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#d62728",
     "Buddhist": "#9467bd", "Jewish": "#8c564b",
-    "Traditional Indigenous spirituality": "#e377c2", "Other religions": "#17becf",
+    "Indigenous": "#e377c2", "Other religions": "#17becf",
 }
 
 
 def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                   value_col="share", default_geo="Canada", source_note=None,
                   nhs_year=2011, nhs_label="2011: voluntary NHS", height=560,
-                  yaxis_title="% of population", dropdown=True, measures=None):
+                  yaxis_title="% of population", dropdown=True, measures=None,
+                  rangeslider=False):
     """Composition over census years, with a dropdown to switch the geography
     (Canada / a province / a city). Mirrors `choropleth_groups_map`'s dropdown idiom:
     one fixed line trace per group; each dropdown button `restyle`s every trace's y to
@@ -821,13 +987,18 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                       width=3 if g == thick_group else 1.8),
             marker=dict(size=6), hovertemplate=hover(g, init)))
 
+    xaxis = dict(title="Census year", gridcolor="#e0e0e0",
+                 tickmode="array", tickvals=years)
+    if rangeslider:   # draggable time window for the deep (1871–) long-run series
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.07, bgcolor="#f5f5f5")
+    b_margin = 120 if rangeslider else 90
+    src_y = -0.30 if rangeslider else -0.18
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
-        xaxis=dict(title="Census year", gridcolor="#e0e0e0",
-                   tickmode="array", tickvals=years),
+        xaxis=xaxis,
         yaxis=dict(title=init.get("ytitle", yaxis_title), gridcolor="#e0e0e0", rangemode="tozero"),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
-        margin=dict(l=10, r=180, t=70 if (dropdown or measures) else 40, b=90),
+        margin=dict(l=10, r=180, t=70 if (dropdown or measures) else 40, b=b_margin),
     )
     if dropdown:
         buttons = [dict(method="restyle", label=geo,
@@ -857,8 +1028,8 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                            font=dict(size=9, color="#999"))
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper",
-                           x=0, xanchor="left", y=-0.18, showarrow=False,
-                           font=dict(size=10, color="#999"))
+                           x=0, xanchor="left", y=src_y, showarrow=False,
+                           align="left", font=dict(size=10, color="#999"))
     return fig
 
 
@@ -974,7 +1145,7 @@ def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
 
 def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
                 rangeslider=False, source_note=None, hovertemplate=None,
-                yaxis_tickformat=None, customdata=None):
+                yaxis_tickformat=None, customdata=None, initial_full=False):
     """Single Canada-only time series.
 
     Set rangeslider=True for long series (more than a decade or two) to add a
@@ -982,6 +1153,9 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
     the slider only has to coexist with the source note, which this function
     places below the slider (no overlap). Pass source_note to have it positioned
     correctly for the slider; pass hovertemplate / yaxis_tickformat as needed.
+
+    `initial_full=True` opens on the entire history instead of the recent ~25-year
+    window (e.g. the population total, where the long sweep is the point).
     """
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -1004,9 +1178,10 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
         xaxis["rangeslider"] = dict(visible=True, thickness=0.10, bgcolor="#f5f5f5")
         # Open on the most recent ~25 years (from 1999, so the 2000 tick anchors
         # the view); the slider still spans all history and "All" resets it.
+        # initial_full=True opens on the whole record instead.
         import pandas as pd
         xmin, xmax = df[x_col].min(), df[x_col].max()
-        xaxis["range"] = [max(xmin, pd.Timestamp("1999-01-01")), xmax]
+        xaxis["range"] = [xmin if initial_full else max(xmin, pd.Timestamp("1999-01-01")), xmax]
     yaxis = dict(title=yaxis_title, gridcolor="#e0e0e0")
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat

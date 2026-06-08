@@ -20,19 +20,14 @@ For an even finer view — Statistics Canada's smallest standard areas (**dissem
 ```{python}
 #| echo: false
 import os, json
-from pipeline.charts import choropleth_groups_map
+from pipeline.charts import choropleth_groups_map, RELIGION_MAP_GROUPS
 rel_geo = "data/geo/ct_2021.geojson"
 rel_path = "data/geo/statcan_ct_religion_2021.csv"
 if os.path.exists(rel_geo) and os.path.exists(rel_path):
     geo = json.load(open(rel_geo))
     rel = pd.read_csv(rel_path, dtype={"ctuid": str})
-    groups = [("christian", "Christian"), ("no_religion", "No religion / secular"),
-              ("muslim", "Muslim"), ("hindu", "Hindu"), ("sikh", "Sikh"),
-              ("buddhist", "Buddhist"), ("jewish", "Jewish"),
-              ("indigenous_spirituality", "Traditional Indigenous spirituality"),
-              ("other_religion", "Other religions & spiritual traditions")]
-    fig = choropleth_groups_map(geo, rel, "ctuid", groups, name_col="name", colorscale="Cividis", opacity=0.6,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. Religion is self-reported. Descriptive only.")
+    fig = choropleth_groups_map(geo, rel, "ctuid", RELIGION_MAP_GROUPS, name_col="name", colorscale="Viridis", opacity=0.6,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. Religion is self-reported. Opens on 'No religion / secular'. Descriptive only.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Religion map not yet available — run `python -m pipeline.build_census_geo`.")
@@ -53,12 +48,12 @@ if os.path.exists(rellr_path):
     # that earlier era (≤1971) rather than imply it still contains them afterwards.
     rellr = rellr[~((rellr["group"] == "Other religions") & (rellr["year"] > 1971))]
     fig = history_lines(rellr, group_colors=RELIGION_HISTORY_COLORS, dropdown=False,
-        thick_group="Christian",
+        thick_group="Christian", rangeslider=True,
         measures=[dict(label="% of population", col="share", fmt=".1f", suffix="%",
                        ytitle="% of total population"),
                   dict(label="Number of people", col="count", fmt=",.0f", suffix="",
                        ytitle="Number of people")],
-        source_note="Sources: Censuses of Canada 1871–2021 — StatCan Table 17-10-0073-01 (1871–1971), published census tabulations (1981–2001), 2011 National Household Survey, 2021 Census. Self-reported religion. World religions counted separately from 1981; “Other” shown to 1971 only; 2011 = voluntary NHS.")
+        source_note="Sources: Censuses of Canada 1871–2021 — StatCan Table 17-10-0073-01 (1871–1971), published census tabulations (1981–2001), 2011 National Household Survey, 2021 Census.<br>Self-reported religion. World religions counted separately from 1981; “Other” shown to 1971 only; 2011 = voluntary NHS.")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Long-run religion data not yet available — run `python -m pipeline.build_census_geo`.")
@@ -83,9 +78,9 @@ else:
     print("Long-run religion data not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-### By province and city, 2011 vs 2021
+### By province and city, 2001 to 2021
 
-The series above is national. To compare places, the chart below switches between Canada, each province and territory, and the eight largest metro areas for the two most recent censuses. Shares are of the total population; the smaller groups sit near the bottom of the axis — click legend entries to isolate them.
+The series above is national. To compare places, the chart below switches between Canada, each province and territory, and the eight largest metro areas across the **three most recent censuses — 2001, 2011 and 2021** (the 2026 Census will add a fourth point when it is released in 2027). Shares are of the total population; the smaller groups sit near the bottom of the axis — click legend entries to isolate them. **2011** was the voluntary National Household Survey (flagged on the chart), and metropolitan-area boundaries shift a little between censuses, so read each city's trajectory as indicative rather than exact.
 
 ```{python}
 #| echo: false
@@ -94,7 +89,7 @@ if os.path.exists(relh_path):
     relh = pd.read_csv(relh_path)
     fig = history_lines(relh, group_colors=RELIGION_HISTORY_COLORS,
         thick_group="Christian", yaxis_title="% of population",
-        source_note="Source: 2021 Census (Table 98-10-0353) + 2011 National Household Survey profiles, Statistics Canada. Self-reported religion, % of population in private households. 2011 = voluntary NHS.")
+        source_note="Sources: 2001 Census (catalogue 97F0022XCB2001001), 2011 National Household Survey, and 2021 Census (Table 98-10-0353), Statistics Canada.<br>Self-reported religion, % of population. 2011 = voluntary NHS; metropolitan-area boundaries shift slightly between censuses.")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Religion-over-time data not yet available — run `python -m pipeline.build_census_geo`.")

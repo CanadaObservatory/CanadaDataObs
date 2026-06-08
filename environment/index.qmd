@@ -100,7 +100,7 @@ if os.path.exists(co2cap_path):
     fig.update_layout(
         annotations=[dict(
             text=f"Source: OECD Green Growth Indicators | Data as of: {get_data_date(co2cap_path)}",
-            xref="paper", yref="paper", x=0, y=-0.52,
+            xref="paper", yref="paper", x=0, y=-0.34,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
@@ -140,7 +140,7 @@ if os.path.exists(co2idx_path):
     fig.update_layout(
         annotations=[dict(
             text=f"Source: OECD Green Growth Indicators | Data as of: {get_data_date(co2idx_path)}",
-            xref="paper", yref="paper", x=0, y=-0.52,
+            xref="paper", yref="paper", x=0, y=-0.34,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
@@ -162,7 +162,7 @@ if os.path.exists(cco2_path):
         title="", yaxis_title="Tonnes CO2 per capita (consumption-based)", show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(cco2_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52, showarrow=False, font=dict(size=10, color="#999"))])
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Consumption-based CO2 data not yet available. Run the data pipeline.")
@@ -194,7 +194,7 @@ if os.path.exists(emix_path):
         show_average=True)
     fig.update_layout(annotations=[dict(
         text=f"Source: Our World in Data (Energy Institute, Ember) | Data as of: {get_data_date(emix_path)}",
-        xref="paper", yref="paper", x=0, y=-0.52,
+        xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

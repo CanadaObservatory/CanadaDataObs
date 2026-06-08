@@ -283,6 +283,7 @@ def build_cma_ethnicity():
     for cid, col, _ in VM_GROUPS:
         out[col] = (by_id(cid) / denom * 100).round(1)
     out["white"], out["indigenous"] = _derived_population_groups(by_id, denom)
+    out["population"] = denom.round().astype("Int64")   # area head-count (the share base)
     out.index.name = "cmauid"
     out = out.dropna(subset=["all_vm"])
     os.makedirs(GEO_DIR, exist_ok=True)
@@ -311,6 +312,7 @@ def build_cma_religion():
     out = pd.DataFrame({"name": names})
     for cid, col, _ in RELIGION_GROUPS:
         out[col] = (by_id(cid) / denom * 100).round(1)
+    out["population"] = denom.round().astype("Int64")   # area head-count (the share base)
     out.index.name = "cmauid"
     out = out.dropna(subset=["christian"])
     os.makedirs(GEO_DIR, exist_ok=True)
@@ -391,6 +393,7 @@ def build_ct_from_profile():
     for cid, col, _ in VM_GROUPS:
         eth[col] = (ct_series(cid) / base * 100).round(1)
     eth["white"], eth["indigenous"] = _derived_population_groups(ct_series, base)
+    eth["population"] = base.round().astype("Int64")    # area head-count (the share base)
     eth.index.name = "ctuid"
     eth = eth.dropna(subset=["all_vm"])
     eth.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_ethnicity_2021.csv", index=False)
@@ -401,6 +404,7 @@ def build_ct_from_profile():
     rel = pd.DataFrame({"name": names})
     for cid, col, _ in RELIGION_GROUPS:
         rel[col] = (ct_series(cid) / rbase * 100).round(1)
+    rel["population"] = rbase.round().astype("Int64")   # area head-count (the share base)
     rel.index.name = "ctuid"
     rel = rel.dropna(subset=["christian"])
     rel.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_religion_2021.csv", index=False)
@@ -978,6 +982,7 @@ def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouve
         for cid, col, _ in VM_GROUPS:
             eth[col] = (ser(cid) / base * 100).round(1)
         eth["white"], eth["indigenous"] = _derived_population_groups(ser, base)
+        eth["population"] = base.round().astype("Int64")    # area head-count (the share base)
         eth["name"] = "StatCan area #" + eth.index.astype(str)
         eth = eth.dropna(subset=["all_vm"])
         os.makedirs(GEO_DIR, exist_ok=True)
@@ -990,6 +995,7 @@ def build_da_profile(cmauid="933", pruid="59", geono="006_BC_CB", slug="vancouve
         rel.index.name = "dauid"
         for cid, col, _ in RELIGION_GROUPS:
             rel[col] = (ser(cid) / rbase * 100).round(1)
+        rel["population"] = rbase.round().astype("Int64")   # area head-count (the share base)
         rel["name"] = "StatCan area #" + rel.index.astype(str)
         rel = rel.dropna(subset=["christian"])
         rel.reset_index().to_csv(f"{GEO_DIR}/statcan_da_{slug}_religion.csv", index=False)

@@ -135,7 +135,10 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
 
     def _name(code):
         s = df[df[country_col] == code]
-        return s[name_col].iloc[0] if (name_col in df.columns and not s.empty) else code
+        v = s[name_col].iloc[0] if (name_col in df.columns and not s.empty) else code
+        return str(v) if v == v else str(code)   # always a str so the name-sort can't
+        #                                           crash on a NaN name (a bad data row
+        #                                           must never fail the whole site render)
 
     codes = list(df[country_col].unique())
     comparators = sorted([c for c in codes
@@ -305,7 +308,10 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
 
     def _name(code):
         s = df[df[country_col] == code]
-        return s[name_col].iloc[0] if (name_col in df.columns and not s.empty) else code
+        v = s[name_col].iloc[0] if (name_col in df.columns and not s.empty) else code
+        return str(v) if v == v else str(code)   # always a str so the name-sort can't
+        #                                           crash on a NaN name (a bad data row
+        #                                           must never fail the whole site render)
 
     codes = list(df[country_col].unique())
     comparators = sorted([c for c in codes
@@ -699,7 +705,7 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
                           colorscale="Viridis", source_note=None,
                           center=None, zoom=2.6, height=660, cap_quantiles=(0.0, 1.0),
                           opacity=0.82, breakdown=True, breakdown_min=0.5,
-                          breakdown_exclude=()):
+                          breakdown_exclude=(), pop_col=None):
     """Choropleth with a dropdown to switch the mapped variable across `groups`
     (list of (column, label)). Used for the descriptive share maps (visible
     minority, religion, land cover); values are percentages and each option
@@ -726,7 +732,13 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     typical range. The default colour scale is **Viridis** — perceptually uniform and
     colourblind-safe, with no red/green valence, and higher contrast than Cividis so
     the socially meaningful mid-range (e.g. 3% vs 13%) stays distinguishable while
-    these sensitive layers keep a neutral, descriptive reading."""
+    these sensitive layers keep a neutral, descriptive reading.
+
+    `pop_col` (optional) names a population column; when given, the hover gains a
+    "Population: N,NNN" line — the area's head-count, i.e. the denominator the shares
+    are computed on (so a 50% share in a 90-person block reads differently from a
+    5,000-person tract). Pre-formatted to a comma string to dodge the bundled-Plotly
+    d3-format quirk."""
     import numpy as np
     import pandas as pd
     center = center or {"lat": 56.0, "lon": -96.0}
@@ -739,6 +751,13 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     c0, l0 = groups[0]
     lo0, hi0 = rng(c0)
 
+    # Optional population column → "Population: N,NNN" line in the hover (the area's
+    # head-count, the denominator the shares are computed on). Pre-formatted to a
+    # comma string in Python: Quarto's bundled Plotly does not reliably honour a d3
+    # number-format inside hovertemplate (same quirk as the CPI/quarterly-GDP hovers).
+    pop = (pd.to_numeric(df[pop_col], errors="coerce").fillna(0).round().astype(int)
+           .map("{:,}".format).to_numpy() if (pop_col and pop_col in df.columns) else None)
+
     # Hover content: either the area's full composition across every group (default)
     # or a single selected-group readout. The breakdown is baked per-area into
     # customdata so it stays put as the dropdown swaps which group colours the map.
@@ -749,12 +768,19 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
                      if col not in excl and pd.notna(row[col]) and row[col] >= breakdown_min]
             pairs.sort(key=lambda t: t[1], reverse=True)
             return "<br>".join(f"{lab}: {v:.1f}%" for lab, v in pairs)
-        custom = np.column_stack([df[name_col].to_numpy(),
-                                  df.apply(_profile, axis=1).to_numpy()])
-        hovertemplate = "<b>%{customdata[0]}</b><br>%{customdata[1]}<extra></extra>"
+        prof = df.apply(_profile, axis=1).to_numpy()
+        if pop is not None:
+            custom = np.column_stack([df[name_col].to_numpy(), pop, prof])
+            hovertemplate = ("<b>%{customdata[0]}</b><br>Population: %{customdata[1]}"
+                             "<br>%{customdata[2]}<extra></extra>")
+        else:
+            custom = np.column_stack([df[name_col].to_numpy(), prof])
+            hovertemplate = "<b>%{customdata[0]}</b><br>%{customdata[1]}<extra></extra>"
     else:
-        custom = df[[name_col]].to_numpy()
-        hovertemplate = f"<b>%{{customdata[0]}}</b><br>{l0}: %{{z:.1f}}%<extra></extra>"
+        pop_line = "Population: %{customdata[1]}<br>" if pop is not None else ""
+        custom = (np.column_stack([df[name_col].to_numpy(), pop]) if pop is not None
+                  else df[[name_col]].to_numpy())
+        hovertemplate = f"<b>%{{customdata[0]}}</b><br>{pop_line}{l0}: %{{z:.1f}}%<extra></extra>"
 
     fig = go.Figure(go.Choroplethmapbox(
         geojson=geojson, locations=locs, z=df[c0].tolist(), featureidkey="id",
@@ -770,7 +796,7 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
         args = {"z": [df[col].tolist()], "zmin": lo, "zmax": hi,
                 "colorbar.title.text": f"% {label}"}
         if not breakdown:   # keep the full-composition hover stable across the dropdown
-            args["hovertemplate"] = f"<b>%{{customdata[0]}}</b><br>{label}: %{{z:.1f}}%<extra></extra>"
+            args["hovertemplate"] = f"<b>%{{customdata[0]}}</b><br>{pop_line}{label}: %{{z:.1f}}%<extra></extra>"
         buttons.append(dict(method="restyle", label=label, args=[args]))
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),

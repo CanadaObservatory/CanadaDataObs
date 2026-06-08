@@ -639,6 +639,13 @@ def build_rivers():
     shp = [n for n in z.namelist() if n.endswith(".shp") and "Rivers_sparse" in n][0]
     g = gpd.read_file(f"/tmp/ac15m_rivers/{shp}").to_crs(epsg=4326)
     g = g.rename(columns={"NAME": "name"})[["name", "geometry"]]
+
+    def _fix(s):     # Atlas DBF carries UTF-8 bytes tagged latin-1 → "RiviÃ¨re" etc.
+        try:
+            return s.encode("latin-1").decode("utf-8")
+        except Exception:
+            return s
+    g["name"] = g["name"].map(lambda s: _fix(s) if isinstance(s, str) else s)
     canada = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson").to_crs(epsg=4326).union_all()
     g = gpd.clip(g, canada)                                  # drop US-only rivers; trim transboundary
     g = g[~g.geometry.is_empty & g.geometry.notna()].copy()

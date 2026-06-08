@@ -78,7 +78,7 @@ if os.path.exists(dgeo) and os.path.exists(dcsv):
     fig = choropleth_categorical(dg, dd, "dr_code", "oda_name", name_col="dr_name",
         ordered=list(oda_colors), color_map=oda_colors, legend_title="Drains to",
         center={"lat": 62, "lon": -96}, zoom=2.2,
-        source_note="Source: Statistics Canada — Drainage regions of Canada (16-201-X); rivers from the Natural Resources Canada Atlas of Canada (1:15,000,000). Drainage regions grouped by the ocean drainage area each flows to; major rivers drawn on top.")
+        source_note="Source: Statistics Canada (16-201-X); rivers, Natural Resources Canada Atlas (1:15M).")
     rgeo = "data/geo/rivers_major.geojson"
     if os.path.exists(rgeo):
         add_line_features(fig, json.load(open(rgeo)), color="#0d2b5e", width=1.1, name="rivers")

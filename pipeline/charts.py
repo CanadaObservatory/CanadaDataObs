@@ -912,7 +912,7 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
             lat=[None], lon=[None], mode="markers",
             marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
         ))
-    legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.01)
+    legend = (dict(orientation="v", yanchor="top", y=0.93, xanchor="left", x=1.01)
               if legend_orientation == "v"
               else dict(orientation="h", yanchor="top", y=-0.02, xanchor="center", x=0.5))
     if legend_title:

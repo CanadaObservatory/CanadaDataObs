@@ -27,9 +27,9 @@ ground of the Rockies, the Coast Mountains, and the Arctic ranges.
 
 ```{python}
 #| echo: false
-relief_png, relief_meta = "data/geo/elevation_relief.png", "data/geo/elevation_relief.json"
-if os.path.exists(relief_png) and os.path.exists(relief_meta):
-    uri = "data:image/png;base64," + base64.b64encode(open(relief_png, "rb").read()).decode()
+relief_img, relief_meta = "data/geo/elevation_relief.webp", "data/geo/elevation_relief.json"
+if os.path.exists(relief_img) and os.path.exists(relief_meta):
+    uri = "data:image/webp;base64," + base64.b64encode(open(relief_img, "rb").read()).decode()
     coords = json.load(open(relief_meta))["coordinates"]
     prov = json.load(open(prov_geo)) if os.path.exists(prov_geo) else None
     fig = relief_map(uri, coords, boundary_geojson=prov, boundary_color="#7c8088",
@@ -70,4 +70,4 @@ else:
 ## Download data
 
 - [Land area by elevation band (CSV)](../data/geo/elevation_distribution.csv) — NRCan MRDEM-30
-- [Relief image (PNG)](../data/geo/elevation_relief.png) — NRCan MRDEM-30, hypsometric tint
+- [Relief image (WebP)](../data/geo/elevation_relief.webp) — NRCan MRDEM-30, hypsometric tint

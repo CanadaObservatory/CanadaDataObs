@@ -663,11 +663,11 @@ def build_rivers():
     print(f"  {len(g)} river features (clipped to Canada)")
 
 
-def build_elevation_relief(width=1500):
+def build_elevation_relief(width=2800):
     """National relief image for the elevation page. Streams a COARSE overview of MRDEM-30,
     reprojects it from EPSG:3979 to **Web-Mercator (3857)** so it aligns with Plotly's
     basemap, applies a muted hypsometric tint (green low → tan/brown → near-white peaks),
-    masks to Canada (transparent elsewhere), and writes elevation_relief.png + the image's
+    masks to Canada (transparent elsewhere), and writes elevation_relief.webp + the image's
     lon/lat **corner coordinates** (clockwise TL,TR,BR,BL — what a Plotly mapbox `image`
     layer expects). The image is rendered in Mercator; the corners passed to the page are
     WGS84. Static; needs rasterio + matplotlib."""
@@ -677,7 +677,7 @@ def build_elevation_relief(width=1500):
     from rasterio.warp import reproject, transform as warp_transform, transform_bounds
     from rasterio.features import rasterize
     from matplotlib.colors import LinearSegmentedColormap
-    import matplotlib.image as mpimg
+    from PIL import Image
     print("Building elevation relief (MRDEM-30 → 3857 hypsometric PNG) ...")
     os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
                       GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
@@ -711,12 +711,15 @@ def build_elevation_relief(width=1500):
         (0.65, "#a98c6b"), (0.85, "#cabfb2"), (1.00, "#f2efe9")])
     rgba = cmap(e)
     rgba[..., 3] = np.where(valid, 1.0, 0.0)         # transparent off Canada
-    mpimg.imsave(f"{GEO_DIR}/elevation_relief.png", (rgba * 255).astype("uint8"))
+    # WebP (lossy, with alpha) keeps a high-resolution relief small enough to inline —
+    # far lighter than PNG at the same size; smooth hypsometric gradients compress well.
+    Image.fromarray((rgba * 255).astype("uint8"), "RGBA").save(
+        f"{GEO_DIR}/elevation_relief.webp", "WEBP", quality=85, method=6)
     lons, lats = warp_transform("EPSG:3857", "EPSG:4326",   # 3857 bounds → lon/lat corners
                                 [l3857, r3857, r3857, l3857], [t3857, t3857, b3857, b3857])
     coords = [[round(lons[i], 5), round(lats[i], 5)] for i in range(4)]   # TL, TR, BR, BL
     json.dump({"coordinates": coords}, open(f"{GEO_DIR}/elevation_relief.json", "w"))
-    print(f"  3857 grid {dw}×{dh} | PNG {os.path.getsize(f'{GEO_DIR}/elevation_relief.png')/1e3:.0f} KB "
+    print(f"  3857 grid {dw}×{dh} | WebP {os.path.getsize(f'{GEO_DIR}/elevation_relief.webp')/1e3:.0f} KB "
           f"| land px {int(valid.sum()):,} | corners {coords}")
 
 

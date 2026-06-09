@@ -1,0 +1,2406 @@
+city,pollutant,unit,year,value,n_stations
+Abbotsford,CO,ppm,2005,0.34,1
+Abbotsford,CO,ppm,2006,0.33,1
+Abbotsford,CO,ppm,2007,0.29,1
+Abbotsford,CO,ppm,2008,0.29,1
+Abbotsford,CO,ppm,2009,0.26,1
+Abbotsford,CO,ppm,2010,0.23,1
+Abbotsford,CO,ppm,2011,0.22,1
+Abbotsford,CO,ppm,2012,0.22,1
+Abbotsford,CO,ppm,2013,0.2,2
+Abbotsford,CO,ppm,2014,0.19,2
+Abbotsford,CO,ppm,2015,0.21,2
+Abbotsford,CO,ppm,2016,0.18,2
+Abbotsford,CO,ppm,2017,0.18,2
+Abbotsford,CO,ppm,2018,0.18,2
+Abbotsford,CO,ppm,2019,0.17,2
+Abbotsford,CO,ppm,2020,0.18,2
+Abbotsford,CO,ppm,2021,0.13,1
+Abbotsford,CO,ppm,2022,0.14,1
+Abbotsford,CO,ppm,2023,0.17,1
+Abbotsford,CO,ppm,2024,0.18,1
+Calgary,CO,ppm,2005,0.42,3
+Calgary,CO,ppm,2006,0.39,3
+Calgary,CO,ppm,2007,0.34,3
+Calgary,CO,ppm,2008,0.33,2
+Calgary,CO,ppm,2009,0.28,3
+Calgary,CO,ppm,2010,0.29,3
+Calgary,CO,ppm,2011,0.23,2
+Calgary,CO,ppm,2012,0.23,2
+Calgary,CO,ppm,2013,0.21,2
+Calgary,CO,ppm,2014,0.23,2
+Calgary,CO,ppm,2015,0.21,2
+Calgary,CO,ppm,2016,0.19,3
+Calgary,CO,ppm,2017,0.2,2
+Calgary,CO,ppm,2018,0.27,2
+Calgary,CO,ppm,2019,0.22,3
+Calgary,CO,ppm,2020,0.21,3
+Calgary,CO,ppm,2021,0.22,3
+Calgary,CO,ppm,2022,0.2,3
+Calgary,CO,ppm,2023,0.26,3
+Calgary,CO,ppm,2024,0.24,3
+Edmonton,CO,ppm,2005,0.39,3
+Edmonton,CO,ppm,2006,0.31,3
+Edmonton,CO,ppm,2007,0.3,3
+Edmonton,CO,ppm,2008,0.29,3
+Edmonton,CO,ppm,2009,0.25,3
+Edmonton,CO,ppm,2010,0.31,3
+Edmonton,CO,ppm,2011,0.24,3
+Edmonton,CO,ppm,2012,0.24,3
+Edmonton,CO,ppm,2013,0.19,3
+Edmonton,CO,ppm,2014,0.23,3
+Edmonton,CO,ppm,2015,0.22,3
+Edmonton,CO,ppm,2016,0.23,3
+Edmonton,CO,ppm,2017,0.26,3
+Edmonton,CO,ppm,2018,0.26,3
+Edmonton,CO,ppm,2019,0.25,3
+Edmonton,CO,ppm,2020,0.22,3
+Edmonton,CO,ppm,2021,0.24,3
+Edmonton,CO,ppm,2022,0.2,3
+Edmonton,CO,ppm,2023,0.29,3
+Edmonton,CO,ppm,2024,0.25,3
+Fredericton,CO,ppm,2005,0.14,1
+Fredericton,CO,ppm,2006,0.21,1
+Fredericton,CO,ppm,2007,0.2,1
+Fredericton,CO,ppm,2008,0.13,1
+Fredericton,CO,ppm,2010,0.12,1
+Fredericton,CO,ppm,2011,0.23,1
+Fredericton,CO,ppm,2012,0.09,1
+Fredericton,CO,ppm,2013,0.24,1
+Fredericton,CO,ppm,2014,0.22,1
+Fredericton,CO,ppm,2015,0.23,1
+Fredericton,CO,ppm,2016,0.21,1
+Halifax,CO,ppm,2006,0.03,1
+Halifax,CO,ppm,2011,0.16,1
+Halifax,CO,ppm,2012,0.18,1
+Halifax,CO,ppm,2013,0.24,1
+Halifax,CO,ppm,2015,0.2,1
+Halifax,CO,ppm,2016,0.18,1
+Halifax,CO,ppm,2017,0.12,1
+Halifax,CO,ppm,2018,0.16,1
+Halifax,CO,ppm,2019,0.12,1
+Halifax,CO,ppm,2020,0.11,1
+Halifax,CO,ppm,2021,0.09,1
+Halifax,CO,ppm,2022,0.13,1
+Halifax,CO,ppm,2023,0.16,1
+Halifax,CO,ppm,2024,0.13,1
+Hamilton,CO,ppm,2005,0.31,1
+Hamilton,CO,ppm,2006,0.33,1
+Hamilton,CO,ppm,2007,0.22,1
+Hamilton,CO,ppm,2008,0.19,1
+Hamilton,CO,ppm,2009,0.2,1
+Hamilton,CO,ppm,2010,0.23,1
+Hamilton,CO,ppm,2011,0.23,1
+Hamilton,CO,ppm,2012,0.26,1
+Hamilton,CO,ppm,2013,0.26,1
+Hamilton,CO,ppm,2014,0.26,1
+Hamilton,CO,ppm,2015,0.25,1
+Hamilton,CO,ppm,2016,0.24,1
+Hamilton,CO,ppm,2017,0.24,1
+Hamilton,CO,ppm,2018,0.24,1
+Hamilton,CO,ppm,2019,0.25,1
+Hamilton,CO,ppm,2020,0.22,1
+Hamilton,CO,ppm,2021,0.23,1
+Hamilton,CO,ppm,2024,0.24,1
+Kelowna,CO,ppm,2005,0.39,1
+Kelowna,CO,ppm,2006,0.31,1
+Kelowna,CO,ppm,2007,0.27,1
+Kelowna,CO,ppm,2008,0.26,1
+Kelowna,CO,ppm,2009,0.24,1
+Kelowna,CO,ppm,2010,0.31,1
+Kelowna,CO,ppm,2011,0.22,1
+Kelowna,CO,ppm,2012,0.23,1
+Kelowna,CO,ppm,2013,0.19,1
+Kelowna,CO,ppm,2014,0.23,1
+Kelowna,CO,ppm,2015,0.27,1
+Kelowna,CO,ppm,2016,0.24,1
+Kelowna,CO,ppm,2017,0.25,1
+Kelowna,CO,ppm,2018,0.26,1
+Kelowna,CO,ppm,2020,0.23,1
+Kelowna,CO,ppm,2021,0.28,1
+Kelowna,CO,ppm,2022,0.17,1
+Kelowna,CO,ppm,2023,0.22,1
+Kelowna,CO,ppm,2024,0.18,1
+London,CO,ppm,2005,0.17,1
+London,CO,ppm,2006,0.19,1
+London,CO,ppm,2007,0.16,1
+London,CO,ppm,2008,0.16,1
+London,CO,ppm,2009,0.16,1
+London,CO,ppm,2010,0.2,1
+Moncton,CO,ppm,2005,0.34,1
+Moncton,CO,ppm,2006,0.24,1
+Moncton,CO,ppm,2007,0.24,1
+Moncton,CO,ppm,2008,0.27,1
+Moncton,CO,ppm,2009,0.26,1
+Moncton,CO,ppm,2010,0.25,1
+Moncton,CO,ppm,2012,0.07,1
+Moncton,CO,ppm,2013,0.17,1
+Moncton,CO,ppm,2014,0.17,1
+Moncton,CO,ppm,2015,0.19,1
+Moncton,CO,ppm,2016,0.18,1
+Moncton,CO,ppm,2017,0.18,1
+Moncton,CO,ppm,2018,0.19,1
+Moncton,CO,ppm,2019,0.19,1
+Moncton,CO,ppm,2020,0.17,1
+Moncton,CO,ppm,2021,0.19,1
+Moncton,CO,ppm,2022,0.17,1
+Moncton,CO,ppm,2023,0.2,1
+Moncton,CO,ppm,2024,0.18,1
+Montréal,CO,ppm,2005,0.36,5
+Montréal,CO,ppm,2006,0.36,6
+Montréal,CO,ppm,2007,0.26,6
+Montréal,CO,ppm,2008,0.18,3
+Montréal,CO,ppm,2009,0.22,4
+Montréal,CO,ppm,2010,0.22,5
+Montréal,CO,ppm,2011,0.25,5
+Montréal,CO,ppm,2012,0.26,4
+Montréal,CO,ppm,2013,0.34,3
+Montréal,CO,ppm,2014,0.28,4
+Montréal,CO,ppm,2015,0.27,4
+Montréal,CO,ppm,2016,0.23,4
+Montréal,CO,ppm,2017,0.23,4
+Montréal,CO,ppm,2018,0.22,4
+Montréal,CO,ppm,2019,0.21,5
+Montréal,CO,ppm,2020,0.2,5
+Montréal,CO,ppm,2021,0.21,5
+Montréal,CO,ppm,2022,0.21,4
+Montréal,CO,ppm,2023,0.24,3
+Montréal,CO,ppm,2024,0.22,3
+Ottawa–Gatineau,CO,ppm,2005,0.38,2
+Ottawa–Gatineau,CO,ppm,2006,0.29,2
+Ottawa–Gatineau,CO,ppm,2007,0.31,1
+Ottawa–Gatineau,CO,ppm,2008,0.28,3
+Ottawa–Gatineau,CO,ppm,2009,0.26,2
+Ottawa–Gatineau,CO,ppm,2010,0.24,2
+Ottawa–Gatineau,CO,ppm,2011,0.25,2
+Ottawa–Gatineau,CO,ppm,2012,0.23,2
+Ottawa–Gatineau,CO,ppm,2013,0.21,2
+Ottawa–Gatineau,CO,ppm,2014,0.2,2
+Ottawa–Gatineau,CO,ppm,2015,0.21,2
+Ottawa–Gatineau,CO,ppm,2016,0.2,2
+Ottawa–Gatineau,CO,ppm,2017,0.19,1
+Ottawa–Gatineau,CO,ppm,2018,0.19,2
+Ottawa–Gatineau,CO,ppm,2019,0.18,2
+Ottawa–Gatineau,CO,ppm,2020,0.18,2
+Ottawa–Gatineau,CO,ppm,2021,0.19,1
+Québec City,CO,ppm,2005,0.36,1
+Québec City,CO,ppm,2006,0.33,1
+Québec City,CO,ppm,2007,0.29,1
+Québec City,CO,ppm,2008,0.2,1
+Québec City,CO,ppm,2009,0.17,1
+Québec City,CO,ppm,2010,0.25,1
+Québec City,CO,ppm,2011,0.26,1
+Québec City,CO,ppm,2012,0.24,1
+Québec City,CO,ppm,2013,0.22,1
+Québec City,CO,ppm,2014,0.22,1
+Québec City,CO,ppm,2015,0.22,1
+Québec City,CO,ppm,2016,0.21,1
+Québec City,CO,ppm,2017,0.21,1
+Québec City,CO,ppm,2018,0.21,1
+Québec City,CO,ppm,2019,0.2,1
+Québec City,CO,ppm,2020,0.3,2
+Québec City,CO,ppm,2021,0.26,2
+Québec City,CO,ppm,2022,0.24,2
+Québec City,CO,ppm,2023,0.28,2
+Québec City,CO,ppm,2024,0.26,2
+Regina,CO,ppm,2005,0.41,1
+Regina,CO,ppm,2006,0.54,1
+Regina,CO,ppm,2008,0.26,1
+Regina,CO,ppm,2010,0.22,1
+Regina,CO,ppm,2011,0.24,1
+Regina,CO,ppm,2012,0.28,1
+Regina,CO,ppm,2013,0.25,1
+Regina,CO,ppm,2014,0.26,1
+Regina,CO,ppm,2015,0.2,1
+Regina,CO,ppm,2016,0.17,1
+Regina,CO,ppm,2017,0.17,1
+Regina,CO,ppm,2019,0.17,1
+Regina,CO,ppm,2020,0.16,1
+Regina,CO,ppm,2021,0.18,1
+Regina,CO,ppm,2022,0.16,1
+Regina,CO,ppm,2023,0.2,1
+Regina,CO,ppm,2024,0.18,1
+Saint John,CO,ppm,2005,0.37,1
+Saint John,CO,ppm,2006,0.51,1
+Saint John,CO,ppm,2007,0.21,1
+Saint John,CO,ppm,2009,0.27,1
+Saint John,CO,ppm,2013,0.2,1
+Saint John,CO,ppm,2014,0.19,1
+Saint John,CO,ppm,2015,0.19,1
+Saint John,CO,ppm,2017,0.16,1
+Saint John,CO,ppm,2018,0.16,1
+Saint John,CO,ppm,2019,0.16,1
+Saint John,CO,ppm,2020,0.16,1
+Saint John,CO,ppm,2021,0.17,1
+Saint John,CO,ppm,2022,0.15,1
+Saint John,CO,ppm,2023,0.17,1
+Saint John,CO,ppm,2024,0.16,1
+Saskatoon,CO,ppm,2007,0.29,1
+Saskatoon,CO,ppm,2008,0.12,1
+Saskatoon,CO,ppm,2009,0.18,1
+Saskatoon,CO,ppm,2010,0.17,1
+Saskatoon,CO,ppm,2011,0.24,1
+Saskatoon,CO,ppm,2012,0.26,1
+Saskatoon,CO,ppm,2016,0.21,1
+Saskatoon,CO,ppm,2017,0.19,1
+Saskatoon,CO,ppm,2018,0.19,1
+Saskatoon,CO,ppm,2020,0.17,1
+Saskatoon,CO,ppm,2021,0.2,1
+Saskatoon,CO,ppm,2022,0.16,1
+Saskatoon,CO,ppm,2023,0.21,1
+St. John's,CO,ppm,2005,0.26,2
+St. John's,CO,ppm,2006,0.28,2
+St. John's,CO,ppm,2007,0.82,2
+St. John's,CO,ppm,2008,0.25,2
+St. John's,CO,ppm,2009,0.13,2
+St. John's,CO,ppm,2010,0.2,2
+St. John's,CO,ppm,2011,0.28,2
+St. John's,CO,ppm,2012,0.2,2
+St. John's,CO,ppm,2013,0.19,1
+St. John's,CO,ppm,2014,0.23,2
+St. John's,CO,ppm,2015,0.19,2
+St. John's,CO,ppm,2016,0.15,2
+St. John's,CO,ppm,2017,0.22,2
+St. John's,CO,ppm,2018,0.17,2
+St. John's,CO,ppm,2019,0.16,1
+St. John's,CO,ppm,2020,0.16,2
+St. John's,CO,ppm,2021,0.14,1
+St. John's,CO,ppm,2022,0.15,2
+St. John's,CO,ppm,2023,0.16,2
+St. John's,CO,ppm,2024,0.16,1
+Toronto,CO,ppm,2005,0.35,2
+Toronto,CO,ppm,2006,0.34,2
+Toronto,CO,ppm,2007,0.24,2
+Toronto,CO,ppm,2008,0.16,2
+Toronto,CO,ppm,2009,0.2,2
+Toronto,CO,ppm,2010,0.24,2
+Toronto,CO,ppm,2011,0.2,1
+Toronto,CO,ppm,2012,0.26,1
+Toronto,CO,ppm,2013,0.25,1
+Toronto,CO,ppm,2014,0.26,1
+Toronto,CO,ppm,2015,0.25,1
+Toronto,CO,ppm,2016,0.29,2
+Toronto,CO,ppm,2017,0.27,3
+Toronto,CO,ppm,2018,0.26,3
+Toronto,CO,ppm,2019,0.26,3
+Toronto,CO,ppm,2020,0.23,3
+Toronto,CO,ppm,2021,0.26,3
+Toronto,CO,ppm,2022,0.25,3
+Toronto,CO,ppm,2023,0.28,3
+Toronto,CO,ppm,2024,0.26,3
+Vancouver,CO,ppm,2005,0.45,5
+Vancouver,CO,ppm,2006,0.4,5
+Vancouver,CO,ppm,2007,0.31,5
+Vancouver,CO,ppm,2008,0.28,5
+Vancouver,CO,ppm,2009,0.26,5
+Vancouver,CO,ppm,2010,0.24,4
+Vancouver,CO,ppm,2011,0.21,16
+Vancouver,CO,ppm,2012,0.21,17
+Vancouver,CO,ppm,2013,0.21,17
+Vancouver,CO,ppm,2014,0.23,4
+Vancouver,CO,ppm,2015,0.24,4
+Vancouver,CO,ppm,2016,0.26,5
+Vancouver,CO,ppm,2017,0.26,5
+Vancouver,CO,ppm,2018,0.23,3
+Vancouver,CO,ppm,2019,0.24,5
+Vancouver,CO,ppm,2020,0.24,3
+Vancouver,CO,ppm,2021,0.23,3
+Vancouver,CO,ppm,2022,0.21,11
+Vancouver,CO,ppm,2023,0.2,10
+Vancouver,CO,ppm,2024,0.2,11
+Victoria,CO,ppm,2005,0.39,1
+Victoria,CO,ppm,2006,0.6,1
+Victoria,CO,ppm,2008,0.42,2
+Victoria,CO,ppm,2013,0.27,1
+Victoria,CO,ppm,2014,0.23,1
+Victoria,CO,ppm,2015,0.27,1
+Victoria,CO,ppm,2016,0.24,1
+Victoria,CO,ppm,2017,0.24,1
+Victoria,CO,ppm,2018,0.22,1
+Victoria,CO,ppm,2019,0.19,1
+Victoria,CO,ppm,2020,0.22,1
+Victoria,CO,ppm,2021,0.17,1
+Victoria,CO,ppm,2023,0.14,1
+Victoria,CO,ppm,2024,0.16,1
+Windsor,CO,ppm,2005,0.2,1
+Windsor,CO,ppm,2006,0.3,1
+Windsor,CO,ppm,2007,0.24,1
+Windsor,CO,ppm,2008,0.2,1
+Windsor,CO,ppm,2009,0.21,1
+Windsor,CO,ppm,2010,0.25,1
+Windsor,CO,ppm,2011,0.26,1
+Windsor,CO,ppm,2012,0.26,1
+Windsor,CO,ppm,2013,0.26,1
+Windsor,CO,ppm,2014,0.27,1
+Windsor,CO,ppm,2015,0.26,1
+Windsor,CO,ppm,2016,0.25,1
+Windsor,CO,ppm,2017,0.24,1
+Windsor,CO,ppm,2018,0.25,1
+Windsor,CO,ppm,2019,0.24,1
+Windsor,CO,ppm,2020,0.21,1
+Windsor,CO,ppm,2021,0.24,1
+Windsor,CO,ppm,2022,0.22,1
+Windsor,CO,ppm,2023,0.25,1
+Windsor,CO,ppm,2024,0.21,1
+Winnipeg,CO,ppm,2005,0.25,2
+Winnipeg,CO,ppm,2006,0.29,2
+Winnipeg,CO,ppm,2007,0.38,2
+Winnipeg,CO,ppm,2008,0.45,1
+Winnipeg,CO,ppm,2009,0.41,2
+Winnipeg,CO,ppm,2010,0.21,2
+Winnipeg,CO,ppm,2011,0.23,2
+Winnipeg,CO,ppm,2012,0.33,2
+Winnipeg,CO,ppm,2013,0.2,2
+Winnipeg,CO,ppm,2014,0.22,1
+Winnipeg,CO,ppm,2015,0.2,2
+Winnipeg,CO,ppm,2016,0.28,1
+Winnipeg,CO,ppm,2018,0.03,1
+Winnipeg,CO,ppm,2019,0.02,1
+Winnipeg,CO,ppm,2020,0.01,1
+Yellowknife,CO,ppm,2005,0.1,1
+Yellowknife,CO,ppm,2006,0.15,1
+Yellowknife,CO,ppm,2007,0.39,1
+Yellowknife,CO,ppm,2008,0.22,1
+Yellowknife,CO,ppm,2009,0.32,1
+Yellowknife,CO,ppm,2010,0.15,1
+Yellowknife,CO,ppm,2011,0.18,1
+Yellowknife,CO,ppm,2012,0.42,1
+Yellowknife,CO,ppm,2013,0.39,1
+Yellowknife,CO,ppm,2014,0.26,1
+Yellowknife,CO,ppm,2015,0.34,1
+Yellowknife,CO,ppm,2016,0.37,1
+Yellowknife,CO,ppm,2017,0.19,1
+Yellowknife,CO,ppm,2018,0.16,1
+Yellowknife,CO,ppm,2019,0.17,1
+Yellowknife,CO,ppm,2020,0.15,1
+Yellowknife,CO,ppm,2021,0.19,1
+Yellowknife,CO,ppm,2022,0.15,1
+Yellowknife,CO,ppm,2023,0.63,1
+Abbotsford,NO2,ppb,2005,10.35,2
+Abbotsford,NO2,ppb,2006,9.65,2
+Abbotsford,NO2,ppb,2007,9.35,2
+Abbotsford,NO2,ppb,2008,9.15,2
+Abbotsford,NO2,ppb,2009,9.35,2
+Abbotsford,NO2,ppb,2010,9.1,1
+Abbotsford,NO2,ppb,2011,8.7,1
+Abbotsford,NO2,ppb,2012,9.2,1
+Abbotsford,NO2,ppb,2013,8.15,2
+Abbotsford,NO2,ppb,2014,7.4,2
+Abbotsford,NO2,ppb,2015,8.65,2
+Abbotsford,NO2,ppb,2016,7.2,2
+Abbotsford,NO2,ppb,2017,8.4,2
+Abbotsford,NO2,ppb,2018,8.2,2
+Abbotsford,NO2,ppb,2019,7.85,2
+Abbotsford,NO2,ppb,2020,7.0,2
+Abbotsford,NO2,ppb,2021,6.8,2
+Abbotsford,NO2,ppb,2022,7.55,2
+Abbotsford,NO2,ppb,2023,7.4,2
+Abbotsford,NO2,ppb,2024,6.5,2
+Calgary,NO2,ppb,2005,20.07,3
+Calgary,NO2,ppb,2006,19.7,3
+Calgary,NO2,ppb,2007,19.03,3
+Calgary,NO2,ppb,2008,17.2,2
+Calgary,NO2,ppb,2009,18.83,3
+Calgary,NO2,ppb,2010,17.57,3
+Calgary,NO2,ppb,2011,13.7,2
+Calgary,NO2,ppb,2012,12.1,2
+Calgary,NO2,ppb,2013,13.65,2
+Calgary,NO2,ppb,2014,15.0,2
+Calgary,NO2,ppb,2015,12.0,2
+Calgary,NO2,ppb,2016,12.17,3
+Calgary,NO2,ppb,2017,12.6,3
+Calgary,NO2,ppb,2018,15.8,2
+Calgary,NO2,ppb,2019,12.9,3
+Calgary,NO2,ppb,2020,12.17,3
+Calgary,NO2,ppb,2021,11.8,3
+Calgary,NO2,ppb,2022,11.57,3
+Calgary,NO2,ppb,2023,13.8,3
+Calgary,NO2,ppb,2024,12.33,3
+Charlottetown,NO2,ppb,2014,2.0,1
+Charlottetown,NO2,ppb,2015,1.9,1
+Charlottetown,NO2,ppb,2016,1.9,1
+Charlottetown,NO2,ppb,2017,1.8,1
+Charlottetown,NO2,ppb,2018,1.8,1
+Charlottetown,NO2,ppb,2019,2.3,1
+Charlottetown,NO2,ppb,2020,1.6,1
+Charlottetown,NO2,ppb,2021,1.7,1
+Charlottetown,NO2,ppb,2022,1.5,1
+Charlottetown,NO2,ppb,2023,1.5,1
+Charlottetown,NO2,ppb,2024,1.0,1
+Edmonton,NO2,ppb,2005,18.43,3
+Edmonton,NO2,ppb,2006,16.7,3
+Edmonton,NO2,ppb,2007,15.97,3
+Edmonton,NO2,ppb,2008,15.97,3
+Edmonton,NO2,ppb,2009,16.07,3
+Edmonton,NO2,ppb,2010,15.07,3
+Edmonton,NO2,ppb,2011,14.07,3
+Edmonton,NO2,ppb,2012,13.97,3
+Edmonton,NO2,ppb,2013,14.67,3
+Edmonton,NO2,ppb,2014,13.07,3
+Edmonton,NO2,ppb,2015,13.2,4
+Edmonton,NO2,ppb,2016,12.05,4
+Edmonton,NO2,ppb,2017,13.45,4
+Edmonton,NO2,ppb,2018,13.38,4
+Edmonton,NO2,ppb,2019,12.45,4
+Edmonton,NO2,ppb,2020,12.02,5
+Edmonton,NO2,ppb,2021,11.57,4
+Edmonton,NO2,ppb,2022,11.93,4
+Edmonton,NO2,ppb,2023,12.63,4
+Edmonton,NO2,ppb,2024,11.5,4
+Fredericton,NO2,ppb,2005,3.7,1
+Fredericton,NO2,ppb,2006,3.1,1
+Fredericton,NO2,ppb,2007,3.6,1
+Fredericton,NO2,ppb,2008,3.3,1
+Fredericton,NO2,ppb,2010,2.8,1
+Fredericton,NO2,ppb,2011,3.4,1
+Fredericton,NO2,ppb,2012,2.4,1
+Fredericton,NO2,ppb,2013,3.4,1
+Fredericton,NO2,ppb,2014,3.2,1
+Fredericton,NO2,ppb,2015,3.2,1
+Fredericton,NO2,ppb,2016,2.4,1
+Fredericton,NO2,ppb,2018,1.8,1
+Fredericton,NO2,ppb,2019,2.5,1
+Fredericton,NO2,ppb,2020,2.7,1
+Fredericton,NO2,ppb,2021,2.2,1
+Fredericton,NO2,ppb,2022,2.5,1
+Fredericton,NO2,ppb,2023,2.3,1
+Fredericton,NO2,ppb,2024,2.0,1
+Halifax,NO2,ppb,2006,15.7,1
+Halifax,NO2,ppb,2007,14.2,1
+Halifax,NO2,ppb,2008,8.7,1
+Halifax,NO2,ppb,2010,12.5,1
+Halifax,NO2,ppb,2011,6.95,2
+Halifax,NO2,ppb,2012,6.45,2
+Halifax,NO2,ppb,2013,6.0,2
+Halifax,NO2,ppb,2014,1.7,1
+Halifax,NO2,ppb,2015,5.8,2
+Halifax,NO2,ppb,2016,5.05,2
+Halifax,NO2,ppb,2017,4.0,2
+Halifax,NO2,ppb,2018,3.35,2
+Halifax,NO2,ppb,2019,4.4,2
+Halifax,NO2,ppb,2020,3.95,2
+Halifax,NO2,ppb,2021,3.0,2
+Halifax,NO2,ppb,2022,3.0,2
+Halifax,NO2,ppb,2023,3.1,2
+Halifax,NO2,ppb,2024,3.0,2
+Hamilton,NO2,ppb,2005,19.3,1
+Hamilton,NO2,ppb,2006,17.0,1
+Hamilton,NO2,ppb,2007,14.45,2
+Hamilton,NO2,ppb,2008,12.6,2
+Hamilton,NO2,ppb,2009,11.75,2
+Hamilton,NO2,ppb,2010,10.8,2
+Hamilton,NO2,ppb,2011,12.17,3
+Hamilton,NO2,ppb,2012,10.87,3
+Hamilton,NO2,ppb,2013,11.37,3
+Hamilton,NO2,ppb,2014,11.47,3
+Hamilton,NO2,ppb,2015,11.13,3
+Hamilton,NO2,ppb,2016,10.53,3
+Hamilton,NO2,ppb,2017,10.03,3
+Hamilton,NO2,ppb,2018,10.13,3
+Hamilton,NO2,ppb,2019,10.87,3
+Hamilton,NO2,ppb,2020,8.77,3
+Hamilton,NO2,ppb,2021,8.83,3
+Hamilton,NO2,ppb,2022,8.83,3
+Hamilton,NO2,ppb,2023,7.83,3
+Hamilton,NO2,ppb,2024,8.33,3
+Kelowna,NO2,ppb,2005,9.3,1
+Kelowna,NO2,ppb,2006,9.8,1
+Kelowna,NO2,ppb,2007,8.9,1
+Kelowna,NO2,ppb,2008,9.2,1
+Kelowna,NO2,ppb,2010,8.2,1
+Kelowna,NO2,ppb,2011,7.4,1
+Kelowna,NO2,ppb,2012,7.6,1
+Kelowna,NO2,ppb,2013,5.9,1
+Kelowna,NO2,ppb,2014,6.7,1
+Kelowna,NO2,ppb,2015,7.1,1
+Kelowna,NO2,ppb,2016,6.8,1
+Kelowna,NO2,ppb,2017,7.6,1
+Kelowna,NO2,ppb,2018,7.2,1
+Kelowna,NO2,ppb,2020,5.8,1
+Kelowna,NO2,ppb,2021,5.8,1
+Kelowna,NO2,ppb,2022,5.4,1
+Kelowna,NO2,ppb,2023,5.5,1
+Kelowna,NO2,ppb,2024,5.0,1
+Kitchener–Waterloo,NO2,ppb,2005,12.9,1
+Kitchener–Waterloo,NO2,ppb,2006,10.8,1
+Kitchener–Waterloo,NO2,ppb,2007,9.7,1
+Kitchener–Waterloo,NO2,ppb,2008,9.0,1
+Kitchener–Waterloo,NO2,ppb,2009,8.6,1
+Kitchener–Waterloo,NO2,ppb,2010,7.7,1
+Kitchener–Waterloo,NO2,ppb,2011,7.7,1
+Kitchener–Waterloo,NO2,ppb,2012,7.1,1
+Kitchener–Waterloo,NO2,ppb,2013,6.7,1
+Kitchener–Waterloo,NO2,ppb,2014,7.0,1
+Kitchener–Waterloo,NO2,ppb,2015,6.8,1
+Kitchener–Waterloo,NO2,ppb,2016,6.2,1
+Kitchener–Waterloo,NO2,ppb,2017,5.8,1
+Kitchener–Waterloo,NO2,ppb,2018,5.8,1
+Kitchener–Waterloo,NO2,ppb,2019,6.2,1
+Kitchener–Waterloo,NO2,ppb,2020,4.9,1
+Kitchener–Waterloo,NO2,ppb,2021,4.8,1
+Kitchener–Waterloo,NO2,ppb,2022,5.4,1
+Kitchener–Waterloo,NO2,ppb,2023,5.0,1
+Kitchener–Waterloo,NO2,ppb,2024,5.0,1
+London,NO2,ppb,2005,14.1,1
+London,NO2,ppb,2006,12.3,1
+London,NO2,ppb,2007,11.7,1
+London,NO2,ppb,2008,10.8,1
+London,NO2,ppb,2009,9.0,1
+London,NO2,ppb,2010,8.8,1
+London,NO2,ppb,2011,8.3,1
+London,NO2,ppb,2012,6.3,1
+London,NO2,ppb,2013,6.4,1
+London,NO2,ppb,2014,6.9,1
+London,NO2,ppb,2015,6.6,1
+London,NO2,ppb,2016,5.4,1
+London,NO2,ppb,2017,5.8,1
+London,NO2,ppb,2018,5.4,1
+London,NO2,ppb,2019,5.8,1
+London,NO2,ppb,2020,4.5,1
+London,NO2,ppb,2021,5.2,1
+London,NO2,ppb,2022,4.9,1
+London,NO2,ppb,2023,4.9,1
+London,NO2,ppb,2024,5.0,1
+Moncton,NO2,ppb,2005,5.1,1
+Moncton,NO2,ppb,2007,4.5,1
+Moncton,NO2,ppb,2008,4.4,1
+Moncton,NO2,ppb,2009,5.1,1
+Moncton,NO2,ppb,2010,4.8,1
+Moncton,NO2,ppb,2011,5.9,1
+Moncton,NO2,ppb,2012,4.5,1
+Moncton,NO2,ppb,2013,5.2,1
+Moncton,NO2,ppb,2014,5.2,1
+Moncton,NO2,ppb,2015,5.6,1
+Moncton,NO2,ppb,2016,3.7,1
+Moncton,NO2,ppb,2017,3.8,1
+Moncton,NO2,ppb,2018,3.4,1
+Moncton,NO2,ppb,2019,3.6,1
+Moncton,NO2,ppb,2020,3.1,1
+Moncton,NO2,ppb,2021,3.5,1
+Moncton,NO2,ppb,2022,3.5,1
+Moncton,NO2,ppb,2023,3.4,1
+Moncton,NO2,ppb,2024,3.0,1
+Montréal,NO2,ppb,2005,17.71,7
+Montréal,NO2,ppb,2006,14.5,9
+Montréal,NO2,ppb,2007,14.57,9
+Montréal,NO2,ppb,2008,15.6,7
+Montréal,NO2,ppb,2009,13.29,9
+Montréal,NO2,ppb,2010,12.27,9
+Montréal,NO2,ppb,2011,12.39,10
+Montréal,NO2,ppb,2012,10.99,10
+Montréal,NO2,ppb,2013,10.69,9
+Montréal,NO2,ppb,2014,10.23,10
+Montréal,NO2,ppb,2015,10.04,8
+Montréal,NO2,ppb,2016,9.39,10
+Montréal,NO2,ppb,2017,9.74,9
+Montréal,NO2,ppb,2018,9.91,9
+Montréal,NO2,ppb,2019,9.07,9
+Montréal,NO2,ppb,2020,8.16,10
+Montréal,NO2,ppb,2021,8.03,10
+Montréal,NO2,ppb,2022,8.44,9
+Montréal,NO2,ppb,2023,7.97,9
+Montréal,NO2,ppb,2024,7.44,9
+Ottawa–Gatineau,NO2,ppb,2005,9.9,2
+Ottawa–Gatineau,NO2,ppb,2006,8.4,2
+Ottawa–Gatineau,NO2,ppb,2007,8.13,3
+Ottawa–Gatineau,NO2,ppb,2008,9.37,3
+Ottawa–Gatineau,NO2,ppb,2009,7.7,3
+Ottawa–Gatineau,NO2,ppb,2010,6.73,3
+Ottawa–Gatineau,NO2,ppb,2011,7.13,3
+Ottawa–Gatineau,NO2,ppb,2012,6.83,3
+Ottawa–Gatineau,NO2,ppb,2013,6.93,3
+Ottawa–Gatineau,NO2,ppb,2014,6.33,3
+Ottawa–Gatineau,NO2,ppb,2015,6.27,3
+Ottawa–Gatineau,NO2,ppb,2016,6.13,3
+Ottawa–Gatineau,NO2,ppb,2017,5.93,3
+Ottawa–Gatineau,NO2,ppb,2018,6.4,2
+Ottawa–Gatineau,NO2,ppb,2019,6.0,2
+Ottawa–Gatineau,NO2,ppb,2020,5.2,2
+Ottawa–Gatineau,NO2,ppb,2021,4.95,2
+Ottawa–Gatineau,NO2,ppb,2022,5.25,2
+Ottawa–Gatineau,NO2,ppb,2023,4.65,2
+Ottawa–Gatineau,NO2,ppb,2024,4.0,2
+Québec City,NO2,ppb,2005,12.6,1
+Québec City,NO2,ppb,2006,12.3,1
+Québec City,NO2,ppb,2007,12.4,1
+Québec City,NO2,ppb,2008,13.2,1
+Québec City,NO2,ppb,2009,11.2,1
+Québec City,NO2,ppb,2010,7.87,3
+Québec City,NO2,ppb,2011,8.4,3
+Québec City,NO2,ppb,2012,9.1,1
+Québec City,NO2,ppb,2013,8.8,1
+Québec City,NO2,ppb,2014,9.1,1
+Québec City,NO2,ppb,2015,8.7,1
+Québec City,NO2,ppb,2016,8.1,1
+Québec City,NO2,ppb,2017,8.8,1
+Québec City,NO2,ppb,2018,8.7,1
+Québec City,NO2,ppb,2019,6.33,3
+Québec City,NO2,ppb,2020,6.25,4
+Québec City,NO2,ppb,2021,5.7,4
+Québec City,NO2,ppb,2022,6.6,3
+Québec City,NO2,ppb,2023,6.57,3
+Québec City,NO2,ppb,2024,6.0,3
+Regina,NO2,ppb,2005,12.1,1
+Regina,NO2,ppb,2006,14.7,1
+Regina,NO2,ppb,2007,12.0,1
+Regina,NO2,ppb,2008,10.8,1
+Regina,NO2,ppb,2009,10.1,1
+Regina,NO2,ppb,2010,10.9,1
+Regina,NO2,ppb,2011,9.4,1
+Regina,NO2,ppb,2012,9.3,1
+Regina,NO2,ppb,2013,9.3,1
+Regina,NO2,ppb,2014,11.0,1
+Regina,NO2,ppb,2016,7.3,1
+Regina,NO2,ppb,2017,8.5,1
+Regina,NO2,ppb,2018,9.1,1
+Regina,NO2,ppb,2019,8.8,1
+Regina,NO2,ppb,2020,7.4,1
+Regina,NO2,ppb,2021,7.1,1
+Regina,NO2,ppb,2022,7.7,1
+Regina,NO2,ppb,2023,8.4,1
+Regina,NO2,ppb,2024,8.0,1
+Saint John,NO2,ppb,2005,6.65,2
+Saint John,NO2,ppb,2006,3.4,1
+Saint John,NO2,ppb,2007,6.5,1
+Saint John,NO2,ppb,2008,4.35,2
+Saint John,NO2,ppb,2009,3.13,3
+Saint John,NO2,ppb,2010,4.55,2
+Saint John,NO2,ppb,2011,2.9,2
+Saint John,NO2,ppb,2012,3.33,3
+Saint John,NO2,ppb,2013,4.43,3
+Saint John,NO2,ppb,2014,3.7,3
+Saint John,NO2,ppb,2015,4.23,3
+Saint John,NO2,ppb,2016,3.25,2
+Saint John,NO2,ppb,2017,3.63,3
+Saint John,NO2,ppb,2018,3.03,3
+Saint John,NO2,ppb,2019,3.47,3
+Saint John,NO2,ppb,2020,3.23,3
+Saint John,NO2,ppb,2021,3.1,1
+Saint John,NO2,ppb,2022,3.4,3
+Saint John,NO2,ppb,2023,3.4,3
+Saint John,NO2,ppb,2024,3.33,3
+Saskatoon,NO2,ppb,2005,9.9,1
+Saskatoon,NO2,ppb,2006,10.5,1
+Saskatoon,NO2,ppb,2008,8.5,1
+Saskatoon,NO2,ppb,2009,10.3,1
+Saskatoon,NO2,ppb,2010,11.1,1
+Saskatoon,NO2,ppb,2011,11.4,1
+Saskatoon,NO2,ppb,2012,10.5,1
+Saskatoon,NO2,ppb,2013,11.1,1
+Saskatoon,NO2,ppb,2014,9.7,1
+Saskatoon,NO2,ppb,2015,8.2,1
+Saskatoon,NO2,ppb,2016,8.9,1
+Saskatoon,NO2,ppb,2017,8.6,1
+Saskatoon,NO2,ppb,2018,9.0,1
+Saskatoon,NO2,ppb,2019,8.1,1
+Saskatoon,NO2,ppb,2020,7.4,1
+Saskatoon,NO2,ppb,2021,7.1,1
+Saskatoon,NO2,ppb,2022,7.6,1
+Saskatoon,NO2,ppb,2023,8.3,1
+Saskatoon,NO2,ppb,2024,7.0,1
+St. Catharines–Niagara,NO2,ppb,2006,11.7,1
+St. Catharines–Niagara,NO2,ppb,2007,12.0,1
+St. Catharines–Niagara,NO2,ppb,2008,10.4,1
+St. Catharines–Niagara,NO2,ppb,2009,9.9,1
+St. Catharines–Niagara,NO2,ppb,2010,9.1,1
+St. Catharines–Niagara,NO2,ppb,2011,8.5,1
+St. Catharines–Niagara,NO2,ppb,2012,8.0,1
+St. Catharines–Niagara,NO2,ppb,2013,7.7,1
+St. Catharines–Niagara,NO2,ppb,2014,7.3,1
+St. Catharines–Niagara,NO2,ppb,2015,7.3,1
+St. Catharines–Niagara,NO2,ppb,2016,6.6,1
+St. Catharines–Niagara,NO2,ppb,2017,6.6,1
+St. Catharines–Niagara,NO2,ppb,2018,6.0,1
+St. Catharines–Niagara,NO2,ppb,2019,6.0,1
+St. Catharines–Niagara,NO2,ppb,2020,5.3,1
+St. Catharines–Niagara,NO2,ppb,2021,5.8,1
+St. Catharines–Niagara,NO2,ppb,2022,5.7,1
+St. Catharines–Niagara,NO2,ppb,2023,5.8,1
+St. Catharines–Niagara,NO2,ppb,2024,5.0,1
+St. John's,NO2,ppb,2005,4.65,2
+St. John's,NO2,ppb,2006,3.95,2
+St. John's,NO2,ppb,2008,4.65,2
+St. John's,NO2,ppb,2009,2.75,2
+St. John's,NO2,ppb,2010,4.3,2
+St. John's,NO2,ppb,2011,3.95,2
+St. John's,NO2,ppb,2012,3.75,2
+St. John's,NO2,ppb,2013,4.5,2
+St. John's,NO2,ppb,2014,3.85,2
+St. John's,NO2,ppb,2015,3.15,2
+St. John's,NO2,ppb,2016,3.45,2
+St. John's,NO2,ppb,2017,4.25,2
+St. John's,NO2,ppb,2018,3.4,2
+St. John's,NO2,ppb,2019,2.6,2
+St. John's,NO2,ppb,2020,1.1,1
+St. John's,NO2,ppb,2021,2.5,2
+St. John's,NO2,ppb,2022,2.5,2
+St. John's,NO2,ppb,2023,2.75,2
+St. John's,NO2,ppb,2024,3.0,2
+Sudbury,NO2,ppb,2013,7.2,1
+Sudbury,NO2,ppb,2014,7.3,1
+Sudbury,NO2,ppb,2015,7.2,1
+Sudbury,NO2,ppb,2016,6.9,1
+Sudbury,NO2,ppb,2017,6.8,1
+Sudbury,NO2,ppb,2018,6.5,1
+Sudbury,NO2,ppb,2019,6.9,1
+Sudbury,NO2,ppb,2020,6.3,1
+Sudbury,NO2,ppb,2021,5.6,1
+Sudbury,NO2,ppb,2022,6.1,1
+Sudbury,NO2,ppb,2023,5.5,1
+Sudbury,NO2,ppb,2024,5.0,1
+Thunder Bay,NO2,ppb,2007,8.7,1
+Thunder Bay,NO2,ppb,2008,8.1,1
+Thunder Bay,NO2,ppb,2009,8.4,1
+Thunder Bay,NO2,ppb,2010,7.8,1
+Thunder Bay,NO2,ppb,2011,8.6,1
+Thunder Bay,NO2,ppb,2012,7.3,1
+Thunder Bay,NO2,ppb,2013,7.3,1
+Thunder Bay,NO2,ppb,2014,7.7,1
+Thunder Bay,NO2,ppb,2015,7.5,1
+Thunder Bay,NO2,ppb,2016,7.1,1
+Thunder Bay,NO2,ppb,2017,6.7,1
+Thunder Bay,NO2,ppb,2018,7.5,1
+Thunder Bay,NO2,ppb,2019,6.6,1
+Thunder Bay,NO2,ppb,2020,6.1,1
+Thunder Bay,NO2,ppb,2021,6.5,1
+Thunder Bay,NO2,ppb,2022,7.0,1
+Thunder Bay,NO2,ppb,2023,6.6,1
+Toronto,NO2,ppb,2005,22.12,6
+Toronto,NO2,ppb,2006,20.04,5
+Toronto,NO2,ppb,2007,19.03,6
+Toronto,NO2,ppb,2008,18.15,6
+Toronto,NO2,ppb,2009,16.36,5
+Toronto,NO2,ppb,2010,16.57,6
+Toronto,NO2,ppb,2011,16.6,5
+Toronto,NO2,ppb,2012,14.72,5
+Toronto,NO2,ppb,2013,14.6,5
+Toronto,NO2,ppb,2014,15.1,5
+Toronto,NO2,ppb,2015,14.68,5
+Toronto,NO2,ppb,2016,14.47,6
+Toronto,NO2,ppb,2017,14.07,6
+Toronto,NO2,ppb,2018,13.4,6
+Toronto,NO2,ppb,2019,13.74,5
+Toronto,NO2,ppb,2020,11.67,6
+Toronto,NO2,ppb,2021,12.63,6
+Toronto,NO2,ppb,2022,13.2,6
+Toronto,NO2,ppb,2023,11.85,4
+Toronto,NO2,ppb,2024,12.67,6
+Vancouver,NO2,ppb,2005,14.61,17
+Vancouver,NO2,ppb,2006,13.87,18
+Vancouver,NO2,ppb,2007,13.31,18
+Vancouver,NO2,ppb,2008,12.76,18
+Vancouver,NO2,ppb,2009,16.88,4
+Vancouver,NO2,ppb,2010,10.69,17
+Vancouver,NO2,ppb,2011,10.64,18
+Vancouver,NO2,ppb,2012,11.16,19
+Vancouver,NO2,ppb,2013,11.13,19
+Vancouver,NO2,ppb,2014,10.8,17
+Vancouver,NO2,ppb,2015,14.37,3
+Vancouver,NO2,ppb,2016,15.55,4
+Vancouver,NO2,ppb,2017,16.8,4
+Vancouver,NO2,ppb,2018,10.89,20
+Vancouver,NO2,ppb,2019,14.78,4
+Vancouver,NO2,ppb,2020,13.07,4
+Vancouver,NO2,ppb,2021,13.68,4
+Vancouver,NO2,ppb,2022,10.38,21
+Vancouver,NO2,ppb,2023,9.28,20
+Vancouver,NO2,ppb,2024,9.05,20
+Victoria,NO2,ppb,2005,10.4,1
+Victoria,NO2,ppb,2006,5.0,1
+Victoria,NO2,ppb,2008,7.05,2
+Victoria,NO2,ppb,2009,10.6,1
+Victoria,NO2,ppb,2010,9.9,1
+Victoria,NO2,ppb,2011,9.0,1
+Victoria,NO2,ppb,2012,8.7,1
+Victoria,NO2,ppb,2013,9.0,1
+Victoria,NO2,ppb,2014,8.4,1
+Victoria,NO2,ppb,2015,8.6,1
+Victoria,NO2,ppb,2016,6.65,2
+Victoria,NO2,ppb,2017,6.55,2
+Victoria,NO2,ppb,2018,8.3,1
+Victoria,NO2,ppb,2019,6.25,2
+Victoria,NO2,ppb,2020,5.05,2
+Victoria,NO2,ppb,2021,4.95,2
+Victoria,NO2,ppb,2022,6.7,1
+Victoria,NO2,ppb,2023,6.9,1
+Victoria,NO2,ppb,2024,7.0,1
+Windsor,NO2,ppb,2005,17.0,2
+Windsor,NO2,ppb,2006,16.45,2
+Windsor,NO2,ppb,2007,16.65,2
+Windsor,NO2,ppb,2008,15.7,2
+Windsor,NO2,ppb,2009,13.8,2
+Windsor,NO2,ppb,2010,15.05,2
+Windsor,NO2,ppb,2011,13.7,2
+Windsor,NO2,ppb,2012,12.3,2
+Windsor,NO2,ppb,2013,11.95,2
+Windsor,NO2,ppb,2014,12.9,2
+Windsor,NO2,ppb,2015,11.8,2
+Windsor,NO2,ppb,2016,11.0,2
+Windsor,NO2,ppb,2017,10.5,2
+Windsor,NO2,ppb,2018,9.9,2
+Windsor,NO2,ppb,2019,10.45,2
+Windsor,NO2,ppb,2020,8.55,2
+Windsor,NO2,ppb,2021,9.0,2
+Windsor,NO2,ppb,2022,8.7,2
+Windsor,NO2,ppb,2023,9.35,2
+Windsor,NO2,ppb,2024,8.0,2
+Winnipeg,NO2,ppb,2005,9.9,2
+Winnipeg,NO2,ppb,2006,10.05,2
+Winnipeg,NO2,ppb,2007,10.4,2
+Winnipeg,NO2,ppb,2008,11.7,1
+Winnipeg,NO2,ppb,2009,9.2,2
+Winnipeg,NO2,ppb,2010,8.05,2
+Winnipeg,NO2,ppb,2011,9.65,2
+Winnipeg,NO2,ppb,2012,7.8,2
+Winnipeg,NO2,ppb,2013,7.55,2
+Winnipeg,NO2,ppb,2014,5.85,2
+Winnipeg,NO2,ppb,2015,7.0,2
+Winnipeg,NO2,ppb,2016,8.0,1
+Winnipeg,NO2,ppb,2017,7.5,1
+Winnipeg,NO2,ppb,2018,8.6,1
+Winnipeg,NO2,ppb,2019,9.8,1
+Winnipeg,NO2,ppb,2020,8.0,1
+Winnipeg,NO2,ppb,2021,6.7,1
+Winnipeg,NO2,ppb,2022,3.7,1
+Winnipeg,NO2,ppb,2023,2.3,1
+Yellowknife,NO2,ppb,2005,3.9,1
+Yellowknife,NO2,ppb,2006,3.9,1
+Yellowknife,NO2,ppb,2007,2.8,1
+Yellowknife,NO2,ppb,2008,1.9,1
+Yellowknife,NO2,ppb,2009,2.1,1
+Yellowknife,NO2,ppb,2010,4.7,1
+Yellowknife,NO2,ppb,2011,3.0,1
+Yellowknife,NO2,ppb,2012,2.2,1
+Yellowknife,NO2,ppb,2013,3.2,1
+Yellowknife,NO2,ppb,2014,2.8,1
+Yellowknife,NO2,ppb,2015,3.1,1
+Yellowknife,NO2,ppb,2016,1.9,1
+Yellowknife,NO2,ppb,2017,3.5,1
+Yellowknife,NO2,ppb,2018,2.9,1
+Yellowknife,NO2,ppb,2019,1.3,1
+Yellowknife,NO2,ppb,2020,2.1,1
+Yellowknife,NO2,ppb,2021,3.1,1
+Yellowknife,NO2,ppb,2022,3.0,1
+Yellowknife,NO2,ppb,2024,2.0,1
+Abbotsford,O3,ppb,2005,16.0,1
+Abbotsford,O3,ppb,2006,19.0,1
+Abbotsford,O3,ppb,2007,18.0,2
+Abbotsford,O3,ppb,2008,17.0,1
+Abbotsford,O3,ppb,2009,19.5,2
+Abbotsford,O3,ppb,2010,19.0,1
+Abbotsford,O3,ppb,2011,19.0,1
+Abbotsford,O3,ppb,2012,20.0,1
+Abbotsford,O3,ppb,2013,18.0,2
+Abbotsford,O3,ppb,2014,20.5,2
+Abbotsford,O3,ppb,2015,18.5,2
+Abbotsford,O3,ppb,2016,19.5,2
+Abbotsford,O3,ppb,2017,21.5,2
+Abbotsford,O3,ppb,2018,20.5,2
+Abbotsford,O3,ppb,2019,19.5,2
+Abbotsford,O3,ppb,2020,20.0,2
+Abbotsford,O3,ppb,2021,22.5,2
+Abbotsford,O3,ppb,2022,20.5,2
+Abbotsford,O3,ppb,2023,20.5,2
+Abbotsford,O3,ppb,2024,20.5,2
+Calgary,O3,ppb,2005,18.0,3
+Calgary,O3,ppb,2006,19.33,3
+Calgary,O3,ppb,2007,19.67,3
+Calgary,O3,ppb,2008,21.5,2
+Calgary,O3,ppb,2009,22.67,3
+Calgary,O3,ppb,2010,20.33,3
+Calgary,O3,ppb,2011,24.0,2
+Calgary,O3,ppb,2012,21.5,2
+Calgary,O3,ppb,2013,24.0,2
+Calgary,O3,ppb,2014,23.0,2
+Calgary,O3,ppb,2015,24.0,2
+Calgary,O3,ppb,2016,21.33,3
+Calgary,O3,ppb,2017,26.0,3
+Calgary,O3,ppb,2018,23.0,2
+Calgary,O3,ppb,2019,24.33,3
+Calgary,O3,ppb,2020,24.67,3
+Calgary,O3,ppb,2021,26.67,3
+Calgary,O3,ppb,2022,27.33,3
+Calgary,O3,ppb,2023,27.33,3
+Calgary,O3,ppb,2024,25.33,3
+Charlottetown,O3,ppb,2014,30.0,1
+Charlottetown,O3,ppb,2015,38.0,1
+Charlottetown,O3,ppb,2016,28.0,1
+Charlottetown,O3,ppb,2017,30.0,1
+Charlottetown,O3,ppb,2018,28.0,1
+Charlottetown,O3,ppb,2019,26.0,1
+Charlottetown,O3,ppb,2020,26.0,1
+Charlottetown,O3,ppb,2021,28.0,1
+Charlottetown,O3,ppb,2022,28.0,1
+Charlottetown,O3,ppb,2023,28.0,1
+Charlottetown,O3,ppb,2024,29.0,1
+Edmonton,O3,ppb,2005,18.67,3
+Edmonton,O3,ppb,2006,20.33,3
+Edmonton,O3,ppb,2007,21.0,3
+Edmonton,O3,ppb,2008,21.0,3
+Edmonton,O3,ppb,2009,22.0,3
+Edmonton,O3,ppb,2010,19.33,3
+Edmonton,O3,ppb,2011,23.67,3
+Edmonton,O3,ppb,2012,21.33,3
+Edmonton,O3,ppb,2013,22.33,3
+Edmonton,O3,ppb,2014,21.75,4
+Edmonton,O3,ppb,2015,21.5,4
+Edmonton,O3,ppb,2016,21.25,4
+Edmonton,O3,ppb,2017,22.5,4
+Edmonton,O3,ppb,2018,24.0,4
+Edmonton,O3,ppb,2019,22.75,4
+Edmonton,O3,ppb,2020,23.2,5
+Edmonton,O3,ppb,2021,24.25,4
+Edmonton,O3,ppb,2022,24.75,4
+Edmonton,O3,ppb,2023,25.25,4
+Edmonton,O3,ppb,2024,23.25,4
+Fredericton,O3,ppb,2005,25.0,1
+Fredericton,O3,ppb,2006,26.0,1
+Fredericton,O3,ppb,2007,29.0,1
+Fredericton,O3,ppb,2008,27.0,1
+Fredericton,O3,ppb,2009,25.0,1
+Fredericton,O3,ppb,2010,26.0,1
+Fredericton,O3,ppb,2011,24.0,1
+Fredericton,O3,ppb,2012,24.0,1
+Fredericton,O3,ppb,2013,25.0,1
+Fredericton,O3,ppb,2014,26.0,1
+Fredericton,O3,ppb,2015,25.0,1
+Fredericton,O3,ppb,2016,24.0,1
+Fredericton,O3,ppb,2018,31.0,1
+Fredericton,O3,ppb,2019,27.0,1
+Fredericton,O3,ppb,2020,27.0,1
+Fredericton,O3,ppb,2021,28.0,1
+Fredericton,O3,ppb,2022,26.0,1
+Fredericton,O3,ppb,2023,27.0,1
+Fredericton,O3,ppb,2024,25.0,1
+Halifax,O3,ppb,2005,13.0,1
+Halifax,O3,ppb,2006,21.0,1
+Halifax,O3,ppb,2007,19.0,1
+Halifax,O3,ppb,2008,18.5,2
+Halifax,O3,ppb,2009,22.0,1
+Halifax,O3,ppb,2010,21.0,1
+Halifax,O3,ppb,2011,23.5,2
+Halifax,O3,ppb,2012,22.0,2
+Halifax,O3,ppb,2013,25.5,2
+Halifax,O3,ppb,2014,25.0,2
+Halifax,O3,ppb,2015,25.0,2
+Halifax,O3,ppb,2016,23.5,2
+Halifax,O3,ppb,2017,25.0,2
+Halifax,O3,ppb,2018,28.0,2
+Halifax,O3,ppb,2019,27.0,2
+Halifax,O3,ppb,2020,26.5,2
+Halifax,O3,ppb,2021,27.5,2
+Halifax,O3,ppb,2022,29.0,2
+Halifax,O3,ppb,2023,29.5,2
+Halifax,O3,ppb,2024,28.0,2
+Hamilton,O3,ppb,2005,25.5,2
+Hamilton,O3,ppb,2006,25.0,2
+Hamilton,O3,ppb,2007,27.0,2
+Hamilton,O3,ppb,2008,27.0,2
+Hamilton,O3,ppb,2009,25.5,2
+Hamilton,O3,ppb,2010,28.5,2
+Hamilton,O3,ppb,2011,26.0,3
+Hamilton,O3,ppb,2012,26.67,3
+Hamilton,O3,ppb,2013,26.0,3
+Hamilton,O3,ppb,2014,25.67,3
+Hamilton,O3,ppb,2015,26.33,3
+Hamilton,O3,ppb,2016,26.67,3
+Hamilton,O3,ppb,2017,26.67,3
+Hamilton,O3,ppb,2018,26.67,3
+Hamilton,O3,ppb,2019,25.33,3
+Hamilton,O3,ppb,2020,26.67,3
+Hamilton,O3,ppb,2021,26.67,3
+Hamilton,O3,ppb,2022,26.33,3
+Hamilton,O3,ppb,2023,27.0,3
+Hamilton,O3,ppb,2024,26.0,3
+Kelowna,O3,ppb,2005,21.0,1
+Kelowna,O3,ppb,2006,22.0,1
+Kelowna,O3,ppb,2007,23.0,1
+Kelowna,O3,ppb,2008,24.0,1
+Kelowna,O3,ppb,2009,25.0,1
+Kelowna,O3,ppb,2010,21.0,1
+Kelowna,O3,ppb,2011,25.0,1
+Kelowna,O3,ppb,2012,25.0,1
+Kelowna,O3,ppb,2013,24.0,1
+Kelowna,O3,ppb,2014,22.0,1
+Kelowna,O3,ppb,2015,23.0,1
+Kelowna,O3,ppb,2016,22.0,1
+Kelowna,O3,ppb,2017,25.0,1
+Kelowna,O3,ppb,2018,23.0,1
+Kelowna,O3,ppb,2020,21.0,1
+Kelowna,O3,ppb,2021,23.0,1
+Kelowna,O3,ppb,2022,21.0,1
+Kelowna,O3,ppb,2023,19.0,1
+Kelowna,O3,ppb,2024,19.0,1
+Kitchener–Waterloo,O3,ppb,2005,28.0,1
+Kitchener–Waterloo,O3,ppb,2006,27.0,1
+Kitchener–Waterloo,O3,ppb,2007,29.0,1
+Kitchener–Waterloo,O3,ppb,2008,28.0,1
+Kitchener–Waterloo,O3,ppb,2009,27.0,1
+Kitchener–Waterloo,O3,ppb,2010,29.0,1
+Kitchener–Waterloo,O3,ppb,2011,28.0,1
+Kitchener–Waterloo,O3,ppb,2012,28.0,1
+Kitchener–Waterloo,O3,ppb,2013,28.0,1
+Kitchener–Waterloo,O3,ppb,2014,27.0,1
+Kitchener–Waterloo,O3,ppb,2015,28.0,1
+Kitchener–Waterloo,O3,ppb,2016,29.0,1
+Kitchener–Waterloo,O3,ppb,2017,28.0,1
+Kitchener–Waterloo,O3,ppb,2018,28.0,1
+Kitchener–Waterloo,O3,ppb,2019,27.0,1
+Kitchener–Waterloo,O3,ppb,2020,28.0,1
+Kitchener–Waterloo,O3,ppb,2021,28.0,1
+Kitchener–Waterloo,O3,ppb,2022,29.0,1
+Kitchener–Waterloo,O3,ppb,2023,29.0,1
+Kitchener–Waterloo,O3,ppb,2024,28.0,1
+London,O3,ppb,2005,26.0,1
+London,O3,ppb,2006,25.0,1
+London,O3,ppb,2007,27.0,1
+London,O3,ppb,2008,27.0,1
+London,O3,ppb,2009,25.0,1
+London,O3,ppb,2010,28.0,1
+London,O3,ppb,2011,27.0,1
+London,O3,ppb,2012,28.0,1
+London,O3,ppb,2013,29.0,1
+London,O3,ppb,2014,28.0,1
+London,O3,ppb,2015,28.0,1
+London,O3,ppb,2016,28.0,1
+London,O3,ppb,2017,28.0,1
+London,O3,ppb,2018,28.0,1
+London,O3,ppb,2019,27.0,1
+London,O3,ppb,2020,28.0,1
+London,O3,ppb,2021,29.0,1
+London,O3,ppb,2022,30.0,1
+London,O3,ppb,2023,29.0,1
+London,O3,ppb,2024,28.0,1
+Moncton,O3,ppb,2005,23.0,1
+Moncton,O3,ppb,2006,22.0,1
+Moncton,O3,ppb,2007,19.0,1
+Moncton,O3,ppb,2008,22.0,1
+Moncton,O3,ppb,2009,24.0,1
+Moncton,O3,ppb,2010,24.0,1
+Moncton,O3,ppb,2011,22.0,1
+Moncton,O3,ppb,2012,23.0,1
+Moncton,O3,ppb,2013,25.0,1
+Moncton,O3,ppb,2014,25.0,1
+Moncton,O3,ppb,2015,24.0,1
+Moncton,O3,ppb,2016,24.0,1
+Moncton,O3,ppb,2017,25.0,1
+Moncton,O3,ppb,2018,25.0,1
+Moncton,O3,ppb,2019,27.0,1
+Moncton,O3,ppb,2020,24.0,1
+Moncton,O3,ppb,2021,24.0,1
+Moncton,O3,ppb,2022,24.0,1
+Moncton,O3,ppb,2023,23.0,1
+Moncton,O3,ppb,2024,24.0,1
+Montréal,O3,ppb,2005,20.78,9
+Montréal,O3,ppb,2006,19.11,9
+Montréal,O3,ppb,2007,21.4,10
+Montréal,O3,ppb,2008,20.67,9
+Montréal,O3,ppb,2009,20.33,9
+Montréal,O3,ppb,2010,22.44,9
+Montréal,O3,ppb,2011,20.78,9
+Montréal,O3,ppb,2012,22.33,9
+Montréal,O3,ppb,2013,23.12,8
+Montréal,O3,ppb,2014,22.89,9
+Montréal,O3,ppb,2015,23.57,7
+Montréal,O3,ppb,2016,23.44,9
+Montréal,O3,ppb,2017,23.25,8
+Montréal,O3,ppb,2018,24.89,9
+Montréal,O3,ppb,2019,24.44,9
+Montréal,O3,ppb,2020,24.22,9
+Montréal,O3,ppb,2021,24.3,10
+Montréal,O3,ppb,2022,24.11,9
+Montréal,O3,ppb,2023,25.7,10
+Montréal,O3,ppb,2024,24.8,10
+Ottawa–Gatineau,O3,ppb,2005,23.5,2
+Ottawa–Gatineau,O3,ppb,2006,23.0,2
+Ottawa–Gatineau,O3,ppb,2007,26.0,2
+Ottawa–Gatineau,O3,ppb,2008,24.33,3
+Ottawa–Gatineau,O3,ppb,2009,23.33,3
+Ottawa–Gatineau,O3,ppb,2010,26.0,3
+Ottawa–Gatineau,O3,ppb,2011,24.33,3
+Ottawa–Gatineau,O3,ppb,2012,25.67,3
+Ottawa–Gatineau,O3,ppb,2013,26.33,3
+Ottawa–Gatineau,O3,ppb,2014,26.0,3
+Ottawa–Gatineau,O3,ppb,2015,26.33,3
+Ottawa–Gatineau,O3,ppb,2016,26.0,3
+Ottawa–Gatineau,O3,ppb,2017,25.67,3
+Ottawa–Gatineau,O3,ppb,2018,26.5,2
+Ottawa–Gatineau,O3,ppb,2019,26.5,2
+Ottawa–Gatineau,O3,ppb,2020,26.0,2
+Ottawa–Gatineau,O3,ppb,2021,26.5,2
+Ottawa–Gatineau,O3,ppb,2022,26.5,2
+Ottawa–Gatineau,O3,ppb,2023,27.5,2
+Ottawa–Gatineau,O3,ppb,2024,26.0,2
+Québec City,O3,ppb,2005,22.33,3
+Québec City,O3,ppb,2006,21.0,3
+Québec City,O3,ppb,2007,21.33,3
+Québec City,O3,ppb,2008,20.0,3
+Québec City,O3,ppb,2009,20.0,3
+Québec City,O3,ppb,2010,23.33,3
+Québec City,O3,ppb,2011,21.67,3
+Québec City,O3,ppb,2012,23.0,3
+Québec City,O3,ppb,2013,24.67,3
+Québec City,O3,ppb,2014,23.67,3
+Québec City,O3,ppb,2015,24.0,3
+Québec City,O3,ppb,2016,24.0,3
+Québec City,O3,ppb,2017,24.0,3
+Québec City,O3,ppb,2018,25.67,3
+Québec City,O3,ppb,2019,25.0,3
+Québec City,O3,ppb,2020,24.75,4
+Québec City,O3,ppb,2021,25.0,5
+Québec City,O3,ppb,2022,24.6,5
+Québec City,O3,ppb,2023,24.75,4
+Québec City,O3,ppb,2024,24.2,5
+Regina,O3,ppb,2005,17.0,1
+Regina,O3,ppb,2006,16.0,1
+Regina,O3,ppb,2008,22.0,1
+Regina,O3,ppb,2009,23.0,1
+Regina,O3,ppb,2010,22.0,1
+Regina,O3,ppb,2011,26.0,1
+Regina,O3,ppb,2012,21.0,1
+Regina,O3,ppb,2013,21.0,1
+Regina,O3,ppb,2014,24.0,1
+Regina,O3,ppb,2015,25.0,1
+Regina,O3,ppb,2016,25.0,1
+Regina,O3,ppb,2017,26.0,1
+Regina,O3,ppb,2018,26.0,1
+Regina,O3,ppb,2019,26.0,1
+Regina,O3,ppb,2020,25.0,1
+Regina,O3,ppb,2021,26.0,1
+Regina,O3,ppb,2022,27.0,1
+Regina,O3,ppb,2023,28.0,1
+Regina,O3,ppb,2024,26.0,1
+Saguenay,O3,ppb,2005,25.0,1
+Saguenay,O3,ppb,2006,24.0,1
+Saguenay,O3,ppb,2007,23.0,1
+Saguenay,O3,ppb,2008,23.0,1
+Saguenay,O3,ppb,2009,21.0,1
+Saguenay,O3,ppb,2010,25.0,1
+Saguenay,O3,ppb,2011,25.0,1
+Saguenay,O3,ppb,2012,27.0,1
+Saguenay,O3,ppb,2013,26.0,1
+Saguenay,O3,ppb,2014,24.0,1
+Saguenay,O3,ppb,2015,25.0,1
+Saguenay,O3,ppb,2016,24.0,1
+Saguenay,O3,ppb,2017,26.0,1
+Saguenay,O3,ppb,2018,27.0,1
+Saguenay,O3,ppb,2019,25.5,2
+Saguenay,O3,ppb,2020,25.0,2
+Saguenay,O3,ppb,2021,25.0,2
+Saguenay,O3,ppb,2022,26.5,2
+Saguenay,O3,ppb,2023,26.5,2
+Saguenay,O3,ppb,2024,25.5,2
+Saint John,O3,ppb,2005,25.67,3
+Saint John,O3,ppb,2006,25.67,3
+Saint John,O3,ppb,2007,26.0,3
+Saint John,O3,ppb,2008,26.67,3
+Saint John,O3,ppb,2009,26.33,3
+Saint John,O3,ppb,2010,27.67,3
+Saint John,O3,ppb,2011,26.0,2
+Saint John,O3,ppb,2012,25.5,2
+Saint John,O3,ppb,2013,27.0,3
+Saint John,O3,ppb,2014,26.67,3
+Saint John,O3,ppb,2015,26.33,3
+Saint John,O3,ppb,2016,27.0,2
+Saint John,O3,ppb,2017,29.0,3
+Saint John,O3,ppb,2018,29.0,3
+Saint John,O3,ppb,2019,30.0,3
+Saint John,O3,ppb,2020,30.0,3
+Saint John,O3,ppb,2021,29.0,3
+Saint John,O3,ppb,2022,28.67,3
+Saint John,O3,ppb,2023,30.67,3
+Saint John,O3,ppb,2024,29.0,3
+Saskatoon,O3,ppb,2005,20.0,1
+Saskatoon,O3,ppb,2006,20.0,1
+Saskatoon,O3,ppb,2007,19.0,1
+Saskatoon,O3,ppb,2008,21.0,1
+Saskatoon,O3,ppb,2009,22.0,1
+Saskatoon,O3,ppb,2010,22.0,1
+Saskatoon,O3,ppb,2011,24.0,1
+Saskatoon,O3,ppb,2012,22.0,1
+Saskatoon,O3,ppb,2013,26.0,1
+Saskatoon,O3,ppb,2014,24.0,1
+Saskatoon,O3,ppb,2015,24.0,1
+Saskatoon,O3,ppb,2016,22.0,1
+Saskatoon,O3,ppb,2017,26.0,1
+Saskatoon,O3,ppb,2018,26.0,1
+Saskatoon,O3,ppb,2019,25.0,1
+Saskatoon,O3,ppb,2020,24.0,1
+Saskatoon,O3,ppb,2021,25.0,1
+Saskatoon,O3,ppb,2022,25.0,1
+Saskatoon,O3,ppb,2023,26.0,1
+Saskatoon,O3,ppb,2024,25.0,1
+Sherbrooke,O3,ppb,2005,26.0,1
+Sherbrooke,O3,ppb,2006,23.0,1
+Sherbrooke,O3,ppb,2007,24.0,1
+Sherbrooke,O3,ppb,2008,24.0,1
+Sherbrooke,O3,ppb,2009,24.0,1
+Sherbrooke,O3,ppb,2010,26.0,1
+Sherbrooke,O3,ppb,2011,26.0,1
+Sherbrooke,O3,ppb,2012,27.0,1
+Sherbrooke,O3,ppb,2013,29.0,1
+Sherbrooke,O3,ppb,2014,28.0,1
+Sherbrooke,O3,ppb,2015,27.0,1
+Sherbrooke,O3,ppb,2016,27.0,1
+Sherbrooke,O3,ppb,2017,28.0,1
+Sherbrooke,O3,ppb,2018,29.0,1
+Sherbrooke,O3,ppb,2019,29.0,1
+Sherbrooke,O3,ppb,2020,28.0,1
+Sherbrooke,O3,ppb,2021,28.0,1
+Sherbrooke,O3,ppb,2024,27.0,1
+St. Catharines–Niagara,O3,ppb,2005,26.0,1
+St. Catharines–Niagara,O3,ppb,2006,26.0,1
+St. Catharines–Niagara,O3,ppb,2007,28.0,1
+St. Catharines–Niagara,O3,ppb,2008,28.0,1
+St. Catharines–Niagara,O3,ppb,2009,26.0,1
+St. Catharines–Niagara,O3,ppb,2010,28.0,1
+St. Catharines–Niagara,O3,ppb,2011,28.0,1
+St. Catharines–Niagara,O3,ppb,2012,29.0,1
+St. Catharines–Niagara,O3,ppb,2013,29.0,1
+St. Catharines–Niagara,O3,ppb,2014,29.0,1
+St. Catharines–Niagara,O3,ppb,2015,29.0,1
+St. Catharines–Niagara,O3,ppb,2016,30.0,1
+St. Catharines–Niagara,O3,ppb,2017,28.0,1
+St. Catharines–Niagara,O3,ppb,2018,28.0,1
+St. Catharines–Niagara,O3,ppb,2019,28.0,1
+St. Catharines–Niagara,O3,ppb,2020,30.0,1
+St. Catharines–Niagara,O3,ppb,2021,30.0,1
+St. Catharines–Niagara,O3,ppb,2022,30.0,1
+St. Catharines–Niagara,O3,ppb,2023,29.0,1
+St. Catharines–Niagara,O3,ppb,2024,29.0,1
+St. John's,O3,ppb,2005,27.5,2
+St. John's,O3,ppb,2006,30.0,2
+St. John's,O3,ppb,2007,29.0,2
+St. John's,O3,ppb,2008,29.0,2
+St. John's,O3,ppb,2009,19.5,2
+St. John's,O3,ppb,2010,28.0,2
+St. John's,O3,ppb,2011,28.5,2
+St. John's,O3,ppb,2012,29.0,2
+St. John's,O3,ppb,2013,27.0,2
+St. John's,O3,ppb,2014,28.0,2
+St. John's,O3,ppb,2015,30.0,2
+St. John's,O3,ppb,2016,28.5,2
+St. John's,O3,ppb,2017,29.0,1
+St. John's,O3,ppb,2018,27.5,2
+St. John's,O3,ppb,2019,25.0,2
+St. John's,O3,ppb,2020,26.5,2
+St. John's,O3,ppb,2021,27.5,2
+St. John's,O3,ppb,2022,27.5,2
+St. John's,O3,ppb,2023,26.5,2
+St. John's,O3,ppb,2024,27.5,2
+Sudbury,O3,ppb,2005,31.0,1
+Sudbury,O3,ppb,2006,28.0,1
+Sudbury,O3,ppb,2007,28.0,1
+Sudbury,O3,ppb,2008,28.0,1
+Sudbury,O3,ppb,2009,26.0,1
+Sudbury,O3,ppb,2010,29.0,1
+Sudbury,O3,ppb,2011,29.0,1
+Sudbury,O3,ppb,2012,29.0,1
+Sudbury,O3,ppb,2013,27.0,1
+Sudbury,O3,ppb,2014,26.0,1
+Sudbury,O3,ppb,2015,26.0,1
+Sudbury,O3,ppb,2016,26.0,1
+Sudbury,O3,ppb,2017,26.0,1
+Sudbury,O3,ppb,2018,27.0,1
+Sudbury,O3,ppb,2019,26.0,1
+Sudbury,O3,ppb,2020,25.0,1
+Sudbury,O3,ppb,2021,24.0,1
+Sudbury,O3,ppb,2022,26.0,1
+Sudbury,O3,ppb,2023,27.0,1
+Sudbury,O3,ppb,2024,27.0,1
+Thunder Bay,O3,ppb,2005,22.0,1
+Thunder Bay,O3,ppb,2006,23.0,1
+Thunder Bay,O3,ppb,2007,24.0,1
+Thunder Bay,O3,ppb,2008,23.0,1
+Thunder Bay,O3,ppb,2009,24.0,1
+Thunder Bay,O3,ppb,2010,26.0,1
+Thunder Bay,O3,ppb,2011,25.0,1
+Thunder Bay,O3,ppb,2012,25.0,1
+Thunder Bay,O3,ppb,2013,26.0,1
+Thunder Bay,O3,ppb,2014,23.0,1
+Thunder Bay,O3,ppb,2015,24.0,1
+Thunder Bay,O3,ppb,2016,23.0,1
+Thunder Bay,O3,ppb,2017,23.0,1
+Thunder Bay,O3,ppb,2018,24.0,1
+Thunder Bay,O3,ppb,2019,24.0,1
+Thunder Bay,O3,ppb,2020,23.0,1
+Thunder Bay,O3,ppb,2021,24.0,1
+Thunder Bay,O3,ppb,2022,25.0,1
+Thunder Bay,O3,ppb,2023,25.0,1
+Toronto,O3,ppb,2005,22.67,6
+Toronto,O3,ppb,2006,21.17,6
+Toronto,O3,ppb,2007,23.17,6
+Toronto,O3,ppb,2008,22.67,6
+Toronto,O3,ppb,2009,22.0,5
+Toronto,O3,ppb,2010,23.83,6
+Toronto,O3,ppb,2011,22.6,5
+Toronto,O3,ppb,2012,24.4,5
+Toronto,O3,ppb,2013,23.8,5
+Toronto,O3,ppb,2014,23.4,5
+Toronto,O3,ppb,2015,23.8,5
+Toronto,O3,ppb,2016,23.5,6
+Toronto,O3,ppb,2017,23.0,6
+Toronto,O3,ppb,2018,23.33,6
+Toronto,O3,ppb,2019,22.2,5
+Toronto,O3,ppb,2020,23.5,6
+Toronto,O3,ppb,2021,23.83,6
+Toronto,O3,ppb,2022,22.5,6
+Toronto,O3,ppb,2023,23.6,5
+Toronto,O3,ppb,2024,23.0,6
+Vancouver,O3,ppb,2005,14.53,17
+Vancouver,O3,ppb,2006,17.33,18
+Vancouver,O3,ppb,2007,15.35,17
+Vancouver,O3,ppb,2008,16.06,18
+Vancouver,O3,ppb,2009,17.17,18
+Vancouver,O3,ppb,2010,17.82,17
+Vancouver,O3,ppb,2011,18.28,18
+Vancouver,O3,ppb,2012,18.89,19
+Vancouver,O3,ppb,2013,16.68,19
+Vancouver,O3,ppb,2014,18.06,17
+Vancouver,O3,ppb,2015,12.67,3
+Vancouver,O3,ppb,2016,17.45,20
+Vancouver,O3,ppb,2017,13.75,4
+Vancouver,O3,ppb,2018,17.95,20
+Vancouver,O3,ppb,2019,17.0,20
+Vancouver,O3,ppb,2020,18.15,20
+Vancouver,O3,ppb,2021,19.79,19
+Vancouver,O3,ppb,2022,17.7,20
+Vancouver,O3,ppb,2023,19.0,19
+Vancouver,O3,ppb,2024,18.58,19
+Victoria,O3,ppb,2005,16.0,1
+Victoria,O3,ppb,2006,25.0,2
+Victoria,O3,ppb,2008,23.5,2
+Victoria,O3,ppb,2009,20.0,1
+Victoria,O3,ppb,2010,19.0,1
+Victoria,O3,ppb,2011,16.0,1
+Victoria,O3,ppb,2012,21.0,1
+Victoria,O3,ppb,2013,18.0,1
+Victoria,O3,ppb,2014,21.0,1
+Victoria,O3,ppb,2015,19.5,2
+Victoria,O3,ppb,2016,21.0,1
+Victoria,O3,ppb,2017,22.5,2
+Victoria,O3,ppb,2018,22.0,1
+Victoria,O3,ppb,2019,20.0,1
+Victoria,O3,ppb,2020,21.0,1
+Victoria,O3,ppb,2021,22.0,1
+Victoria,O3,ppb,2022,20.0,1
+Victoria,O3,ppb,2023,22.0,1
+Victoria,O3,ppb,2024,22.0,1
+Windsor,O3,ppb,2005,25.5,2
+Windsor,O3,ppb,2006,24.5,2
+Windsor,O3,ppb,2007,26.0,2
+Windsor,O3,ppb,2008,26.5,2
+Windsor,O3,ppb,2009,25.0,2
+Windsor,O3,ppb,2010,27.5,2
+Windsor,O3,ppb,2011,26.5,2
+Windsor,O3,ppb,2012,28.0,2
+Windsor,O3,ppb,2013,27.0,2
+Windsor,O3,ppb,2014,26.5,2
+Windsor,O3,ppb,2015,26.5,2
+Windsor,O3,ppb,2016,28.0,2
+Windsor,O3,ppb,2017,27.0,2
+Windsor,O3,ppb,2018,27.0,2
+Windsor,O3,ppb,2019,27.0,2
+Windsor,O3,ppb,2020,26.5,2
+Windsor,O3,ppb,2021,29.0,2
+Windsor,O3,ppb,2022,30.0,2
+Windsor,O3,ppb,2023,29.0,2
+Windsor,O3,ppb,2024,29.0,2
+Winnipeg,O3,ppb,2005,19.5,2
+Winnipeg,O3,ppb,2006,22.0,2
+Winnipeg,O3,ppb,2007,22.0,2
+Winnipeg,O3,ppb,2008,21.0,1
+Winnipeg,O3,ppb,2009,20.5,2
+Winnipeg,O3,ppb,2010,24.0,2
+Winnipeg,O3,ppb,2011,25.0,2
+Winnipeg,O3,ppb,2012,25.5,2
+Winnipeg,O3,ppb,2013,26.5,2
+Winnipeg,O3,ppb,2014,23.0,2
+Winnipeg,O3,ppb,2015,24.0,1
+Winnipeg,O3,ppb,2016,23.0,1
+Winnipeg,O3,ppb,2017,24.0,1
+Winnipeg,O3,ppb,2024,20.0,1
+Yellowknife,O3,ppb,2005,27.0,1
+Yellowknife,O3,ppb,2006,26.0,1
+Yellowknife,O3,ppb,2007,25.0,1
+Yellowknife,O3,ppb,2008,24.0,1
+Yellowknife,O3,ppb,2009,23.0,1
+Yellowknife,O3,ppb,2010,26.0,1
+Yellowknife,O3,ppb,2011,25.0,1
+Yellowknife,O3,ppb,2012,27.0,1
+Yellowknife,O3,ppb,2013,24.0,1
+Yellowknife,O3,ppb,2014,24.0,1
+Yellowknife,O3,ppb,2015,25.0,1
+Yellowknife,O3,ppb,2016,26.0,1
+Yellowknife,O3,ppb,2017,24.0,1
+Yellowknife,O3,ppb,2018,26.0,1
+Yellowknife,O3,ppb,2019,26.0,1
+Yellowknife,O3,ppb,2020,22.0,1
+Yellowknife,O3,ppb,2021,24.0,1
+Yellowknife,O3,ppb,2022,24.0,1
+Yellowknife,O3,ppb,2023,19.0,1
+Abbotsford,PM2.5,µg/m³,2005,5.0,1
+Abbotsford,PM2.5,µg/m³,2006,4.0,1
+Abbotsford,PM2.5,µg/m³,2008,4.0,1
+Abbotsford,PM2.5,µg/m³,2009,5.0,1
+Abbotsford,PM2.5,µg/m³,2011,4.0,1
+Abbotsford,PM2.5,µg/m³,2012,4.0,1
+Abbotsford,PM2.5,µg/m³,2013,7.0,2
+Abbotsford,PM2.5,µg/m³,2014,6.0,2
+Abbotsford,PM2.5,µg/m³,2015,7.0,2
+Abbotsford,PM2.5,µg/m³,2016,5.0,2
+Abbotsford,PM2.5,µg/m³,2017,6.5,2
+Abbotsford,PM2.5,µg/m³,2018,7.0,2
+Abbotsford,PM2.5,µg/m³,2019,5.5,2
+Abbotsford,PM2.5,µg/m³,2020,6.5,2
+Abbotsford,PM2.5,µg/m³,2021,5.0,2
+Abbotsford,PM2.5,µg/m³,2022,7.0,2
+Abbotsford,PM2.5,µg/m³,2023,6.0,2
+Abbotsford,PM2.5,µg/m³,2024,4.5,2
+Calgary,PM2.5,µg/m³,2005,5.33,3
+Calgary,PM2.5,µg/m³,2006,6.67,3
+Calgary,PM2.5,µg/m³,2007,5.67,3
+Calgary,PM2.5,µg/m³,2008,5.5,2
+Calgary,PM2.5,µg/m³,2009,8.0,1
+Calgary,PM2.5,µg/m³,2010,11.0,3
+Calgary,PM2.5,µg/m³,2011,10.5,2
+Calgary,PM2.5,µg/m³,2012,10.0,2
+Calgary,PM2.5,µg/m³,2013,8.5,2
+Calgary,PM2.5,µg/m³,2014,8.5,2
+Calgary,PM2.5,µg/m³,2015,8.5,2
+Calgary,PM2.5,µg/m³,2016,5.33,3
+Calgary,PM2.5,µg/m³,2017,7.67,3
+Calgary,PM2.5,µg/m³,2018,11.0,2
+Calgary,PM2.5,µg/m³,2019,7.0,3
+Calgary,PM2.5,µg/m³,2020,6.67,3
+Calgary,PM2.5,µg/m³,2021,8.67,3
+Calgary,PM2.5,µg/m³,2022,7.33,3
+Calgary,PM2.5,µg/m³,2023,12.33,3
+Calgary,PM2.5,µg/m³,2024,10.33,3
+Charlottetown,PM2.5,µg/m³,2014,6.0,1
+Charlottetown,PM2.5,µg/m³,2015,4.0,1
+Charlottetown,PM2.5,µg/m³,2019,8.0,1
+Charlottetown,PM2.5,µg/m³,2020,7.0,1
+Charlottetown,PM2.5,µg/m³,2021,5.0,1
+Charlottetown,PM2.5,µg/m³,2022,4.0,1
+Charlottetown,PM2.5,µg/m³,2023,4.0,1
+Charlottetown,PM2.5,µg/m³,2024,4.0,1
+Edmonton,PM2.5,µg/m³,2005,5.67,3
+Edmonton,PM2.5,µg/m³,2006,5.67,3
+Edmonton,PM2.5,µg/m³,2007,5.33,3
+Edmonton,PM2.5,µg/m³,2008,7.33,3
+Edmonton,PM2.5,µg/m³,2009,9.5,2
+Edmonton,PM2.5,µg/m³,2010,13.5,4
+Edmonton,PM2.5,µg/m³,2011,9.0,4
+Edmonton,PM2.5,µg/m³,2012,8.67,3
+Edmonton,PM2.5,µg/m³,2013,8.25,4
+Edmonton,PM2.5,µg/m³,2014,9.4,5
+Edmonton,PM2.5,µg/m³,2015,8.6,5
+Edmonton,PM2.5,µg/m³,2016,7.6,5
+Edmonton,PM2.5,µg/m³,2017,8.0,4
+Edmonton,PM2.5,µg/m³,2018,10.6,5
+Edmonton,PM2.5,µg/m³,2019,7.8,5
+Edmonton,PM2.5,µg/m³,2020,6.33,6
+Edmonton,PM2.5,µg/m³,2021,8.4,5
+Edmonton,PM2.5,µg/m³,2022,7.4,5
+Edmonton,PM2.5,µg/m³,2023,18.6,5
+Edmonton,PM2.5,µg/m³,2024,12.0,5
+Fredericton,PM2.5,µg/m³,2005,4.0,1
+Fredericton,PM2.5,µg/m³,2006,4.0,1
+Fredericton,PM2.5,µg/m³,2007,4.0,1
+Fredericton,PM2.5,µg/m³,2008,4.0,1
+Fredericton,PM2.5,µg/m³,2010,4.0,1
+Fredericton,PM2.5,µg/m³,2011,5.0,1
+Fredericton,PM2.5,µg/m³,2012,5.0,1
+Fredericton,PM2.5,µg/m³,2013,4.0,1
+Fredericton,PM2.5,µg/m³,2014,5.0,1
+Fredericton,PM2.5,µg/m³,2015,6.0,1
+Fredericton,PM2.5,µg/m³,2016,6.0,1
+Fredericton,PM2.5,µg/m³,2018,6.0,1
+Fredericton,PM2.5,µg/m³,2019,5.0,1
+Fredericton,PM2.5,µg/m³,2020,6.0,1
+Fredericton,PM2.5,µg/m³,2021,6.0,1
+Fredericton,PM2.5,µg/m³,2022,6.0,1
+Fredericton,PM2.5,µg/m³,2023,6.0,1
+Fredericton,PM2.5,µg/m³,2024,4.0,1
+Halifax,PM2.5,µg/m³,2005,4.0,1
+Halifax,PM2.5,µg/m³,2007,3.0,1
+Halifax,PM2.5,µg/m³,2008,6.0,1
+Halifax,PM2.5,µg/m³,2009,4.0,1
+Halifax,PM2.5,µg/m³,2010,6.0,2
+Halifax,PM2.5,µg/m³,2011,6.5,2
+Halifax,PM2.5,µg/m³,2012,7.0,2
+Halifax,PM2.5,µg/m³,2013,6.0,2
+Halifax,PM2.5,µg/m³,2014,5.0,2
+Halifax,PM2.5,µg/m³,2015,4.5,2
+Halifax,PM2.5,µg/m³,2016,5.0,2
+Halifax,PM2.5,µg/m³,2017,5.5,2
+Halifax,PM2.5,µg/m³,2018,5.0,2
+Halifax,PM2.5,µg/m³,2019,5.0,2
+Halifax,PM2.5,µg/m³,2020,5.5,2
+Halifax,PM2.5,µg/m³,2021,5.0,2
+Halifax,PM2.5,µg/m³,2022,5.0,2
+Halifax,PM2.5,µg/m³,2023,5.0,1
+Halifax,PM2.5,µg/m³,2024,4.0,2
+Hamilton,PM2.5,µg/m³,2005,10.0,2
+Hamilton,PM2.5,µg/m³,2006,8.5,2
+Hamilton,PM2.5,µg/m³,2007,8.5,2
+Hamilton,PM2.5,µg/m³,2008,7.5,2
+Hamilton,PM2.5,µg/m³,2009,6.5,2
+Hamilton,PM2.5,µg/m³,2010,7.0,2
+Hamilton,PM2.5,µg/m³,2011,7.33,3
+Hamilton,PM2.5,µg/m³,2012,7.0,3
+Hamilton,PM2.5,µg/m³,2013,9.67,3
+Hamilton,PM2.5,µg/m³,2014,10.0,3
+Hamilton,PM2.5,µg/m³,2015,9.67,3
+Hamilton,PM2.5,µg/m³,2016,7.67,3
+Hamilton,PM2.5,µg/m³,2017,7.33,3
+Hamilton,PM2.5,µg/m³,2018,8.33,3
+Hamilton,PM2.5,µg/m³,2019,8.33,3
+Hamilton,PM2.5,µg/m³,2020,7.67,3
+Hamilton,PM2.5,µg/m³,2021,8.33,3
+Hamilton,PM2.5,µg/m³,2022,8.0,3
+Hamilton,PM2.5,µg/m³,2023,10.0,3
+Hamilton,PM2.5,µg/m³,2024,7.33,3
+Kelowna,PM2.5,µg/m³,2005,5.0,1
+Kelowna,PM2.5,µg/m³,2006,5.0,1
+Kelowna,PM2.5,µg/m³,2007,4.0,1
+Kelowna,PM2.5,µg/m³,2008,5.0,1
+Kelowna,PM2.5,µg/m³,2009,6.0,1
+Kelowna,PM2.5,µg/m³,2010,5.0,1
+Kelowna,PM2.5,µg/m³,2011,4.0,1
+Kelowna,PM2.5,µg/m³,2012,4.0,1
+Kelowna,PM2.5,µg/m³,2013,4.0,1
+Kelowna,PM2.5,µg/m³,2014,4.0,1
+Kelowna,PM2.5,µg/m³,2015,9.0,1
+Kelowna,PM2.5,µg/m³,2016,6.0,1
+Kelowna,PM2.5,µg/m³,2017,10.0,1
+Kelowna,PM2.5,µg/m³,2018,12.0,1
+Kelowna,PM2.5,µg/m³,2020,8.0,1
+Kelowna,PM2.5,µg/m³,2021,11.0,1
+Kelowna,PM2.5,µg/m³,2022,6.0,1
+Kelowna,PM2.5,µg/m³,2023,10.0,1
+Kelowna,PM2.5,µg/m³,2024,5.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2005,10.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2006,8.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2007,8.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2008,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2009,6.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2010,6.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2011,6.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2012,6.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2013,9.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2014,5.5,2
+Kitchener–Waterloo,PM2.5,µg/m³,2015,9.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2016,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2017,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2018,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2019,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2020,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2021,8.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2022,7.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2023,9.0,1
+Kitchener–Waterloo,PM2.5,µg/m³,2024,7.0,1
+London,PM2.5,µg/m³,2005,12.0,1
+London,PM2.5,µg/m³,2006,9.0,1
+London,PM2.5,µg/m³,2007,7.0,1
+London,PM2.5,µg/m³,2008,7.0,1
+London,PM2.5,µg/m³,2009,6.0,1
+London,PM2.5,µg/m³,2011,6.0,1
+London,PM2.5,µg/m³,2012,6.0,1
+London,PM2.5,µg/m³,2013,9.0,1
+London,PM2.5,µg/m³,2014,9.0,1
+London,PM2.5,µg/m³,2015,8.0,1
+London,PM2.5,µg/m³,2016,7.0,1
+London,PM2.5,µg/m³,2017,7.0,1
+London,PM2.5,µg/m³,2018,7.0,1
+London,PM2.5,µg/m³,2019,7.0,1
+London,PM2.5,µg/m³,2020,7.0,1
+London,PM2.5,µg/m³,2021,8.0,1
+London,PM2.5,µg/m³,2022,7.0,1
+London,PM2.5,µg/m³,2023,10.0,1
+London,PM2.5,µg/m³,2024,7.0,1
+Moncton,PM2.5,µg/m³,2005,4.0,1
+Moncton,PM2.5,µg/m³,2006,3.0,1
+Moncton,PM2.5,µg/m³,2007,5.0,1
+Moncton,PM2.5,µg/m³,2008,6.0,1
+Moncton,PM2.5,µg/m³,2009,7.0,1
+Moncton,PM2.5,µg/m³,2010,5.0,1
+Moncton,PM2.5,µg/m³,2011,5.0,1
+Moncton,PM2.5,µg/m³,2012,6.0,1
+Moncton,PM2.5,µg/m³,2013,6.0,1
+Moncton,PM2.5,µg/m³,2014,6.0,1
+Moncton,PM2.5,µg/m³,2015,6.0,1
+Moncton,PM2.5,µg/m³,2016,4.0,1
+Moncton,PM2.5,µg/m³,2017,4.0,1
+Moncton,PM2.5,µg/m³,2018,3.0,1
+Moncton,PM2.5,µg/m³,2019,4.0,1
+Moncton,PM2.5,µg/m³,2020,6.0,1
+Moncton,PM2.5,µg/m³,2021,6.0,1
+Moncton,PM2.5,µg/m³,2022,6.0,1
+Moncton,PM2.5,µg/m³,2023,6.0,1
+Moncton,PM2.5,µg/m³,2024,4.0,1
+Montréal,PM2.5,µg/m³,2005,10.14,7
+Montréal,PM2.5,µg/m³,2006,7.43,7
+Montréal,PM2.5,µg/m³,2007,7.57,7
+Montréal,PM2.5,µg/m³,2008,12.0,8
+Montréal,PM2.5,µg/m³,2009,11.12,8
+Montréal,PM2.5,µg/m³,2010,10.6,10
+Montréal,PM2.5,µg/m³,2011,9.78,9
+Montréal,PM2.5,µg/m³,2012,9.4,10
+Montréal,PM2.5,µg/m³,2013,10.11,9
+Montréal,PM2.5,µg/m³,2014,8.56,9
+Montréal,PM2.5,µg/m³,2015,8.12,8
+Montréal,PM2.5,µg/m³,2016,7.11,9
+Montréal,PM2.5,µg/m³,2017,7.5,10
+Montréal,PM2.5,µg/m³,2018,7.73,11
+Montréal,PM2.5,µg/m³,2019,7.3,10
+Montréal,PM2.5,µg/m³,2020,7.0,10
+Montréal,PM2.5,µg/m³,2021,7.55,11
+Montréal,PM2.5,µg/m³,2022,7.09,11
+Montréal,PM2.5,µg/m³,2023,8.8,10
+Montréal,PM2.5,µg/m³,2024,7.18,11
+Ottawa–Gatineau,PM2.5,µg/m³,2005,8.0,2
+Ottawa–Gatineau,PM2.5,µg/m³,2006,6.0,2
+Ottawa–Gatineau,PM2.5,µg/m³,2007,6.0,3
+Ottawa–Gatineau,PM2.5,µg/m³,2008,5.0,2
+Ottawa–Gatineau,PM2.5,µg/m³,2009,4.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2010,5.33,3
+Ottawa–Gatineau,PM2.5,µg/m³,2011,6.0,3
+Ottawa–Gatineau,PM2.5,µg/m³,2012,6.33,3
+Ottawa–Gatineau,PM2.5,µg/m³,2013,7.67,3
+Ottawa–Gatineau,PM2.5,µg/m³,2014,7.0,3
+Ottawa–Gatineau,PM2.5,µg/m³,2015,6.67,3
+Ottawa–Gatineau,PM2.5,µg/m³,2016,6.33,3
+Ottawa–Gatineau,PM2.5,µg/m³,2017,6.0,2
+Ottawa–Gatineau,PM2.5,µg/m³,2018,6.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2019,6.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2020,6.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2021,6.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2022,6.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2023,9.5,2
+Ottawa–Gatineau,PM2.5,µg/m³,2024,6.0,2
+Québec City,PM2.5,µg/m³,2005,9.0,3
+Québec City,PM2.5,µg/m³,2006,8.33,3
+Québec City,PM2.5,µg/m³,2007,6.5,2
+Québec City,PM2.5,µg/m³,2008,7.33,3
+Québec City,PM2.5,µg/m³,2010,9.5,2
+Québec City,PM2.5,µg/m³,2011,9.0,3
+Québec City,PM2.5,µg/m³,2012,10.0,3
+Québec City,PM2.5,µg/m³,2013,9.0,2
+Québec City,PM2.5,µg/m³,2014,9.0,3
+Québec City,PM2.5,µg/m³,2015,9.0,3
+Québec City,PM2.5,µg/m³,2016,8.33,3
+Québec City,PM2.5,µg/m³,2017,8.33,3
+Québec City,PM2.5,µg/m³,2018,8.0,3
+Québec City,PM2.5,µg/m³,2019,7.67,3
+Québec City,PM2.5,µg/m³,2020,9.0,4
+Québec City,PM2.5,µg/m³,2021,8.6,5
+Québec City,PM2.5,µg/m³,2022,8.2,5
+Québec City,PM2.5,µg/m³,2023,9.0,4
+Québec City,PM2.5,µg/m³,2024,7.2,5
+Regina,PM2.5,µg/m³,2005,4.0,1
+Regina,PM2.5,µg/m³,2006,5.0,1
+Regina,PM2.5,µg/m³,2007,4.0,1
+Regina,PM2.5,µg/m³,2008,5.0,1
+Regina,PM2.5,µg/m³,2009,5.0,1
+Regina,PM2.5,µg/m³,2010,7.0,1
+Regina,PM2.5,µg/m³,2011,8.0,1
+Regina,PM2.5,µg/m³,2012,6.0,1
+Regina,PM2.5,µg/m³,2013,7.0,1
+Regina,PM2.5,µg/m³,2014,7.0,1
+Regina,PM2.5,µg/m³,2015,11.0,1
+Regina,PM2.5,µg/m³,2016,8.0,1
+Regina,PM2.5,µg/m³,2017,6.0,1
+Regina,PM2.5,µg/m³,2018,7.0,1
+Regina,PM2.5,µg/m³,2019,8.0,1
+Regina,PM2.5,µg/m³,2020,7.0,1
+Regina,PM2.5,µg/m³,2021,9.0,1
+Regina,PM2.5,µg/m³,2022,7.0,1
+Regina,PM2.5,µg/m³,2023,14.0,1
+Regina,PM2.5,µg/m³,2024,10.0,1
+Saguenay,PM2.5,µg/m³,2005,6.0,1
+Saguenay,PM2.5,µg/m³,2006,6.0,1
+Saguenay,PM2.5,µg/m³,2007,5.0,1
+Saguenay,PM2.5,µg/m³,2008,5.0,1
+Saguenay,PM2.5,µg/m³,2010,6.0,1
+Saguenay,PM2.5,µg/m³,2011,6.0,1
+Saguenay,PM2.5,µg/m³,2012,8.0,1
+Saguenay,PM2.5,µg/m³,2013,6.0,1
+Saguenay,PM2.5,µg/m³,2014,8.0,1
+Saguenay,PM2.5,µg/m³,2015,8.0,1
+Saguenay,PM2.5,µg/m³,2016,7.0,1
+Saguenay,PM2.5,µg/m³,2017,6.0,1
+Saguenay,PM2.5,µg/m³,2018,6.0,1
+Saguenay,PM2.5,µg/m³,2019,6.0,1
+Saguenay,PM2.5,µg/m³,2020,5.0,1
+Saguenay,PM2.5,µg/m³,2021,6.0,1
+Saguenay,PM2.5,µg/m³,2022,6.0,1
+Saguenay,PM2.5,µg/m³,2023,9.0,1
+Saguenay,PM2.5,µg/m³,2024,7.5,2
+Saint John,PM2.5,µg/m³,2005,8.0,1
+Saint John,PM2.5,µg/m³,2006,7.5,2
+Saint John,PM2.5,µg/m³,2007,7.0,2
+Saint John,PM2.5,µg/m³,2008,5.5,2
+Saint John,PM2.5,µg/m³,2009,6.33,3
+Saint John,PM2.5,µg/m³,2010,6.0,3
+Saint John,PM2.5,µg/m³,2011,6.75,4
+Saint John,PM2.5,µg/m³,2012,6.0,4
+Saint John,PM2.5,µg/m³,2013,6.75,4
+Saint John,PM2.5,µg/m³,2014,5.67,3
+Saint John,PM2.5,µg/m³,2015,6.33,3
+Saint John,PM2.5,µg/m³,2016,6.25,4
+Saint John,PM2.5,µg/m³,2017,6.33,3
+Saint John,PM2.5,µg/m³,2018,5.0,3
+Saint John,PM2.5,µg/m³,2019,5.0,3
+Saint John,PM2.5,µg/m³,2020,5.25,4
+Saint John,PM2.5,µg/m³,2021,5.25,4
+Saint John,PM2.5,µg/m³,2022,5.25,4
+Saint John,PM2.5,µg/m³,2023,5.5,4
+Saint John,PM2.5,µg/m³,2024,4.25,4
+Saskatoon,PM2.5,µg/m³,2005,4.0,1
+Saskatoon,PM2.5,µg/m³,2006,4.0,1
+Saskatoon,PM2.5,µg/m³,2007,4.0,1
+Saskatoon,PM2.5,µg/m³,2008,4.0,1
+Saskatoon,PM2.5,µg/m³,2009,4.0,1
+Saskatoon,PM2.5,µg/m³,2010,7.0,1
+Saskatoon,PM2.5,µg/m³,2011,6.0,1
+Saskatoon,PM2.5,µg/m³,2012,6.0,1
+Saskatoon,PM2.5,µg/m³,2013,6.0,1
+Saskatoon,PM2.5,µg/m³,2014,8.0,1
+Saskatoon,PM2.5,µg/m³,2015,11.0,1
+Saskatoon,PM2.5,µg/m³,2016,7.0,1
+Saskatoon,PM2.5,µg/m³,2017,9.0,1
+Saskatoon,PM2.5,µg/m³,2018,11.0,1
+Saskatoon,PM2.5,µg/m³,2019,8.0,1
+Saskatoon,PM2.5,µg/m³,2020,7.0,1
+Saskatoon,PM2.5,µg/m³,2021,11.0,1
+Saskatoon,PM2.5,µg/m³,2022,11.0,1
+Saskatoon,PM2.5,µg/m³,2023,15.0,1
+Saskatoon,PM2.5,µg/m³,2024,10.0,1
+Sherbrooke,PM2.5,µg/m³,2005,7.0,1
+Sherbrooke,PM2.5,µg/m³,2006,7.0,1
+Sherbrooke,PM2.5,µg/m³,2007,7.0,1
+Sherbrooke,PM2.5,µg/m³,2009,6.0,1
+Sherbrooke,PM2.5,µg/m³,2010,6.0,1
+Sherbrooke,PM2.5,µg/m³,2011,7.0,1
+Sherbrooke,PM2.5,µg/m³,2012,7.0,1
+Sherbrooke,PM2.5,µg/m³,2013,8.0,1
+Sherbrooke,PM2.5,µg/m³,2014,8.0,1
+Sherbrooke,PM2.5,µg/m³,2015,7.0,1
+Sherbrooke,PM2.5,µg/m³,2016,5.0,1
+Sherbrooke,PM2.5,µg/m³,2017,6.0,1
+Sherbrooke,PM2.5,µg/m³,2018,7.0,1
+Sherbrooke,PM2.5,µg/m³,2019,8.0,1
+Sherbrooke,PM2.5,µg/m³,2020,7.0,1
+Sherbrooke,PM2.5,µg/m³,2021,8.0,1
+Sherbrooke,PM2.5,µg/m³,2024,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2005,9.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2006,8.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2007,8.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2008,7.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2009,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2010,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2011,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2012,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2013,8.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2015,8.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2016,7.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2017,7.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2018,7.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2019,7.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2020,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2021,6.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2022,5.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2023,8.0,1
+St. Catharines–Niagara,PM2.5,µg/m³,2024,6.0,1
+St. John's,PM2.5,µg/m³,2005,3.0,1
+St. John's,PM2.5,µg/m³,2006,3.5,2
+St. John's,PM2.5,µg/m³,2007,3.0,2
+St. John's,PM2.5,µg/m³,2008,4.0,2
+St. John's,PM2.5,µg/m³,2009,6.0,2
+St. John's,PM2.5,µg/m³,2010,5.0,2
+St. John's,PM2.5,µg/m³,2011,6.0,2
+St. John's,PM2.5,µg/m³,2012,3.5,2
+St. John's,PM2.5,µg/m³,2013,5.5,2
+St. John's,PM2.5,µg/m³,2014,7.0,2
+St. John's,PM2.5,µg/m³,2015,6.0,2
+St. John's,PM2.5,µg/m³,2016,5.5,2
+St. John's,PM2.5,µg/m³,2017,5.5,2
+St. John's,PM2.5,µg/m³,2018,4.5,2
+St. John's,PM2.5,µg/m³,2019,5.0,2
+St. John's,PM2.5,µg/m³,2020,5.0,2
+St. John's,PM2.5,µg/m³,2021,5.5,2
+St. John's,PM2.5,µg/m³,2022,6.0,2
+St. John's,PM2.5,µg/m³,2023,6.5,2
+St. John's,PM2.5,µg/m³,2024,5.0,2
+Sudbury,PM2.5,µg/m³,2005,5.0,1
+Sudbury,PM2.5,µg/m³,2006,5.0,1
+Sudbury,PM2.5,µg/m³,2007,5.0,1
+Sudbury,PM2.5,µg/m³,2008,4.0,1
+Sudbury,PM2.5,µg/m³,2009,3.0,1
+Sudbury,PM2.5,µg/m³,2010,4.0,1
+Sudbury,PM2.5,µg/m³,2011,4.0,1
+Sudbury,PM2.5,µg/m³,2012,4.0,1
+Sudbury,PM2.5,µg/m³,2013,6.0,1
+Sudbury,PM2.5,µg/m³,2014,6.0,1
+Sudbury,PM2.5,µg/m³,2015,6.0,1
+Sudbury,PM2.5,µg/m³,2016,5.0,1
+Sudbury,PM2.5,µg/m³,2017,5.0,1
+Sudbury,PM2.5,µg/m³,2018,5.0,1
+Sudbury,PM2.5,µg/m³,2019,5.0,1
+Sudbury,PM2.5,µg/m³,2020,5.0,1
+Sudbury,PM2.5,µg/m³,2021,6.0,1
+Sudbury,PM2.5,µg/m³,2022,5.0,1
+Sudbury,PM2.5,µg/m³,2023,9.0,1
+Sudbury,PM2.5,µg/m³,2024,5.0,1
+Thunder Bay,PM2.5,µg/m³,2005,4.0,1
+Thunder Bay,PM2.5,µg/m³,2006,5.0,1
+Thunder Bay,PM2.5,µg/m³,2007,4.0,1
+Thunder Bay,PM2.5,µg/m³,2008,4.0,1
+Thunder Bay,PM2.5,µg/m³,2009,4.0,1
+Thunder Bay,PM2.5,µg/m³,2010,4.0,1
+Thunder Bay,PM2.5,µg/m³,2011,5.0,1
+Thunder Bay,PM2.5,µg/m³,2012,4.0,1
+Thunder Bay,PM2.5,µg/m³,2013,6.0,1
+Thunder Bay,PM2.5,µg/m³,2014,7.0,1
+Thunder Bay,PM2.5,µg/m³,2015,6.0,1
+Thunder Bay,PM2.5,µg/m³,2016,5.0,1
+Thunder Bay,PM2.5,µg/m³,2017,5.0,1
+Thunder Bay,PM2.5,µg/m³,2018,6.0,1
+Thunder Bay,PM2.5,µg/m³,2019,5.0,1
+Thunder Bay,PM2.5,µg/m³,2020,5.0,1
+Thunder Bay,PM2.5,µg/m³,2021,7.0,1
+Thunder Bay,PM2.5,µg/m³,2022,5.0,1
+Toronto,PM2.5,µg/m³,2005,9.0,6
+Toronto,PM2.5,µg/m³,2006,8.0,6
+Toronto,PM2.5,µg/m³,2007,8.0,6
+Toronto,PM2.5,µg/m³,2008,7.33,6
+Toronto,PM2.5,µg/m³,2009,6.0,4
+Toronto,PM2.5,µg/m³,2010,6.6,5
+Toronto,PM2.5,µg/m³,2011,6.8,5
+Toronto,PM2.5,µg/m³,2012,6.6,5
+Toronto,PM2.5,µg/m³,2013,8.4,5
+Toronto,PM2.5,µg/m³,2014,9.2,5
+Toronto,PM2.5,µg/m³,2015,8.6,5
+Toronto,PM2.5,µg/m³,2016,7.5,6
+Toronto,PM2.5,µg/m³,2017,7.5,6
+Toronto,PM2.5,µg/m³,2018,8.0,6
+Toronto,PM2.5,µg/m³,2019,7.6,5
+Toronto,PM2.5,µg/m³,2020,7.33,6
+Toronto,PM2.5,µg/m³,2021,8.0,6
+Toronto,PM2.5,µg/m³,2022,7.67,6
+Toronto,PM2.5,µg/m³,2023,9.4,5
+Toronto,PM2.5,µg/m³,2024,7.0,6
+Vancouver,PM2.5,µg/m³,2005,5.5,10
+Vancouver,PM2.5,µg/m³,2006,4.6,10
+Vancouver,PM2.5,µg/m³,2007,4.56,9
+Vancouver,PM2.5,µg/m³,2008,4.5,2
+Vancouver,PM2.5,µg/m³,2009,5.0,3
+Vancouver,PM2.5,µg/m³,2010,4.0,8
+Vancouver,PM2.5,µg/m³,2011,4.0,14
+Vancouver,PM2.5,µg/m³,2012,3.93,14
+Vancouver,PM2.5,µg/m³,2013,6.0,13
+Vancouver,PM2.5,µg/m³,2014,5.87,15
+Vancouver,PM2.5,µg/m³,2015,5.33,3
+Vancouver,PM2.5,µg/m³,2016,4.65,17
+Vancouver,PM2.5,µg/m³,2017,6.53,17
+Vancouver,PM2.5,µg/m³,2018,6.82,17
+Vancouver,PM2.5,µg/m³,2019,5.5,4
+Vancouver,PM2.5,µg/m³,2020,7.0,3
+Vancouver,PM2.5,µg/m³,2021,5.0,4
+Vancouver,PM2.5,µg/m³,2022,6.12,17
+Vancouver,PM2.5,µg/m³,2023,5.41,17
+Vancouver,PM2.5,µg/m³,2024,4.2,15
+Victoria,PM2.5,µg/m³,2005,5.0,1
+Victoria,PM2.5,µg/m³,2006,5.5,2
+Victoria,PM2.5,µg/m³,2007,5.0,1
+Victoria,PM2.5,µg/m³,2008,4.0,3
+Victoria,PM2.5,µg/m³,2009,5.33,3
+Victoria,PM2.5,µg/m³,2010,8.0,1
+Victoria,PM2.5,µg/m³,2011,8.0,1
+Victoria,PM2.5,µg/m³,2012,6.0,1
+Victoria,PM2.5,µg/m³,2013,7.0,1
+Victoria,PM2.5,µg/m³,2014,6.0,1
+Victoria,PM2.5,µg/m³,2015,6.0,2
+Victoria,PM2.5,µg/m³,2016,4.0,1
+Victoria,PM2.5,µg/m³,2017,7.0,1
+Victoria,PM2.5,µg/m³,2018,9.0,1
+Victoria,PM2.5,µg/m³,2019,7.0,1
+Victoria,PM2.5,µg/m³,2020,7.5,2
+Victoria,PM2.5,µg/m³,2021,6.5,2
+Victoria,PM2.5,µg/m³,2022,7.0,1
+Victoria,PM2.5,µg/m³,2023,6.0,1
+Victoria,PM2.5,µg/m³,2024,5.0,1
+Windsor,PM2.5,µg/m³,2005,10.0,2
+Windsor,PM2.5,µg/m³,2006,8.5,2
+Windsor,PM2.5,µg/m³,2007,9.5,2
+Windsor,PM2.5,µg/m³,2008,8.5,2
+Windsor,PM2.5,µg/m³,2009,7.0,2
+Windsor,PM2.5,µg/m³,2010,8.0,2
+Windsor,PM2.5,µg/m³,2011,8.0,2
+Windsor,PM2.5,µg/m³,2012,7.5,2
+Windsor,PM2.5,µg/m³,2013,9.5,2
+Windsor,PM2.5,µg/m³,2014,10.5,2
+Windsor,PM2.5,µg/m³,2015,9.5,2
+Windsor,PM2.5,µg/m³,2016,8.5,2
+Windsor,PM2.5,µg/m³,2017,8.0,2
+Windsor,PM2.5,µg/m³,2018,8.5,2
+Windsor,PM2.5,µg/m³,2019,8.5,2
+Windsor,PM2.5,µg/m³,2020,8.0,2
+Windsor,PM2.5,µg/m³,2021,9.0,2
+Windsor,PM2.5,µg/m³,2022,8.5,2
+Windsor,PM2.5,µg/m³,2023,11.0,2
+Windsor,PM2.5,µg/m³,2024,8.5,2
+Winnipeg,PM2.5,µg/m³,2005,5.0,2
+Winnipeg,PM2.5,µg/m³,2006,5.0,2
+Winnipeg,PM2.5,µg/m³,2007,4.5,2
+Winnipeg,PM2.5,µg/m³,2008,5.0,1
+Winnipeg,PM2.5,µg/m³,2009,4.5,2
+Winnipeg,PM2.5,µg/m³,2010,6.0,2
+Winnipeg,PM2.5,µg/m³,2011,7.0,1
+Winnipeg,PM2.5,µg/m³,2012,6.0,2
+Winnipeg,PM2.5,µg/m³,2013,6.5,2
+Winnipeg,PM2.5,µg/m³,2014,5.5,2
+Winnipeg,PM2.5,µg/m³,2015,5.5,2
+Winnipeg,PM2.5,µg/m³,2016,5.5,2
+Winnipeg,PM2.5,µg/m³,2017,5.0,2
+Winnipeg,PM2.5,µg/m³,2018,6.0,2
+Winnipeg,PM2.5,µg/m³,2019,5.5,2
+Winnipeg,PM2.5,µg/m³,2020,5.5,2
+Winnipeg,PM2.5,µg/m³,2021,8.0,1
+Winnipeg,PM2.5,µg/m³,2022,6.0,1
+Winnipeg,PM2.5,µg/m³,2023,10.0,1
+Winnipeg,PM2.5,µg/m³,2024,8.5,2
+Yellowknife,PM2.5,µg/m³,2005,3.0,1
+Yellowknife,PM2.5,µg/m³,2006,1.0,1
+Yellowknife,PM2.5,µg/m³,2007,2.0,1
+Yellowknife,PM2.5,µg/m³,2008,5.0,1
+Yellowknife,PM2.5,µg/m³,2009,4.0,1
+Yellowknife,PM2.5,µg/m³,2010,4.0,1
+Yellowknife,PM2.5,µg/m³,2011,6.0,1
+Yellowknife,PM2.5,µg/m³,2012,6.0,1
+Yellowknife,PM2.5,µg/m³,2013,6.0,1
+Yellowknife,PM2.5,µg/m³,2014,16.0,1
+Yellowknife,PM2.5,µg/m³,2015,9.0,1
+Yellowknife,PM2.5,µg/m³,2016,8.0,1
+Yellowknife,PM2.5,µg/m³,2017,5.0,1
+Yellowknife,PM2.5,µg/m³,2018,3.0,1
+Yellowknife,PM2.5,µg/m³,2019,4.0,1
+Yellowknife,PM2.5,µg/m³,2020,4.0,1
+Yellowknife,PM2.5,µg/m³,2021,4.0,1
+Yellowknife,PM2.5,µg/m³,2022,6.0,1
+Yellowknife,PM2.5,µg/m³,2023,25.0,1
+Yellowknife,PM2.5,µg/m³,2024,9.0,1
+Abbotsford,SO2,ppb,2005,0.4,1
+Abbotsford,SO2,ppb,2006,0.3,2
+Abbotsford,SO2,ppb,2007,0.25,2
+Abbotsford,SO2,ppb,2008,0.5,1
+Abbotsford,SO2,ppb,2009,0.35,2
+Abbotsford,SO2,ppb,2010,0.3,1
+Abbotsford,SO2,ppb,2011,0.4,1
+Abbotsford,SO2,ppb,2012,0.2,1
+Abbotsford,SO2,ppb,2013,0.2,2
+Abbotsford,SO2,ppb,2014,0.2,2
+Abbotsford,SO2,ppb,2015,0.25,2
+Abbotsford,SO2,ppb,2016,0.2,2
+Abbotsford,SO2,ppb,2017,0.15,2
+Abbotsford,SO2,ppb,2018,0.2,2
+Abbotsford,SO2,ppb,2019,0.15,2
+Abbotsford,SO2,ppb,2020,0.25,2
+Abbotsford,SO2,ppb,2021,0.2,2
+Abbotsford,SO2,ppb,2022,0.2,2
+Abbotsford,SO2,ppb,2023,0.2,2
+Abbotsford,SO2,ppb,2024,0.1,2
+Calgary,SO2,ppb,2005,1.7,1
+Calgary,SO2,ppb,2006,1.4,1
+Calgary,SO2,ppb,2007,1.1,1
+Calgary,SO2,ppb,2008,1.2,1
+Calgary,SO2,ppb,2009,1.3,1
+Calgary,SO2,ppb,2010,1.1,1
+Calgary,SO2,ppb,2015,0.2,2
+Calgary,SO2,ppb,2016,0.3,1
+Calgary,SO2,ppb,2017,0.3,1
+Calgary,SO2,ppb,2018,0.4,1
+Calgary,SO2,ppb,2019,0.3,1
+Calgary,SO2,ppb,2020,0.3,1
+Calgary,SO2,ppb,2021,0.2,1
+Calgary,SO2,ppb,2022,0.3,1
+Calgary,SO2,ppb,2023,0.3,1
+Calgary,SO2,ppb,2024,0.3,1
+Charlottetown,SO2,ppb,2014,0.5,1
+Charlottetown,SO2,ppb,2015,0.7,1
+Charlottetown,SO2,ppb,2016,0.6,1
+Charlottetown,SO2,ppb,2017,0.3,1
+Charlottetown,SO2,ppb,2018,0.2,1
+Charlottetown,SO2,ppb,2019,0.3,1
+Charlottetown,SO2,ppb,2020,0.2,1
+Charlottetown,SO2,ppb,2021,0.1,1
+Charlottetown,SO2,ppb,2022,0.2,1
+Charlottetown,SO2,ppb,2023,0.2,1
+Charlottetown,SO2,ppb,2024,0.2,1
+Edmonton,SO2,ppb,2005,1.6,1
+Edmonton,SO2,ppb,2006,1.3,1
+Edmonton,SO2,ppb,2007,1.4,1
+Edmonton,SO2,ppb,2009,1.4,1
+Edmonton,SO2,ppb,2010,1.1,1
+Edmonton,SO2,ppb,2011,1.1,1
+Edmonton,SO2,ppb,2012,0.85,2
+Edmonton,SO2,ppb,2013,1.05,2
+Edmonton,SO2,ppb,2014,1.1,2
+Edmonton,SO2,ppb,2015,0.83,4
+Edmonton,SO2,ppb,2016,0.6,3
+Edmonton,SO2,ppb,2017,0.6,3
+Edmonton,SO2,ppb,2018,0.57,3
+Edmonton,SO2,ppb,2019,0.57,3
+Edmonton,SO2,ppb,2020,0.5,3
+Edmonton,SO2,ppb,2021,0.53,3
+Edmonton,SO2,ppb,2022,0.6,3
+Edmonton,SO2,ppb,2023,0.5,3
+Edmonton,SO2,ppb,2024,0.47,3
+Halifax,SO2,ppb,2005,5.6,1
+Halifax,SO2,ppb,2006,6.1,1
+Halifax,SO2,ppb,2007,2.3,1
+Halifax,SO2,ppb,2009,0.5,1
+Halifax,SO2,ppb,2010,0.7,1
+Halifax,SO2,ppb,2011,2.7,1
+Halifax,SO2,ppb,2012,1.35,2
+Halifax,SO2,ppb,2013,1.15,2
+Halifax,SO2,ppb,2014,1.1,2
+Halifax,SO2,ppb,2015,0.6,2
+Halifax,SO2,ppb,2016,0.3,2
+Halifax,SO2,ppb,2017,0.25,2
+Halifax,SO2,ppb,2018,0.3,2
+Halifax,SO2,ppb,2019,0.4,2
+Halifax,SO2,ppb,2020,0.3,2
+Halifax,SO2,ppb,2021,0.35,2
+Halifax,SO2,ppb,2022,0.3,2
+Halifax,SO2,ppb,2023,0.25,2
+Halifax,SO2,ppb,2024,0.2,2
+Hamilton,SO2,ppb,2005,5.3,1
+Hamilton,SO2,ppb,2006,4.8,1
+Hamilton,SO2,ppb,2007,3.85,2
+Hamilton,SO2,ppb,2008,3.65,2
+Hamilton,SO2,ppb,2009,3.15,2
+Hamilton,SO2,ppb,2010,3.1,2
+Hamilton,SO2,ppb,2011,4.65,2
+Hamilton,SO2,ppb,2012,4.25,2
+Hamilton,SO2,ppb,2013,3.85,2
+Hamilton,SO2,ppb,2014,4.0,2
+Hamilton,SO2,ppb,2015,3.5,2
+Hamilton,SO2,ppb,2016,2.5,2
+Hamilton,SO2,ppb,2017,2.75,2
+Hamilton,SO2,ppb,2018,3.7,2
+Hamilton,SO2,ppb,2019,4.15,2
+Hamilton,SO2,ppb,2020,3.1,2
+Hamilton,SO2,ppb,2021,3.5,2
+Hamilton,SO2,ppb,2022,3.4,2
+Hamilton,SO2,ppb,2023,3.05,2
+Hamilton,SO2,ppb,2024,2.8,2
+Kelowna,SO2,ppb,2005,0.2,1
+Kelowna,SO2,ppb,2006,0.2,1
+Kelowna,SO2,ppb,2007,0.3,1
+Kelowna,SO2,ppb,2008,0.4,1
+Kelowna,SO2,ppb,2009,0.5,1
+Kelowna,SO2,ppb,2010,0.4,1
+Kelowna,SO2,ppb,2011,0.3,1
+Kelowna,SO2,ppb,2012,0.4,1
+Kelowna,SO2,ppb,2013,0.4,1
+Kelowna,SO2,ppb,2014,0.3,1
+Kelowna,SO2,ppb,2015,0.4,1
+Kelowna,SO2,ppb,2016,0.3,1
+Kelowna,SO2,ppb,2017,0.3,1
+Kelowna,SO2,ppb,2018,0.4,1
+Kelowna,SO2,ppb,2020,0.3,1
+Kelowna,SO2,ppb,2021,0.3,1
+Kelowna,SO2,ppb,2022,0.3,1
+Kelowna,SO2,ppb,2023,0.3,1
+Kelowna,SO2,ppb,2024,0.3,1
+Kitchener–Waterloo,SO2,ppb,2006,1.2,1
+London,SO2,ppb,2005,2.3,1
+London,SO2,ppb,2006,1.9,1
+London,SO2,ppb,2007,1.9,1
+London,SO2,ppb,2008,2.2,1
+London,SO2,ppb,2009,1.0,1
+London,SO2,ppb,2010,0.9,1
+Montréal,SO2,ppb,2005,4.73,3
+Montréal,SO2,ppb,2006,4.13,3
+Montréal,SO2,ppb,2007,2.9,3
+Montréal,SO2,ppb,2008,2.62,4
+Montréal,SO2,ppb,2009,2.02,4
+Montréal,SO2,ppb,2010,1.52,4
+Montréal,SO2,ppb,2011,1.2,4
+Montréal,SO2,ppb,2012,1.15,4
+Montréal,SO2,ppb,2013,1.2,3
+Montréal,SO2,ppb,2014,1.17,3
+Montréal,SO2,ppb,2015,0.73,3
+Montréal,SO2,ppb,2016,0.83,4
+Montréal,SO2,ppb,2017,0.72,4
+Montréal,SO2,ppb,2018,0.62,5
+Montréal,SO2,ppb,2019,0.48,4
+Montréal,SO2,ppb,2020,0.44,5
+Montréal,SO2,ppb,2021,0.42,5
+Montréal,SO2,ppb,2022,0.45,4
+Montréal,SO2,ppb,2023,0.4,5
+Montréal,SO2,ppb,2024,0.52,4
+Ottawa–Gatineau,SO2,ppb,2005,1.2,2
+Ottawa–Gatineau,SO2,ppb,2006,0.85,2
+Ottawa–Gatineau,SO2,ppb,2007,0.73,3
+Ottawa–Gatineau,SO2,ppb,2008,0.73,3
+Ottawa–Gatineau,SO2,ppb,2009,0.55,2
+Ottawa–Gatineau,SO2,ppb,2010,0.2,2
+Ottawa–Gatineau,SO2,ppb,2011,0.25,2
+Ottawa–Gatineau,SO2,ppb,2012,0.25,2
+Ottawa–Gatineau,SO2,ppb,2013,0.3,2
+Ottawa–Gatineau,SO2,ppb,2014,0.4,2
+Ottawa–Gatineau,SO2,ppb,2015,0.3,2
+Ottawa–Gatineau,SO2,ppb,2016,0.1,2
+Ottawa–Gatineau,SO2,ppb,2017,0.15,2
+Ottawa–Gatineau,SO2,ppb,2018,0.15,2
+Ottawa–Gatineau,SO2,ppb,2019,0.15,2
+Ottawa–Gatineau,SO2,ppb,2020,0.1,2
+Ottawa–Gatineau,SO2,ppb,2021,0.15,2
+Ottawa–Gatineau,SO2,ppb,2022,0.3,1
+Québec City,SO2,ppb,2005,2.3,1
+Québec City,SO2,ppb,2006,2.1,1
+Québec City,SO2,ppb,2007,1.4,1
+Québec City,SO2,ppb,2008,0.9,1
+Québec City,SO2,ppb,2009,0.9,1
+Québec City,SO2,ppb,2010,0.6,1
+Québec City,SO2,ppb,2011,0.7,1
+Québec City,SO2,ppb,2012,0.9,1
+Québec City,SO2,ppb,2013,0.6,1
+Québec City,SO2,ppb,2014,0.7,1
+Québec City,SO2,ppb,2015,0.3,1
+Québec City,SO2,ppb,2016,0.2,1
+Québec City,SO2,ppb,2017,0.3,1
+Québec City,SO2,ppb,2018,0.3,1
+Québec City,SO2,ppb,2019,0.3,1
+Québec City,SO2,ppb,2020,0.2,2
+Québec City,SO2,ppb,2021,0.2,2
+Québec City,SO2,ppb,2022,0.2,2
+Québec City,SO2,ppb,2023,0.15,2
+Québec City,SO2,ppb,2024,0.2,2
+Regina,SO2,ppb,2005,0.6,1
+Regina,SO2,ppb,2006,0.7,1
+Regina,SO2,ppb,2007,0.7,1
+Regina,SO2,ppb,2008,0.3,1
+Regina,SO2,ppb,2009,0.3,1
+Regina,SO2,ppb,2010,0.3,1
+Regina,SO2,ppb,2011,0.5,1
+Regina,SO2,ppb,2012,0.7,1
+Regina,SO2,ppb,2013,0.4,1
+Regina,SO2,ppb,2014,0.5,1
+Regina,SO2,ppb,2015,0.3,1
+Regina,SO2,ppb,2017,0.3,1
+Regina,SO2,ppb,2018,0.3,1
+Regina,SO2,ppb,2019,0.4,1
+Regina,SO2,ppb,2020,0.3,1
+Regina,SO2,ppb,2021,0.3,1
+Regina,SO2,ppb,2022,0.4,1
+Regina,SO2,ppb,2023,0.4,1
+Regina,SO2,ppb,2024,0.3,1
+Saguenay,SO2,ppb,2005,12.3,1
+Saguenay,SO2,ppb,2006,8.7,1
+Saguenay,SO2,ppb,2007,6.7,1
+Saguenay,SO2,ppb,2008,8.7,1
+Saguenay,SO2,ppb,2009,4.5,1
+Saguenay,SO2,ppb,2010,3.5,1
+Saguenay,SO2,ppb,2011,4.7,1
+Saguenay,SO2,ppb,2012,6.1,1
+Saguenay,SO2,ppb,2013,5.4,1
+Saguenay,SO2,ppb,2014,6.1,1
+Saguenay,SO2,ppb,2015,5.4,1
+Saguenay,SO2,ppb,2016,5.8,1
+Saguenay,SO2,ppb,2017,6.3,1
+Saguenay,SO2,ppb,2018,5.3,1
+Saguenay,SO2,ppb,2019,5.5,1
+Saguenay,SO2,ppb,2020,5.4,1
+Saguenay,SO2,ppb,2021,4.9,1
+Saguenay,SO2,ppb,2022,6.0,1
+Saguenay,SO2,ppb,2023,5.7,1
+Saguenay,SO2,ppb,2024,6.1,1
+Saint John,SO2,ppb,2005,3.5,2
+Saint John,SO2,ppb,2006,2.5,2
+Saint John,SO2,ppb,2007,3.4,2
+Saint John,SO2,ppb,2008,2.1,2
+Saint John,SO2,ppb,2009,1.5,2
+Saint John,SO2,ppb,2010,1.3,3
+Saint John,SO2,ppb,2011,1.07,3
+Saint John,SO2,ppb,2012,1.37,3
+Saint John,SO2,ppb,2013,1.32,4
+Saint John,SO2,ppb,2014,1.38,4
+Saint John,SO2,ppb,2015,1.18,4
+Saint John,SO2,ppb,2016,1.33,3
+Saint John,SO2,ppb,2017,0.6,3
+Saint John,SO2,ppb,2018,1.05,4
+Saint John,SO2,ppb,2019,1.15,4
+Saint John,SO2,ppb,2020,1.27,4
+Saint John,SO2,ppb,2021,1.3,4
+Saint John,SO2,ppb,2022,1.2,4
+Saint John,SO2,ppb,2023,0.78,4
+Saint John,SO2,ppb,2024,1.05,4
+Saskatoon,SO2,ppb,2005,0.5,1
+Saskatoon,SO2,ppb,2006,0.6,1
+Saskatoon,SO2,ppb,2007,0.7,1
+Saskatoon,SO2,ppb,2008,0.2,1
+Saskatoon,SO2,ppb,2009,0.2,1
+Saskatoon,SO2,ppb,2010,0.2,1
+Saskatoon,SO2,ppb,2011,0.7,1
+Saskatoon,SO2,ppb,2012,0.4,1
+Saskatoon,SO2,ppb,2013,0.2,1
+Saskatoon,SO2,ppb,2014,0.1,1
+Saskatoon,SO2,ppb,2015,0.1,1
+Saskatoon,SO2,ppb,2016,0.1,1
+Saskatoon,SO2,ppb,2017,0.2,1
+Saskatoon,SO2,ppb,2018,0.1,1
+Saskatoon,SO2,ppb,2019,0.1,1
+Saskatoon,SO2,ppb,2020,0.0,1
+Saskatoon,SO2,ppb,2021,0.1,1
+Saskatoon,SO2,ppb,2022,0.1,1
+Saskatoon,SO2,ppb,2023,0.1,1
+Saskatoon,SO2,ppb,2024,0.1,1
+St. John's,SO2,ppb,2005,1.2,2
+St. John's,SO2,ppb,2006,1.0,2
+St. John's,SO2,ppb,2007,0.5,1
+St. John's,SO2,ppb,2008,0.5,2
+St. John's,SO2,ppb,2009,1.0,2
+St. John's,SO2,ppb,2010,0.5,2
+St. John's,SO2,ppb,2011,0.6,2
+St. John's,SO2,ppb,2012,0.8,2
+St. John's,SO2,ppb,2013,0.75,2
+St. John's,SO2,ppb,2014,0.35,2
+St. John's,SO2,ppb,2015,0.35,2
+St. John's,SO2,ppb,2016,0.35,2
+St. John's,SO2,ppb,2017,0.9,2
+St. John's,SO2,ppb,2018,0.9,2
+St. John's,SO2,ppb,2019,0.65,2
+St. John's,SO2,ppb,2020,0.3,2
+St. John's,SO2,ppb,2021,0.2,2
+St. John's,SO2,ppb,2022,0.15,2
+St. John's,SO2,ppb,2023,0.2,1
+St. John's,SO2,ppb,2024,0.15,2
+Sudbury,SO2,ppb,2005,2.8,1
+Sudbury,SO2,ppb,2006,2.4,1
+Sudbury,SO2,ppb,2007,2.3,1
+Sudbury,SO2,ppb,2008,2.0,1
+Sudbury,SO2,ppb,2009,1.1,1
+Sudbury,SO2,ppb,2010,1.3,1
+Sudbury,SO2,ppb,2011,1.5,1
+Sudbury,SO2,ppb,2012,1.3,1
+Sudbury,SO2,ppb,2013,2.9,1
+Sudbury,SO2,ppb,2014,2.4,1
+Sudbury,SO2,ppb,2015,2.5,1
+Sudbury,SO2,ppb,2016,2.1,1
+Sudbury,SO2,ppb,2017,1.4,1
+Sudbury,SO2,ppb,2018,1.2,1
+Sudbury,SO2,ppb,2019,1.2,1
+Sudbury,SO2,ppb,2020,0.9,1
+Sudbury,SO2,ppb,2021,0.9,1
+Sudbury,SO2,ppb,2022,1.1,1
+Sudbury,SO2,ppb,2023,1.0,1
+Sudbury,SO2,ppb,2024,0.8,1
+Toronto,SO2,ppb,2005,2.55,2
+Toronto,SO2,ppb,2006,1.95,2
+Toronto,SO2,ppb,2007,1.7,2
+Toronto,SO2,ppb,2008,1.5,2
+Toronto,SO2,ppb,2009,1.05,2
+Toronto,SO2,ppb,2010,0.9,2
+Toronto,SO2,ppb,2011,1.5,1
+Toronto,SO2,ppb,2012,0.6,1
+Toronto,SO2,ppb,2013,0.5,1
+Toronto,SO2,ppb,2014,0.8,1
+Toronto,SO2,ppb,2015,1.0,1
+Toronto,SO2,ppb,2016,0.55,2
+Toronto,SO2,ppb,2017,0.33,3
+Toronto,SO2,ppb,2018,0.3,3
+Toronto,SO2,ppb,2019,0.23,3
+Toronto,SO2,ppb,2020,0.17,3
+Toronto,SO2,ppb,2021,0.2,3
+Toronto,SO2,ppb,2022,0.23,3
+Toronto,SO2,ppb,2023,0.15,2
+Toronto,SO2,ppb,2024,0.13,3
+Vancouver,SO2,ppb,2005,1.72,13
+Vancouver,SO2,ppb,2006,1.61,14
+Vancouver,SO2,ppb,2007,1.39,14
+Vancouver,SO2,ppb,2008,2.12,4
+Vancouver,SO2,ppb,2009,2.0,4
+Vancouver,SO2,ppb,2010,1.18,13
+Vancouver,SO2,ppb,2011,1.11,14
+Vancouver,SO2,ppb,2012,1.18,15
+Vancouver,SO2,ppb,2013,0.89,15
+Vancouver,SO2,ppb,2014,0.77,14
+Vancouver,SO2,ppb,2015,0.5,3
+Vancouver,SO2,ppb,2016,0.35,2
+Vancouver,SO2,ppb,2017,0.47,3
+Vancouver,SO2,ppb,2018,0.36,15
+Vancouver,SO2,ppb,2019,0.3,4
+Vancouver,SO2,ppb,2020,0.28,4
+Vancouver,SO2,ppb,2021,0.33,4
+Vancouver,SO2,ppb,2022,0.3,15
+Vancouver,SO2,ppb,2023,0.29,14
+Vancouver,SO2,ppb,2024,0.26,16
+Victoria,SO2,ppb,2005,0.7,1
+Victoria,SO2,ppb,2008,1.2,2
+Victoria,SO2,ppb,2009,1.4,1
+Victoria,SO2,ppb,2010,1.3,1
+Victoria,SO2,ppb,2011,1.4,1
+Victoria,SO2,ppb,2012,0.9,2
+Victoria,SO2,ppb,2013,0.8,2
+Victoria,SO2,ppb,2014,1.0,1
+Victoria,SO2,ppb,2015,0.63,3
+Victoria,SO2,ppb,2016,0.5,3
+Victoria,SO2,ppb,2017,0.25,2
+Victoria,SO2,ppb,2018,0.25,2
+Victoria,SO2,ppb,2019,0.2,2
+Victoria,SO2,ppb,2020,0.3,1
+Victoria,SO2,ppb,2021,0.2,1
+Victoria,SO2,ppb,2022,0.2,1
+Victoria,SO2,ppb,2023,0.2,1
+Victoria,SO2,ppb,2024,0.3,1
+Windsor,SO2,ppb,2005,5.0,2
+Windsor,SO2,ppb,2006,4.95,2
+Windsor,SO2,ppb,2007,5.35,2
+Windsor,SO2,ppb,2008,4.55,2
+Windsor,SO2,ppb,2009,3.55,2
+Windsor,SO2,ppb,2010,3.35,2
+Windsor,SO2,ppb,2011,3.45,2
+Windsor,SO2,ppb,2012,2.8,2
+Windsor,SO2,ppb,2013,2.5,2
+Windsor,SO2,ppb,2014,2.65,2
+Windsor,SO2,ppb,2015,1.9,2
+Windsor,SO2,ppb,2016,1.25,2
+Windsor,SO2,ppb,2017,1.0,2
+Windsor,SO2,ppb,2018,0.65,2
+Windsor,SO2,ppb,2019,0.6,2
+Windsor,SO2,ppb,2020,0.55,2
+Windsor,SO2,ppb,2021,0.55,2
+Windsor,SO2,ppb,2022,0.55,2
+Windsor,SO2,ppb,2023,0.45,2
+Windsor,SO2,ppb,2024,0.4,2
+Winnipeg,SO2,ppb,2009,0.5,1
+Winnipeg,SO2,ppb,2010,0.4,1
+Winnipeg,SO2,ppb,2011,0.4,1
+Winnipeg,SO2,ppb,2012,0.2,1
+Winnipeg,SO2,ppb,2013,0.1,1
+Winnipeg,SO2,ppb,2014,0.1,2
+Winnipeg,SO2,ppb,2015,0.1,1
+Winnipeg,SO2,ppb,2017,0.1,1
+Winnipeg,SO2,ppb,2024,0.1,1
+Yellowknife,SO2,ppb,2005,1.0,1
+Yellowknife,SO2,ppb,2006,0.2,1
+Yellowknife,SO2,ppb,2007,0.4,1
+Yellowknife,SO2,ppb,2008,0.7,1
+Yellowknife,SO2,ppb,2009,0.9,1
+Yellowknife,SO2,ppb,2010,0.7,1
+Yellowknife,SO2,ppb,2011,0.2,1
+Yellowknife,SO2,ppb,2013,0.4,1
+Yellowknife,SO2,ppb,2014,0.4,1
+Yellowknife,SO2,ppb,2015,0.3,1
+Yellowknife,SO2,ppb,2016,0.2,1
+Yellowknife,SO2,ppb,2017,0.1,1
+Yellowknife,SO2,ppb,2018,0.2,1
+Yellowknife,SO2,ppb,2019,0.2,1
+Yellowknife,SO2,ppb,2020,0.3,1
+Yellowknife,SO2,ppb,2021,0.5,1
+Yellowknife,SO2,ppb,2022,0.5,1

@@ -1,0 +1,216 @@
+---
+title: "Air Quality"
+description: "How the air Canadians breathe has changed — emissions, concentrations, the international picture, and the rising challenge of wildfire smoke"
+---
+
+```{python}
+#| echo: false
+import pandas as pd
+import plotly.graph_objects as go
+import os
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import lines_over_time, peer_comparison_line, ranked_bar
+
+# Shared pollutant palette. PM2.5 is red — it is the pollutant now moving the
+# wrong way (wildfire smoke), so it is the one to draw the eye.
+AQ_COLORS = {
+    "SOx": "#1f77b4", "SO2": "#1f77b4", "NOX": "#ff7f0e", "NO2": "#ff7f0e",
+    "VOC": "#2ca02c", "CO": "#9467bd", "O3": "#8c564b", "PM2.5": "#d62728",
+}
+```
+
+Air pollution is one of the clearer environmental success stories of the past few
+decades — and, increasingly, an exception. Emissions of the classic industrial
+pollutants have fallen sharply since 1990, and the concentrations Canadians
+actually breathe have followed for most pollutants. The conspicuous exception is
+fine particulate matter (PM2.5), which has risen as wildfire smoke reaches
+populated areas more often. All concentration measures here are
+**population-weighted** — they reflect the air where people live, not remote
+monitoring sites — and are drawn from Environment and Climate Change Canada's
+national monitoring and inventory programs.
+
+## Emissions of the main air pollutants have fallen since 1990
+
+Canada's [Air Pollutant Emissions Inventory](https://www.canada.ca/en/environment-climate-change/services/pollutants/air-emissions-inventory-overview.html)
+tracks how much of each pollutant is released nationally. The declines are large:
+sulphur oxides — the driver of acid rain — have fallen by roughly four-fifths since
+1990 as smelters and coal plants were controlled or closed; carbon monoxide and
+nitrogen oxides have fallen by roughly half or more, largely through tighter
+vehicle standards. Not everything fell: ammonia, mostly from agriculture, has
+drifted up. (Shown as an index, 1990 = 100, so the *rates* of change are
+comparable across pollutants of very different size.)
+
+```{python}
+#| echo: false
+apei_path = "data/environment/apei_emissions.csv"
+if os.path.exists(apei_path):
+    ap = pd.read_csv(apei_path)
+    keep = ["SOx", "NOX", "VOC", "CO"]
+    ap = ap[ap["pollutant"].isin(keep)].copy()
+    base = ap[ap["year"] == 1990].set_index("pollutant")["emissions_t"]
+    ap["index"] = [r.emissions_t / base[r.pollutant] * 100 for r in ap.itertuples()]
+    fig = lines_over_time(
+        ap, "year", "index", "pollutant",
+        yaxis_title="Emissions (1990 = 100)", colors=AQ_COLORS,
+        group_order=keep, hover_decimals=0,
+        source_note=f"Source: Environment and Climate Change Canada, Air Pollutant Emissions Inventory | Data as of: {get_data_date(apei_path)}")
+    fig.add_hline(y=100, line_dash="dash", line_color="#bbb", opacity=0.6)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("APEI emissions data not yet available. Run the data pipeline.")
+```
+
+## What Canadians breathe: concentrations since 2009
+
+Emissions are what we release; concentrations are what we actually breathe. This
+indicator, built on the [National Air Pollution Surveillance (NAPS)](https://www.canada.ca/en/environment-climate-change/services/air-pollution/monitoring-networks-data/national-air-pollution-program.html)
+network, tracks the population-weighted concentration of each pollutant (indexed
+to 2009 = 100). Sulphur dioxide, nitrogen dioxide, and volatile organic compounds
+have all declined; ground-level ozone — a secondary pollutant that forms in the
+atmosphere — has been roughly flat. **Fine particulate matter (PM2.5) is the
+exception: it has risen, not fallen** — the signature of wildfire smoke, which the
+final chart isolates. These are national figures; to pick an individual city and
+see its pollutants month by month back to 2005, see
+**[Air Quality by City](air-quality-cities.qmd)**.
+
+```{python}
+#| echo: false
+cesi_path = "data/environment/cesi_air_quality.csv"
+if os.path.exists(cesi_path):
+    aq = pd.read_csv(cesi_path)
+    avg = aq[aq["metric"] == "average"].copy()
+    order = ["SO2", "VOC", "NO2", "O3", "PM2.5"]
+    fig = lines_over_time(
+        avg, "year", "index", "pollutant",
+        yaxis_title="Concentration (2009 = 100)", colors=AQ_COLORS,
+        group_order=order, hover_decimals=0,
+        source_note=f"Source: Environment and Climate Change Canada, Canadian Environmental Sustainability Indicators (NAPS) | Data as of: {get_data_date(cesi_path)}")
+    fig.add_hline(y=100, line_dash="dash", line_color="#bbb", opacity=0.6)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CESI air-quality data not yet available. Run the data pipeline.")
+```
+
+## How Canada's PM2.5 compares internationally
+
+Against OECD peers, Canada's baseline air is among the cleanest: by mean
+population exposure to PM2.5, Canada ranks **4th of the 16 peers with data** —
+behind only Finland, Sweden, and Norway. (This OECD series, derived from
+satellite and ground measurements, currently runs to 2020 — before the most
+severe recent smoke years.) The dotted line marks the [World Health
+Organization's 2021 guideline](https://www.who.int/publications/i/item/9789240034228)
+of 5 µg/m³; that guideline is strict enough that most Canadians still live above
+it — roughly four-fifths of the population — even though Canada's air is cleaner
+than almost every peer's.
+
+```{python}
+#| echo: false
+pm_path = "data/environment/oecd_pm25_exposure.csv"
+if os.path.exists(pm_path):
+    pm = pd.read_csv(pm_path)
+    fig = peer_comparison_line(
+        pm, x_col="year", y_col="pm25",
+        title="", yaxis_title="PM2.5 (µg/m³, population-weighted)", show_average=True)
+    fig.add_hline(y=5, line_dash="dot", line_color="#2ca02c", opacity=0.8,
+                  annotation_text="WHO 2021 guideline (5 µg/m³)",
+                  annotation_position="top left", annotation_font_color="#2ca02c")
+    fig.update_layout(annotations=list(fig.layout.annotations) + [dict(
+        text=f"Source: OECD Green Growth Indicators (satellite-derived) | Data as of: {get_data_date(pm_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
+        font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("OECD PM2.5 data not yet available. Run the data pipeline.")
+```
+
+### Latest PM2.5 exposure: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(pm_path):
+    pm = pd.read_csv(pm_path)
+    fig = ranked_bar(
+        pm, "pm25", "PM2.5 (µg/m³, population-weighted)",
+        f"Source: OECD Green Growth Indicators | Data as of: {get_data_date(pm_path)}",
+        hover_template="%{y}: %{x:.1f} µg/m³<extra></extra>")
+    fig.add_vline(x=5, line_dash="dot", line_color="#2ca02c", opacity=0.8,
+                  annotation_text="WHO guideline", annotation_position="top",
+                  annotation_font_color="#2ca02c")
+    fig.show(config={"displaylogo": False})
+```
+
+## The new challenge: wildfire smoke
+
+The one pollutant moving the wrong way is fine particulate matter, and wildfire is
+why. This chart pairs the area burned by wildfire each year (bars) with the
+**peak** PM2.5 concentration Canadians are exposed to (the 98th-percentile of
+daily values, indexed to 2009 = 100). The worst smoke years stand out — 2018, and
+above all the record 2023 fire season, when the peak exposure index reached nearly
+three times its 2009 level. Population-weighted smoke depends on *where* fires
+burn relative to where people live, so the link is not exact year to year, but the
+trend is clear: wildfire smoke is increasingly the dominant influence on what
+Canadians breathe on the worst days. See [Geography → Fire & Ice](../geography/fire-ice.qmd)
+for the long-run wildfire record and 2023 fire map.
+
+```{python}
+#| echo: false
+wf_path = "data/geography/nfdb_wildfire.csv"
+if os.path.exists(wf_path) and os.path.exists(cesi_path):
+    wf = pd.read_csv(wf_path)
+    nat = wf[(wf["geography"] == "Canada") & (wf["year"] >= 2009)].sort_values("year")
+    peak = aq[(aq["pollutant"] == "PM2.5") & (aq["metric"] == "peak")].sort_values("year")
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=nat["year"], y=nat["area_burned_ha"] / 1e6, name="Area burned",
+        marker_color="#d9a441", opacity=0.85,
+        hovertemplate="%{x}: %{y:.1f} M ha burned<extra></extra>"))
+    fig.add_trace(go.Scatter(
+        x=peak["year"], y=peak["index"], name="PM2.5 peak exposure (2009 = 100)",
+        mode="lines+markers", line=dict(color=CANADA_COLOR, width=3),
+        marker=dict(size=6), yaxis="y2",
+        hovertemplate="%{x}: PM2.5 peak index %{y:.0f}<extra></extra>"))
+    fig.update_layout(
+        plot_bgcolor="white", height=470, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0", dtick=2),
+        yaxis=dict(title="Wildfire area burned (million ha)", gridcolor="#e0e0e0",
+                   rangemode="tozero"),
+        yaxis2=dict(title="PM2.5 98th-percentile peak (2009 = 100)", overlaying="y",
+                    side="right", rangemode="tozero", showgrid=False),
+        legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5),
+        margin=dict(t=30, b=120, r=70),
+        annotations=[dict(
+            text=f"Sources: NRCan Canadian National Fire Database (area burned); ECCC CESI / NAPS (PM2.5 peak) | as of {get_data_date(wf_path)}",
+            xref="paper", yref="paper", x=0, y=-0.30, showarrow=False,
+            font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Wildfire and/or PM2.5 data not yet available. Run the data pipeline.")
+```
+
+## Download Data
+
+- [Air-pollutant concentrations, indexed (CSV)](../data/environment/cesi_air_quality.csv) — ECCC CESI air-quality indicators (NAPS)
+- [Air-pollutant emissions, national (CSV)](../data/environment/apei_emissions.csv) — ECCC Air Pollutant Emissions Inventory (APEI)
+- [Mean population exposure to PM2.5 (CSV)](../data/environment/oecd_pm25_exposure.csv) — OECD Green Growth Indicators
+- [Population exposed to PM2.5 above WHO guideline (CSV)](../data/environment/oecd_pm25_above_who.csv) — OECD Green Growth Indicators
+
+::: {.callout-note collapse="true"}
+## About these data
+
+**Concentrations vs. emissions.** *Emissions* (APEI) measure what is released into
+the air nationally; *concentrations* (NAPS/CESI) measure what is actually present
+in the air where people live. They can diverge — for example, PM2.5 concentrations
+have risen on smoky days even though directly emitted particulate emissions have
+changed little, because wildfire smoke is not fully captured in the controllable
+emissions inventory.
+
+**Population-weighting.** The concentration indicators weight each monitoring
+station by the population nearby, so they approximate the exposure of a typical
+resident rather than a simple average across all monitors.
+
+**International series.** The OECD PM2.5 figures are modelled from satellite and
+ground observations on a consistent basis across countries (so they differ
+slightly from Canada's own ground-network figures) and currently extend to 2020.
+South Korea is the one peer without data in this series. All sources are published
+under the Open Government Licence – Canada or the OECD's terms of use.
+:::

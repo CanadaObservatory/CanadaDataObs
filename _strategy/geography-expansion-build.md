@@ -1,5 +1,20 @@
 # Geography expansion — overnight build (started 2026-06-08, ~5 PM)
 
+> ## ▶ RESUME HERE (next session)
+> All 5 maps DONE + committed on `geography-maps-expansion` (not pushed). Since the overnight build,
+> also: watershed **rivers** overlay (hover off) + fixes; agriculture **breakdown-on-hover** (off by
+> default); **elevation relief map** shipped (`charts.relief_map`, MRDEM→3857 hypsometric **WebP**
+> 2800px/238 KB, page ~0.5 MB) and the weak **province-median map was cut**.
+> **OPEN TASK — "Canada's mountains" peaks map (feasibility = GO, NOT built):** owner wants to
+> **discuss all paths forward first**. Verified recipe: NRCan **Canadian Geographical Names** CSV
+> (`cgn_canada_csv_eng.zip`, `Generic Term`∈{Mount,Mountain,Peak,Summit}, curate `Relevance at Scale`
+> ≥1,000,000 → ~757 peaks, maybe + elevation floor) for names+coords; **MRDEM window-max** (±~33 cells
+> ≈1 km) for elevation (within ~1-2%; single-point undershoots). Plot as vector proportional symbols
+> (zoom-friendly) below the relief. Detail-approach alternatives already weighed: raster relief =
+> overview-only; raw points = rejected; hex/grid = marginal; tiles = overkill; peaks = chosen.
+> Full detail in memory `project_geography_expansion_2026-06`.
+
+
 Branch: `geography-maps-expansion` (off `lakes-map-and-homepage-polish`). **Do NOT push
 or open a PR** until the owner reviews. Commit each map separately. These are **drafts for
 review** — the owner does the visual polish pass (colour scales, labels, framing), as with

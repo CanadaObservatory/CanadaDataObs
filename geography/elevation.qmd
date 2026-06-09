@@ -1,51 +1,160 @@
 ---
 title: "Elevation"
-description: "How high Canada is — the distribution of land by elevation, and where the high ground lies"
+description: "How high Canada is — an interactive relief map of the terrain, where the named peaks lie, and the distribution of land by elevation"
+toc: false
+resources:
+  - vendor/**
 ---
 
 ```{python}
 #| echo: false
-import os, json, base64
+import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.charts import relief_map
 
-MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
-              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 dist_csv = "data/geo/elevation_distribution.csv"
-prov_geo = "data/geo/prov_2021.geojson"
 ```
 
 ## The shape of the land
 
 Seen whole, Canada's surface resolves into a few great physiographic regions: the high, folded
-**Western Cordillera** along the Pacific; the flat-then-rising **Interior Plains** of the
-Prairies; the ancient, low **Canadian Shield** wrapped around Hudson Bay; the **lowlands** of
-the St. Lawrence and Hudson Bay; and the worn **Appalachian** uplands of the east. The relief
-map colours the land by elevation — green lowlands through tan and brown to the near-white high
-ground of the Rockies, the Coast Mountains, and the Arctic ranges.
+**Western Cordillera** along the Pacific; the flat-then-rising **Interior Plains** of the Prairies;
+the ancient, low **Canadian Shield** wrapped around Hudson Bay; the **lowlands** of the St. Lawrence
+and Hudson Bay; and the worn **Appalachian** uplands of the east. The map below is a **shaded-relief**
+view of that terrain — pan and zoom to follow a valley or a coastline. Scattered across it are
+Canada's **named summits**, each coloured by its elevation; hover for a name and height, and zoom in
+to see the labels of the highest peak in each province and territory.
 
 ```{python}
 #| echo: false
-relief_img, relief_meta = "data/geo/elevation_relief.webp", "data/geo/elevation_relief.json"
-if os.path.exists(relief_img) and os.path.exists(relief_meta):
-    uri = "data:image/webp;base64," + base64.b64encode(open(relief_img, "rb").read()).decode()
-    coords = json.load(open(relief_meta))["coordinates"]
-    prov = json.load(open(prov_geo)) if os.path.exists(prov_geo) else None
-    fig = relief_map(uri, coords, boundary_geojson=prov, boundary_color="#7c8088",
-        boundary_width=0.5, center={"lat": 60, "lon": -96}, zoom=2.3,
-        source_note="Source: Natural Resources Canada — Medium-Resolution DEM (MRDEM-30, CanElevation). Coarse national read, reprojected to Web Mercator; colour = elevation.")
-    fig.show(config=MAP_CONFIG)
-else:
-    print("Relief image not yet available — run `python -m pipeline.build_geography`.")
+#| output: asis
+import json
+from pipeline.charts import MAJOR_CITIES
+
+
+def _load(p):
+    return json.load(open(p)) if os.path.exists(p) else {"type": "FeatureCollection", "features": []}
+
+
+_data = {
+    "peaks": _load("data/geo/peaks_canada.geojson"),
+    "lakes": _load("data/geo/lakes_major.geojson"),
+    "rivers": _load("data/geo/rivers_major.geojson"),
+    "prov": _load("data/geo/prov_2021.geojson"),
+    "cities": [{"name": c[0], "lat": c[1], "lon": c[2]} for c in MAJOR_CITIES],
+}
+print('<script>window.ELEV = ' + json.dumps(_data, separators=(",", ":")) + ';</script>')
 ```
+
+::: {.column-screen-inset}
+
+```{=html}
+<style>
+#elevmap{height:700px;border:1px solid #ddd;border-radius:6px;background:#e7ecef;}
+.elev-legend{background:rgba(255,255,255,0.9);padding:7px 10px;border-radius:5px;font-size:12px;
+  line-height:1.5;color:#333;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
+.elev-legend i{display:inline-block;width:13px;height:13px;margin-right:6px;vertical-align:-2px;
+  border:0.5px solid #888;}
+.peak-label{background:transparent;border:0;box-shadow:none;color:#3a2a12;font-weight:600;
+  font-size:11px;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;}
+.city-label{background:transparent;border:0;box-shadow:none;color:#111;font-size:11px;
+  text-shadow:0 0 3px #fff,0 0 3px #fff;}
+.map-source{font-size:10px;color:#999;margin:6px 2px 0;}
+</style>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css"/>
+<div id="elevmap"></div>
+<div class="map-source">Relief: Natural Resources Canada — Canada Base Map · Elevation (CBME) hillshade,
+served live (EPSG:3978). Peaks: Canadian Geographical Names (names &amp; coordinates) + MRDEM-30
+(window-max elevation). Lakes &amp; rivers: NRCan Atlas. All Open Government Licence – Canada.</div>
+<!-- Quarto loads RequireJS for Plotly; Leaflet/proj4 are UMD and would register with AMD
+     instead of creating globals (the same gotcha as window.Plotly). Hide `define` while the
+     vendored libs load so they attach to window (L, proj4), then restore AMD for Plotly. -->
+<script>window.__amdDefine=window.define;window.define=undefined;</script>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/proj4.js"></script>
+<script src="vendor/proj4leaflet.js"></script>
+<script>window.define=window.__amdDefine;try{delete window.__amdDefine;}catch(e){}</script>
+<script>
+(function(){
+  var E=window.ELEV; if(!E||typeof L==='undefined'){return;}
+  // elevation → colour (green lowland → yellow → orange → red → purple high)
+  var STOPS=[[0,'#1a9850'],[1000,'#a6d96a'],[2000,'#fee08b'],[3000,'#fdae61'],[4000,'#d73027'],[5500,'#7a0177']];
+  function hx(s,i){return parseInt(s.substr(i,2),16);}
+  function lerp(a,b,t){return 'rgb('+[1,3,5].map(function(i){return Math.round(hx(a,i)+(hx(b,i)-hx(a,i))*t);}).join(',')+')';}
+  function elevColor(h){
+    if(h<=STOPS[0][0])return STOPS[0][1];
+    for(var i=1;i<STOPS.length;i++){if(h<=STOPS[i][0]){return lerp(STOPS[i-1][1],STOPS[i][1],(h-STOPS[i-1][0])/(STOPS[i][0]-STOPS[i-1][0]));}}
+    return STOPS[STOPS.length-1][1];
+  }
+  // NRCan EPSG:3978 (Canada Atlas Lambert) tile matrix
+  var res=[38364.660062653464,22489.62831258996,13229.193125052918,7937.5158750317505,
+    4630.2175937685215,2645.8376250181442,1587.5031750063501,926.0435187537042,529.1675250036289,
+    317.50063500127004,185.20870458407753,111.12522275044652,66.1501587502646,38.36466006265346,
+    22.48962831258996,13.229193125052918,7.9375158750317505,4.6302175937685215,2.645837625018144,
+    1.5875031750063502];
+  var crs=new L.Proj.CRS('EPSG:3978',
+    '+proj=lcc +lat_1=49 +lat_2=77 +lat_0=49 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs',
+    {origin:[-34655800,39310000],resolutions:res,
+     bounds:L.bounds([-4926564.35,-5396818.74],[5347435.65,4623181.26])});
+  var map=L.map('elevmap',{crs:crs,minZoom:2,maxZoom:12,zoomSnap:0.25,attributionControl:true});
+  L.tileLayer('https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/tile/{z}/{y}/{x}',
+    {minZoom:2,maxZoom:13,attribution:'Hillshade © NRCan CBME (OGL)'}).addTo(map);
+  // Frame Canada robustly in Lambert: a 2-corner fitBounds misses the SE/NW bulges of a conic
+  // projection, so project the geographic extremes to pixels, take that box, and fit it.
+  (function(){var Z=4,
+    ex=[[41.7,-141],[41.7,-52.6],[83.1,-141],[83.1,-74],[47,-52.6],[49,-123.5],[60,-141],[52,-56]],
+    ps=ex.map(function(a){return crs.latLngToPoint(L.latLng(a[0],a[1]),Z);}),
+    xs=ps.map(function(p){return p.x;}), ys=ps.map(function(p){return p.y;}),
+    nw=crs.pointToLatLng(L.point(Math.min.apply(null,xs),Math.min.apply(null,ys)),Z),
+    se=crs.pointToLatLng(L.point(Math.max.apply(null,xs),Math.max.apply(null,ys)),Z);
+    map.fitBounds(L.latLngBounds(nw,se),{padding:[20,16]});})();
+
+  var provLayer=L.geoJSON(E.prov,{style:{color:'#9aa0a6',weight:0.8,fill:false,opacity:0.65}});
+  var hydro=L.layerGroup();
+  L.geoJSON(E.lakes,{style:{color:'#6699bb',weight:0.4,fillColor:'#a7cde4',fillOpacity:0.75}}).addTo(hydro);
+  L.geoJSON(E.rivers,{style:{color:'#6699bb',weight:1.1,opacity:0.85}}).addTo(hydro);
+  var cityLayer=L.layerGroup();
+  E.cities.forEach(function(c){
+    L.circleMarker([c.lat,c.lon],{radius:3,color:'#111',weight:1,fillColor:'#fff',fillOpacity:1}).addTo(cityLayer);
+    L.marker([c.lat,c.lon],{icon:L.divIcon({className:'city-label',html:c.name,iconSize:[80,14],iconAnchor:[-5,7]}),
+      interactive:false,keyboard:false}).addTo(cityLayer);
+  });
+  // peaks: coloured-by-elevation dots (hover names); highest-per-province labels appear when zoomed in
+  var peakLayer=L.layerGroup(), peakLabels=L.layerGroup(), seen={};
+  E.peaks.features.forEach(function(f){
+    var c=f.geometry.coordinates,p=f.properties,h=p.elevation_m||0;
+    var r=2+Math.max(0,(h-800))/1100;
+    L.circleMarker([c[1],c[0]],{radius:r,color:'#3a2a12',weight:0.5,fillColor:elevColor(h),fillOpacity:0.9})
+      .bindTooltip(p.name+' — '+Math.round(h).toLocaleString()+' m',{direction:'top'}).addTo(peakLayer);
+    if(!seen[p.province]){seen[p.province]=true;
+      L.marker([c[1],c[0]],{icon:L.divIcon({className:'peak-label',html:p.name,iconSize:[90,14],iconAnchor:[-4,14]}),
+        interactive:false,keyboard:false}).addTo(peakLabels);}
+  });
+  provLayer.addTo(map); hydro.addTo(map); cityLayer.addTo(map); peakLayer.addTo(map);
+  function syncLabels(){var z=map.getZoom();
+    if(z>=5){if(!map.hasLayer(peakLabels))peakLabels.addTo(map);}else{if(map.hasLayer(peakLabels))map.removeLayer(peakLabels);}}
+  map.on('zoomend',syncLabels); syncLabels();
+  L.control.layers(null,{'Peaks':peakLayer,'Cities':cityLayer,'Lakes &amp; rivers':hydro,'Province borders':provLayer},
+    {collapsed:false,position:'topright'}).addTo(map);
+  var lg=L.control({position:'bottomleft'});
+  lg.onAdd=function(){var d=L.DomUtil.create('div','elev-legend');
+    d.innerHTML='<b>Peak elevation</b><br>'+[['#1a9850','0'],['#a6d96a','1,000'],['#fee08b','2,000'],
+      ['#fdae61','3,000'],['#d73027','4,000'],['#7a0177','5,000+ m']].map(function(s){
+        return '<i style="background:'+s[0]+'"></i>'+s[1];}).join('<br>');
+    return d;};
+  lg.addTo(map);
+})();
+</script>
+```
+
+:::
 
 ## How high is Canada?
 
-For all its mountains, Canada is a remarkably **low-lying** country. About **three-quarters of
-its land sits below 500 metres**, and barely **half a percent rises above 2,000 metres** — the
-high peaks of the western Cordillera and the Arctic make up a tiny share of the total area. The
-chart shows how the country's land is distributed across elevation bands.
+For all its mountains, Canada is a remarkably **low-lying** country. About **three-quarters of its
+land sits below 500 metres**, and barely **half a percent rises above 2,000 metres** — the high peaks
+of the western Cordillera and the Arctic make up a tiny share of the total area. The chart shows how
+the country's land is distributed across elevation bands.
 
 ```{python}
 #| echo: false
@@ -69,5 +178,6 @@ else:
 
 ## Download data
 
+- [Named peaks of Canada (CSV)](../data/geo/peaks_canada.csv) — Canadian Geographical Names + MRDEM-30 elevation
+- [Named peaks of Canada (GeoJSON)](../data/geo/peaks_canada.geojson)
 - [Land area by elevation band (CSV)](../data/geo/elevation_distribution.csv) — NRCan MRDEM-30
-- [Relief image (WebP)](../data/geo/elevation_relief.webp) — NRCan MRDEM-30, hypsometric tint

@@ -723,6 +723,69 @@ def build_elevation_relief(width=2800):
           f"| land px {int(valid.sum()):,} | corners {coords}")
 
 
+CGN_NATIONAL = ("https://ftp.cartes.canada.ca/pub/nrcan_rncan/vector/"
+                "geobase_cgn_toponyme/prov_csv_eng/cgn_canada_csv_eng.zip")
+PEAK_TERMS = {"Mount", "Mountain", "Peak", "Summit"}
+
+
+def build_peaks(relevance_min=1_000_000, win=33):
+    """Named-peaks vector layer for the elevation page ("Canada's mountains").
+
+    Names/coords from NRCan's Canadian Geographical Names national CSV (Generic Term in
+    Mount/Mountain/Peak/Summit, kept where 'Relevance at Scale' >= 1,000,000 -> ~757 prominent,
+    nationally distributed summits). Elevation is NOT in CGN, so it is sampled from MRDEM-30 as a
+    WINDOW-MAX (+/-33 cells ~ 1 km, take the max valid) -- a single-point read undershoots summits
+    badly (Robson reads ~3556 vs 3954 m; window-max recovers ~3900). Writes
+    data/geo/peaks_canada.geojson (+ .csv for download). Static one-time build (not weekly)."""
+    import io
+
+    import rasterio
+    from rasterio.warp import transform as warp_transform
+    from rasterio.windows import Window
+    cache = "/tmp/cgn_canada_csv_eng.csv"
+    if not os.path.exists(cache):
+        print("Downloading Canadian Geographical Names (national CSV) ...")
+        z = zipfile.ZipFile(io.BytesIO(requests.get(CGN_NATIONAL, timeout=180).content))
+        nm = [n for n in z.namelist() if n.lower().endswith(".csv")][0]
+        open(cache, "wb").write(z.read(nm))
+    d = pd.read_csv(cache, encoding="latin-1", low_memory=False)
+    m = d[d["Generic Term"].isin(PEAK_TERMS) & (d["Relevance at Scale"] >= relevance_min)]
+    m = m.dropna(subset=["Latitude", "Longitude"]).reset_index(drop=True)
+    print(f"Building peaks: sampling MRDEM window-max for {len(m)} summits ...")
+    os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
+                      GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
+    elevs = []
+    with rasterio.open(MRDEM_VRT) as src:
+        nd = src.nodata if src.nodata is not None else -32767.0
+        xs, ys = warp_transform("EPSG:4326", src.crs,
+                                m["Longitude"].tolist(), m["Latitude"].tolist())
+        for i, (x, y) in enumerate(zip(xs, ys)):
+            r, c = src.index(x, y)
+            a = src.read(1, window=Window(c - win, r - win, 2 * win + 1, 2 * win + 1),
+                         boundless=True, fill_value=nd).astype("float32")
+            v = a[(a != nd) & (a > -100) & (a < 7000)]
+            elevs.append(round(float(v.max()), 1) if v.size else None)
+            if (i + 1) % 100 == 0:
+                print(f"  {i + 1}/{len(m)}")
+    m["elevation_m"] = elevs
+    m = m.dropna(subset=["elevation_m"]).sort_values("elevation_m", ascending=False)
+    feats = [{
+        "type": "Feature",
+        "geometry": {"type": "Point",
+                     "coordinates": [round(r["Longitude"], 5), round(r["Latitude"], 5)]},
+        "properties": {"name": r["Geographical Name"], "elevation_m": r["elevation_m"],
+                       "province": r["Province - Territory"],
+                       "relevance": int(r["Relevance at Scale"])},
+    } for _, r in m.iterrows()]
+    json.dump({"type": "FeatureCollection", "features": feats},
+              open(f"{GEO_DIR}/peaks_canada.geojson", "w"))
+    m.rename(columns={"Geographical Name": "name", "Province - Territory": "province"})[
+        ["name", "province", "Latitude", "Longitude", "elevation_m"]].to_csv(
+        f"{GEO_DIR}/peaks_canada.csv", index=False)
+    print(f"Wrote {len(feats)} peaks -> {GEO_DIR}/peaks_canada.geojson")
+    print(m[["Geographical Name", "elevation_m"]].head(8).to_string(index=False))
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -737,4 +800,5 @@ if __name__ == "__main__":
     build_protected_areas()
     build_elevation()
     build_elevation_relief()
+    build_peaks()
     print("build_geography complete.")

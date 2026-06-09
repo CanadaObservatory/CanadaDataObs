@@ -37,6 +37,20 @@ jobs:
         timeout-minutes: 5
         continue-on-error: true  # Don't fail deploy if one source is down
 
+      - name: Check NRCan elevation tile service (Elevation-page basemap)
+        # The Elevation page streams NRCan's live CBME hillshade as its relief base. NRCan has
+        # migrated endpoints before, so ping it weekly and surface a warning (not a failure) if it
+        # changes — the fix is a one-line URL update, or activate pipeline/build_elevation_tiles.py.
+        run: |
+          URL="https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer?f=json"
+          code=$(curl -s -o /tmp/cbme.json -w "%{http_code}" --max-time 30 "$URL" || echo "000")
+          if [ "$code" = "200" ] && grep -q "tileInfo" /tmp/cbme.json; then
+            echo "NRCan CBME hillshade service OK ($code)."
+          else
+            echo "::warning title=Elevation basemap::NRCan CBME hillshade returned '$code' or an unexpected body — the Elevation page relief may be blank. Verify the endpoint, or activate the self-hosted fallback (pipeline/build_elevation_tiles.py)."
+          fi
+        continue-on-error: true
+
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"

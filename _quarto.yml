@@ -24,10 +24,18 @@ website:
             text: Where People Live
           - href: geography/land.qmd
             text: The Land
+          - href: geography/elevation.qmd
+            text: Elevation
+          - href: geography/agriculture.qmd
+            text: Agriculture
           - href: geography/water.qmd
             text: Water
           - href: geography/fire-ice.qmd
             text: Fire & Ice
+          - href: geography/climate.qmd
+            text: Climate
+          - href: geography/protected.qmd
+            text: Protected Areas
       - text: Economy
         menu:
           - href: economics/index.qmd

@@ -18,6 +18,20 @@ researchers, and anyone who wants accessible Canadian data.
 
 ---
 
+## Start with these questions
+
+New here? These are some of the big questions this data can help you explore —
+each links to the section behind it:
+
+- [**Is Canada becoming less affordable?**](housing/) — inflation, house prices, rents, and household debt
+- [**Are incomes keeping up?**](income/) — wages, real incomes, and poverty
+- [**How do Canadian living standards compare with peer countries?**](economics/) — GDP per capita, productivity, and jobs
+- [**Where is population growth coming from?**](population/) — immigration, temporary residents, and natural increase
+- [**How big is government, and what does it spend on?**](fiscal/) — debt, deficits, the public-service workforce, and federal spending
+- **How is Canada doing on [health](health/), the [environment](environment/), and [well-being](wellbeing/)?** — life expectancy, emissions, and life satisfaction
+
+---
+
 ## Topics
 
 ::::{.columns}
@@ -121,4 +135,4 @@ Debt and deficits, the size of the public-service workforce, and what the federa
 - **Broad peer comparisons** — 17 OECD countries, not just the G7
 - **Automatically updated** — data pipelines run weekly
 - **Open and downloadable** — all cleaned data available as CSV
-- **No policy advocacy** — the data speaks for itself
+- **No policy advocacy** — we present the data, sources, and methods to support informed discussion, not to push conclusions

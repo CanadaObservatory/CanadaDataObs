@@ -49,7 +49,7 @@ DataCan/
 ├── population/religion-neighbourhoods*.qmd ← per-metro **DA religion** maps, same 5 metros (religion-neighbourhoods.qmd = Vancouver)
 ├── geography/index.qmd    ← **Where People Live** (Geography-dropdown landing): population density (province log-scale + by-city) + "Canada in the world" framing
 ├── geography/land.qmd     ← 15 ecozones (categorical) + land cover by ecozone (dropdown)
-├── geography/water.qmd    ← **major lakes** (40 largest, NRCan Atlas 1:1M, shaded by area) + % freshwater area by province
+├── geography/water.qmd    ← **major lakes & rivers** (40 largest, NRCan Atlas 1:1M; lakes log-shaded by area with a dark outline, rivers in flat blue; light province/territory borders for orientation)
 ├── geography/fire-ice.qmd ← wildfire (national 1959– bar + **2023 fire locations**: every NFDB fire point sized by area burned) + permafrost zones (categorical) + Arctic sea-ice extent
 ├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate (unemployment + employment have an **age-bracket dropdown**: youth/prime/older/total), current account
 ├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
@@ -74,7 +74,7 @@ DataCan/
 │   ├── fetch_boc.py       ← fetch_boc_indicator (generic Bank of Canada Valet API; source="boc", Indicator.boc_series = {col: valet_code})
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, bubble_map (proportional-symbol map, e.g. wildfire points), add_city_markers (orient physical-geography maps), history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views. Every choropleth/bubble map carries a **hover on/off toggle** (`_hover_toggle`); ranked bars show one clearly-labelled year (no duplicate "Data as of")
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, bubble_map (proportional-symbol map, e.g. wildfire points), add_city_markers + add_boundaries (orient physical-geography maps — city dots, plus province/territory & national boundary line-layer overlays), history_lines, ranking_strip, lines_over_time, stacked_area, category_bar, single_line_multi, category_bar_views. Every choropleth/bubble map carries a **hover on/off toggle** (`_hover_toggle`); ranked bars show one clearly-labelled year (no duplicate "Data as of")
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover, **major lakes (build_lakes, NRCan 1:1M waterbodies) + 2023 wildfire points (build_wildfire_points, NFDB)** (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
@@ -455,7 +455,18 @@ maps); page ≈ 1.1 MB (province/ecozone/permafrost/CMA GeoJSON each < 0.2 MB, i
   Both key on a per-polygon **unique `fid`** (25 polygons / 15 zones) so non-contiguous zones don't
   collide on a shared id (same dup-id trap as Ottawa–Gatineau). Land cover is **by ecozone, not
   province** — table 38-10-0177-01 has no province dimension.
-- **% freshwater area by province** (`choropleth_map`, Blues) — hardcoded NRCan/StatCan area table.
+- **Major lakes & rivers** (`geography/water.qmd`) — the 40 largest waterbodies (NRCan Atlas 1:1M); lakes
+  log-shaded by surface area with a dark outline, and the three river features (Mackenzie/Yukon/Peace) split into a
+  separate **flat-blue** trace so they read as water, not borders. Light province/territory boundaries
+  (`add_boundaries` line-layer from `prov_2021.geojson`, below the fills) orient the map — their southern edges
+  trace the Canada–US line, so no standalone national outline is drawn (an earlier dissolved-provinces national
+  outline was tried but dropped as too heavy/distracting). The earlier **% freshwater-area-by-province** map was
+  dropped as uninformative; its `pct_freshwater` column is still built (still in `statcan_prov_geography.csv`),
+  just no longer mapped. Unlike the other Geography maps it carries **no explicit `add_city_markers` overlay** —
+  the carto basemap's own labels reveal place names as you zoom in, which keeps the default national view
+  uncluttered. Surface **area** is the only physical attribute: the 1:1M waterbodies layer is outline-only (**no
+  depth/volume**), and there is no authoritative all-Canada lake-volume dataset, so volume is deliberately omitted
+  rather than hardcoded from mixed third-party sources (don't re-propose without a primary source).
 - **Wildfire** — national annual area-burned bar (1959–; 2023 = 17.6 M ha record) + a **2023
   by-province choropleth normalised to % of each province's land area** (raw hectares would just
   track province size: pct = ha ÷ land-km²). NFDB "by agency" sheet is wide & irregular (Nunavut

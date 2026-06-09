@@ -640,10 +640,78 @@ def add_city_markers(fig, cities=MAJOR_CITIES, textposition="top center"):
     return fig
 
 
+def add_boundaries(fig, geojson, *, color="#9aa0a6", width=0.8, below="traces"):
+    """Overlay administrative boundaries (province/territory or national) on a map by
+    adding the polygon GeoJSON as a mapbox **line** layer — the polygon rings render as
+    outlines. Inserted with `below="traces"` so the data fills (e.g. the lakes) and the
+    place labels stay on top; call it twice to layer a light internal-division set under
+    a heavier national outline (the later call draws above the earlier where they share
+    the perimeter). Returns the figure for chaining."""
+    layer = dict(sourcetype="geojson", source=geojson, type="line",
+                 color=color, line=dict(width=width))
+    if below is not None:
+        layer["below"] = below   # below=None → drawn on top (e.g. rivers over basin fills)
+    existing = [l.to_plotly_json() for l in (fig.layout.mapbox.layers or [])]
+    fig.update_layout(mapbox_layers=existing + [layer])
+    return fig
+
+
+def add_line_features(fig, geojson, *, name_key="name", color="#0d2b5e", width=1.1,
+                      name="lines"):
+    """Overlay line features (e.g. rivers) from a LineString/MultiLineString GeoJSON as a
+    Scattermapbox trace. Unlike `add_boundaries` (a static mapbox line *layer*, no hover),
+    this is a real trace, so each feature carries a hover label from `name_key`. Segments are
+    joined with None breaks so separate features don't connect. Drawn above the choropleth
+    fills but below the basemap place-labels. Kept out of the legend. Returns the figure."""
+    lats, lons, cd = [], [], []
+    for f in geojson.get("features", []):
+        nm = (f.get("properties") or {}).get(name_key) or ""
+        geom = f.get("geometry") or {}
+        coords = geom.get("coordinates") or []
+        segs = coords if geom.get("type") == "MultiLineString" else [coords]
+        for seg in segs:
+            for pt in seg:
+                lons.append(pt[0]); lats.append(pt[1]); cd.append(nm)
+            lons.append(None); lats.append(None); cd.append(None)
+    fig.add_trace(go.Scattermapbox(
+        lat=lats, lon=lons, mode="lines", line=dict(color=color, width=width),
+        customdata=cd, hovertemplate="<b>%{customdata}</b><extra></extra>",
+        name=name, showlegend=False))
+    return fig
+
+
+def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color="#8a8f96",
+               boundary_width=0.5, source_note=None, center=None, zoom=2.3, height=660):
+    """Raster-image overlay map: places a pre-rendered **Web-Mercator** image (e.g. the
+    elevation relief PNG, warped to EPSG:3857) over the free carto basemap as a mapbox
+    `image` layer, positioned by its lon/lat **corner coordinates** (clockwise TL, TR, BR,
+    BL — the order Plotly expects; the image is rendered in 3857 but the corners are WGS84).
+    `boundary_geojson` draws province/territory lines over the image; place labels stay on
+    top. The image is the surface, so there's no hover or legend — an invisible
+    Scattermapbox trace just anchors the mapbox subplot."""
+    center = center or {"lat": 62.0, "lon": -96.0}
+    base = _labelled_basemap()
+    layers = [base[0],
+              dict(sourcetype="image", source=image_uri, coordinates=coordinates, below="traces")]
+    if boundary_geojson is not None:
+        layers.append(dict(sourcetype="geojson", source=boundary_geojson, type="line",
+                           color=boundary_color, line=dict(width=boundary_width), below="traces"))
+    layers.append(base[1])
+    fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
+    fig.update_layout(mapbox_style="white-bg", mapbox_layers=layers,
+                      mapbox_zoom=zoom, mapbox_center=center,
+                      margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white")
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
-                   center=None, zoom=2.6, height=640, zmin=None, zmax=None, log=False):
+                   center=None, zoom=2.6, height=640, zmin=None, zmax=None, log=False,
+                   line_color="rgba(255,255,255,0.4)", line_width=0.2, opacity=0.82):
     """Zoomable choropleth map (Plotly Choroplethmapbox, free carto-positron
     basemap — no API token). The `geojson` features must carry a top-level `id`
     equal to df[location_col]. Used for the census-tract maps so users can pan/
@@ -653,7 +721,12 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     population density, where a few dense provinces would otherwise flatten the
     rest); the colourbar ticks are relabelled to the real values and zmin/zmax are
     ignored. The hover always shows the true (un-logged) value, read from
-    customdata so the displayed number is identical whether or not log is set."""
+    customdata so the displayed number is identical whether or not log is set.
+
+    `line_color`/`line_width` style the polygon outline (default a hairline white
+    separator, right for dense tract maps); pass a dark colour + a slightly larger
+    width for sparse polygons over a basemap (e.g. the major-lakes map) so small,
+    light-filled features still read. `opacity` is the polygon fill opacity."""
     import math
     import numpy as np
     import pandas as pd
@@ -683,7 +756,7 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         geojson=geojson, locations=df[location_col], z=z_,
         zmin=zmin_, zmax=zmax_,
         featureidkey="id", colorscale=colorscale, reversescale=reversescale,
-        marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=0.82),
+        marker=dict(line=dict(width=line_width, color=line_color), opacity=opacity),
         colorbar=colorbar,
         customdata=customdata,
         hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{customdata[{vidx}]:{value_fmt}}}{value_suffix}<extra></extra>",
@@ -824,7 +897,7 @@ CATEGORICAL_PALETTE = [
 def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
                            color_map=None, ordered=None, source_note=None,
                            center=None, zoom=2.4, height=660, legend_title=None,
-                           legend_orientation="v"):
+                           legend_orientation="v", detail_col=None):
     """Categorical choropleth — each polygon coloured by a *discrete* category
     rather than a continuous value (used for ecozones and permafrost zones).
 
@@ -835,7 +908,9 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     Pass `ordered` to fix the legend order (and, for an ordinal ramp like the
     permafrost zones, the colour order); `color_map` to set exact colours, else
     CATEGORICAL_PALETTE is cycled. `geojson` features must carry a top-level `id`
-    equal to df[location_col]; `name_col` adds a per-feature hover label."""
+    equal to df[location_col]; `name_col` adds a per-feature hover label. Pass `detail_col`
+    to show a custom per-feature string (e.g. a full composition breakdown, like the
+    diversity/religion maps) in the hover instead of the bare category."""
     center = center or {"lat": 62.0, "lon": -96.0}
     cats = list(ordered) if ordered else sorted(df[cat_col].dropna().unique())
     if color_map is None:
@@ -847,7 +922,9 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     for i, c in enumerate(cats):
         colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
 
-    custom = (df[[name_col, cat_col]].to_numpy() if name_col else df[[cat_col]].to_numpy())
+    hover_col = detail_col or cat_col   # detail_col (e.g. a composition breakdown) shows in
+    custom = (df[[name_col, hover_col]].to_numpy() if name_col   # the hover instead of the
+              else df[[hover_col]].to_numpy())                    # bare category
     name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
     cat_idx = 1 if name_col else 0
     fig = go.Figure(go.Choroplethmapbox(
@@ -866,7 +943,7 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
             lat=[None], lon=[None], mode="markers",
             marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
         ))
-    legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.01)
+    legend = (dict(orientation="v", yanchor="top", y=0.93, xanchor="left", x=1.01)
               if legend_orientation == "v"
               else dict(orientation="h", yanchor="top", y=-0.02, xanchor="center", x=0.5))
     if legend_title:
@@ -907,6 +984,57 @@ def bubble_map(df, lat_col, lon_col, size_col, *, color="#e3492a", opacity=0.5,
         mapbox_zoom=zoom, mapbox_center=center,
         margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
         updatemenus=[_hover_toggle()])
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.04, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
+def point_value_map(df, lat_col, lon_col, groups, *, colorscale="RdBu", reversescale=False,
+                    cmid=None, cmin=None, cmax=None, cbar_title="", value_suffix="",
+                    value_fmt=".1f", marker_size=7, opacity=0.9, name_col=None,
+                    source_note=None, center=None, zoom=2.3, height=640):
+    """Coloured-point map — one constant-size dot per row, **coloured** by value on a shared
+    scale, with an optional dropdown to switch the coloured variable across `groups` (list of
+    (col, label)). Unlike `bubble_map` (size ∝ value, for magnitudes), this colours a fixed
+    marker, so it suits **diverging** quantities like temperature — pass a diverging
+    `colorscale` + `cmid` (e.g. RdBu, reversescale=True, cmid=0 → blue below freezing, red
+    above). Hover shows `name_col` + the selected value (pre-formatted to dodge the bundled-
+    Plotly d3-format quirk). Same labelled basemap + hover-toggle as the choropleths."""
+    import pandas as pd
+    center = center or {"lat": 60.0, "lon": -96.0}
+
+    def vals(col):
+        return pd.to_numeric(df[col], errors="coerce").tolist()
+
+    def cdata(col):
+        v = pd.to_numeric(df[col], errors="coerce")
+        names = list(df[name_col]) if name_col else [""] * len(df)
+        return [[n, ("—" if pd.isna(x) else f"{x:{value_fmt}}")] for n, x in zip(names, v)]
+
+    name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    htmpl = f"{name_line}{cbar_title}: %{{customdata[1]}}{value_suffix}<extra></extra>"
+    c0 = groups[0][0]
+    fig = go.Figure(go.Scattermapbox(
+        lat=df[lat_col], lon=df[lon_col], mode="markers",
+        marker=dict(size=marker_size, color=vals(c0), colorscale=colorscale,
+                    reversescale=reversescale, cmid=cmid, cmin=cmin, cmax=cmax,
+                    opacity=opacity, colorbar=dict(title=cbar_title, ticksuffix=value_suffix)),
+        customdata=cdata(c0), hovertemplate=htmpl, name=""))
+    menus = [_hover_toggle()]
+    if len(groups) > 1:
+        menus.append(dict(
+            type="dropdown", direction="down", showactive=True, x=0.01, y=0.99,
+            xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1,
+            buttons=[dict(label=label, method="restyle",
+                          args=[{"marker.color": [vals(col)], "customdata": [cdata(col)]}, [0]])
+                     for col, label in groups]))
+    fig.update_layout(
+        mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
+        mapbox_zoom=zoom, mapbox_center=center,
+        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        updatemenus=menus)
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
                            xanchor="left", y=-0.04, showarrow=False,

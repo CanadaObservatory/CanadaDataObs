@@ -16,7 +16,8 @@ Outputs (committed to data/geo/):
   permafrost_zones.csv              fid -> zone label (drives the categorical map)
 
 Run:  /opt/anaconda3/bin/python -m pipeline.build_geography
-      (any interpreter with geopandas + pyogrio; not in the weekly pipeline)
+      (any interpreter with geopandas + pyogrio + rasterio; not in the weekly pipeline.
+       rasterio is needed only by build_elevation, which streams the MRDEM-30 DTM mosaic.)
 """
 
 import os
@@ -379,6 +380,438 @@ def build_lakes(top_n=40):
     print(f"  {len(keep)} lakes; largest {keep.iloc[0]['name']} {keep.iloc[0]['area_km2']:,.0f} km²")
 
 
+CLIMATE_NORMALS_API = "https://api.weather.gc.ca/collections/climate-normals/items"
+
+
+def build_climate_normals():
+    """ECCC Canadian Climate Normals 1981-2010 — station POINT data (OGL-Canada), pulled
+    from the MSC GeoMet **OGC API – Features** endpoint (decimal lat/lon, no DMS parsing).
+    Mean daily temperature is NORMAL_ID=1 and total precipitation NORMAL_ID=56; MONTH 1=Jan,
+    7=Jul, 13=annual. Writes a tidy point CSV (climate_id, station, province, lat, lon,
+    jan_temp, jul_temp, annual_temp, annual_precip) for the proportional/coloured-point
+    climate map. ~660 stations carry a temperature normal. Decennial — NOT weekly."""
+    print("Building climate normals (ECCC 1981-2010, GeoMet OGC API) ...")
+
+    def fetch(normal_id, month):
+        url = f"{CLIMATE_NORMALS_API}?NORMAL_ID={normal_id}&MONTH={month}&limit=10000&f=json"
+        r = requests.get(url, timeout=120)
+        r.raise_for_status()
+        return r.json()["features"]
+
+    rows = {}
+    for f in fetch(1, 1):                     # Jan mean temp = base (geometry + name)
+        p = f["properties"]
+        cid = p["CLIMATE_IDENTIFIER"]
+        lon, lat = f["geometry"]["coordinates"]
+        rows[cid] = dict(climate_id=cid, station=str(p["STATION_NAME"]).title(),
+                         province=p["PROVINCE_CODE"], lat=round(lat, 4), lon=round(lon, 4),
+                         jan_temp=p["VALUE"])
+
+    def add(normal_id, month, col):
+        for f in fetch(normal_id, month):
+            p = f["properties"]
+            cid = p["CLIMATE_IDENTIFIER"]
+            if cid in rows:
+                rows[cid][col] = p["VALUE"]
+
+    add(1, 7, "jul_temp")
+    add(1, 13, "annual_temp")
+    add(56, 13, "annual_precip")
+    df = pd.DataFrame(rows.values()).dropna(subset=["jan_temp", "jul_temp"])
+    os.makedirs(GEO_DIR, exist_ok=True)
+    df.to_csv(f"{GEO_DIR}/climate_normals.csv", index=False)
+    print(f"  {len(df)} stations | Jan {df.jan_temp.min():.1f}..{df.jan_temp.max():.1f}°C "
+          f"| Jul {df.jul_temp.min():.1f}..{df.jul_temp.max():.1f}°C")
+
+
+CAR_BND_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/"
+               "boundary-limites/files-fichiers/lcar000a21a_e.zip")
+AG_FARMTYPE_URL = "https://www150.statcan.gc.ca/n1/tbl/csv/32100231-eng.zip"
+AG_LANDUSE_URL = "https://www150.statcan.gc.ca/n1/tbl/csv/32100249-eng.zip"
+# Farm-type categories by NAICS code. Cattle [1121] is split into its 6-digit children so
+# dairy (112120) reads distinctly from beef (112110): at the 4-digit level [1121] lumps the
+# two, which would mislabel dairy regions (Ontario/Quebec) as "cattle ranching".
+FARM_CODES = {
+    "1111": "Oilseed & grain", "1112": "Vegetable & melon", "1113": "Fruit & tree nut",
+    "1114": "Greenhouse & nursery", "1119": "Other crop",
+    "112110": "Beef cattle", "112120": "Dairy",
+    "1122": "Hog & pig", "1123": "Poultry & egg", "1124": "Sheep & goat",
+    "1129": "Other animal",
+}
+
+
+def build_agriculture():
+    """Census of Agriculture 2021 (StatCan, OGL) by Census Agricultural Region (CAR, the
+    natural agricultural geography, 72 regions). Writes car_2021.geojson (id=CARUID) +
+    statcan_car_agriculture.csv with the **dominant farm type** (NAICS 4-digit farm type
+    with the most farms; table 32-10-0231-01) and **cropland share** (land in crops ÷ CAR
+    land area; 32-10-0249-01, hectares). Census = 5-yearly, NOT weekly."""
+    print("Building agriculture (Census of Ag 2021 by CAR) ...")
+    naics = "North American Industry Classification System (NAICS)"
+    z = zipfile.ZipFile(_download_cache(AG_FARMTYPE_URL, "/tmp/ag_farmtype.zip", "Census of Ag farm type"))
+    ft = pd.read_csv(z.open("32100231.csv"), dtype=str)
+    ft = ft[ft["DGUID"].str.contains("S0501", na=False)].copy()   # CAR rows only
+    ft["caruid"] = ft["DGUID"].str[9:]
+    ft["code"] = ft[naics].str.extract(r"\[(\d+)\]")
+    name_by_car = (ft.drop_duplicates("caruid").set_index("caruid")["GEO"]
+                   .str.replace(r"\s*\[[^\]]*\]", "", regex=True))
+    fc = ft[ft["code"].isin(FARM_CODES)].copy()                   # curated farm-type set
+    fc["VALUE"] = pd.to_numeric(fc["VALUE"], errors="coerce")
+    fc = fc.dropna(subset=["VALUE"])
+    dom = (fc.loc[fc.groupby("caruid")["VALUE"].idxmax()]
+           .set_index("caruid")["code"].map(FARM_CODES))
+    total = (ft[ft[naics].str.startswith("Total number of farms")]
+             .assign(v=lambda x: pd.to_numeric(x["VALUE"], errors="coerce"))
+             .drop_duplicates("caruid").set_index("caruid")["v"])
+
+    # Per-region farm-type breakdown for the hover: each type's share of total farms, sorted
+    # high→low, top 6 above 2% (the dominant type colours the map; the hover gives the full
+    # mix, like the diversity/religion maps). One pre-formatted string per CAR.
+    fc["lbl"] = fc["code"].map(FARM_CODES)
+    detail = {}
+    for cid, grp in fc.groupby("caruid"):
+        tf = total.get(cid)
+        denom = tf if (pd.notna(tf) and tf > 0) else grp["VALUE"].sum()
+        parts = [f"{r.lbl} {r.VALUE / denom * 100:.0f}%"
+                 for r in grp.sort_values("VALUE", ascending=False).itertuples()
+                 if r.VALUE / denom * 100 >= 2][:6]
+        nf = int(tf) if pd.notna(tf) else int(grp["VALUE"].sum())
+        detail[cid] = f"{nf:,} farms<br>" + " · ".join(parts)
+
+    z2 = zipfile.ZipFile(_download_cache(AG_LANDUSE_URL, "/tmp/ag_landuse.zip", "Census of Ag land use"))
+    lu = pd.read_csv(z2.open("32100249.csv"), dtype=str)
+    lu = lu[lu["DGUID"].str.contains("S0501", na=False)
+            & lu["Land use"].str.startswith("Land in crops")
+            & (lu["Unit of measure"] == "Hectares")].copy()
+    lu["caruid"] = lu["DGUID"].str[9:]
+    crop_ha = (lu.assign(v=lambda x: pd.to_numeric(x["VALUE"], errors="coerce"))
+               .drop_duplicates("caruid").set_index("caruid")["v"])
+
+    bz = zipfile.ZipFile(_download_cache(CAR_BND_URL, "/tmp/lcar.zip", "CAR boundaries"))
+    bz.extractall("/tmp/car_bnd")
+    shp = [f for f in bz.namelist() if f.endswith(".shp")][0]
+    g = gpd.read_file(f"/tmp/car_bnd/{shp}").to_crs(epsg=4326)
+    g["caruid"] = g["CARUID"].astype(str)
+
+    out = pd.DataFrame({"caruid": g["caruid"]})
+    out["name"] = out["caruid"].map(name_by_car)
+    out["province"] = out["name"].str.split(",").str[-1].str.strip()
+    out["dominant_ftype"] = out["caruid"].map(dom)
+    out["total_farms"] = out["caruid"].map(total)
+    out["hover_detail"] = out["caruid"].map(detail)
+    out["land_area_km2"] = out["caruid"].map(g.set_index("caruid")["LANDAREA"]).round(0)
+    out["cropland_ha"] = out["caruid"].map(crop_ha)
+    out["cropland_share"] = (out["cropland_ha"] / out["land_area_km2"]).round(2)  # %, 1 km²=100 ha
+    out.to_csv(f"{GEO_DIR}/statcan_car_agriculture.csv", index=False)
+
+    g["geometry"] = g["geometry"].simplify(SIMPLIFY_TOL, preserve_topology=True)
+    gj = json.loads(g[["caruid", "geometry"]].to_json())
+    for f in gj["features"]:
+        f["id"] = f["properties"]["caruid"]
+        f["geometry"]["coordinates"] = _rnd(f["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/car_2021.geojson")
+    print(f"  {len(out)} CARs | {out['dominant_ftype'].dropna().nunique()} farm types | "
+          f"cropland share {out['cropland_share'].min():.0f}–{out['cropland_share'].max():.0f}%")
+
+
+DRAINAGE_URL = "https://www150.statcan.gc.ca/n1/en/pub/16-201-x/2017000/sec-1/m-c/m-c-1.1.zip"
+
+
+def build_drainage():
+    """Canada's drainage regions (Statistics Canada 16-201-X, OGL): 25 drainage regions
+    nested under the 5 **ocean drainage areas** — Pacific, Arctic, Hudson Bay, Atlantic and
+    the Gulf of Mexico. Writes drainage_2017.geojson (id=dr_code, props dr_name/oda_name) +
+    a small CSV, for a 'Canada by watershed, not province' categorical map. Static geographic
+    facts — NOT weekly."""
+    print("Building drainage regions (StatCan 16-201-X) ...")
+    z = zipfile.ZipFile(_download_cache(DRAINAGE_URL, "/tmp/drainage.zip", "drainage regions"))
+    z.extractall("/tmp/drainage")
+    shp = [n for n in z.namelist() if n.lower().endswith(".shp")][0]
+    g = gpd.read_file(f"/tmp/drainage/{shp}").to_crs(epsg=4326)
+    g["dr_code"] = g["DR_Code"].astype(str)
+    g = g.rename(columns={"DR_Name": "dr_name", "ODA_Name": "oda_name"})
+    g[["dr_code", "dr_name", "oda_name"]].to_csv(f"{GEO_DIR}/statcan_drainage.csv", index=False)
+    # The file is dominated by the *count* of tiny Arctic islands, not vertices per polygon.
+    # For a national overview, explode to single polygons in an equal-area CRS, keep parts
+    # ≥ 50 km² (mainland + major islands), dissolve back, then generalise — keeps it light.
+    parts = g.to_crs("ESRI:102001").explode(index_parts=False)
+    parts = parts[parts.geometry.area / 1e6 >= 50]
+    g = parts.dissolve(by="dr_code", aggfunc="first").reset_index().to_crs(epsg=4326)
+    g["geometry"] = g["geometry"].simplify(0.05, preserve_topology=True).buffer(0)
+    gj = json.loads(g[["dr_code", "dr_name", "oda_name", "geometry"]].to_json())
+    for f in gj["features"]:
+        f["id"] = f["properties"]["dr_code"]
+        f["geometry"]["coordinates"] = _rnd(f["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/drainage_2017.geojson")
+    print(f"  {len(g)} drainage regions / {g['oda_name'].nunique()} ocean basins")
+
+
+CESI_CONS_BASE = ("https://www.canada.ca/content/dam/eccc/documents/csv/cesindicators/"
+                  "canada-conserved-areas/2025")   # year-stamped folder — bump each release
+PRUID_BY_NAME = {
+    "Newfoundland and Labrador": "10", "Prince Edward Island": "11", "Nova Scotia": "12",
+    "New Brunswick": "13", "Quebec": "24", "Ontario": "35", "Manitoba": "46",
+    "Saskatchewan": "47", "Alberta": "48", "British Columbia": "59", "Yukon": "60",
+    "Northwest Territories": "61", "Nunavut": "62",
+}
+
+
+def build_protected_areas():
+    """Conserved areas (ECCC Canadian Environmental Sustainability Indicators, OGL) — the
+    series Canada's **30%-by-2030 ("30 by 30")** target is tracked against. Writes a national
+    time series (% of terrestrial + marine area conserved, 1990–) and a by-province snapshot
+    (% of each province/territory's land conserved, latest year) → protected_areas_national.csv
+    + protected_areas_by_prov.csv. Annual; the source URL is year-stamped (bump CESI_CONS_BASE).
+    CSVs are latin-1 with a 2-row banner."""
+    print("Building protected/conserved areas (ECCC CESI) ...")
+    nat = pd.read_csv(_download_cache(f"{CESI_CONS_BASE}/1-conserved-areas-proportion.csv",
+                                      "/tmp/cons_national.csv", "CESI conserved (national)"),
+                      skiprows=2, encoding="latin-1")
+    out_nat = pd.DataFrame({
+        "year": pd.to_numeric(nat.iloc[:, 0], errors="coerce"),
+        "terrestrial_pct": pd.to_numeric(nat.iloc[:, 4], errors="coerce"),
+        "marine_pct": pd.to_numeric(nat.iloc[:, 8], errors="coerce"),
+    }).dropna(subset=["year"])
+    out_nat["year"] = out_nat["year"].astype(int)
+    out_nat.to_csv(f"{GEO_DIR}/protected_areas_national.csv", index=False)
+
+    prov = pd.read_csv(_download_cache(f"{CESI_CONS_BASE}/4-conserved-areas-terrestrial-province-territory.csv",
+                                       "/tmp/cons_prov.csv", "CESI conserved (by province)"),
+                       skiprows=2, encoding="latin-1").iloc[:, [0, 6]]
+    prov.columns = ["name", "pct_conserved"]
+    prov = prov[prov["name"].isin(PRUID_BY_NAME)].copy()
+    prov["pruid"] = prov["name"].map(PRUID_BY_NAME)
+    prov["pct_conserved"] = pd.to_numeric(prov["pct_conserved"], errors="coerce")
+    prov[["pruid", "name", "pct_conserved"]].to_csv(f"{GEO_DIR}/protected_areas_by_prov.csv", index=False)
+    print(f"  national {out_nat['year'].min()}–{out_nat['year'].max()}: terrestrial "
+          f"{out_nat['terrestrial_pct'].iloc[-1]:.1f}% conserved | {len(prov)} provinces "
+          f"({prov['pct_conserved'].min():.1f}–{prov['pct_conserved'].max():.1f}%)")
+
+
+MRDEM_VRT = "/vsicurl/https://canelevation-dem.s3.ca-central-1.amazonaws.com/mrdem-30/mrdem-30-dtm.vrt"
+
+
+def build_elevation(width=1100):
+    """Elevation/terrain from NRCan's Medium-Resolution DEM (MRDEM-30, CanElevation, OGL).
+    The national grid is ~30 m / multi-TB and "designed for streaming, not downloading", so
+    we never download it — we open the DTM mosaic VRT through GDAL `/vsicurl/` and read only a
+    COARSE downsampled overview of the whole country. Writes elevation_distribution.csv (share
+    of land area by elevation band + cumulative 'below X m'). The province rasterize is the
+    land mask. Static — NOT weekly. Needs rasterio."""
+    import numpy as np
+    import rasterio
+    from rasterio.enums import Resampling
+    from rasterio.features import rasterize
+    print("Building elevation (MRDEM-30 coarse national read) ...")
+    os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
+                      GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
+    with rasterio.open(MRDEM_VRT) as src:
+        h = int(src.height * width / src.width)
+        elev = src.read(1, out_shape=(h, width), resampling=Resampling.average).astype("float64")
+        transform = src.transform * rasterio.Affine.scale(src.width / width, src.height / h)
+        nodata = src.nodata
+    prov = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson").to_crs(3979)
+    pr = rasterize([(g, int(u)) for g, u in zip(prov.geometry, prov["pruid"])],
+                   out_shape=(h, width), transform=transform, fill=0, dtype="int32")
+    land = (pr > 0) & np.isfinite(elev) & (elev != nodata) & (elev > -100) & (elev < 7000)
+
+    edges = [0, 200, 500, 1000, 1500, 2000, 3000, 6000]
+    counts, _ = np.histogram(np.clip(elev[land], 0, None), bins=edges)
+    tot = int(counts.sum())
+    rows, cum = [], 0.0
+    for i in range(len(edges) - 1):
+        pct = counts[i] / tot * 100
+        cum += pct
+        lab = f"{edges[i]:,}–{edges[i+1]:,} m" if edges[i + 1] < 6000 else f"over {edges[i]:,} m"
+        rows.append(dict(band=lab, lower=edges[i], upper=edges[i + 1],
+                         pct=round(pct, 2), cumulative_below=round(cum, 2)))
+    pd.DataFrame(rows).to_csv(f"{GEO_DIR}/elevation_distribution.csv", index=False)
+
+    print(f"  below 500 m: {rows[0]['pct'] + rows[1]['pct']:.0f}% of land | {len(rows)} bands")
+
+
+RIVERS_URL = ("https://ftp.geogratis.gc.ca/pub/nrcan_rncan/vector/framework_cadre/"
+              "Atlas_of_Canada_15M/hydrology/AC_15M_Rivers.shp.zip")
+
+
+def build_rivers():
+    """Major rivers — NRCan Atlas of Canada 1:15,000,000 'sparse' rivers (~150 named major
+    rivers; the line companion to the 1:1M waterbodies the lakes come from, OGL-Canada).
+    Clipped to Canada and written as rivers_major.geojson (props: name), to overlay on the
+    watershed map so the flow toward each ocean basin is visible. Static — NOT weekly."""
+    print("Building major rivers (NRCan Atlas 1:15M sparse) ...")
+    z = zipfile.ZipFile(_download_cache(RIVERS_URL, "/tmp/ac15m_rivers.shp.zip", "1:15M rivers"))
+    z.extractall("/tmp/ac15m_rivers")
+    shp = [n for n in z.namelist() if n.endswith(".shp") and "Rivers_sparse" in n][0]
+    g = gpd.read_file(f"/tmp/ac15m_rivers/{shp}").to_crs(epsg=4326)
+    g = g.rename(columns={"NAME": "name"})[["name", "geometry"]]
+
+    def _fix(s):     # Atlas DBF carries UTF-8 bytes tagged latin-1 → "RiviÃ¨re" etc.
+        try:
+            return s.encode("latin-1").decode("utf-8")
+        except Exception:
+            return s
+    g["name"] = g["name"].map(lambda s: _fix(s) if isinstance(s, str) else s)
+    canada = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson").to_crs(epsg=4326).union_all()
+    g = gpd.clip(g, canada)                                  # drop US-only rivers; trim transboundary
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    g["geometry"] = g["geometry"].simplify(0.01, preserve_topology=True)
+    gj = json.loads(g.to_json())
+    for f in gj["features"]:
+        f["geometry"]["coordinates"] = _rnd(f["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/rivers_major.geojson")
+    print(f"  {len(g)} river features (clipped to Canada)")
+
+
+def build_elevation_relief(width=2800):
+    """National relief image for the elevation page. Streams a COARSE overview of MRDEM-30,
+    reprojects it from EPSG:3979 to **Web-Mercator (3857)** so it aligns with Plotly's
+    basemap, applies a muted hypsometric tint (green low → tan/brown → near-white peaks),
+    masks to Canada (transparent elsewhere), and writes elevation_relief.webp + the image's
+    lon/lat **corner coordinates** (clockwise TL,TR,BR,BL — what a Plotly mapbox `image`
+    layer expects). The image is rendered in Mercator; the corners passed to the page are
+    WGS84. Static; needs rasterio + matplotlib."""
+    import numpy as np
+    import rasterio
+    from rasterio.enums import Resampling
+    from rasterio.warp import reproject, transform as warp_transform, transform_bounds
+    from rasterio.features import rasterize
+    from matplotlib.colors import LinearSegmentedColormap
+    from PIL import Image
+    print("Building elevation relief (MRDEM-30 → 3857 hypsometric PNG) ...")
+    os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
+                      GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
+    with rasterio.open(MRDEM_VRT) as src:           # read coarse in the source CRS (3979)
+        h0 = int(src.height * width / src.width)
+        elev0 = src.read(1, out_shape=(h0, width), resampling=Resampling.average).astype("float32")
+        st = src.transform * rasterio.Affine.scale(src.width / width, src.height / h0)
+        scrs = src.crs
+        nd = src.nodata if src.nodata is not None else -32767.0
+    # Target a TIGHT Canada extent in 3857 — the full 3979 bbox reprojects to a huge,
+    # mostly-empty box that wastes resolution; use the province bounds instead.
+    prov = gpd.read_file(f"{GEO_DIR}/prov_2021.geojson")
+    minx, miny, maxx, maxy = prov.to_crs(epsg=4326).total_bounds
+    # The province polygons carry Arctic "sector" boundary lines to the North Pole, so
+    # total_bounds maxy ≈ 90°; cap at the northernmost land (Ellesmere, ~83.1°N) or the
+    # Mercator image becomes absurdly tall.
+    maxy = min(maxy, 83.5)
+    l3857, b3857, r3857, t3857 = transform_bounds("EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy)
+    dw = width
+    dh = int(dw * (t3857 - b3857) / (r3857 - l3857))
+    dt = rasterio.transform.from_bounds(l3857, b3857, r3857, t3857, dw, dh)
+    dst = np.full((dh, dw), nd, dtype="float32")     # warp the small array into that 3857 grid
+    reproject(elev0, dst, src_transform=st, src_crs=scrs, dst_transform=dt, dst_crs="EPSG:3857",
+              resampling=Resampling.bilinear, src_nodata=nd, dst_nodata=nd)
+    canada = rasterize([(g, 1) for g in prov.to_crs(epsg=3857).geometry], out_shape=(dh, dw),
+                       transform=dt, fill=0, dtype="uint8").astype(bool)
+    valid = canada & np.isfinite(dst) & (dst != nd) & (dst > -100) & (dst < 7000)
+    e = np.sqrt(np.clip(np.where(valid, dst, 0.0), 0, 2500) / 2500.0)   # sqrt → more low-land range
+    cmap = LinearSegmentedColormap.from_list("relief", [
+        (0.00, "#6c8b66"), (0.18, "#8aa06b"), (0.42, "#c2b280"),
+        (0.65, "#a98c6b"), (0.85, "#cabfb2"), (1.00, "#f2efe9")])
+    rgba = cmap(e)
+    rgba[..., 3] = np.where(valid, 1.0, 0.0)         # transparent off Canada
+    # WebP (lossy, with alpha) keeps a high-resolution relief small enough to inline —
+    # far lighter than PNG at the same size; smooth hypsometric gradients compress well.
+    Image.fromarray((rgba * 255).astype("uint8"), "RGBA").save(
+        f"{GEO_DIR}/elevation_relief.webp", "WEBP", quality=85, method=6)
+    lons, lats = warp_transform("EPSG:3857", "EPSG:4326",   # 3857 bounds → lon/lat corners
+                                [l3857, r3857, r3857, l3857], [t3857, t3857, b3857, b3857])
+    coords = [[round(lons[i], 5), round(lats[i], 5)] for i in range(4)]   # TL, TR, BR, BL
+    json.dump({"coordinates": coords}, open(f"{GEO_DIR}/elevation_relief.json", "w"))
+    print(f"  3857 grid {dw}×{dh} | WebP {os.path.getsize(f'{GEO_DIR}/elevation_relief.webp')/1e3:.0f} KB "
+          f"| land px {int(valid.sum()):,} | corners {coords}")
+
+
+CGN_NATIONAL = ("https://ftp.cartes.canada.ca/pub/nrcan_rncan/vector/"
+                "geobase_cgn_toponyme/prov_csv_eng/cgn_canada_csv_eng.zip")
+PEAK_TERMS = {"Mount", "Mountain", "Peak", "Summit"}
+
+
+def build_peaks(relevance_min=1_000_000, win=33):
+    """Named-peaks vector layer for the elevation page ("Canada's mountains").
+
+    Names/coords from NRCan's Canadian Geographical Names national CSV (Generic Term in
+    Mount/Mountain/Peak/Summit, kept where 'Relevance at Scale' >= 1,000,000 -> ~757 prominent,
+    nationally distributed summits). Elevation is NOT in CGN, so it is sampled from MRDEM-30 as a
+    WINDOW-MAX (+/-33 cells ~ 1 km, take the max valid) -- a single-point read undershoots summits
+    badly (Robson reads ~3556 vs 3954 m; window-max recovers ~3900). Writes
+    data/geo/peaks_canada.geojson (+ .csv for download). Static one-time build (not weekly)."""
+    import io
+
+    import rasterio
+    from rasterio.warp import transform as warp_transform
+    from rasterio.windows import Window
+    cache = "/tmp/cgn_canada_csv_eng.csv"
+    if not os.path.exists(cache):
+        print("Downloading Canadian Geographical Names (national CSV) ...")
+        z = zipfile.ZipFile(io.BytesIO(requests.get(CGN_NATIONAL, timeout=180).content))
+        nm = [n for n in z.namelist() if n.lower().endswith(".csv")][0]
+        open(cache, "wb").write(z.read(nm))
+    d = pd.read_csv(cache, encoding="latin-1", low_memory=False)
+    m = d[d["Generic Term"].isin(PEAK_TERMS) & (d["Relevance at Scale"] >= relevance_min)]
+    m = m.dropna(subset=["Latitude", "Longitude"]).reset_index(drop=True)
+    print(f"Building peaks: sampling MRDEM window-max for {len(m)} summits ...")
+    os.environ.update(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", VSI_CACHE="TRUE",
+                      GDAL_HTTP_MULTIRANGE="YES", GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
+    elevs = []
+    with rasterio.open(MRDEM_VRT) as src:
+        nd = src.nodata if src.nodata is not None else -32767.0
+        xs, ys = warp_transform("EPSG:4326", src.crs,
+                                m["Longitude"].tolist(), m["Latitude"].tolist())
+        for i, (x, y) in enumerate(zip(xs, ys)):
+            r, c = src.index(x, y)
+            a = src.read(1, window=Window(c - win, r - win, 2 * win + 1, 2 * win + 1),
+                         boundless=True, fill_value=nd).astype("float32")
+            v = a[(a != nd) & (a > -100) & (a < 7000)]
+            elevs.append(round(float(v.max()), 1) if v.size else None)
+            if (i + 1) % 100 == 0:
+                print(f"  {i + 1}/{len(m)}")
+    m["elevation_m"] = elevs
+    m = m.dropna(subset=["elevation_m"]).sort_values("elevation_m", ascending=False)
+    feats = [{
+        "type": "Feature",
+        "geometry": {"type": "Point",
+                     "coordinates": [round(r["Longitude"], 5), round(r["Latitude"], 5)]},
+        "properties": {"name": r["Geographical Name"], "elevation_m": r["elevation_m"],
+                       "province": r["Province - Territory"],
+                       "relevance": int(r["Relevance at Scale"])},
+    } for _, r in m.iterrows()]
+    json.dump({"type": "FeatureCollection", "features": feats},
+              open(f"{GEO_DIR}/peaks_canada.geojson", "w"))
+    m.rename(columns={"Geographical Name": "name", "Province - Territory": "province"})[
+        ["name", "province", "Latitude", "Longitude", "elevation_m"]].to_csv(
+        f"{GEO_DIR}/peaks_canada.csv", index=False)
+    print(f"Wrote {len(feats)} peaks -> {GEO_DIR}/peaks_canada.geojson")
+    print(m[["Geographical Name", "elevation_m"]].head(8).to_string(index=False))
+
+
+ARCTIC_ECOZONES = ["Arctic Cordillera", "Northern Arctic", "Southern Arctic"]
+
+
+def build_treeline():
+    """Arctic tree line for the elevation map, derived as the taiga-tundra boundary of the
+    National Ecological Framework ecozones. Standard interpretation: the treeless Arctic/tundra
+    ecozones meet the forested Taiga zones at the northern limit of trees, so the shared edge of
+    the dissolved Arctic zones with the rest of the country IS the tree line (the Arctic-Ocean
+    coast is excluded because it is not shared with a forested zone). Source: AAFC/ECCC National
+    Ecological Framework (same as the ecozone map). Writes data/geo/treeline.geojson (one line)."""
+    from shapely.ops import unary_union
+    ez = gpd.read_file(f"{GEO_DIR}/nef_ecozones.geojson")
+    ez["geometry"] = ez.geometry.buffer(0)               # repair invalid/simplified rings
+    arctic = unary_union(ez[ez["ecozone"].isin(ARCTIC_ECOZONES)].geometry)
+    rest = unary_union(ez[~ez["ecozone"].isin(ARCTIC_ECOZONES)].geometry)
+    line = arctic.boundary.intersection(rest.buffer(0.03))   # shared edge; buffer bridges simplify gaps
+    line = line.simplify(0.02)
+    gpd.GeoSeries([line], crs=ez.crs).to_file(f"{GEO_DIR}/treeline.geojson", driver="GeoJSON")
+    km = 0
+    try:
+        km = int(gpd.GeoSeries([line], crs=ez.crs).to_crs(3979).length.iloc[0] / 1000)
+    except Exception:
+        pass
+    print(f"Wrote tree line ({km:,} km, taiga-tundra ecozone boundary) -> {GEO_DIR}/treeline.geojson")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -386,4 +819,13 @@ if __name__ == "__main__":
     build_permafrost()
     build_wildfire_points()
     build_lakes()
+    build_climate_normals()
+    build_agriculture()
+    build_drainage()
+    build_rivers()
+    build_protected_areas()
+    build_elevation()
+    build_elevation_relief()
+    build_peaks()
+    build_treeline()
     print("build_geography complete.")

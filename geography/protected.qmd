@@ -1,0 +1,64 @@
+---
+title: "Protected & Conserved Areas"
+description: "How much of Canada's land and water is protected, and where"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import choropleth_map, lines_over_time
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+prov_geo = "data/geo/prov_2021.geojson"
+prov_csv = "data/geo/protected_areas_by_prov.csv"
+nat_csv = "data/geo/protected_areas_national.csv"
+```
+
+## How much of Canada is protected
+
+Canada has committed to conserving **30% of its land and ocean by 2030** — the international
+"30 by 30" goal. As of 2024, about **14% of the country's land** is protected or under other
+effective area-based conservation measures. But the share varies widely by jurisdiction: the
+map below runs from around **5% in Prince Edward Island** to **21% in Yukon**, reflecting both
+geography and differing provincial and territorial conservation efforts.
+
+```{python}
+#| echo: false
+if os.path.exists(prov_geo) and os.path.exists(prov_csv):
+    g = json.load(open(prov_geo))
+    d = pd.read_csv(prov_csv, dtype={"pruid": str})
+    fig = choropleth_map(g, d, "pruid", "pct_conserved", name_col="name",
+        colorbar_title="% conserved", colorscale="Greens", value_suffix="%", value_fmt=".1f",
+        zoom=2.3, source_note="Source: Environment and Climate Change Canada — Canadian Environmental Sustainability Indicators, conserved areas (2024). Share of each province/territory's land that is protected or under other effective area-based conservation measures (OECMs).")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Protected-areas data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## Progress toward "30 by 30"
+
+The conserved share of Canada has roughly **tripled since 1990** — from about 4% of the land
+to 14% — and the marine share has climbed faster still. Both, however, remain well short of
+the 30% target now set for 2030.
+
+```{python}
+#| echo: false
+if os.path.exists(nat_csv):
+    n = pd.read_csv(nat_csv)
+    long = n.melt(id_vars="year", value_vars=["terrestrial_pct", "marine_pct"],
+                  var_name="s", value_name="pct")
+    long["s"] = long["s"].map({"terrestrial_pct": "Land", "marine_pct": "Ocean"})
+    fig = lines_over_time(long, "year", "pct", "s", yaxis_title="Share conserved",
+        yticksuffix="%", hover_decimals=1, colors={"Land": "#2ca25f", "Ocean": "#1f78b4"},
+        source_note="Source: ECCC — Canadian Environmental Sustainability Indicators, conserved areas. Share of Canada's land and ocean conserved (protected areas + OECMs).")
+    fig.add_hline(y=30, line_dash="dash", line_color="#555",
+                  annotation_text="30% by 2030 target", annotation_position="top left")
+    fig.show(config={"displaylogo": False})
+```
+
+## Download data
+
+- [Conserved area by province (CSV)](../data/geo/protected_areas_by_prov.csv) — ECCC CESI, 2024
+- [Conserved area, Canada, 1990– (CSV)](../data/geo/protected_areas_national.csv) — ECCC CESI

@@ -4,7 +4,7 @@
   "source_table": "OECD Economic Outlook",
   "frequency": "annual",
   "unit": "% of GDP (surplus +/deficit \u2212)",
-  "retrieved_at": "2026-06-08T17:26:49.133555+00:00",
+  "retrieved_at": "2026-06-09T16:35:44.288946+00:00",
   "latest_observation_date": "2026",
   "transformations": [
     "filtered to Government budget balance for OECD peer group"

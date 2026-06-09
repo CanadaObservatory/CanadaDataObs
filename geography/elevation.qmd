@@ -8,14 +8,12 @@ description: "How high Canada is — the distribution of land by elevation, and 
 import os, json, base64
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.charts import choropleth_map, relief_map
+from pipeline.charts import relief_map
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 dist_csv = "data/geo/elevation_distribution.csv"
 prov_geo = "data/geo/prov_2021.geojson"
-elev_csv = "data/geo/elevation_by_prov.csv"
-prov_names = "data/geo/statcan_prov_geography.csv"
 ```
 
 ## The shape of the land
@@ -69,28 +67,7 @@ else:
     print("Elevation data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
-## Where the high ground lies
-
-Median elevation makes the east–west tilt of the country plain: **British Columbia** and the
-**Yukon** stand highest, the Prairies step down from the Rockies toward Manitoba, and the
-Maritimes and the vast **Arctic lowlands** sit near sea level. (Median elevation is a coarse
-summary of very large, varied regions.)
-
-```{python}
-#| echo: false
-if os.path.exists(prov_geo) and os.path.exists(elev_csv):
-    g = json.load(open(prov_geo))
-    e = pd.read_csv(elev_csv, dtype={"pruid": str})
-    nm = pd.read_csv(prov_names, dtype={"pruid": str})[["pruid", "name"]]
-    e = e.merge(nm, on="pruid", how="left")
-    fig = choropleth_map(g, e, "pruid", "median_elev", name_col="name",
-        colorbar_title="Median elev.", colorscale="YlOrBr", value_suffix=" m", value_fmt=",.0f",
-        zoom=2.3, source_note="Source: Natural Resources Canada — MRDEM-30 (CanElevation). Median elevation within each province/territory, from a coarse national read (approximate).")
-    fig.show(config=MAP_CONFIG)
-```
-
 ## Download data
 
 - [Land area by elevation band (CSV)](../data/geo/elevation_distribution.csv) — NRCan MRDEM-30
-- [Median elevation by province (CSV)](../data/geo/elevation_by_prov.csv) — NRCan MRDEM-30
 - [Relief image (PNG)](../data/geo/elevation_relief.png) — NRCan MRDEM-30, hypsometric tint

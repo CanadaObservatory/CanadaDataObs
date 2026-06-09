@@ -596,8 +596,8 @@ def build_elevation(width=1100):
     The national grid is ~30 m / multi-TB and "designed for streaming, not downloading", so
     we never download it — we open the DTM mosaic VRT through GDAL `/vsicurl/` and read only a
     COARSE downsampled overview of the whole country. Writes elevation_distribution.csv (share
-    of land area by elevation band + cumulative 'below X m') and elevation_by_prov.csv (median
-    elevation per province/territory, approximate). Static — NOT weekly. Needs rasterio."""
+    of land area by elevation band + cumulative 'below X m'). The province rasterize is the
+    land mask. Static — NOT weekly. Needs rasterio."""
     import numpy as np
     import rasterio
     from rasterio.enums import Resampling
@@ -627,16 +627,7 @@ def build_elevation(width=1100):
                          pct=round(pct, 2), cumulative_below=round(cum, 2)))
     pd.DataFrame(rows).to_csv(f"{GEO_DIR}/elevation_distribution.csv", index=False)
 
-    prov_rows = []
-    for u in sorted({int(x) for x in prov["pruid"]}):
-        mask = land & (pr == u)
-        if mask.sum():
-            prov_rows.append(dict(pruid=str(u),
-                                  median_elev=int(np.median(np.clip(elev[mask], 0, None)))))
-    pd.DataFrame(prov_rows).to_csv(f"{GEO_DIR}/elevation_by_prov.csv", index=False)
-    print(f"  below 500 m: {rows[0]['pct'] + rows[1]['pct']:.0f}% of land | "
-          f"{len(prov_rows)} provinces | median-elev range "
-          f"{min(r['median_elev'] for r in prov_rows)}–{max(r['median_elev'] for r in prov_rows)} m")
+    print(f"  below 500 m: {rows[0]['pct'] + rows[1]['pct']:.0f}% of land | {len(rows)} bands")
 
 
 RIVERS_URL = ("https://ftp.geogratis.gc.ca/pub/nrcan_rncan/vector/framework_cadre/"

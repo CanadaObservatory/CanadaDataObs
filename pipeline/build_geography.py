@@ -786,6 +786,32 @@ def build_peaks(relevance_min=1_000_000, win=33):
     print(m[["Geographical Name", "elevation_m"]].head(8).to_string(index=False))
 
 
+ARCTIC_ECOZONES = ["Arctic Cordillera", "Northern Arctic", "Southern Arctic"]
+
+
+def build_treeline():
+    """Arctic tree line for the elevation map, derived as the taiga-tundra boundary of the
+    National Ecological Framework ecozones. Standard interpretation: the treeless Arctic/tundra
+    ecozones meet the forested Taiga zones at the northern limit of trees, so the shared edge of
+    the dissolved Arctic zones with the rest of the country IS the tree line (the Arctic-Ocean
+    coast is excluded because it is not shared with a forested zone). Source: AAFC/ECCC National
+    Ecological Framework (same as the ecozone map). Writes data/geo/treeline.geojson (one line)."""
+    from shapely.ops import unary_union
+    ez = gpd.read_file(f"{GEO_DIR}/nef_ecozones.geojson")
+    ez["geometry"] = ez.geometry.buffer(0)               # repair invalid/simplified rings
+    arctic = unary_union(ez[ez["ecozone"].isin(ARCTIC_ECOZONES)].geometry)
+    rest = unary_union(ez[~ez["ecozone"].isin(ARCTIC_ECOZONES)].geometry)
+    line = arctic.boundary.intersection(rest.buffer(0.03))   # shared edge; buffer bridges simplify gaps
+    line = line.simplify(0.02)
+    gpd.GeoSeries([line], crs=ez.crs).to_file(f"{GEO_DIR}/treeline.geojson", driver="GeoJSON")
+    km = 0
+    try:
+        km = int(gpd.GeoSeries([line], crs=ez.crs).to_crs(3979).length.iloc[0] / 1000)
+    except Exception:
+        pass
+    print(f"Wrote tree line ({km:,} km, taiga-tundra ecozone boundary) -> {GEO_DIR}/treeline.geojson")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -801,4 +827,5 @@ if __name__ == "__main__":
     build_elevation()
     build_elevation_relief()
     build_peaks()
+    build_treeline()
     print("build_geography complete.")

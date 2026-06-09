@@ -23,7 +23,9 @@ the ancient, low **Canadian Shield** wrapped around Hudson Bay; the **lowlands**
 and Hudson Bay; and the worn **Appalachian** uplands of the east. The map below is a **shaded-relief**
 view of that terrain — pan and zoom to follow a valley or a coastline. Scattered across it are
 Canada's **named summits**, each coloured by its elevation; hover for a name and height, and zoom in
-to see the labels of the highest peak in each province and territory.
+to see the labels of the highest peak in each province and territory. The layer controls (top-right)
+add optional context — cities, lakes and rivers, the **ecozones**, the **permafrost** zones, and the
+**Arctic tree line** (the northern limit of the forest, where the taiga gives way to tundra).
 
 ```{python}
 #| echo: false
@@ -41,6 +43,9 @@ _data = {
     "lakes": _load("data/geo/lakes_major.geojson"),
     "rivers": _load("data/geo/rivers_major.geojson"),
     "prov": _load("data/geo/prov_2021.geojson"),
+    "ecozones": _load("data/geo/nef_ecozones.geojson"),
+    "treeline": _load("data/geo/treeline.geojson"),
+    "permafrost": _load("data/geo/permafrost_zones.geojson"),
     "cities": [{"name": c[0], "lat": c[1], "lon": c[2]} for c in MAJOR_CITIES],
 }
 print('<script>window.ELEV = ' + json.dumps(_data, separators=(",", ":")) + ';</script>')
@@ -59,13 +64,18 @@ print('<script>window.ELEV = ' + json.dumps(_data, separators=(",", ":")) + ';</
   font-size:11px;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;}
 .city-label{background:transparent;border:0;box-shadow:none;color:#111;font-size:11px;
   text-shadow:0 0 3px #fff,0 0 3px #fff;}
+.cat-legend{font-size:11px;line-height:1.5;max-width:330px;}
+.cat-legend>div{column-gap:14px;}
+.cat-legend i{width:11px;height:11px;}
 .map-source{font-size:10px;color:#999;margin:6px 2px 0;}
 </style>
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css"/>
 <div id="elevmap"></div>
 <div class="map-source">Relief: Natural Resources Canada — Canada Base Map · Elevation (CBME) hillshade,
 served live (EPSG:3978). Peaks: Canadian Geographical Names (names &amp; coordinates) + MRDEM-30
-(window-max elevation). Lakes &amp; rivers: NRCan Atlas. All Open Government Licence – Canada.</div>
+(window-max elevation). Lakes &amp; rivers: NRCan Atlas. Ecozones &amp; tree line (taiga–tundra
+boundary): AAFC/ECCC National Ecological Framework. Permafrost (~1995 mapping): Atlas of Canada
+5th ed. (NRCan). All Open Government Licence – Canada.</div>
 <!-- Quarto loads RequireJS for Plotly; Leaflet/proj4 are UMD and would register with AMD
      instead of creating globals (the same gotcha as window.Plotly). Hide `define` while the
      vendored libs load so they attach to window (L, proj4), then restore AMD for Plotly. -->
@@ -130,11 +140,52 @@ served live (EPSG:3978). Peaks: Canadian Geographical Names (names &amp; coordin
       L.marker([c[1],c[0]],{icon:L.divIcon({className:'peak-label',html:p.name,iconSize:[90,14],iconAnchor:[-4,14]}),
         interactive:false,keyboard:false}).addTo(peakLabels);}
   });
+  // ecozones (categorical fills in a pane below the markers) + Arctic tree line — off by default
+  map.createPane('ecoPane'); map.getPane('ecoPane').style.zIndex=250;
+  var EZCOLORS={"Arctic Cordillera":"#c9d6df","Northern Arctic":"#dde6ec","Southern Arctic":"#b7c9b0",
+    "Taiga Plains":"#9bc4a6","Taiga Shield":"#74b08e","Taiga Cordillera":"#a7c8ad","Hudson Plains":"#6db6b3",
+    "Boreal Shield":"#2e7d52","Boreal Plains":"#7fb069","Boreal Cordillera":"#5fa07a","Pacific Maritime":"#2f8f8f",
+    "Montane Cordillera":"#8a9a5b","Atlantic Maritime":"#4e9c7d","Mixedwood Plains":"#a7d06e","Prairies":"#e3c469"};
+  var ecoLayer=L.geoJSON(E.ecozones,{pane:'ecoPane',
+    style:function(f){return {fillColor:EZCOLORS[f.properties.ecozone]||'#cccccc',color:'#777',weight:0.3,fillOpacity:0.34};},
+    onEachFeature:function(f,l){l.bindTooltip(f.properties.ecozone,{sticky:true});}});
+  var treeLayer=L.geoJSON(E.treeline,{style:{color:'#1f6b3a',weight:2.5,opacity:0.95,dashArray:'5,4'}})
+    .bindTooltip('Arctic tree line (taiga–tundra boundary)',{sticky:true});
+  // permafrost zones (categorical, same low pane; off by default)
+  var PFCOLORS={"Continuous (90–100%)":"#08519c","Extensive discontinuous (50–90%)":"#3182bd",
+    "Sporadic discontinuous (10–50%)":"#6baed6","Isolated patches (0–10%)":"#bdd7e7"};
+  var pfLayer=L.geoJSON(E.permafrost,{pane:'ecoPane',
+    style:function(f){return {fillColor:PFCOLORS[f.properties.zone]||'#ccc',color:'#5a7a9a',weight:0.3,fillOpacity:0.5};},
+    onEachFeature:function(f,l){l.bindTooltip('Permafrost: '+f.properties.zone,{sticky:true});}});
+  // categorical legends shown only while their layer is on
+  function catLegend(title,colorMap,order,cols){
+    var c=L.control({position:'topleft'});
+    c.onAdd=function(){var d=L.DomUtil.create('div','elev-legend cat-legend');
+      d.innerHTML='<b>'+title+'</b><div style="column-count:'+(cols||1)+'">'+order.map(function(k){
+        return '<div><i style="background:'+colorMap[k]+'"></i>'+k+'</div>';}).join('')+'</div>';
+      return c._d=d;};
+    return c;
+  }
+  var ecoLegend=catLegend('Ecozones',EZCOLORS,["Arctic Cordillera","Northern Arctic","Southern Arctic",
+    "Taiga Cordillera","Taiga Plains","Taiga Shield","Hudson Plains","Boreal Cordillera","Boreal Plains",
+    "Boreal Shield","Montane Cordillera","Pacific Maritime","Prairies","Mixedwood Plains","Atlantic Maritime"],2);
+  var pfLegend=catLegend('Permafrost (~1995)',PFCOLORS,["Continuous (90–100%)",
+    "Extensive discontinuous (50–90%)","Sporadic discontinuous (10–50%)","Isolated patches (0–10%)"],1);
+  // ecozones & permafrost are both area fills → mutually exclusive. Toggling the other off is
+  // deferred to after Leaflet finishes handling the current click (its control ignores layer
+  // changes while mid-click), and routed through the checkbox so box + legend stay in sync.
+  function uncheckLayer(name){document.querySelectorAll('#elevmap .leaflet-control-layers-overlays label').forEach(function(l){if(l.textContent.trim()===name){var i=l.querySelector('input'); if(i&&i.checked)i.click();}});}
+  map.on('overlayadd',function(e){
+    if(e.layer===ecoLayer){ecoLegend.addTo(map); if(map.hasLayer(pfLayer))setTimeout(function(){uncheckLayer('Permafrost');},0);}
+    if(e.layer===pfLayer){pfLegend.addTo(map); if(map.hasLayer(ecoLayer))setTimeout(function(){uncheckLayer('Ecozones');},0);}
+  });
+  map.on('overlayremove',function(e){if(e.layer===ecoLayer)map.removeControl(ecoLegend);if(e.layer===pfLayer)map.removeControl(pfLegend);});
   provLayer.addTo(map); hydro.addTo(map); cityLayer.addTo(map); peakLayer.addTo(map);
   function syncLabels(){var z=map.getZoom();
     if(z>=5){if(!map.hasLayer(peakLabels))peakLabels.addTo(map);}else{if(map.hasLayer(peakLabels))map.removeLayer(peakLabels);}}
   map.on('zoomend',syncLabels); syncLabels();
-  L.control.layers(null,{'Peaks':peakLayer,'Cities':cityLayer,'Lakes &amp; rivers':hydro,'Province borders':provLayer},
+  L.control.layers(null,{'Peaks':peakLayer,'Cities':cityLayer,'Lakes &amp; rivers':hydro,
+    'Province borders':provLayer,'Ecozones':ecoLayer,'Permafrost':pfLayer,'Tree line':treeLayer},
     {collapsed:false,position:'topright'}).addTo(map);
   var lg=L.control({position:'bottomleft'});
   lg.onAdd=function(){var d=L.DomUtil.create('div','elev-legend');

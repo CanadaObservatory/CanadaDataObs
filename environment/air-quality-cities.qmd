@@ -18,20 +18,22 @@ MUTED = "#4e79a7"
 # Pollutant panels (label, units) and their grid positions.
 POLLS = [("PM2.5", "µg/m³"), ("O3", "ppb"), ("NO2", "ppb"), ("SO2", "ppb"), ("CO", "ppm")]
 POS = [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2)]
-PREFERRED = ["Toronto", "Montréal", "Vancouver", "Calgary", "Edmonton",
-             "Ottawa–Gatineau", "Winnipeg", "Québec City"]
+# The 15 cities shown in the dropdowns: the nine major metros + the best-covered
+# city in each remaining region (plus Sudbury for its historic smelter-SO2 record).
+# The builder still collects the full candidate list — edit this to change what shows.
+CITIES_SHOWN = [
+    "Toronto", "Montréal", "Vancouver", "Calgary", "Edmonton", "Ottawa–Gatineau",
+    "Winnipeg", "Québec City", "Hamilton",           # major metros
+    "Halifax", "Victoria", "Saskatoon", "Saint John", "St. John's", "Sudbury",
+]
 ANN = "data/environment/naps_city_annual.csv"
 MON = "data/environment/naps_city_monthly.csv"
 
 
 def _ordered_cities(df):
-    # Keep only cities that measure ALL the pollutants — drops the sparse tail
-    # (Charlottetown, Sherbrooke, Trois-Rivières, Saguenay, Fredericton, Moncton),
-    # shortening the dropdown and avoiding empty pollutant panels.
-    counts = df.groupby("city")["pollutant"].nunique()
-    present = set(counts[counts >= len(POLLS)].index)
-    head = [c for c in PREFERRED if c in present]
-    return head + sorted(present - set(head))
+    # Show the curated CITIES_SHOWN list (in that order) — keeps the dropdown short.
+    present = set(df["city"])
+    return [c for c in CITIES_SHOWN if c in present]
 
 
 def city_dashboard(df, xcol, *, mode, hovx, source_note, who_line=False):
@@ -188,9 +190,9 @@ else:
 monitors is smoothed across them. Units are µg/m³ for PM2.5 and ppb for the gases
 (ppm for CO).
 
-**Coverage & how far back.** Two dozen of Canada's larger cities are included — those
-with all five pollutants on record (sparser places are left out to keep the menu
-short). The
+**Coverage & how far back.** Fifteen of Canada's larger cities are shown — the major
+metros plus the best-covered city in each region (the full network is larger; the
+list is trimmed here to keep the menu manageable). The
 gases (NO₂/SO₂/O₃/CO) reach back to **1974** and PM2.5 to the **late 1990s**. From
 2005 on the values are NAPS's pre-computed *Annual Summaries* (validated per-station
 means); the earlier years are aggregated here from NAPS's raw hourly files on the

@@ -54,8 +54,12 @@ website:
             text: Government Employment
           - href: government/spending.qmd
             text: Federal Spending
-      - href: health/index.qmd
-        text: Health
+      - text: Health
+        menu:
+          - href: health/index.qmd
+            text: Health & Health Care
+          - href: health/substance-use.qmd
+            text: Substance Use
       - text: Education & Science
         menu:
           - href: education/index.qmd

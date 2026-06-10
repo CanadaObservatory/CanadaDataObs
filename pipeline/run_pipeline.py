@@ -32,6 +32,7 @@ from pipeline.fetch_boc import fetch_boc_indicator
 from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
 from pipeline.fetch_environment import fetch_ghg, fetch_ghg_by_sector
 from pipeline.fetch_air_quality import fetch_cesi_air_quality, fetch_apei_emissions
+from pipeline.fetch_opioids import fetch_opioid_harms
 from pipeline.fetch_climate import (
     fetch_cesi_temperature, fetch_ctvb_regional, fetch_city_temperatures,
     fetch_city_temperatures_seasonal, fetch_city_temperatures_monthly,
@@ -67,6 +68,7 @@ CUSTOM_FETCHERS = {
     "fetch_ghg_by_sector": fetch_ghg_by_sector,
     "fetch_cesi_air_quality": fetch_cesi_air_quality,
     "fetch_apei_emissions": fetch_apei_emissions,
+    "fetch_opioid_harms": fetch_opioid_harms,
     "fetch_cesi_temperature": fetch_cesi_temperature,
     "fetch_ctvb_regional": fetch_ctvb_regional,
     "fetch_city_temperatures": fetch_city_temperatures,

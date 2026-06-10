@@ -1,0 +1,210 @@
+---
+title: "Substance Use"
+description: "Canada's opioid-toxicity crisis — deaths, geography and a poisoned supply — and everyday substance use by age"
+---
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date
+from pipeline.charts import category_bar, lines_over_time
+
+SHOW = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+
+national_path = "data/health/phac_opioid_national.csv"
+prov_path = "data/health/phac_opioid_provincial.csv"
+demo_path = "data/health/phac_opioid_demographics.csv"
+supply_path = "data/health/phac_opioid_supply.csv"
+```
+
+The overdose crisis is among the most severe public-health emergencies in Canada's recent history, and a leading driver of the [recent decline in life expectancy](index.qmd#the-recent-decline). Since national surveillance began in 2016, tens of thousands of people have died from the acute toxicity of opioids — increasingly from an illegal drug supply contaminated with fentanyl and, more recently, mixed with stimulants. This page tracks that toll: how it has grown, where it falls hardest, who it affects, and how the drugs themselves have changed — then steps back to tobacco, alcohol and cannabis use across age groups.
+
+*These charts are descriptive. The data are the federal government's own surveillance figures (the Public Health Agency of Canada); the page carries no policy position. A note on definitions and limitations is at the foot of the page.*
+
+## The Scale of the Crisis
+
+Apparent opioid-toxicity deaths rose from about 2,800 in 2016 to a peak of roughly 8,000 in 2023 — close to a death every hour — before easing in 2024. The bars show the number of deaths each year; the line shows the rate per 100,000 people, which removes the effect of a growing population.
+
+```{python}
+#| echo: false
+if os.path.exists(national_path):
+    nat = pd.read_csv(national_path)
+    full = nat[~nat["partial"]]
+    bar_colors = ["#e0b3ba" if p else "#a8324a" for p in nat["partial"]]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=nat["year"], y=nat["deaths_number"], name="Deaths (number)",
+        marker_color=bar_colors, hovertemplate="%{x}: %{y:,} deaths<extra></extra>"))
+    fig.add_trace(go.Scatter(x=full["year"], y=full["deaths_rate"], name="Rate per 100,000",
+        yaxis="y2", mode="lines+markers", line=dict(color="#1f1f1f", width=2),
+        marker=dict(size=6), hovertemplate="%{x}: %{y:.1f} per 100,000<extra></extra>"))
+    partial = bool(nat["partial"].any())
+    note = "Source: Public Health Agency of Canada, Substance-Related Harms"
+    note += f" | Data as of: {get_data_date(national_path)}"
+    if partial:
+        note += ". Lighter bar = partial year (January–September); excluded from the rate line."
+    fig.update_layout(plot_bgcolor="white", hovermode="x unified",
+        legend=dict(orientation="h", y=1.1, x=0),
+        yaxis=dict(title="Deaths", gridcolor="#e0e0e0", rangemode="tozero"),
+        yaxis2=dict(title="Per 100,000", overlaying="y", side="right",
+                    showgrid=False, rangemode="tozero"),
+        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=70),
+        annotations=[dict(text=note, xref="paper", yref="paper", x=0, y=-0.16,
+                          showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config=SHOW)
+else:
+    print("Opioid data not yet available. Run: python -m pipeline.run_pipeline")
+```
+
+## A Geography of Risk
+
+The crisis is far from evenly spread. British Columbia stands apart, with a death rate more than double the national figure; Alberta, Saskatchewan, Manitoba and Yukon also sit well above average, while Quebec and the Atlantic provinces are far lower. National surveillance is reported only at the province and territory level, so this is the finest geography the data offer. The dashed line marks the Canada-wide rate.
+
+```{python}
+#| echo: false
+if os.path.exists(prov_path):
+    pr = pd.read_csv(prov_path)
+    yr = int(pr["year"].iloc[0])
+    ca_rate = float(pd.read_csv(national_path).query("not partial").sort_values("year")["deaths_rate"].iloc[-1])
+    fig = category_bar(pr, "region", "deaths_rate", xaxis_title="Deaths per 100,000",
+        color="#a8324a", value_fmt=".1f",
+        hovertemplate="%{y}: %{x:.1f} per 100,000<extra></extra>",
+        source_note=f"Source: PHAC Substance-Related Harms, {yr}. Nunavut suppressed.")
+    fig.add_vline(x=ca_rate, line=dict(color="#555", width=1.5, dash="dash"))
+    # drop the source note below the x-axis title (they overlap at the default position)
+    fig.update_layout(margin=dict(l=10, r=20, t=20, b=110))
+    fig.layout.annotations[0].update(y=-0.22, yanchor="top")
+    fig.show(config=SHOW)
+else:
+    print("Provincial data not yet available. Run: python -m pipeline.run_pipeline")
+```
+
+## Who Is Dying
+
+The dead are overwhelmingly men — about three in four — and concentrated in the working-age years from the 20s through the 50s, though no age group is untouched. The chart shows deaths by age group and sex for the latest complete year.
+
+```{python}
+#| echo: false
+if os.path.exists(demo_path):
+    demo = pd.read_csv(demo_path)
+    order = ["0 to 19 years", "20 to 29 years", "30 to 39 years",
+             "40 to 49 years", "50 to 59 years", "60 years or more"]
+    yr = int(demo["year"].iloc[0])
+    fig = go.Figure()
+    for sex, color in [("Male", "#3b6fb0"), ("Female", "#e08a3c")]:
+        d = demo[demo["sex"] == sex].set_index("age_group").reindex(order).reset_index()
+        fig.add_trace(go.Bar(x=d["age_group"], y=d["deaths_number"], name=sex,
+            marker_color=color, hovertemplate=sex + ", %{x}: %{y:,} deaths<extra></extra>"))
+    fig.update_layout(barmode="group", plot_bgcolor="white", hovermode="x unified",
+        legend=dict(orientation="h", y=1.08, x=0),
+        yaxis=dict(title="Deaths", gridcolor="#e0e0e0"),
+        xaxis=dict(title=""), margin=dict(t=50, b=80),
+        annotations=[dict(text=f"Source: PHAC, Substance-Related Harms — apparent opioid-toxicity deaths by age and sex, {yr}.",
+                          xref="paper", yref="paper", x=0, y=-0.2, showarrow=False,
+                          font=dict(size=10, color="#999"))])
+    fig.show(config=SHOW)
+else:
+    print("Demographic data not yet available. Run: python -m pipeline.run_pipeline")
+```
+
+## A Poisoned, Volatile Supply
+
+What makes the recent years so deadly is the drug supply itself. **Fentanyl** — a synthetic opioid roughly 100 times stronger than morphine — was detected in about half of deaths in 2016 but the great majority in recent years. Increasingly, deaths also involve a **stimulant** such as cocaine or methamphetamine, making the supply less predictable still. And these are overwhelmingly **accidental** poisonings, not suicides.
+
+```{python}
+#| echo: false
+if os.path.exists(supply_path):
+    sup = pd.read_csv(supply_path)
+    sup = sup[~sup["partial"]]   # drop partial years: recent toxicology is incomplete, so % fentanyl lags
+    fig = go.Figure()
+    for col, nm, color in [("fentanyl_pct", "Involving fentanyl", "#7b3294"),
+                           ("stimulant_pct", "Also involving a stimulant", "#d95f02"),
+                           ("accidental_pct", "Accidental (not suicide)", "#1b9e77")]:
+        d = sup.dropna(subset=[col])
+        fig.add_trace(go.Scatter(x=d["year"], y=d[col], name=nm, mode="lines+markers",
+            line=dict(color=color, width=2), marker=dict(size=6),
+            hovertemplate=nm + ": %{y:.0f}% (%{x})<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", hovermode="x unified",
+        legend=dict(orientation="h", y=1.12, x=0),
+        yaxis=dict(title="% of opioid-toxicity deaths", gridcolor="#e0e0e0",
+                   range=[0, 100], ticksuffix="%"),
+        xaxis=dict(title="", dtick=1), margin=dict(t=60, b=70),
+        annotations=[dict(text=f"Source: PHAC, Substance-Related Harms | Data as of: {get_data_date(supply_path)}. Shares can sum above 100% (a death may involve more than one substance).",
+                          xref="paper", yref="paper", x=0, y=-0.16, showarrow=False,
+                          font=dict(size=10, color="#999"))])
+    fig.show(config=SHOW)
+else:
+    print("Supply data not yet available. Run: python -m pipeline.run_pipeline")
+```
+
+## Beyond Deaths: Hospitalizations
+
+Deaths are the sharpest edge of the crisis, but not its full extent. Opioid-poisoning **hospitalizations** add a parallel measure of acute harm. Both are shown here as rates per 100,000 so they sit on the same scale.
+
+```{python}
+#| echo: false
+if os.path.exists(national_path):
+    nat = pd.read_csv(national_path)
+    full = nat[~nat["partial"]]
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=full["year"], y=full["deaths_rate"], name="Toxicity deaths",
+        mode="lines+markers", line=dict(color="#a8324a", width=3), marker=dict(size=6),
+        hovertemplate="Deaths: %{y:.1f} per 100,000 (%{x})<extra></extra>"))
+    fig.add_trace(go.Scatter(x=full["year"], y=full["hosp_rate"], name="Poisoning hospitalizations",
+        mode="lines+markers", line=dict(color="#4e79a7", width=2), marker=dict(size=6),
+        hovertemplate="Hospitalizations: %{y:.1f} per 100,000 (%{x})<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", hovermode="x unified",
+        legend=dict(orientation="h", y=1.08, x=0),
+        yaxis=dict(title="Per 100,000", gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=70),
+        annotations=[dict(text=f"Source: PHAC, Substance-Related Harms | Data as of: {get_data_date(national_path)}. Hospitalization rates exclude Quebec.",
+                          xref="paper", yref="paper", x=0, y=-0.16, showarrow=False,
+                          font=dict(size=10, color="#999"))])
+    fig.show(config=SHOW)
+```
+
+## Tobacco, Alcohol & Cannabis, by Age
+
+The opioid crisis is the acute edge of substance use; stepping back, most use is of legal or legalized substances — tobacco, alcohol, and, since 2018, cannabis. This chart shows the share of Canadians who report each, by age group — use the **Substance** menu to switch between them. The age patterns differ sharply: cannabis use and heavy drinking are highest among younger adults and taper off with age, while smoking peaks in middle age. Cannabis was added to the national survey only after legalization in 2018, so its line begins in 2019/2020.
+
+```{python}
+#| echo: false
+su_path = "data/health/statcan_substance_use_by_age.csv"
+if os.path.exists(su_path):
+    su = pd.read_csv(su_path)
+    ages = ["18 to 34 years", "35 to 49 years", "50 to 64 years", "65 years and over"]
+    su = su[su["age_group"].isin(ages)]
+    fig = lines_over_time(su, "period_end", "cannabis_pct", "age_group",
+        yaxis_title="% of adults", yticksuffix="%", hover_decimals=1, rangemode="tozero",
+        group_order=ages,
+        colors={"18 to 34 years": "#4e79a7", "35 to 49 years": "#59a14f",
+                "50 to 64 years": "#f28e2b", "65 years and over": "#b07aa1"},
+        measures=[
+            {"col": "cannabis_pct", "label": "Cannabis (past year)", "yaxis_title": "% reporting cannabis use, past 12 months"},
+            {"col": "smoking_pct", "label": "Tobacco (current smoker)", "yaxis_title": "% current daily or occasional smokers"},
+            {"col": "drinking_pct", "label": "Heavy drinking", "yaxis_title": "% reporting heavy drinking"},
+        ],
+        source_note=f"Source: Statistics Canada, CCHS (table 13-10-0972), two-year pooled estimates, ages 18+ | Data as of: {get_data_date(su_path)}")
+    fig.update_xaxes(tickmode="array", tickvals=sorted(su["period_end"].unique()), tickangle=0)
+    fig.show(config=SHOW)
+else:
+    print("Substance-use-by-age data not yet available. Run: python -m pipeline.build_substance_use")
+```
+
+## About This Data
+
+- **What is counted.** "Apparent opioid-toxicity deaths" are deaths caused by the acute toxicity of one or more opioids, as determined by coroners and medical examiners. Because investigations take time, the figures are **dynamic** — the most recent quarters are preliminary and are revised upward as cases are confirmed. A partial year (January–September) is shown only where noted.
+- **Rates are crude**, not age-standardised, and use July population estimates as the denominator.
+- **Hospitalizations exclude Quebec**, which does not report to the national hospitalization dataset on the same basis; the death figures are nationwide.
+- **Stimulants.** This page focuses on opioids; the same federal dataset also tracks stimulant-toxicity harms, which have risen sharply in parallel.
+- The opioid data are released **quarterly** under the Open Government Licence – Canada, and this page refreshes with them.
+- **The by-age use figures are self-reported, from a different source.** They come from Statistics Canada's Canadian Community Health Survey (table 13-10-0972), pooled into two-year periods and covering ages **18 and over** (no 12–17 youth). "Heavy drinking" is the survey threshold (5+ drinks for men / 4+ for women on one occasion, at least monthly); cannabis is any use in the past 12 months. These self-reported survey rates aren't comparable with the coroner-confirmed opioid-death counts above.
+
+## Download Data
+
+- [Opioid toxicity deaths & hospitalizations, national (CSV)](../data/health/phac_opioid_national.csv) — PHAC, Substance-Related Harms
+- [Opioid toxicity death rate by province/territory (CSV)](../data/health/phac_opioid_provincial.csv) — PHAC, Substance-Related Harms
+- [Opioid toxicity deaths by age & sex (CSV)](../data/health/phac_opioid_demographics.csv) — PHAC, Substance-Related Harms
+- [Drug-supply indicators — fentanyl, stimulant, manner of death (CSV)](../data/health/phac_opioid_supply.csv) — PHAC, Substance-Related Harms
+- [Substance use by age — cannabis, smoking, heavy drinking (CSV)](../data/health/statcan_substance_use_by_age.csv) — Statistics Canada, CCHS (table 13-10-0972)

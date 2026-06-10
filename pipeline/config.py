@@ -584,13 +584,62 @@ INDICATORS = [
               dataflow="OECD.ELS.HD,DSD_HEALTH_REAC_EMP@DF_NURSE",
               key=f"{_C}.HSE.10P3HB._Z._Z.MINU._Z.P._Z",  # total practising nurses
               source_table="OECD Health Statistics"),
-    Indicator("avoidable_mortality", "health", "oecd",
-              "Avoidable mortality", "deaths per 100,000", "annual",
-              value_col="avoidable_mortality", chart_recipe="ranked_bar",
-              # AVM=avoidable (preventable+treatable), age-standardised deaths/100k
-              dataflow="OECD.ELS.HD,DSD_HEALTH_STAT@DF_AM,1.1",
-              key=f"{_C}.A.AVM.DT_10P5HB._T._T._Z._Z.STANDARD._Z._Z._Z._Z",
-              source_table="OECD Health Statistics"),
+    # NOTE: "avoidable mortality" (OECD DSD_HEALTH_STAT@DF_AM, MEASURE=AVM) was removed
+    # 2026-06-10 — see project_health_expansion_2026-06 memory. The measure is sound but
+    # the "avoidable" label embeds a contestable evaluative judgment; held for revival.
+    # Population health & risk factors — World Bank (one config row each via the
+    # generic fetcher). These are sourced by the WB from WHO / UN / IDF, NOT OECD,
+    # so they add new topics (mental health, risk factors, financial protection)
+    # with no overlap with our OECD health set above. All cover the full 17 peers.
+    Indicator("suicide", "health", "worldbank",
+              "Suicide mortality rate", "per 100,000", "annual",
+              value_col="suicide_rate", chart_recipe="line",
+              wb_indicator="SH.STA.SUIC.P5",
+              source_table="World Bank / WHO Global Health Observatory"),
+    Indicator("overweight", "health", "worldbank",
+              "Overweight (adults)", "% of adults", "annual",
+              value_col="overweight_pct", chart_recipe="line",
+              wb_indicator="SH.STA.OWAD.ZS",
+              source_table="World Bank / WHO Global Health Observatory"),
+    Indicator("smoking", "health", "worldbank",
+              "Tobacco use (adults)", "% of adults", "annual",
+              value_col="smoking_pct", chart_recipe="line",
+              wb_indicator="SH.PRV.SMOK",
+              source_table="World Bank / WHO Global Health Observatory"),
+    Indicator("diabetes", "health", "worldbank",
+              "Diabetes prevalence", "% of adults 20–79", "annual",
+              value_col="diabetes_pct", chart_recipe="ranked_bar",
+              wb_indicator="SH.STA.DIAB.ZS",
+              source_table="World Bank / IDF Diabetes Atlas"),
+    Indicator("alcohol", "health", "worldbank",
+              "Alcohol consumption", "litres per capita", "annual",
+              value_col="alcohol_lpc", chart_recipe="line",
+              wb_indicator="SH.ALC.PCAP.LI",
+              source_table="World Bank / WHO Global Health Observatory"),
+    Indicator("health_oop", "health", "worldbank",
+              "Out-of-pocket health spending", "% of health spending", "annual",
+              value_col="oop_pct", chart_recipe="line",
+              wb_indicator="SH.XPD.OOPC.CH.ZS",
+              source_table="World Bank / WHO Global Health Expenditure Database"),
+    Indicator("uhc_index", "health", "worldbank",
+              "Universal health coverage index", "index (0–100)", "annual",
+              value_col="uhc_index", chart_recipe="line",
+              # WB API expects the underscore form; the dotted variants are archived
+              wb_indicator="SH_UHC_SCI",
+              source_table="World Bank / WHO Universal Health Coverage"),
+    Indicator("maternal_mortality", "health", "worldbank",
+              "Maternal mortality ratio", "per 100,000 live births", "annual",
+              value_col="maternal_mortality", chart_recipe="line",
+              wb_indicator="SH.STA.MMRT",
+              source_table="World Bank (WHO/UNICEF/UNFPA/World Bank/UNDESA)"),
+    # Opioid- & stimulant-related harms (PHAC Substance-Related Harms). One small
+    # quarterly CSV → national time series + provincial death-rate map + who's
+    # affected + drug-supply breakdowns. Drives health/substance-use.qmd.
+    Indicator("opioid_harms", "health", "custom",
+              "Opioid- and stimulant-related harms", "deaths / hospitalizations",
+              "quarterly", fetch_fn="fetch_opioid_harms",
+              output_subpath="phac_opioid_national.csv",
+              source_table="Public Health Agency of Canada, Substance-Related Harms"),
 
     # ----- Education & Innovation (OECD MSTI reuses the R&D dataflow) -----
     Indicator("rd_expenditure", "science", "oecd",
@@ -794,7 +843,13 @@ SNAPSHOT_SPECS = {
         ("Physicians", "data/health/oecd_physicians.csv", "physicians", "{:.1f}/1k", "high"),
         ("Nurses", "data/health/oecd_nurses.csv", "nurses", "{:.1f}/1k", "high"),
         ("MRI units", "data/health/oecd_mri_units.csv", "mri_units", "{:.1f}/M", "high"),
-        ("Avoidable mortality", "data/health/oecd_avoidable_mortality.csv", "avoidable_mortality", "{:.0f}/100k", "low"),
+        ("Suicide rate", "data/health/worldbank_suicide.csv", "suicide_rate", "{:.1f}/100k", "low"),
+        ("Smoking", "data/health/worldbank_smoking.csv", "smoking_pct", "{:.0f}%", "low"),
+        ("Overweight", "data/health/worldbank_overweight.csv", "overweight_pct", "{:.0f}%", "low"),
+        ("Diabetes", "data/health/worldbank_diabetes.csv", "diabetes_pct", "{:.1f}%", "low"),
+        ("Maternal mortality", "data/health/worldbank_maternal_mortality.csv", "maternal_mortality", "{:.0f}/100k", "low"),
+        ("UHC coverage", "data/health/worldbank_uhc_index.csv", "uhc_index", "{:.0f}", "high"),
+        ("Out-of-pocket health", "data/health/worldbank_health_oop.csv", "oop_pct", "{:.0f}%", "low"),
     ],
     "science": [
         ("R&D spending", "data/science/oecd_rd_expenditure.csv", "rd_pct_gdp", "{:.2f}% GDP", "high"),

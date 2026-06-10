@@ -102,13 +102,14 @@ def monthly_city_pollutant(m, *, source_note):
                                {"yaxis.title.text": f"{p} ({u})", "yaxis.autorange": True}])
                     for p, u in POLLS]
     fig.update_layout(
-        height=480, plot_bgcolor="white", margin=dict(t=100, b=95, l=55, r=20),
+        height=620, plot_bgcolor="white", margin=dict(t=100, b=95, l=55, r=20),
         xaxis=dict(gridcolor="#e0e0e0",
-                   rangeslider=dict(visible=True, thickness=0.06, bgcolor="#f5f5f5")),
+                   rangeslider=dict(visible=True, thickness=0.05, bgcolor="#f5f5f5")),
         yaxis=dict(title=f"{POLLS[0][0]} ({POLLS[0][1]})", gridcolor="#e0e0e0", rangemode="tozero"),
         updatemenus=[
             dict(buttons=city_buttons, active=0, x=0.0, xanchor="left", y=1.17, yanchor="top",
-                 bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True),
+                 bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True,
+                 font=dict(size=10)),
             dict(buttons=poll_buttons, active=0, x=0.42, xanchor="left", y=1.17, yanchor="top",
                  bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)],
         annotations=[
@@ -126,10 +127,12 @@ are the actual measurements from Environment and Climate Change Canada's
 [National Air Pollution Surveillance (NAPS)](https://www.canada.ca/en/environment-climate-change/services/air-pollution/monitoring-networks-data/national-air-pollution-program.html)
 network — the monitoring stations behind the national indicators on the
 [Air Quality](air-quality.qmd) page — averaged across each city's stations. The
-broad pattern is improvement: sulphur dioxide and nitrogen dioxide have fallen
-sharply in most cities. The exception is fine particulate matter (PM2.5), which has
-been pushed up in recent years by wildfire smoke — most visibly in the western
-cities in 2023.
+broad pattern is steep improvement. Sulphur dioxide — the acid-rain pollutant — has
+fallen most. **Carbon monoxide and nitrogen dioxide trace vehicle exhaust, so their
+high readings in the 1970s reflect the era before catalytic converters and unleaded
+fuel** — carbon monoxide has since dropped by roughly 90%. The exception is fine
+particulate matter (PM2.5), which has been pushed up in recent years by wildfire
+smoke — most visibly in the western cities in 2023.
 
 ## Annual trends
 

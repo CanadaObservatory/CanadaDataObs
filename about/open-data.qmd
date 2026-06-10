@@ -1,0 +1,78 @@
+---
+title: "Open Data: The One Cause"
+description: "DataCan's single exception to 'no advocacy' — the creation, use, and open availability of public data"
+---
+
+DataCan does not take policy positions. We don't say whether taxes are too
+high, immigration too fast, or health spending too low — we show the numbers,
+the peer comparison, and the official benchmark, and leave the judgment to you.
+
+We make **one deliberate exception**: we advocate for the **creation, use, and
+open availability of high-quality public data**. We hold this position openly
+because the project cannot pretend to be neutral about its own foundation.
+Every chart on this site exists because a public agency counted something
+carefully and published the result for anyone to use. No open data, no DataCan
+— and, more importantly, no shared factual ground for the country's arguments.
+
+## Why it matters
+
+The case is an old and broadly shared one — it is the logic of the census
+itself, of public audit, and of open government, supported across the political
+spectrum:
+
+- **Transparency.** Citizens can only evaluate how the country is doing — and
+  hold institutions to account — if the measuring is done professionally and
+  the results are published for everyone, not summarized selectively.
+- **Informed civic engagement.** Disagreement is healthy; arguing from
+  different facts is corrosive. A shared, citable evidence base doesn't end
+  debates, but it lets them be about values and trade-offs rather than about
+  whose numbers are real.
+- **Value.** Data collected once at public expense gets used thousands of
+  times — by researchers, journalists, businesses, community groups, and
+  sites like this one — but only if it is open, machine-readable, and free.
+
+## What we mean, concretely
+
+**Creation.** Statistical agencies need the mandate, independence, and funding
+to measure the country rigorously and continuously. Canada is fortunate:
+Statistics Canada is internationally respected, and the census is the
+backbone of almost everything subnational on this site. That quality is a
+choice that has to keep being made. The clearest illustration of the stakes is
+in our own charts: the 2011 census cycle replaced the mandatory long-form
+census with a voluntary survey, response rates fell, and the data quality
+suffered — which is why, wherever 2011 appears in our census-based series, we
+flag it as the lower-quality point in the line. When collection weakens, the
+gap never fully heals.
+
+**Open access.** Publication should be the default: machine-readable formats,
+open licences, stable links, free of charge. Canada has made real strides —
+the Open Government Licence, Statistics Canada's bulk tables and APIs,
+Environment and Climate Change Canada's indicator program, the Bank of
+Canada's Valet API, and municipal open-data portals like the one this site's
+Toronto crime maps are built on. Where data exists but sits behind
+restrictive licensing, the public conversation is poorer for it.
+
+**Use.** Data only matters when someone uses it. The final step of openness
+is making data *usable* — and used: cleaned, documented, visualized, taught.
+That is the part DataCan tries to contribute. We aggregate scattered official
+sources into one consistent, continually updated reference, cite everything,
+and publish our cleaned datasets and code so anyone can check or build on our
+work.
+
+## What this exception is not
+
+It is not a back door to other positions. Advocating for good measurement
+does not tell you what the measurements should make you conclude. We hold
+ourselves to that line: when a dataset has limitations, we say so on the
+chart; when a source is discontinued or degraded, we note it rather than
+quietly substituting something weaker; and we do not grade governments on
+anything — including this.
+
+## If you agree
+
+Use the data. Cite it — every chart here links to its source. Download
+[our cleaned CSVs](https://github.com/CanadaObservatory/CanadaDataObs) and
+build something. Answer the census like it matters, because it does. And when
+public data helps you understand something, tell people where the numbers
+came from — the habit of citing sources is most of what "informed civic
+conversation" means.

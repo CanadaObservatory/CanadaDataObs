@@ -4,13 +4,17 @@ subtitle: "Interactive metrics for informed civic conversation"
 ---
 
 Canada Data Observatory provides interactive, regularly updated charts and
-downloadable data on the state of the country — its population, economy, cost of
-living, incomes, public finances, health, education, environment, and well-being. All data comes
-from official sources — primarily [Statistics Canada](https://www.statcan.gc.ca/)
-and the [OECD](https://data.oecd.org/) — and is updated automatically each week.
+downloadable data on the state of the country, organized around six themes —
+**people & society**, **economy & affordability**, **government & public
+finances**, **health & well-being**, **land & environment**, and **education,
+science & innovation**. All data comes from official sources — primarily
+[Statistics Canada](https://www.statcan.gc.ca/), the
+[OECD](https://data.oecd.org/), and other government agencies — and is updated
+automatically each week.
 
 Where possible, Canada is shown alongside a broad set of 17 OECD peer countries
-(not just the G7) to provide meaningful international context.
+(not just the G7) to provide meaningful international context. Where the data
+allows, maps reach all the way down to the neighbourhood level.
 
 This is an open, non-partisan project. It presents data without policy advocacy.
 Data files are freely downloadable for anyone to use — students, journalists,
@@ -28,7 +32,9 @@ each links to the section behind it:
 - [**How do Canadian living standards compare with peer countries?**](economics/) — GDP per capita, productivity, and jobs
 - [**Where is population growth coming from?**](population/) — immigration, temporary residents, and natural increase
 - [**How big is government, and what does it spend on?**](fiscal/) — debt, deficits, the public-service workforce, and federal spending
-- **How is Canada doing on [health](health/), the [environment](environment/), and [well-being](wellbeing/)?** — life expectancy, emissions, and life satisfaction
+- [**Is crime going up?**](wellbeing/crime-safety.qmd) — everyday crime, hate crime, and your city, over time
+- [**How fast is Canada warming?**](environment/climate-change.qmd) — national, regional, and city-level temperature trends
+- [**What does my neighbourhood look like?**](population/diversity.qmd) — diversity, religion, incomes, and home values, mapped to the census tract
 
 ---
 
@@ -37,82 +43,22 @@ each links to the section behind it:
 ::::{.columns}
 
 :::{.column width="32%"}
-### [Population](population/)
-How many people live in Canada, how the population is changing, and why.
+### [People & Society](population/)
+How many people live in Canada and why that's changing; diversity, religion,
+and crime & safety — with maps down to the neighbourhood level.
 
-*Source: Statistics Canada*
+*Sources: Statistics Canada, Toronto Police Service*
 :::
 
 :::{.column width="2%"}
 :::
 
 :::{.column width="32%"}
-### [Economy & Jobs](economics/)
-GDP per capita, labour productivity, and unemployment, compared with peers.
+### [Economy & Affordability](economics/)
+Growth, jobs, the cost of living, housing, and incomes & inequality — Canada
+against 17 OECD peers.
 
-*Sources: OECD, Statistics Canada*
-:::
-
-:::{.column width="2%"}
-:::
-
-:::{.column width="32%"}
-### [Housing & Cost of Living](housing/)
-Inflation, house prices, affordability, and household debt.
-
-*Sources: OECD, Statistics Canada*
-:::
-
-::::
-
-::::{.columns}
-
-:::{.column width="32%"}
-### [Income & Inequality](income/)
-Real incomes and wages, the Gini coefficient, and poverty rates.
-
-*Sources: OECD, Statistics Canada*
-:::
-
-:::{.column width="2%"}
-:::
-
-:::{.column width="32%"}
-### [Health](health/)
-Life expectancy and how much countries spend on health care.
-
-*Source: OECD*
-:::
-
-:::{.column width="2%"}
-:::
-
-:::{.column width="32%"}
-### [Education & Innovation](science/)
-R&D spending, researchers, and educational attainment.
-
-*Source: OECD*
-:::
-
-::::
-
-::::{.columns}
-
-:::{.column width="32%"}
-### [Environment](environment/)
-CO₂ emissions, the energy mix, and renewable energy.
-
-*Sources: OECD, Our World in Data*
-:::
-
-:::{.column width="2%"}
-:::
-
-:::{.column width="32%"}
-### [Society & Well-being](wellbeing/)
-Life satisfaction and the factors that underlie it.
-
-*Source: World Happiness Report*
+*Sources: OECD, Statistics Canada, Bank of Canada, CREA*
 :::
 
 :::{.column width="2%"}
@@ -120,9 +66,44 @@ Life satisfaction and the factors that underlie it.
 
 :::{.column width="32%"}
 ### [Government & Public Finances](fiscal/)
-Debt and deficits, the size of the public-service workforce, and what the federal government spends.
+Debt, deficits, and interest costs compared with peers; the public-sector
+workforce; and what the federal government spends, back to 1961.
 
 *Sources: Statistics Canada, OECD, Treasury Board*
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column width="32%"}
+### [Health & Well-being](health/)
+Life expectancy, health spending and system capacity, population health and
+risk factors, substance use, and life satisfaction.
+
+*Sources: OECD, World Bank/WHO, PHAC, CIHI, World Happiness Report*
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Land & Environment](geography/)
+The land itself — ecozones, elevation, water, agriculture, wildfire — plus
+climate change, air quality, emissions, and energy.
+
+*Sources: ECCC, NRCan, Statistics Canada, OECD, Our World in Data*
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+### [Education, Science & Innovation](education/)
+University tuition across provinces and fields, R&D spending, and Canada's
+research workforce, compared with peers.
+
+*Sources: Statistics Canada, OECD*
 :::
 
 ::::
@@ -135,4 +116,8 @@ Debt and deficits, the size of the public-service workforce, and what the federa
 - **Broad peer comparisons** — 17 OECD countries, not just the G7
 - **Automatically updated** — data pipelines run weekly
 - **Open and downloadable** — all cleaned data available as CSV
-- **No policy advocacy** — we present the data, sources, and methods to support informed discussion, not to push conclusions
+- **No policy advocacy** — we present the data, sources, and methods to support
+  informed discussion, not to push conclusions. We make
+  [one deliberate exception](about/open-data.qmd): we advocate for the creation,
+  use, and open availability of public data itself — without it, nothing on
+  this site exists.

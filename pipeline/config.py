@@ -105,6 +105,10 @@ OECD_AVG_COLOR = "#555555"  # Dark grey for OECD average (blue is now the US)
 HIGHLIGHT_WIDTH = 3
 PEER_WIDTH = 1.5
 
+# Site attribution appended beneath every chart's source note (see the Figure.show
+# interceptor in charts.py). Change here to update it everywhere.
+BRAND = "Canada Observatory"
+
 
 # ============================================================================
 # Indicator registry

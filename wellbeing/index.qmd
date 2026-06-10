@@ -104,60 +104,13 @@ else:
 
 ## Safety
 
-Safety is a basic component of well-being, and crime is often discussed using individual incidents rather than long-run trends. The two measures below give the trend instead. The **Crime Severity Index** weights each crime by its seriousness (so a homicide counts far more than a minor theft) and is indexed to 2006 = 100. The **homicide rate** is the most consistently measured serious crime over the long run.
-
-```{python}
-#| echo: false
-csi_path = "data/wellbeing/statcan_crime_severity.csv"
-if os.path.exists(csi_path):
-    df = pd.read_csv(csi_path, parse_dates=["date"])
-    fig = single_line(df, "date", "crime_severity_index", title="",
-                      yaxis_title="Crime Severity Index (2006 = 100)", rangeslider=True,
-                      source_note=f"Source: Statistics Canada, Table 35-10-0026-01 | Data as of: {get_data_date(csi_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Crime severity data not yet available. Run the data pipeline.")
-```
-
-```{python}
-#| echo: false
-hom_path = "data/wellbeing/statcan_homicide_rate.csv"
-if os.path.exists(hom_path):
-    df = pd.read_csv(hom_path, parse_dates=["date"])
-    fig = single_line(df, "date", "homicide_rate", title="",
-                      yaxis_title="Homicides per 100,000 population", rangeslider=True,
-                      source_note=f"Source: Statistics Canada, Table 35-10-0068-01 | Data as of: {get_data_date(hom_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Homicide data not yet available. Run the data pipeline.")
-```
-
-## Crime Severity by City
-
-The same Crime Severity Index, mapped across metropolitan areas (latest year) — it weights offences by seriousness, so a city with more serious crime scores higher. **Zoom and pan to your area.** Reported for larger metropolitan areas only (smaller places aren't shown).
-
-```{python}
-#| echo: false
-import json
-from pipeline.charts import choropleth_map
-cma_geo_path = "data/geo/cma_2021.geojson"
-cma_path = "data/geo/statcan_cma_indicators.csv"
-if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
-    cma_geo = json.load(open(cma_geo_path))
-    cma = pd.read_csv(cma_path, dtype={"cmauid": str})
-    sub = cma.dropna(subset=["crime_severity"])
-    fig = choropleth_map(cma_geo, sub, "cmauid", "crime_severity", name_col="name",
-        colorbar_title="Crime Severity Index", value_fmt=".1f", colorscale="YlOrRd",
-        zmin=float(sub["crime_severity"].quantile(0.05)), zmax=float(sub["crime_severity"].quantile(0.95)),
-        source_note="Source: Statistics Canada, Table 35-10-0026-01 (latest year). Larger metro areas only.")
-    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("City crime map not yet available — run `python -m pipeline.build_census_geo`.")
-```
+Safety is a basic component of well-being. It now has its own page —
+**[Crime & Safety](crime-safety.qmd)** — covering the long-run Crime Severity Index
+and homicide rate, the specific kinds of crime people actually experience and how
+often they get solved, and how metropolitan areas and Toronto neighbourhoods compare.
 
 ## Download Data
 
 - [Happiness Scores & Factor Decomposition (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)
-- [City indicators incl. Crime Severity (CSV)](../data/geo/statcan_cma_indicators.csv) — Statistics Canada (2021 Census + Table 35-10-0026-01)
-- [Crime Severity Index (CSV)](../data/wellbeing/statcan_crime_severity.csv) — Statistics Canada Table 35-10-0026-01
-- [Homicide Rate (CSV)](../data/wellbeing/statcan_homicide_rate.csv) — Statistics Canada Table 35-10-0068-01
+
+Crime & safety data downloads are on the [Crime & Safety](crime-safety.qmd) page.

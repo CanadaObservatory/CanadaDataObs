@@ -8,9 +8,7 @@ website:
   description: "Interactive metrics about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-      - text: People & Society
+      - text: People
         menu:
           - href: population/index.qmd
             text: Population & Growth
@@ -20,7 +18,7 @@ website:
             text: Religion
           - href: wellbeing/crime-safety.qmd
             text: Crime & Safety
-      - text: Economy & Affordability
+      - text: Economy
         menu:
           - href: economics/index.qmd
             text: Growth & Jobs
@@ -30,7 +28,7 @@ website:
             text: Housing
           - href: income/index.qmd
             text: Income & Inequality
-      - text: Government & Public Finances
+      - text: Government
         menu:
           - href: fiscal/index.qmd
             text: Government Finances
@@ -38,7 +36,7 @@ website:
             text: Government Employment
           - href: government/spending.qmd
             text: Federal Spending
-      - text: Health & Well-being
+      - text: Health
         menu:
           - href: health/index.qmd
             text: Health & Health Care
@@ -46,7 +44,7 @@ website:
             text: Substance Use
           - href: wellbeing/index.qmd
             text: Well-being
-      - text: Land & Environment
+      - text: Environment
         menu:
           - text: "The Land"
           - href: geography/index.qmd
@@ -75,7 +73,7 @@ website:
             text: Air Quality by City
           - href: environment/index.qmd
             text: Emissions & Energy
-      - text: "Education, Science & Innovation"
+      - text: Education & Science
         menu:
           - href: education/index.qmd
             text: Education

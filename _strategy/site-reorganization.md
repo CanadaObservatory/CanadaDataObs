@@ -23,6 +23,16 @@ Judgment calls settled with the owner: Health stays top-level (as Health & Well-
 Well-being (happiness) rides with Health; Crime & Safety goes to People & Society;
 Where People Live stays in Land & Environment as its landing.
 
+**Navbar labels compacted (same day, owner-chosen):** the full area names made the navbar
+~1,590px wide, and Bootstrap navbars **clip from the right with no wrap and no scrollbar**
+— About + the GitHub link were literally unreachable at 1,440px (MacBook) and below.
+Top-level labels are now **People / Economy / Government / Health / Environment /
+Education & Science** (~955px min-viewport, under the 992px hamburger breakpoint → can
+never clip on any device), and **Home was dropped** (the DataCan brand links home). The
+full thematic names remain the areas' identities on the landing cards and page titles —
+the navbar label is a wayfinding button, not the definition. This also pre-pays the
+French-label problem ("Gouvernement et finances publiques" would never have fit).
+
 Also in Phase 1: landing page rebuilt (6 cards mirroring the areas — fixed the
 missing-Geography card and the phantom "educational attainment" promise — plus an expanded
 question router); **About became a dropdown**: `about.qmd` (Mission & Method),

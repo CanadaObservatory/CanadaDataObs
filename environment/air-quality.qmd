@@ -70,7 +70,7 @@ have all declined; ground-level ozone — a secondary pollutant that forms in th
 atmosphere — has been roughly flat. **Fine particulate matter (PM2.5) is the
 exception: it has risen, not fallen** — the signature of wildfire smoke, which the
 final chart isolates. These are national figures; to pick an individual city and
-see its pollutants month by month back to 2005, see
+see its pollutants month by month back to the 1970s, see
 **[Air Quality by City](air-quality-cities.qmd)**.
 
 ```{python}

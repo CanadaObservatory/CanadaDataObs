@@ -1,6 +1,6 @@
 ---
 title: "Air Quality by City"
-description: "Pick a city and see how its air pollutants have changed since 2005 — annual trends and the month-by-month detail, straight from the NAPS monitoring network"
+description: "Pick a city and see how its air pollutants have changed since the 1970s — annual trends and the month-by-month detail, straight from the NAPS monitoring network"
 ---
 
 ```{python}
@@ -9,7 +9,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import os
 from plotly.subplots import make_subplots
-from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.config import get_data_date
+
+# Muted, elegant blue for the city air-quality lines (Tableau-10 blue; not the
+# Canada-red reserved for peer comparisons elsewhere on the site).
+MUTED = "#4e79a7"
 
 # Pollutant panels (label, units) and their grid positions.
 POLLS = [("PM2.5", "µg/m³"), ("O3", "ppb"), ("NO2", "ppb"), ("SO2", "ppb"), ("CO", "ppm")]
@@ -39,8 +43,8 @@ def city_dashboard(df, xcol, *, mode, hovx, source_note, who_line=False):
             s = df[(df["city"] == city) & (df["pollutant"] == p)].sort_values(xcol)
             fig.add_trace(go.Scatter(
                 x=s[xcol], y=s["value"], mode=mode,
-                line=dict(color=CANADA_COLOR, width=2),
-                marker=dict(size=4) if "markers" in mode else dict(),
+                line=dict(color=MUTED, width=2),
+                marker=dict(size=4, color=MUTED) if "markers" in mode else dict(),
                 showlegend=False, visible=(city == cities[0]),
                 hovertemplate=f"{p} {hovx}: %{{y:.1f}} {u}<extra></extra>"),
                 row=rr, col=cc)
@@ -63,9 +67,61 @@ def city_dashboard(df, xcol, *, mode, hovx, source_note, who_line=False):
             dict(text=source_note, xref="paper", yref="paper", x=0, y=-0.13,
                  showarrow=False, font=dict(size=10, color="#999"))])
     return fig
+
+
+def monthly_city_pollutant(m, *, source_note):
+    """One large monthly time series with TWO dropdowns — City (restyles the line's
+    data) and Pollutant (toggles which of the 5 pollutant traces is shown). The
+    menus don't conflict: one changes the DATA, the other changes VISIBILITY. A
+    range slider lets you zoom into a period for detail."""
+    m = m.copy()
+    m["date"] = pd.to_datetime(m["date"])
+    cities = _ordered_cities(m)
+    dates = sorted(m["date"].unique())
+    didx = {d: i for i, d in enumerate(dates)}
+
+    def yfor(city, poll):
+        sub = m[(m["city"] == city) & (m["pollutant"] == poll)]
+        arr = [None] * len(dates)
+        for d, v in zip(sub["date"], sub["value"]):
+            arr[didx[d]] = v
+        return arr
+
+    c0 = cities[0]
+    fig = go.Figure()
+    for i, (p, u) in enumerate(POLLS):
+        fig.add_trace(go.Scatter(
+            x=dates, y=yfor(c0, p), mode="lines", name=p, visible=(i == 0),
+            line=dict(color=MUTED, width=1.6), connectgaps=False,
+            hovertemplate=f"%{{x|%b %Y}}: %{{y:.1f}} {u}<extra></extra>"))
+    city_buttons = [dict(method="update", label=c,
+                         args=[{"y": [yfor(c, p) for p, u in POLLS]},
+                               {"yaxis.autorange": True}]) for c in cities]
+    poll_buttons = [dict(method="update", label=p,
+                         args=[{"visible": [pp == p for pp, uu in POLLS]},
+                               {"yaxis.title.text": f"{p} ({u})", "yaxis.autorange": True}])
+                    for p, u in POLLS]
+    fig.update_layout(
+        height=480, plot_bgcolor="white", margin=dict(t=100, b=95, l=55, r=20),
+        xaxis=dict(gridcolor="#e0e0e0",
+                   rangeslider=dict(visible=True, thickness=0.06, bgcolor="#f5f5f5")),
+        yaxis=dict(title=f"{POLLS[0][0]} ({POLLS[0][1]})", gridcolor="#e0e0e0", rangemode="tozero"),
+        updatemenus=[
+            dict(buttons=city_buttons, active=0, x=0.0, xanchor="left", y=1.17, yanchor="top",
+                 bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True),
+            dict(buttons=poll_buttons, active=0, x=0.42, xanchor="left", y=1.17, yanchor="top",
+                 bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)],
+        annotations=[
+            dict(text="City", xref="paper", yref="paper", x=0.0, y=1.26, xanchor="left",
+                 showarrow=False, font=dict(size=11, color="#555")),
+            dict(text="Pollutant", xref="paper", yref="paper", x=0.42, y=1.26, xanchor="left",
+                 showarrow=False, font=dict(size=11, color="#555")),
+            dict(text=source_note, xref="paper", yref="paper", x=0, y=-0.34,
+                 showarrow=False, font=dict(size=10, color="#999"))])
+    return fig
 ```
 
-Pick a city and see how the air its residents breathe has changed since 2005. These
+Pick a city and see how the air its residents breathe has changed since the 1970s. These
 are the actual measurements from Environment and Climate Change Canada's
 [National Air Pollution Surveillance (NAPS)](https://www.canada.ca/en/environment-climate-change/services/air-pollution/monitoring-networks-data/national-air-pollution-program.html)
 network — the monitoring stations behind the national indicators on the
@@ -77,9 +133,9 @@ cities in 2023.
 
 ## Annual trends
 
-Annual mean concentration for each pollutant, 2005 onward. Use the dropdown to
-change city. The dotted green line on the PM2.5 panel is the World Health
-Organization's 2021 guideline (5 µg/m³).
+Annual mean concentration for each pollutant — back to **1974** for the gases, the
+late 1990s for PM2.5. Use the dropdown to change city. The dotted green line on the
+PM2.5 panel is the World Health Organization's 2021 guideline (5 µg/m³).
 
 ```{python}
 #| echo: false
@@ -95,18 +151,17 @@ else:
 
 ## Month-by-month detail
 
-The same pollutants at monthly resolution, which reveals the seasonal rhythm —
-summer ozone, winter particulates — and the sharp spikes when wildfire smoke
-arrives. Switch to a western city like Edmonton or Calgary and look at the PM2.5
-panel around 2023 to see a record smoke season in the monthly data.
+Monthly resolution reveals the seasonal rhythm — summer ozone, winter particulates —
+and the sharp spikes when wildfire smoke arrives. Pick a **city** and a **pollutant**
+to see one series at full size, and drag the slider beneath the chart to zoom into a
+period. Try Edmonton or Calgary with PM2.5 around 2023 for a record smoke season.
 
 ```{python}
 #| echo: false
 if os.path.exists(MON):
     m = pd.read_csv(MON)
-    m["date"] = pd.to_datetime(m["date"])
-    fig = city_dashboard(
-        m, "date", mode="lines", hovx="%{x|%b %Y}",
+    fig = monthly_city_pollutant(
+        m,
         source_note=f"Source: Environment and Climate Change Canada, NAPS Annual Summaries (monthly means, 1-hour basis), stations averaged per city | Data as of: {get_data_date(MON)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -121,20 +176,25 @@ else:
 ::: {.callout-note collapse="true"}
 ## About these data
 
-**Source & method.** Values come from the NAPS network's published Annual
-Summaries — per-station validated annual and monthly means on a 1-hour basis. For
-each city we average all of its stations, so a city with several monitors is
-smoothed across them. Units are µg/m³ for PM2.5 and ppb for the gases (ppm for CO).
+**Source & method.** Values are 1-hour-basis concentrations from the NAPS network
+(per-station). For each city we average all of its stations, so a city with several
+monitors is smoothed across them. Units are µg/m³ for PM2.5 and ppb for the gases
+(ppm for CO).
 
-**Coverage.** About 30 of Canada's larger cities are included, 2005–2024. Smaller
-communities with NAPS monitors are omitted here to keep the selector manageable;
-the full network is larger. Validated NAPS data lags the calendar year by roughly
-12–18 months, so the most recent year may update.
+**Coverage & how far back.** About 30 of Canada's larger cities are included. The
+gases (NO₂/SO₂/O₃/CO) reach back to **1974** and PM2.5 to the **late 1990s**. From
+2005 on the values are NAPS's pre-computed *Annual Summaries* (validated per-station
+means); the earlier years are aggregated here from NAPS's raw hourly files on the
+same 1-hour basis (a monthly mean needs ≥50% of the month's hours; an annual mean
+needs ≥6 months spanning all four quarters). The two eras join smoothly — Toronto
+SO₂, for instance, reads ~2.5 ppb in both 2004 and 2005. Smaller communities are
+omitted to keep the selector manageable; recent validated data lags the calendar
+year by ~12–18 months.
 
 **Cities vs. the national picture.** These city averages complement the
 population-weighted *national* indicator on the [Air Quality](air-quality.qmd)
 page (which is the standard reference but only national and from 2009). Here the
-trade-off is reversed: city-level and back to 2005, but a simple station average
+trade-off is reversed: city-level and back to the 1970s, but a simple station average
 rather than a population-weighted exposure estimate. All data are published under
 the Open Government Licence – Canada.
 :::

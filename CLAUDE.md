@@ -65,7 +65,7 @@ DataCan/
 ├── innovation/index.qmd   ← **Innovation** (Education-&-Science dropdown): business R&D (BERD) — starter page to grow
 ├── environment/index.qmd  ← **Emissions & Energy** (Environment-dropdown landing): CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix, GHG total + by sector
 ├── environment/air-quality.qmd ← **Air Quality** (Environment dropdown): APEI emissions decline (SOx/NOx/VOC/CO 1990–), CESI concentrations indexed (PM2.5/O3/NO2/SO2 2009–; PM2.5 the rising exception), OECD peer PM2.5 (line + ranked bar, WHO-5 guideline line), wildfire-era PM2.5 (CESI 98th-pct peak + NFDB area, links Fire & Ice); links to air-quality-cities
-├── environment/air-quality-cities.qmd ← **Air Quality by City** (linked from Air Quality, NOT in nav — heavy page like neighbourhoods): NAPS city dashboard — ~29 cities × 5 pollutants × 2005–2024, annual + monthly small-multiples with a city dropdown (data from build_naps_cities)
+├── environment/air-quality-cities.qmd ← **Air Quality by City** (its own Environment-dropdown item): NAPS city dashboard — ~30 cities × 5 pollutants, **gases 1974– / PM2.5 late-1990s–**; annual small-multiples (city dropdown) + a monthly chart with **City + Pollutant** dropdowns (one restyles data, the other toggles visibility); muted-blue lines (data from build_naps_cities)
 ├── environment/climate-change.qmd ← **Climate Change** (Environment dropdown): national temperature anomaly (CESI 1948–, 2024=+3.1°C), regional warming / Arctic amplification (CTVB ranked bar relabelled to plain names + a marker map of the 11 regions, coloured by rate), two-trace long-run city temps (homogenized AHCCD + raw MSC tail) with least-squares trend, warming-by-season (AHCCD seasonal), and animated raw-monthly **warming spirals** (Toronto vs Eureka, scatterpolar)
 ├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide + by-city map)
 ├── pipeline/
@@ -81,7 +81,7 @@ DataCan/
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover, **major lakes (build_lakes, NRCan 1:1M waterbodies) + 2023 wildfire points (build_wildfire_points, NFDB)** (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
-│   ├── build_naps_cities.py ← ANNUAL builder (not weekly): NAPS Annual Summaries (1HR block; CSV 2016+ / .xlsx ≤2015) → per-city annual + monthly means for ~29 major cities, 2005– → data/environment/naps_city_{annual,monthly}.csv; re-run each spring
+│   ├── build_naps_cities.py ← ANNUAL builder (not weekly): per-city annual + monthly air-quality means for ~30 major cities → data/environment/naps_city_{annual,monthly}.csv. Two eras: **2005– from NAPS Annual Summaries** (1HR block; CSV 2016+ / .xlsx ≤2015) + **pre-2005 aggregated from raw hourly** (gases to 1974, PM2.5 to late-1990s; ≥50%-of-month / ≥6-months-over-4-quarters validity). Normalised city matcher handles old spellings/province codes (St Johns, Montreal/PQ). Re-run each spring
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
 │   ├── fetch_environment.py ← registry custom fetchers: GHG emissions national total + by economic sector (ECCC National Inventory Report / CESI; year-stamped URL — bump GHG_RELEASE each spring)
 │   ├── fetch_air_quality.py ← registry custom fetchers (Air Quality page): CESI air-quality concentrations indexed (PM2.5/O3/NO2/SO2/VOC, NAPS-derived; year-stamped — bump CESI_AQ_RELEASE) + APEI national emissions (criteria air contaminants 1990–, az-host /api/file cube)
@@ -143,8 +143,9 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   (PM2.5/O3/NO2/SO2/VOC, derived from the NAPS network, indexed to 2009) + the
   **APEI** emissions inventory (criteria air contaminants 1990–, az-host
   `/api/file?path=` cube, filter REGION=CA + GRAND TOTAL). **NAPS** raw monitoring —
-  per-station annual + monthly means aggregated to ~29 cities, 2005– (annual builder
-  `build_naps_cities.py`; format switches CSV 2016+ / .xlsx ≤2015). **Climate**
+  per-station annual + monthly means aggregated to ~30 cities — **gases back to 1974,
+  PM2.5 to the late 1990s** (annual builder `build_naps_cities.py`: 2005+ from Annual
+  Summaries [CSV 2016+ / .xlsx ≤2015], pre-2005 aggregated from raw hourly). **Climate**
   (`fetch_climate.py`): CESI national temperature departure (vs 1961–90, 1948–) + the
   **Climate Trends and Variations Bulletin** regional warming trends (its 11 climate
   regions — a bespoke ECCC delineation with NO open geometry, so the Climate page

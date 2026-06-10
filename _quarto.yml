@@ -70,6 +70,8 @@ website:
             text: Emissions & Energy
           - href: environment/air-quality.qmd
             text: Air Quality
+          - href: environment/air-quality-cities.qmd
+            text: Air Quality by City
           - href: environment/climate-change.qmd
             text: Climate Change
       - href: wellbeing/index.qmd

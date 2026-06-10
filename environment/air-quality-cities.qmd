@@ -57,7 +57,7 @@ def city_dashboard(df, xcol, *, mode, hovx, source_note, who_line=False):
     fig.update_xaxes(gridcolor="#e0e0e0")
     fig.update_yaxes(gridcolor="#e0e0e0", rangemode="tozero")
     fig.update_layout(
-        height=620, plot_bgcolor="white", margin=dict(t=90, b=80, l=45, r=20),
+        height=640, plot_bgcolor="white", margin=dict(t=90, b=110, l=45, r=20),
         updatemenus=[dict(buttons=buttons, active=0, x=0.5, xanchor="center",
                           y=1.20, yanchor="top", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)],
@@ -65,7 +65,7 @@ def city_dashboard(df, xcol, *, mode, hovx, source_note, who_line=False):
             dict(text="Select a city", xref="paper", yref="paper", x=0.5, y=1.27,
                  xanchor="center", showarrow=False, font=dict(size=12, color="#555")),
             dict(text=source_note, xref="paper", yref="paper", x=0, y=-0.13,
-                 showarrow=False, font=dict(size=10, color="#999"))])
+                 showarrow=False, align="left", font=dict(size=10, color="#999"))])
     return fig
 
 
@@ -102,7 +102,7 @@ def monthly_city_pollutant(m, *, source_note):
                                {"yaxis.title.text": f"{p} ({u})", "yaxis.autorange": True}])
                     for p, u in POLLS]
     fig.update_layout(
-        height=620, plot_bgcolor="white", margin=dict(t=100, b=95, l=55, r=20),
+        height=620, plot_bgcolor="white", margin=dict(t=100, b=120, l=55, r=20),
         xaxis=dict(gridcolor="#e0e0e0",
                    rangeslider=dict(visible=True, thickness=0.05, bgcolor="#f5f5f5")),
         yaxis=dict(title=f"{POLLS[0][0]} ({POLLS[0][1]})", gridcolor="#e0e0e0", rangemode="tozero"),
@@ -118,7 +118,7 @@ def monthly_city_pollutant(m, *, source_note):
             dict(text="Pollutant", xref="paper", yref="paper", x=0.42, y=1.26, xanchor="left",
                  showarrow=False, font=dict(size=11, color="#555")),
             dict(text=source_note, xref="paper", yref="paper", x=0, y=-0.34,
-                 showarrow=False, font=dict(size=10, color="#999"))])
+                 showarrow=False, align="left", font=dict(size=10, color="#999"))])
     return fig
 ```
 
@@ -146,7 +146,7 @@ if os.path.exists(ANN):
     a = pd.read_csv(ANN)
     fig = city_dashboard(
         a, "year", mode="lines+markers", hovx="%{x}", who_line=True,
-        source_note=f"Source: Environment and Climate Change Canada, NAPS Annual Summaries (1-hour basis), stations averaged per city | Data as of: {get_data_date(ANN)}")
+        source_note=f"Source: Environment and Climate Change Canada, NAPS Annual Summaries (1-hour basis), stations averaged per city<br>Data as of: {get_data_date(ANN)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("NAPS city data not yet available. Run: python -m pipeline.build_naps_cities")
@@ -165,7 +165,7 @@ if os.path.exists(MON):
     m = pd.read_csv(MON)
     fig = monthly_city_pollutant(
         m,
-        source_note=f"Source: Environment and Climate Change Canada, NAPS Annual Summaries (monthly means, 1-hour basis), stations averaged per city | Data as of: {get_data_date(MON)}")
+        source_note=f"Source: Environment and Climate Change Canada, NAPS Annual Summaries (monthly means, 1-hour basis), stations averaged per city<br>Data as of: {get_data_date(MON)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("NAPS monthly data not yet available. Run: python -m pipeline.build_naps_cities")

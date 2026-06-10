@@ -1,6 +1,6 @@
 ---
 title: "Health"
-description: "Life expectancy and health spending — Canada and OECD peers"
+description: "Life expectancy, health spending, system capacity, access, and population health — Canada and OECD peers"
 ---
 
 Health is both an outcome people care about directly and one of the largest
@@ -17,7 +17,7 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, peer_comparison_line_by_age
+from pipeline.charts import peer_comparison_line, ranked_bar, peer_comparison_line_by_age, single_line
 
 def show_peer_line(path, value_col, yaxis_title, source, initial_start=None):
     """Standard 17-peer line chart for a World Bank health series."""
@@ -114,6 +114,29 @@ show_peer_line("data/health/worldbank_suicide.csv", "suicide_rate",
     "Deaths per 100,000", "World Bank / WHO Global Health Observatory")
 ```
 
+## Mental Health
+
+The share of Canadians aged 12 and over rating their own mental health **very good
+or excellent** has fallen from 72% in 2015 to 55% in 2022 — one of the clearest
+trends in the national health survey. Unlike the charts above, this is a
+**Canada-only** series (Canadian Community Health Survey): self-rated mental health
+isn't collected on a comparable basis across the peer group.
+
+```{python}
+#| echo: false
+mh_path = "data/health/statcan_mental_health.csv"
+if os.path.exists(mh_path):
+    mh = pd.read_csv(mh_path, parse_dates=["date"])
+    fig = single_line(mh, "date", "pct_mh_very_good", title="",
+        yaxis_title="% rating mental health very good or excellent",
+        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(mh_path)}")
+    fig.update_yaxes(ticksuffix="%")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Mental-health data not yet available. Run the data pipeline.")
+```
+
 ## Tobacco & Alcohol
 
 Two everyday risk factors on one chart — use the **Substance** menu (top right) to switch between them. Canada has one of the *lowest* tobacco-use rates in the peer group, around 12% of adults — less than half the heaviest-smoking European peers — and sits near the middle of the pack on alcohol (litres of pure alcohol per person aged 15+). The two use different units, so the y-axis rescales when you switch.
@@ -168,6 +191,40 @@ Maternal deaths per 100,000 live births (modelled estimates on a consistent inte
 #| echo: false
 show_peer_line("data/health/worldbank_maternal_mortality.csv", "maternal_mortality",
     "Per 100,000 live births", "World Bank (WHO/UNICEF/UNFPA/World Bank/UNDESA)")
+```
+
+## Childhood Vaccination
+
+The share of children aged 12–23 months immunized against measles (first dose).
+Because measles is so contagious, roughly **95%** coverage — the dashed line — is
+the widely used threshold for stopping community spread. Canada's coverage sits
+around 90%, below most European peers, and coverage dipped across many countries
+around the pandemic. (The matching DTP3 series is in the downloads.)
+
+```{python}
+#| echo: false
+vac_path = "data/health/worldbank_measles_vaccination.csv"
+if os.path.exists(vac_path):
+    vac = pd.read_csv(vac_path)
+    fig = peer_comparison_line(vac, "year", "measles_immunization_pct", "",
+        "% of children 12–23 months", show_average=True,
+        source_note=f"Source: World Bank (WHO/UNICEF immunization estimates) | Data as of: {get_data_date(vac_path)}")
+    fig.add_hline(y=95, line_dash="dash", line_color="#555", line_width=1,
+                  annotation_text="≈95% needed to stop community spread",
+                  annotation_position="bottom left",
+                  annotation_font=dict(size=10, color="#555"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Vaccination data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(vac_path):
+    fig = ranked_bar(vac, "measles_immunization_pct", "% of children 12–23 months",
+        f"Source: World Bank (WHO/UNICEF immunization estimates) | Data as of: {get_data_date(vac_path)}",
+        hover_template="%{y}: %{x:.0f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## Health Spending
@@ -235,6 +292,37 @@ if os.path.exists(hspc_path):
     df = pd.read_csv(hspc_path)
     fig = ranked_bar(df, "health_pc_usd", "US$ PPP per person",
         f"Source: OECD Health Expenditure (SHA), USD PPP | Data as of: {get_data_date(hspc_path)}",
+        hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.update_xaxes(tickprefix="$", tickformat=",")
+    fig.show(config={"displaylogo": False})
+```
+
+## Pharmaceutical Spending per Person
+
+Spending on retail pharmaceuticals and other medical non-durables (SHA function
+HC.5.1), in US dollars at purchasing-power parity per person. Canada is among the
+highest spenders in the peer group — behind only the United States in most years.
+Definitions differ slightly across countries (Canada's figure is flagged by the
+OECD as differing in definition), so read small gaps loosely.
+
+```{python}
+#| echo: false
+rx_path = "data/health/oecd_pharma_spending_pc.csv"
+if os.path.exists(rx_path):
+    rx = pd.read_csv(rx_path)
+    fig = peer_comparison_line(rx, "year", "pharma_pc_usd", "",
+        "US$ PPP per person", show_average=True,
+        source_note=f"Source: OECD Health Expenditure (SHA), retail pharmaceuticals (HC.5.1), USD PPP | Data as of: {get_data_date(rx_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Pharmaceutical-spending data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(rx_path):
+    fig = ranked_bar(rx, "pharma_pc_usd", "US$ PPP per person",
+        f"Source: OECD Health Expenditure (SHA), retail pharmaceuticals (HC.5.1) | Data as of: {get_data_date(rx_path)}",
         hover_template="%{y}: $%{x:,.0f}<extra></extra>")
     fig.update_xaxes(tickprefix="$", tickformat=",")
     fig.show(config={"displaylogo": False})
@@ -391,6 +479,61 @@ if os.path.exists(mri_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Long-Term Care Beds
+
+Beds in long-term care facilities and the long-term-care wards of hospitals, per
+1,000 people aged 65 and over — the institutional capacity behind aging-population
+pressures (see the [age structure of the population](../population/index.qmd)).
+Countries organize elder care very differently — some emphasize home care over
+institutions — so this measures capacity in one model of care, not the quality of
+elder care overall.
+
+```{python}
+#| echo: false
+ltc_path = "data/health/oecd_ltc_beds.csv"
+if os.path.exists(ltc_path):
+    ltc = pd.read_csv(ltc_path)
+    fig = peer_comparison_line(ltc, "year", "ltc_beds_per_1k_65plus", "",
+        "Beds per 1,000 aged 65+", show_average=True,
+        source_note=f"Source: OECD Health Statistics (Long-Term Care Resources) | Data as of: {get_data_date(ltc_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Long-term-care data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(ltc_path):
+    fig = ranked_bar(ltc, "ltc_beds_per_1k_65plus", "Beds per 1,000 aged 65+",
+        f"Source: OECD Health Statistics (Long-Term Care Resources) | Data as of: {get_data_date(ltc_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## A Regular Health-Care Provider
+
+The share of Canadians aged 12 and over who report having a **regular health-care
+provider** — a family doctor or nurse practitioner they usually see. In 2022 it was
+86%, which still leaves roughly **one in seven** without one. A **Canada-only**
+series (Canadian Community Health Survey, annual estimates to 2022; the survey was
+redesigned afterwards, so later years will appear when published on a comparable
+basis).
+
+```{python}
+#| echo: false
+fd_path = "data/health/statcan_family_doctor.csv"
+if os.path.exists(fd_path):
+    fd = pd.read_csv(fd_path, parse_dates=["date"])
+    fig = single_line(fd, "date", "pct_regular_provider", title="",
+        yaxis_title="% with a regular health-care provider",
+        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(fd_path)}")
+    fig.update_yaxes(ticksuffix="%")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Regular-provider data not yet available. Run the data pipeline.")
+```
+
 ## Wait Times for Priority Procedures
 
 The share of patients treated within the agreed **pan-Canadian benchmark** time, for five priority procedures (Canada-wide). Higher is better — more patients treated on time. The pandemic sharply cut access to scheduled surgeries (hip, knee, cataract) in 2020, and most have only partly recovered since; emergency hip-fracture repair and radiation therapy held up. Unlike most charts on this page, this is a **Canada-only** series — there is no comparable peer feed — and the Canadian Institute for Health Information (CIHI) publishes it **annually each spring**, so it is refreshed once a year rather than weekly with the rest of the site.
@@ -430,3 +573,9 @@ The capacity measures above — beds, physicians, and imaging units — are the 
 - [Maternal Mortality (CSV)](../data/health/worldbank_maternal_mortality.csv) — World Bank (WHO/UNICEF/UNFPA/World Bank/UNDESA)
 - [Universal Health Coverage Index (CSV)](../data/health/worldbank_uhc_index.csv) — World Bank / WHO Universal Health Coverage
 - [Out-of-Pocket Health Spending (CSV)](../data/health/worldbank_health_oop.csv) — World Bank / WHO Global Health Expenditure Database
+- [Has a Regular Health-Care Provider (CSV)](../data/health/statcan_family_doctor.csv) — Statistics Canada Table 13-10-0096-01 (CCHS)
+- [Perceived Mental Health, Very Good or Excellent (CSV)](../data/health/statcan_mental_health.csv) — Statistics Canada Table 13-10-0096-01 (CCHS)
+- [Long-Term Care Beds (CSV)](../data/health/oecd_ltc_beds.csv) — OECD Health Statistics (Long-Term Care Resources)
+- [Pharmaceutical Spending per Person (CSV)](../data/health/oecd_pharma_spending_pc.csv) — OECD Health Expenditure (SHA, HC.5.1)
+- [Measles Immunization (CSV)](../data/health/worldbank_measles_vaccination.csv) — World Bank (WHO/UNICEF estimates)
+- [DTP3 Immunization (CSV)](../data/health/worldbank_dtp_vaccination.csv) — World Bank (WHO/UNICEF estimates)

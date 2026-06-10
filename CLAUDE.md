@@ -64,7 +64,7 @@ DataCan/
 ├── fiscal/index.qmd       ← **Government Finances** (Government-&-Public-Finances dropdown): govt gross debt, budget balance, revenue, interest costs, defence (all vs OECD peers)
 ├── government/index.qmd   ← **Government Employment** (Government-&-Public-Finances dropdown): employment by level of government, full public-sector composition (archived), OECD peer comparison, federal public-service headcount/by-department/demographics/executives, + sourced occupational note
 ├── government/spending.qmd ← **Federal Spending**: revenue & spending %GDP (1961–) + nominal, expense by economic type, by standard object, by department, by function (CCOFOG — all governments)
-├── health/index.qmd       ← **Health & Health Care** (Health-&-Well-being-dropdown landing): life expectancy (+ a Canada-vs-US **recent-decline** chart, 2019→2022, off the existing OECD CSV) + health spending (%GDP + per person) + beds/physicians/nurses/MRI + **Population Health & Risk Factors** (World Bank/WHO/UN/IDF: suicide, **tobacco+alcohol merged into one "Substance" dropdown chart** [different units → the dropdown rescales the y-axis], overweight, diabetes [ranked, IDF point estimates], maternal mortality — Canada 16/17, high) + UHC index + out-of-pocket %; wait times. WB rows are WHO/UN-sourced so NO OECD overlap; 7 added to the scorecard
+├── health/index.qmd       ← **Health & Health Care** (Health-&-Well-being-dropdown landing): life expectancy (+ a Canada-vs-US **recent-decline** chart, 2019→2022, off the existing OECD CSV) + health spending (%GDP + per person) + beds/physicians/nurses/MRI + **Population Health & Risk Factors** (World Bank/WHO/UN/IDF: suicide, **tobacco+alcohol merged into one "Substance" dropdown chart** [different units → the dropdown rescales the y-axis], overweight, diabetes [ranked, IDF point estimates], maternal mortality — Canada 16/17, high) + UHC index + out-of-pocket %; wait times. WB rows are WHO/UN-sourced so NO OECD overlap; 7 added to the scorecard. **2026-06-10 Branch-2 access set** (+6 → 106 indicators): **Mental Health** (CCHS 13-10-0096-01 generic-statcan row, Canada-only, 72%→55% very-good/excellent 2015→2022) after Suicide; **Childhood Vaccination** (WB measles `SH.IMM.MEAS` line+ranked with a **≈95% herd-immunity dashed line** + DTP3 `SH.IMM.IDPT` downloads-only; measles = the 8th scorecard row, good=high) after Maternal Mortality; **Pharmaceutical Spending per Person** (SHA `FUNCTION=HC51`, USD PPP `V` prices — Canada ~2nd behind the US; OECD flags Canada "definition differs") after spending-per-person; **Long-Term Care Beds** (`DSD_HEALTH_LTCR@DF_HEALTH_LTCR_BED`, UNIT `10P3HB_Y_GE65` per-1,000-aged-65+; prose notes home-care-vs-institution model differences — NO scorecard row, direction contested) + **A Regular Health-Care Provider** (CCHS, 86% in 2022 ≈ one in seven without; survey redesigned post-2022 so the series ends there until StatCan extends the cube) before Wait Times
 ├── health/substance-use.qmd ← **Substance Use** (Health-&-Well-being dropdown): Canada's opioid/toxic-drug crisis — national apparent-opioid-toxicity deaths (bars+rate, 2016→2024; 2,832→8,020 peak 2023) + provincial death-rate **ranked bar** (BC 41.3 vs PEI 3.9, 2024; dashed national-rate line — a bar not a choropleth, since resolution is only provincial) + deaths by age×sex (men ~3/4) + a poisoned-supply chart (% fentanyl/stimulant/accidental, partial years dropped — toxicology lags) + deaths-vs-hospitalizations footprint. Then **"Tobacco, Alcohol & Cannabis, by Age"** — a Canada-only **Substance dropdown** chart (Cannabis / Tobacco / Heavy drinking; age-group lines; **x = period end-year, horizontal labels** — CCHS is two-year pooled but angled "YYYY/YYYY" labels were dropped; cannabis starts 2019/2020 post-legalization, steep age gradient ~33%@18-34→8%@65+) from StatCan CCHS 13-10-0972 (build_substance_use.py). Sources: PHAC Substance-Related Harms (fetch_opioids.py) + StatCan CCHS (build_substance_use.py)
 ├── education/index.qmd   ← **Education** (Education-Science-&-Innovation nav dropdown): university tuition — real by province, domestic vs international, by field (StatCan TLAC 37-10-0045-01 / 37-10-0003-01, bespoke fetch_tuition/_by_field)
 ├── science/index.qmd      ← **Science** (Education-Science-&-Innovation dropdown): R&D (GERD), researchers
@@ -130,7 +130,7 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (100 indicators / 12 sections)
+## Data sources (106 indicators / 12 sections)
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   population by age & gender 17-10-0005-01 (bespoke `fetch_age_structure` — Canada,
@@ -749,6 +749,16 @@ map** (`population/age-neighbourhoods.qmd`, 6,165 tracts — more than ethnicity
 colour cap for student/retirement outlier tracts; cross-linked with income/home-value
 maps as the descriptive affordability companion). No scorecard rows added —
 fertility/aging have no uncontroversial "good" direction.
+**Branch 2 (Health access set) BUILT 2026-06-10** (branch `health-access-set`):
+**100→106 indicators** — regular health-care provider + self-rated mental health
+(both CCHS 13-10-0096-01, a 4.9 MB zip, plain generic-statcan rows filtered to
+"Canada (excluding territories)"/"Total, 12 years and over"/"Both sexes"/"Percent";
+annual 2015–2022, survey redesigned after), LTC beds
+(`DSD_HEALTH_LTCR@DF_HEALTH_LTCR_BED` unit `10P3HB_Y_GE65`), pharmaceutical
+spending (SHA `HC51` per-capita `V` prices), measles + DTP3 immunization (WB
+`SH.IMM.MEAS`/`SH.IMM.IDPT`, 1980–; measles → scorecard good=high with a 95%
+herd-immunity benchmark line). The CCHS cube also carries age groups + provinces —
+future by-age/provincial cuts are one filter away.
 Deferred (candidates, not committed):
 **homeownership rate** (Census-only — no clean annual StatCan series; revisit when
 2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),

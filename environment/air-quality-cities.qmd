@@ -25,7 +25,11 @@ MON = "data/environment/naps_city_monthly.csv"
 
 
 def _ordered_cities(df):
-    present = set(df["city"])
+    # Keep only cities that measure ALL the pollutants — drops the sparse tail
+    # (Charlottetown, Sherbrooke, Trois-Rivières, Saguenay, Fredericton, Moncton),
+    # shortening the dropdown and avoiding empty pollutant panels.
+    counts = df.groupby("city")["pollutant"].nunique()
+    present = set(counts[counts >= len(POLLS)].index)
     head = [c for c in PREFERRED if c in present]
     return head + sorted(present - set(head))
 
@@ -60,7 +64,7 @@ def city_dashboard(df, xcol, *, mode, hovx, source_note, who_line=False):
         height=640, plot_bgcolor="white", margin=dict(t=90, b=110, l=45, r=20),
         updatemenus=[dict(buttons=buttons, active=0, x=0.5, xanchor="center",
                           y=1.20, yanchor="top", bgcolor="white", bordercolor="#ccc",
-                          borderwidth=1, showactive=True)],
+                          borderwidth=1, showactive=True, font=dict(size=10))],
         annotations=list(fig.layout.annotations) + [
             dict(text="Select a city", xref="paper", yref="paper", x=0.5, y=1.27,
                  xanchor="center", showarrow=False, font=dict(size=12, color="#555")),
@@ -184,7 +188,9 @@ else:
 monitors is smoothed across them. Units are µg/m³ for PM2.5 and ppb for the gases
 (ppm for CO).
 
-**Coverage & how far back.** About 30 of Canada's larger cities are included. The
+**Coverage & how far back.** Two dozen of Canada's larger cities are included — those
+with all five pollutants on record (sparser places are left out to keep the menu
+short). The
 gases (NO₂/SO₂/O₃/CO) reach back to **1974** and PM2.5 to the **late 1990s**. From
 2005 on the values are NAPS's pre-computed *Annual Summaries* (validated per-station
 means); the earlier years are aggregated here from NAPS's raw hourly files on the

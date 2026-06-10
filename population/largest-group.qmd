@@ -1,0 +1,59 @@
+---
+title: "The Largest Group, by Neighbourhood"
+description: "Each census tract coloured by its largest population group (plurality) — 2021 Census"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import (choropleth_categorical, choropleth_groups_map,
+                             DIVERSITY_MAP_GROUPS, CATEGORICAL_PALETTE)
+```
+
+Instead of one group's share at a time, this map colours each **census tract** by
+its **largest single group** (2021 Census). A plurality is not a majority — in
+mixed neighbourhoods the leading group may hold well under half — so **hover for
+the top three groups**, which makes a 90% tract read differently from a 31% one.
+White-plurality tracts, most of the country, are deliberately drawn in a neutral
+grey so colour is reserved for distinguishing the other groups.
+
+Groups are the same as on the [Diversity](diversity.qmd) page (StatCan's visible
+minority groups, plus derived **White** and **Indigenous** from the same census
+base — the derivation is described there). Descriptive only: this maps where
+people live, nothing more.
+
+[← Back to Diversity](diversity.qmd)
+
+```{python}
+#| echo: false
+eth_geo = "data/geo/ct_2021.geojson"
+eth_path = "data/geo/statcan_ct_ethnicity_2021.csv"
+if os.path.exists(eth_geo) and os.path.exists(eth_path):
+    geo = json.load(open(eth_geo))
+    eth = pd.read_csv(eth_path, dtype={"ctuid": str})
+    sub = eth.dropna(subset=["all_vm"]).copy()
+    gdefs = [g for g in DIVERSITY_MAP_GROUPS if g[0] != "all_vm"]
+    gcols = [g[0] for g in gdefs]
+    glabels = {g[0]: g[1] for g in gdefs}
+    sub["largest"] = sub[gcols].astype(float).idxmax(axis=1).map(glabels)
+
+    def _top3(row):
+        s = row[gcols].astype(float).nlargest(3)
+        return " · ".join(f"{glabels[c]} {v:.0f}%" for c, v in s.items())
+    sub["detail"] = sub.apply(_top3, axis=1)
+
+    order = sub["largest"].value_counts().index.tolist()
+    cmap = {lab: CATEGORICAL_PALETTE[i % len(CATEGORICAL_PALETTE)]
+            for i, lab in enumerate([l for l in order if l != "White"])}
+    cmap["White"] = "#d4d4d4"
+    fig = choropleth_categorical(geo, sub, "ctuid", "largest", name_col="name",
+        ordered=order, color_map=cmap, detail_col="detail", height=700,
+        center={"lat": 51.5, "lon": -96.0}, zoom=3.0,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007). Largest single group per tract (plurality); hover shows the top three. White is derived (Not a visible minority − Indigenous identity); Indigenous = Indigenous identity. Descriptive only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+[← Back to Diversity](diversity.qmd)

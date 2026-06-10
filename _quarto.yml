@@ -16,6 +16,10 @@ website:
             text: Diversity
           - href: population/religion.qmd
             text: Religion
+          - href: population/languages.qmd
+            text: Languages
+          - href: population/citizenship.qmd
+            text: Citizenship
           - href: wellbeing/crime-safety.qmd
             text: Crime & Safety
       - text: Economy

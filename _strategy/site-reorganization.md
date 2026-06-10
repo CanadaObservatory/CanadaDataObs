@@ -57,11 +57,15 @@ deliberately omits gated/advocacy-parent comparators).
 - **NEW (owner): citizenship/nativity map + data** — Canadian-born / foreign-born citizens
   (naturalized) / non-citizens (incl. PRs). Census characteristics (citizenship + immigrant
   status) on the same CMA/tract machinery as diversity.
-- **Languages map — priority** — explicitly modelled on the diversity/religion maps
-  (tract map + groups dropdown + history; census mother tongue / home language).
-- **NEW (owner): "largest group" option on the Diversity map** — plurality
-  visible-minority group (incl. derived White & Indigenous) per tract/CMA; categorical
-  layer (`choropleth_categorical`-style) alongside the existing share dropdown.
+- ✅ **BUILT 2026-06-10 (Branch 3, branch `census-maps-languages-citizenship`):**
+  Languages CT map (`population/languages.qmd` — home language, 12 curated languages +
+  other/multiples; Cantonese = "Yue" id 1032), Citizenship CT map
+  (`population/citizenship.qmd` — Canadian-born/naturalized/non-citizens derived +
+  NPR option; tiles to 100), largest-group plurality map
+  (`population/largest-group.qmd`, own page — a 2nd tract geojson on diversity.qmd
+  would have hit 9.6 MB). **Remaining from these items:** the DA (dissemination-area)
+  tier for languages/citizenship — extend `build_da_profile`'s 5-metro pass the same
+  way; and a possible largest-LANGUAGE plurality map (same recipe, not yet requested).
 - **NEW (owner, 2026-06-10): median-age census-tract map** — part of Branch 1 (age &
   aging). Colour = median age (Viridis, true range; cap_quantiles fallback for
   student/LTC outlier tracts); hover = broad age breakdown (0–14 / 15–64 / 65+ shares +

@@ -1,0 +1,59 @@
+---
+title: "Citizenship"
+description: "Canadian-born, naturalized citizens, and non-citizens, mapped by census tract — 2021 Census"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import choropleth_groups_map
+```
+
+## Citizenship & Nativity, by Neighbourhood
+
+Where the **Canadian-born**, **naturalized citizens** (immigrants who have become
+citizens), and **non-citizens** live, by **census tract** (2021). **Use the
+dropdown to switch group**, and zoom and pan to your area. The pattern is the
+geography of arrival: newcomer neighbourhoods show high non-citizen shares,
+longer-settled immigrant neighbourhoods show high naturalized shares, and much of
+the rest of the urban map is 80–95% Canadian-born.
+
+**How the groups are assembled.** The census reports *citizenship* (citizen or
+not) and *immigrant status* (non-immigrant / immigrant / non-permanent resident)
+on the same population base, and we combine them transparently:
+**Canadian-born** is StatCan's "non-immigrants" (Canadian citizens by birth);
+**naturalized citizens** is Canadian citizens *minus* the Canadian-born; and
+**non-citizens** is direct from the census (permanent residents on track to
+citizenship, temporary residents, and others). The three groups sum to 100%.
+**Non-permanent residents** — people on work or study permits or claiming asylum,
+central to the recent [population-growth story](index.qmd) — are a *subset* of
+non-citizens, shown as a fourth map option. Census citizenship questions are
+asked of a 25% sample, so small tracts carry more noise than the diversity and
+language layers. Descriptive only: this maps who lives where, nothing more.
+
+```{python}
+#| echo: false
+geo_path = "data/geo/ct_2021.geojson"
+cit_path = "data/geo/statcan_ct_citizenship_2021.csv"
+CIT_GROUPS = [
+    ("canadian_born", "Canadian-born"),
+    ("naturalized", "Naturalized citizens"),
+    ("non_citizens", "Non-citizens"),
+    ("npr", "Non-permanent residents"),
+]
+if os.path.exists(geo_path) and os.path.exists(cit_path):
+    geo = json.load(open(geo_path))
+    cit = pd.read_csv(cit_path, dtype={"ctuid": str})
+    fig = choropleth_groups_map(geo, cit, "ctuid", CIT_GROUPS, name_col="name",
+        pop_col="population", colorscale="Viridis", opacity=0.6,
+        breakdown_exclude=["npr"],
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population in private households (25% sample). Canadian-born = non-immigrants; naturalized = citizens − Canadian-born; NPR is a subset of non-citizens. Descriptive only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Citizenship map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+## Download Data
+
+- [Citizenship & Nativity by Census Tract (CSV)](../data/geo/statcan_ct_citizenship_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007

@@ -1,0 +1,55 @@
+---
+title: "Languages"
+description: "The language spoken most often at home, mapped by census tract — 2021 Census"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import choropleth_groups_map
+```
+
+## The Language of Home, by Neighbourhood
+
+The language each household **speaks most often at home** — the census's most
+lived-in language measure — mapped by **census tract** (2021). **Use the dropdown
+to switch language**, and zoom and pan to your area. The map traces Canada's
+linguistic geography at street level: the French-speaking core of Québec and the
+bilingual belt through Montréal, Gatineau and Acadie; Punjabi in Surrey and
+Brampton; Mandarin and Cantonese across Richmond, Markham and Scarborough; Arabic
+in Montréal's north end and Ottawa; Tagalog in Winnipeg's north.
+
+Shares are **single responses** as a percentage of the tract's population
+(excluding institutional residents). People who report two or more home languages,
+plus the long tail of languages not listed here, appear as *Other & multiple
+responses*, so the listed groups don't sum to exactly 100%. Like the
+[Diversity](diversity.qmd) and [Religion](religion.qmd) maps, this is a
+descriptive picture of residential geography — census tracts exist only in larger
+urban areas, so rural Canada is blank by geography convention, not omission.
+
+```{python}
+#| echo: false
+geo_path = "data/geo/ct_2021.geojson"
+lang_path = "data/geo/statcan_ct_language_2021.csv"
+LANG_GROUPS = [
+    ("english", "English"), ("french", "French"), ("mandarin", "Mandarin"),
+    ("punjabi", "Punjabi"), ("cantonese", "Cantonese (Yue)"), ("spanish", "Spanish"),
+    ("arabic", "Arabic"), ("tagalog", "Tagalog (Filipino)"), ("italian", "Italian"),
+    ("vietnamese", "Vietnamese"), ("portuguese", "Portuguese"), ("urdu", "Urdu"),
+    ("other", "Other & multiple responses"),
+]
+if os.path.exists(geo_path) and os.path.exists(lang_path):
+    geo = json.load(open(geo_path))
+    lang = pd.read_csv(lang_path, dtype={"ctuid": str})
+    fig = choropleth_groups_map(geo, lang, "ctuid", LANG_GROUPS, name_col="name",
+        pop_col="population", colorscale="Viridis", opacity=0.6,
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); language spoken most often at home, single responses, % of tract population excluding institutional residents. Descriptive only.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Language map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+## Download Data
+
+- [Home Language by Census Tract (CSV)](../data/geo/statcan_ct_language_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007

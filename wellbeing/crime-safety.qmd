@@ -1,0 +1,436 @@
+---
+title: "Crime & Safety"
+description: "Safety in Canada — from long-run severity down to the neighbourhood: trends, who solves what, and where it happens"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date, BRAND
+from pipeline.charts import (choropleth_groups_map, category_bar, single_line,
+                             single_line_multi, lines_over_time_geo_select)
+
+CRIME = "data/wellbeing/statcan_crime_by_type.csv"
+d = pd.read_csv(CRIME, dtype={"cmauid": str})
+LATEST = int(d["year"].max())
+# Source notes are branded automatically by the Figure.show interceptor (charts.py);
+# the one exception is the markdown caption under the clearance chart below.
+SRC = lambda t=CRIME: f"Source: Statistics Canada, Table 35-10-0177-01 | Data as of: {get_data_date(t)}"
+```
+
+Safety is a basic part of well-being, and crime is usually discussed one incident
+at a time. This page puts those incidents in context — from the long-run *severity*
+of crime down to what is happening in a single neighbourhood. It is descriptive and
+non-partisan: the data, official measures, and comparisons across places and time do
+the work. The two authoritative sources are Statistics Canada's incident-based crime
+statistics (the UCR) and, for the local view, the Toronto Police Service open-data
+portal.
+
+## The headline measures: severity and homicide
+
+Two measures summarise the long-run picture. The **Crime Severity Index** weights
+each offence by its seriousness (so a homicide counts far more than a minor theft)
+and is indexed to 2006 = 100; the **homicide rate** is the most consistently measured
+serious crime over the long run, reaching back to 1961. **Use the dropdown** to switch
+between them (and drag the slider to see homicide's longer history). Everything after
+this breaks the summary apart — by *type* of crime, by whether it gets solved, and by
+*place*.
+
+```{python}
+#| echo: false
+csi = pd.read_csv("data/wellbeing/statcan_crime_severity.csv", parse_dates=["date"])[["date", "crime_severity_index"]]
+hom = pd.read_csv("data/wellbeing/statcan_homicide_rate.csv", parse_dates=["date"])[["date", "homicide_rate"]]
+m = pd.merge(csi, hom, on="date", how="outer").sort_values("date")
+csi_date = get_data_date("data/wellbeing/statcan_crime_severity.csv")
+fig = single_line_multi(m, "date", options=[
+    {"col": "crime_severity_index", "label": "Crime Severity Index",
+     "yaxis_title": "Crime Severity Index (2006 = 100)", "hovertemplate": "%{y:.1f}<extra></extra>"},
+    {"col": "homicide_rate", "label": "Homicide rate",
+     "yaxis_title": "Homicides per 100,000 population", "hovertemplate": "%{y:.2f}<extra></extra>"}],
+    source_note=f"Source: Statistics Canada, Tables 35-10-0026-01 (CSI) & 35-10-0068-01 (homicide) | Data as of: {csi_date}")
+# Open on the recent window (CSI starts 1998); the slider still spans homicide's 1961– history.
+fig.update_xaxes(range=["1997-06-01", f"{LATEST}-12-31"])
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+## What crime do people experience?
+
+The headline index hides *composition* — a single number can't tell you whether a
+place's issue is car theft, break-ins, assault, or fraud. These are the offences that
+make up most of the crime people encounter — everyday property and disorder crime, the
+three tiers of assault (**common**, **with a weapon or injury**, and **aggravated**),
+and (far rarer) homicide — as **rates per 100,000 people** so places and years are
+comparable. **Use the geography selector** to switch between Canada, any
+province or territory, and any of the ~40 metropolitan areas (grouped, and searchable —
+start typing a city name).
+
+::: {#crime-experience}
+```{python}
+#| echo: false
+from IPython.display import HTML, display
+
+EVERYDAY_COLORS = {
+    "Theft under $5,000": "#4e79a7", "Mischief": "#f28e2b",
+    "Shoplifting": "#59a14f", "Fraud": "#e15759",
+    "Breaking & entering": "#b07aa1", "Theft from a vehicle": "#76b7b2",
+    "Motor vehicle theft": "#9c755f", "Robbery": "#edc948",
+    "Common assault": "#d98cb6", "Assault with a weapon or injury": "#a23a7e",
+    "Aggravated assault": "#5a2347", "Homicide": "#111111",
+}
+fig, controls = lines_over_time_geo_select(
+    d, group_col="violation", value_col="rate", colors=EVERYDAY_COLORS,
+    yaxis_title="Rate per 100,000 population", div_id="crime-experience",
+    hover_unit=" per 100k", source_note=SRC(), rangeslider=True,
+    title="Crime rates by type")
+display(HTML(controls))
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+:::
+
+Two patterns stand out. The largest category by far is everyday **theft under
+$5,000** — the bucket that would include things like package or "porch" theft (no
+official statistic isolates parcel theft specifically). And **theft *from* a
+vehicle** has fallen sharply over the decade even as **vehicle theft itself** and
+**fraud** have climbed — which is exactly the divergence the next chart isolates.
+
+## What's rising, and what's falling?
+
+Overall crime is well below its 1990s–2000s levels, but that headline hides very
+different trajectories underneath it. This shows each offence's change in rate over
+the last decade for Canada. Colour indicates direction only.
+
+```{python}
+#| echo: false
+nat = d[d["geo_level"] == "national"].pivot_table(index="violation", columns="year", values="rate")
+Y0, Y1 = 2014, LATEST
+CHANGE_SET = ["Identity theft", "Fraud", "Shoplifting", "Assault with a weapon or injury",
+              "Motor vehicle theft", "Common assault", "Violent crime (total)",
+              "Aggravated assault", "Homicide", "Robbery", "Property crime (total)",
+              "Mischief", "Theft under $5,000", "Breaking & entering", "Theft from a vehicle"]
+rows = []
+for v in CHANGE_SET:
+    if v in nat.index and Y0 in nat.columns and Y1 in nat.columns:
+        a, b = nat.loc[v, Y0], nat.loc[v, Y1]
+        if pd.notna(a) and pd.notna(b) and a > 0:
+            rows.append((v, (b / a - 1) * 100))
+rows.sort(key=lambda r: r[1])
+labels = [r[0] for r in rows]
+vals = [r[1] for r in rows]
+colors = ["#d4763a" if v >= 0 else "#5a8fc2" for v in vals]
+fig = go.Figure(go.Bar(
+    x=vals, y=labels, orientation="h", marker_color=colors,
+    text=[f"{v:+.0f}%" for v in vals], textposition="auto", cliponaxis=False,
+    hovertemplate="%{y}: %{x:+.0f}%<extra></extra>"))
+fig.update_layout(
+    plot_bgcolor="white", height=560, showlegend=False,
+    xaxis=dict(title=f"Change in rate per 100,000, {Y0}→{Y1}", gridcolor="#e0e0e0",
+               ticksuffix="%", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5),
+    yaxis=dict(title=""), margin=dict(l=10, r=30, t=55, b=100))
+fig.add_annotation(text=SRC(), xref="paper", yref="paper", x=1, xanchor="right",
+                   y=-0.28, showarrow=False, font=dict(size=10, color="#999"), align="right")
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+**Fraud and identity theft have roughly doubled; shoplifting is up about two-thirds**
+— the categories driving public anxiety — while traditional property crimes like
+break-and-enter and theft from vehicles have fallen substantially. Among violent
+offences, **assault involving a weapon or injury has climbed about three times faster
+than common assault**. This split is why "is crime up or down?" has no single answer.
+
+## Hate crime
+
+Police-reported **hate crime** — criminal incidents motivated by hatred of a group's
+race or ethnicity, religion, sexual orientation, or other identity — has risen far
+faster than crime overall. It roughly **tripled since 2014**, with sharp jumps in
+2020 and again in 2023.
+
+```{python}
+#| echo: false
+hc_path = "data/wellbeing/statcan_hate_crime.csv"
+hc = pd.read_csv(hc_path)
+hc["date"] = pd.to_datetime(hc["year"], format="%Y")
+fig = single_line(hc, "date", "rate", title="",
+    yaxis_title="Hate-crime incidents per 100,000",
+    hovertemplate="%{y:.1f} per 100k<extra></extra>",
+    source_note=f"Source: Statistics Canada, Table 35-10-0191-01 | Data as of: {get_data_date(hc_path)}")
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+Police figures **undercount** hate crime — most is never reported to police — and
+rising counts partly reflect greater reporting and awareness, not only more
+incidents. The bar below shows the communities targeted **per capita** — incidents
+relative to each community's size, so a small community's experience isn't dwarfed by
+a larger one's. (Use the toggle to switch to raw incident counts.)
+
+```{python}
+#| echo: false
+hm_path = "data/wellbeing/statcan_hate_crime_motivation.csv"
+hm = pd.read_csv(hm_path)
+HM_LATEST = int(hm["year"].max())
+COMMUNITIES = {
+    "Jewish": "Jewish", "Black": "Black",
+    "Sexual orientation": "Sexual orientation",
+    "Arab (West Asian, Middle Eastern and North African origins)": "Arab / West Asian",
+    "Muslim (Islam)": "Muslim", "South Asian": "South Asian",
+    "East or Southeast Asian": "East / Southeast Asian",
+    "Catholic": "Catholic", "Indigenous": "Indigenous",
+}
+# 2021 Census community populations, for the per-capita view. Total population except
+# sexual orientation (no census count → StatCan survey estimate, ~1M aged 15+, flagged).
+# Religion: 98-10-0353 (Jewish/Muslim/Catholic). Visible minority: 98-10-0324 (Black,
+# South Asian; Arab+West Asian and the East/SE-Asian groups aggregated to match the
+# police categories). Indigenous identity: 98-10-0264. Refresh at the 2026 Census.
+POP_2021 = {
+    "Jewish": 335295, "Muslim (Islam)": 1775715, "Catholic": 10880355,
+    "Black": 1547865, "South Asian": 2571400,
+    "Arab (West Asian, Middle Eastern and North African origins)": 694020 + 360490,
+    "East or Southeast Asian": 1715775 + 218135 + 98895 + 957355 + 390340,
+    "Indigenous": 1807250, "Sexual orientation": 1000000,
+}
+sub = hm[(hm["year"] == HM_LATEST) & (hm["motivation"].isin(COMMUNITIES))].copy()
+sub["community"] = sub["motivation"].map(COMMUNITIES)
+sub["rate"] = sub["count"] / sub["motivation"].map(POP_2021) * 100000
+
+def _view(col):
+    s = sub.sort_values(col)            # ascending → largest bar on top
+    return s["community"].tolist(), s[col].tolist()
+cy, cx = _view("count")
+ry, rx = _view("rate")
+INC_TITLE = f"Police-reported hate-crime incidents, {HM_LATEST}"
+RATE_TITLE = "Incidents per 100,000 people of that community"
+btn_rate = dict(method="update", label="Per 100,000 of community",
+    args=[{"x": [rx], "y": [ry], "text": [[f"{v:,.1f}" for v in rx]],
+           "hovertemplate": "%{y}: %{x:,.1f} per 100,000<extra></extra>"},
+          {"xaxis.title.text": RATE_TITLE, "yaxis.categoryarray": ry, "xaxis.autorange": True}])
+btn_count = dict(method="update", label="Number of incidents",
+    args=[{"x": [cx], "y": [cy], "text": [[f"{v:,.0f}" for v in cx]],
+           "hovertemplate": "%{y}: %{x:,.0f} incidents<extra></extra>"},
+          {"xaxis.title.text": INC_TITLE, "yaxis.categoryarray": cy, "xaxis.autorange": True}])
+# Opens on the per-capita view (the fairer comparison); toggle for raw counts.
+fig = go.Figure(go.Bar(x=rx, y=ry, orientation="h", marker_color="#8c6bb1",
+    text=[f"{v:,.1f}" for v in rx], textposition="auto", cliponaxis=False,
+    hovertemplate="%{y}: %{x:,.1f} per 100,000<extra></extra>"))
+fig.update_layout(
+    plot_bgcolor="white", showlegend=False, height=170 + 30 * len(sub),
+    xaxis=dict(title=RATE_TITLE, gridcolor="#e0e0e0"),
+    yaxis=dict(title="", categoryorder="array", categoryarray=ry),
+    margin=dict(l=10, r=70, t=54, b=70),
+    updatemenus=[dict(active=0, x=0, xanchor="left", y=1.0, yanchor="bottom",
+        bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True,
+        buttons=[btn_rate, btn_count])])
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+::: {style="font-size:0.8em; color:#999; margin-top:0.3em;"}
+Source: Statistics Canada — hate crime: Table 35-10-0066-01 (selected police services, most of Canada); community populations for the per-capita view: 2021 Census (Tables 98-10-0353 / 0324 / 0264; the sexual-orientation denominator is a StatCan survey estimate, not a census count). Police motivation categories approximate, but don't exactly match, census groups.<br>`{python} BRAND`
+:::
+
+Jewish and Black Canadians record the most incidents in raw numbers — but **per
+capita the picture is starker**: relative to population, the Jewish community is
+targeted far more than any other group, roughly five times the next-highest rate.
+Incidents targeting Jewish people more than tripled from 2019, and the 2020–21
+increase fell heaviest on East and Southeast Asian communities — shifts that coincide
+with widely-reported events whose causes lie beyond these counts. (The breakdown is
+from police services covering most, but not all, of Canada, so totals differ slightly
+from the national series above.)
+
+## How often does a crime get solved?
+
+A "cleared" crime is one police have resolved — most often by laying a charge. The
+clearance rate is the share of reported incidents that get cleared, and it differs
+enormously by offence: violent crimes, where victims often know the offender, are
+usually solved; high-volume property crimes mostly are not.
+
+```{python}
+#| echo: false
+nl = d[(d["geo_level"] == "national") & (d["year"] == LATEST)].copy()
+nl["clearance"] = nl["cleared"] / nl["incidents"] * 100
+CLR = ["Homicide", "Aggravated assault", "Assault with a weapon or injury",
+       "Violent crime (total)", "Common assault", "Robbery",
+       "Shoplifting", "Property crime (total)", "Mischief", "Breaking & entering",
+       "Fraud", "Theft under $5,000", "Theft from a vehicle", "Motor vehicle theft"]
+cb = nl[nl["violation"].isin(CLR)][["violation", "clearance"]]
+fig = category_bar(cb, "violation", "clearance",
+                   xaxis_title=f"Share of reported incidents cleared, {LATEST}",
+                   ticksuffix="%", value_fmt=".0f", color="#4e79a7")
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+::: {style="font-size:0.8em; color:#999; margin-top:0.3em;"}
+`{python} SRC()`<br>`{python} BRAND`
+:::
+
+Only about **1 in 10 reported vehicle thefts** and a similar share of thefts-from-
+vehicles are cleared, versus more than half of violent crimes — and clearance **rises
+with severity** (aggravated assaults are solved far more often than common ones). This
+is the statistical counterpart to a common lived experience — that everyday property
+crime often goes unresolved.
+
+## How metro areas compare
+
+Crime across Canada's ~40 largest metropolitan areas for the latest year
+(`{python} LATEST`). **Use the dropdown to change the measure** — it opens on the
+overall **Crime Severity Index** (the severity-weighted summary, an index), then
+breaks apart into specific offence rates per 100,000. Each measure rescales to its
+own range, so a city that ranks high on auto theft may not on break-ins. Zoom and
+pan to your area. (Larger metros only.)
+
+```{python}
+#| echo: false
+cma_geo = json.load(open("data/geo/cma_2021.geojson"))
+cl = d[(d["geo_level"] == "cma") & (d["year"] == LATEST)]
+wide = cl.pivot_table(index=["cmauid", "name"], columns="violation", values="rate").reset_index()
+# Join the Crime Severity Index (a weighted index — a different unit from the rates) so
+# it leads the dropdown as the overall-severity view, then the specific offences follow.
+cma_ind = pd.read_csv("data/geo/statcan_cma_indicators.csv", dtype={"cmauid": str})
+wide = wide.merge(cma_ind[["cmauid", "crime_severity"]].rename(columns={"crime_severity": "csi"}),
+                  on="cmauid", how="left")
+CMA_GROUPS = [
+    ("csi", "Crime Severity Index", {"suffix": "", "fmt": ".1f"}),
+    # Violent offences
+    ("Violent crime (total)", "Violent crime"),
+    ("Common assault", "Common assault"),
+    ("Robbery", "Robbery"),
+    ("Homicide", "Homicide", {"fmt": ".1f"}),
+    # Property offences
+    ("Property crime (total)", "Property crime"),
+    ("Motor vehicle theft", "Auto theft"),
+    ("Breaking & entering", "Break & enter"),
+    ("Theft from a vehicle", "Theft from vehicle"),
+    ("Fraud", "Fraud")]
+fig = choropleth_groups_map(
+    cma_geo, wide, "cmauid", CMA_GROUPS, name_col="name", colorscale="YlOrRd",
+    breakdown=False, value_fmt=".0f", value_suffix=" per 100k",
+    cbar_title="{label}", cbar_ticksuffix="", center={"lat": 56.0, "lon": -96.0}, zoom=2.6,
+    source_note="Source: Statistics Canada, Tables 35-10-0026-01 (Crime Severity Index) "
+                "& 35-10-0177-01 (offence rates, per 100,000), latest year; larger metros only.")
+fig.show(config={"displaylogo": False, "scrollZoom": True,
+                 "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+Auto theft clusters in the Prairie metros and the Toronto–Hamilton corridor, while
+violent crime, break-and-enter, and theft-from-vehicle each have different
+geographies again. A single "crime ranking" of cities hides these very different
+stories — which is why the dropdown matters. (Homicide is shown as a rate too, but
+rests on small annual counts in any one metro, so read it cautiously.)
+
+## Toronto, neighbourhood by neighbourhood
+
+For the everyday, local scale — the texture of crime in one's own area — the Toronto
+Police Service publishes rates per 100,000 for each of the city's **158
+neighbourhoods**. **Switch the offence with the dropdown**; hover any neighbourhood for
+its rate and population. These are the Toronto Police's own categories and counting
+rules — a *different* body from Statistics Canada — so this map isn't directly
+comparable to the national and metro figures above; read it as a **local texture** on
+its own terms, not on the same scale. ("Assault (all types)" here, for instance,
+combines *every* assault offence — common, with a weapon, aggravated, and more — not
+just the common-assault tier shown on the StatCan charts.)
+
+```{python}
+#| echo: false
+tor_geo = json.load(open("data/geo/toronto_neighbourhoods.geojson"))
+tor = pd.read_csv("data/geo/toronto_neighbourhood_crime.csv", dtype={"hood_id": str})
+TOR_YEAR = int(tor["year"].iloc[0])
+TOR_GROUPS = [("auto_theft", "Auto theft"), ("bike_theft", "Bike theft"),
+              ("break_enter", "Break & enter"), ("theft_from_mv", "Theft from vehicle"),
+              ("assault", "Assault (all types)"), ("robbery", "Robbery"),
+              ("theft_over", "Theft over $5,000"), ("shooting", "Shootings & discharges"),
+              ("homicide", "Homicide")]
+fig = choropleth_groups_map(
+    tor_geo, tor, "hood_id", TOR_GROUPS, name_col="name", colorscale="YlOrRd",
+    breakdown=False, value_fmt=".0f", value_suffix=" per 100k", cbar_title="{label}",
+    cbar_ticksuffix="", pop_col="population", center={"lat": 43.72, "lon": -79.38},
+    zoom=9.3, height=620,
+    source_note=f"Source: Toronto Police Service, Neighbourhood Crime Rates ({TOR_YEAR}). "
+                "Contains information licensed under the Open Government Licence – Ontario.")
+fig.show(config={"displaylogo": False, "scrollZoom": True,
+                 "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+Rates per capita look different from raw counts: busy downtown and some inner-suburb
+neighbourhoods rank high on theft and assault, while violent firearm incidents are
+rarer and more dispersed. Note that police locations are approximate (offset to the
+nearest intersection for privacy), so this is a neighbourhood-level picture, not an
+address-level one.
+
+## Is crime seasonal?
+
+A common intuition is that crime climbs with the summer heat. Toronto's monthly data
+says *mostly not* — most offences are spread fairly evenly across the year. The big
+exception is **bike theft**, which tracks the cycling season: nearly **half** its
+annual total falls in June–August. Assault is mildly summer-peaked; the rest are
+close to flat. Each line below shows the share of that crime's year-round incidents
+falling in each month (a perfectly even crime would sit on the 8.3% line).
+
+```{python}
+#| echo: false
+sea = pd.read_csv("data/geo/toronto_crime_seasonality.csv")
+piv = sea.pivot_table(index="month", columns="crime", values="count", aggfunc="sum")
+pct = piv.div(piv.sum(axis=0), axis=1) * 100      # each crime's 12 months sum to 100%
+MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+SEA_COLORS = {"Bike theft": "#d62728", "Assault": "#4e79a7", "Theft from vehicle": "#76b7b2",
+              "Auto theft": "#9c755f", "Break & enter": "#b07aa1", "Robbery": "#edc948"}
+fig = go.Figure()
+for c in ["Bike theft", "Assault", "Theft from vehicle", "Auto theft", "Break & enter", "Robbery"]:
+    if c in pct.columns:
+        thick = c == "Bike theft"
+        fig.add_trace(go.Scatter(
+            x=MO, y=[pct[c].get(m + 1) for m in range(12)], name=c, mode="lines+markers",
+            line=dict(color=SEA_COLORS[c], width=3.5 if thick else 1.6),
+            marker=dict(size=7 if thick else 4),
+            hovertemplate=f"{c}, %{{x}}: %{{y:.1f}}%<extra></extra>"))
+fig.add_hline(y=100 / 12, line_dash="dot", line_color="#aaa", opacity=0.8)
+fig.update_layout(
+    plot_bgcolor="white", height=460, hovermode="x unified",
+    xaxis=dict(title="", gridcolor="#e0e0e0"),
+    yaxis=dict(title="Share of the year's incidents", gridcolor="#e0e0e0", ticksuffix="%"),
+    legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+    margin=dict(l=10, r=160, t=20, b=70))
+fig.add_annotation(
+    text="Source: Toronto Police Service open data (occurrences 2014–, by month). Each crime's 12 months sum to 100%.",
+    xref="paper", yref="paper", x=0, xanchor="left", y=-0.16, showarrow=False,
+    font=dict(size=10, color="#999"))
+fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+
+bt = pd.read_csv("data/geo/toronto_bike_thefts.csv")
+st = bt[bt["view"] == "status"]
+BIKE_REC = f"{int(st[st['label'].astype(str).str.upper() == 'RECOVERED']['count'].sum()) / int(st['count'].sum()) * 100:.0f}"
+```
+
+So "more crime in summer" turns out to be largely a **bike-theft story** (and, to a
+lesser degree, assault) — a reminder that some crime is shaped by opportunity and the
+calendar, but most is not. Bike theft also illustrates the low-clearance pattern: of
+the nearly 40,000 reported in Toronto since 2014, only about **`{python} BIKE_REC`%**
+are ever recovered.
+
+## What this page leaves out (for now)
+
+Honesty about gaps matters as much as coverage:
+
+- **No "porch / parcel theft" statistic exists.** Neither Statistics Canada nor the
+  Toronto Police break it out; the closest measure is "theft under $5,000."
+- **No e-scooter collision data.** Kick-style e-scooters are not street-legal in
+  Toronto, so police collision data does not track them. The cyclist/pedestrian
+  *Killed-or-Seriously-Injured* dataset is a separate, buildable traffic-safety view.
+- **Perceived safety is a different question from recorded crime.** Whether people
+  *feel* safe — and how much crime never gets reported — comes from Statistics
+  Canada's victimization survey, which runs only every few years (2019 is current;
+  the next lands ~2027). It is worth adding as a clearly-labelled survey layer.
+- **Cross-city comparison uses StatCan only.** Other cities' police portals
+  (Vancouver, Montréal, Ottawa…) use incompatible categories and counting rules and
+  are explicitly *not* comparable to each other; the comparable layer is the StatCan
+  metro data above, with Toronto as a deeper local example.
+
+## Download data
+
+- [Crime by type — Canada/provinces/metros (CSV)](../data/wellbeing/statcan_crime_by_type.csv) — Statistics Canada Table 35-10-0177-01
+- [Crime Severity Index (CSV)](../data/wellbeing/statcan_crime_severity.csv) — Statistics Canada Table 35-10-0026-01
+- [Homicide rate (CSV)](../data/wellbeing/statcan_homicide_rate.csv) — Statistics Canada Table 35-10-0068-01
+- [Hate crime — national rate (CSV)](../data/wellbeing/statcan_hate_crime.csv) — Statistics Canada Table 35-10-0191-01
+- [Hate crime — by motivation (CSV)](../data/wellbeing/statcan_hate_crime_motivation.csv) — Statistics Canada Table 35-10-0066-01
+- [City indicators incl. Crime Severity (CSV)](../data/geo/statcan_cma_indicators.csv) — Statistics Canada (2021 Census + Table 35-10-0026-01)
+- [Toronto neighbourhood crime rates (CSV)](../data/geo/toronto_neighbourhood_crime.csv) — Toronto Police Service (OGL – Ontario)
+- [Toronto bicycle thefts summary (CSV)](../data/geo/toronto_bike_thefts.csv) — Toronto Police Service (OGL – Ontario)
+- [Toronto crime seasonality by month (CSV)](../data/geo/toronto_crime_seasonality.csv) — Toronto Police Service (OGL – Ontario)

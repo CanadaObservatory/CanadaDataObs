@@ -74,8 +74,12 @@ website:
             text: Air Quality by City
           - href: environment/climate-change.qmd
             text: Climate Change
-      - href: wellbeing/index.qmd
-        text: Society & Well-being
+      - text: Society & Well-being
+        menu:
+          - href: wellbeing/index.qmd
+            text: Well-being
+          - href: wellbeing/crime-safety.qmd
+            text: Crime & Safety
       - href: about.qmd
         text: About
     right:

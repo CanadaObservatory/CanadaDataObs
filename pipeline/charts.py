@@ -7,8 +7,35 @@ import plotly.graph_objects as go
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, HIGHLIGHT_COUNTRY,
-    PEER_COUNTRIES, COMPARATOR_COLORS, SNAPSHOT_SPECS, DATA_DATE, get_data_date,
+    PEER_COUNTRIES, COMPARATOR_COLORS, SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
+
+
+# --- Site attribution on every figure (one cross-cutting interceptor) ----------
+# Source notes are rendered in ~140 places site-wide and in several shapes: a
+# builder's `source_note=` annotation, an inline `fig.update_layout(annotations=…)`,
+# `fig.add_annotation(text="Source…")`, etc. Rather than brand each one (and risk
+# missing some or doing it inconsistently), we intercept `Figure.show()` — which
+# every chart block calls — and append a "<br>{BRAND}" line to the figure's source
+# annotation (the one whose text contains "Source"). It is idempotent (skips if the
+# brand is already present), a no-op for figures without a source note, and uses
+# Plotly's own `<br>` line break (which only works inside a Plotly annotation — a
+# source note rendered as Quarto *markdown* must add the brand in its markdown, since
+# `<br>` there renders literally).
+if not getattr(go.Figure, "_datacan_branded", False):
+    _orig_show = go.Figure.show
+
+    def _branded_show(self, *args, **kwargs):
+        for _ann in (self.layout.annotations or ()):
+            _t = _ann.text or ""
+            if "Source" in _t and BRAND not in _t:
+                _ann.text = f"{_t}<br>{BRAND}"
+                break
+        return _orig_show(self, *args, **kwargs)
+
+    go.Figure.show = _branded_show
+    go.Figure._datacan_branded = True
+
 
 
 def _base_layout(title, yaxis_title, xaxis_title="", range_slider=True,
@@ -778,7 +805,9 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
                           colorscale="Viridis", source_note=None,
                           center=None, zoom=2.6, height=660, cap_quantiles=(0.0, 1.0),
                           opacity=0.82, breakdown=True, breakdown_min=0.5,
-                          breakdown_exclude=(), pop_col=None):
+                          breakdown_exclude=(), pop_col=None,
+                          value_fmt=".1f", value_suffix="%", cbar_title="% {label}",
+                          cbar_ticksuffix="%"):
     """Choropleth with a dropdown to switch the mapped variable across `groups`
     (list of (column, label)). Used for the descriptive share maps (visible
     minority, religion, land cover); values are percentages and each option
@@ -811,7 +840,14 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     "Population: N,NNN" line — the area's head-count, i.e. the denominator the shares
     are computed on (so a 50% share in a 90-person block reads differently from a
     5,000-person tract). Pre-formatted to a comma string to dodge the bundled-Plotly
-    d3-format quirk."""
+    d3-format quirk.
+
+    The layer defaults to **share/percentage** semantics (hover `:.1f%`, colourbar
+    "% {label}"). For a non-percentage value such as a crime **rate per 100,000**,
+    pass `value_fmt`/`value_suffix` (the hover number) and `cbar_title`/
+    `cbar_ticksuffix` (the colourbar) — e.g. `value_fmt=".0f"`,
+    `value_suffix=" per 100k"`, `cbar_title="{label}"`, `cbar_ticksuffix=""` — and
+    set `breakdown=False`, since rates don't compose into a profile."""
     import numpy as np
     import pandas as pd
     center = center or {"lat": 56.0, "lon": -96.0}
@@ -821,7 +857,15 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     def rng(col):
         return float(df[col].quantile(qlo)), float(df[col].quantile(qhi))
 
-    c0, l0 = groups[0]
+    def gfmt(g):
+        # A groups item is (col, label) or (col, label, {fmt?, suffix?, cbar_suffix?}).
+        # The optional dict lets each dropdown option carry its own units — e.g. a Crime
+        # Severity *index* sitting alongside *rate per 100k* offences in one map.
+        o = g[2] if len(g) > 2 else {}
+        return (g[0], g[1], o.get("fmt", value_fmt), o.get("suffix", value_suffix),
+                o.get("cbar_suffix", cbar_ticksuffix))
+
+    c0, l0, fmt0, suf0, cbsuf0 = gfmt(groups[0])
     lo0, hi0 = rng(c0)
 
     # Optional population column → "Population: N,NNN" line in the hover (the area's
@@ -853,23 +897,25 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
         pop_line = "Population: %{customdata[1]}<br>" if pop is not None else ""
         custom = (np.column_stack([df[name_col].to_numpy(), pop]) if pop is not None
                   else df[[name_col]].to_numpy())
-        hovertemplate = f"<b>%{{customdata[0]}}</b><br>{pop_line}{l0}: %{{z:.1f}}%<extra></extra>"
+        hovertemplate = f"<b>%{{customdata[0]}}</b><br>{pop_line}{l0}: %{{z:{fmt0}}}{suf0}<extra></extra>"
 
     fig = go.Figure(go.Choroplethmapbox(
         geojson=geojson, locations=locs, z=df[c0].tolist(), featureidkey="id",
         colorscale=colorscale, zmin=lo0, zmax=hi0,
         marker=dict(line=dict(width=0.2, color="rgba(255,255,255,0.4)"), opacity=opacity),
-        colorbar=dict(title=f"% {l0}", ticksuffix="%"),
+        colorbar=dict(title=cbar_title.format(label=l0), ticksuffix=cbsuf0),
         customdata=custom,
         hovertemplate=hovertemplate,
     ))
     buttons = []
-    for col, label in groups:
+    for g in groups:
+        col, label, fmt, suf, cbsuf = gfmt(g)
         lo, hi = rng(col)
         args = {"z": [df[col].tolist()], "zmin": lo, "zmax": hi,
-                "colorbar.title.text": f"% {label}"}
+                "colorbar.title.text": cbar_title.format(label=label),
+                "colorbar.ticksuffix": cbsuf}
         if not breakdown:   # keep the full-composition hover stable across the dropdown
-            args["hovertemplate"] = f"<b>%{{customdata[0]}}</b><br>{pop_line}{label}: %{{z:.1f}}%<extra></extra>"
+            args["hovertemplate"] = f"<b>%{{customdata[0]}}</b><br>{pop_line}{label}: %{{z:{fmt}}}{suf}<extra></extra>"
         buttons.append(dict(method="restyle", label=label, args=[args]))
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
@@ -1420,6 +1466,148 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
                            xanchor="left", y=-0.18, showarrow=False,
                            font=dict(size=10, color="#999"))
     return fig
+
+
+def lines_over_time_geo_select(df, *, group_col, value_col, colors, yaxis_title,
+                               div_id, year_col="year", geo_col="geography",
+                               geo_level_col="geo_level", geo_name_col="name",
+                               default_geo="Canada", source_note=None, height=520,
+                               level_labels=None, line_width=2.2, hover_unit="",
+                               rangeslider=False, hover_toggle=True, title=None):
+    """Multi-line annual time series with a grouped, **searchable native `<select>`**
+    to switch which geography is shown — a drop-in replacement for Plotly's
+    `updatemenus` dropdown when there are too many options to list flat (the Plotly
+    menu overflows and offers no search). The select carries `<optgroup>`s by
+    geography level and uses native browser type-ahead, so it scales to dozens of
+    options with no need to trim the list.
+
+    `df` is long: (geo_col, geo_level_col, geo_name_col, group_col, year_col,
+    value_col). `colors` (dict group->colour) fixes the line set + legend order (only
+    groups present in it are drawn). Returns **(fig, controls_html)**: in the .qmd,
+    wrap the cell in a `::: {#div_id}` fence, `display(HTML(controls_html))`, then
+    `fig.show()`. The select's JS resolves Plotly via `requirejs` (the AMD-bundle
+    gotcha) and `restyle`s every line to the chosen geography's data, scoped to
+    `#div_id .plotly-graph-div`; the per-geography data blob + handler are namespaced
+    by `div_id`, so several can coexist on one page. Works on file:// (no fetch).
+
+    `level_labels` maps a geo_level value to its optgroup label (None → bare options
+    listed before the groups); defaults cover national / province / cma.
+
+    `rangeslider=True` adds a draggable x-axis range slider under the chart (with extra
+    bottom margin + the source note pushed below it). `hover_toggle=True` (default)
+    appends small **Hover on/off** buttons to the controls row, right-aligned next to
+    the `<select>`, that flip the figure's `hovermode` via `relayout` — the maps'
+    in-chart hover toggle, but placed outside the plot area. `title` (e.g. "Crime
+    rates by type") draws an in-figure title "`title` — {geography}" that the selector
+    JS keeps in sync — so a downloaded PNG still shows which geography it is (the
+    `<select>` itself isn't captured in the image)."""
+    import json as _json
+    import re as _re
+    import html as _html
+    import pandas as pd
+    groups = [g for g in colors if g in set(df[group_col])]
+    years = sorted(df[year_col].unique())
+    piv = (df[df[group_col].isin(groups)]
+           .pivot_table(index=[geo_col, group_col], columns=year_col, values=value_col))
+
+    def yvals(geo, grp):
+        if (geo, grp) in piv.index:
+            row = piv.loc[(geo, grp)]
+            return [None if (y not in row.index or pd.isna(row[y])) else round(float(row[y]), 1)
+                    for y in years]
+        return [None] * len(years)
+
+    labels = {"national": None, "province": "Provinces & territories",
+              "cma": "Census metropolitan areas"}
+    if level_labels:
+        labels.update(level_labels)
+    order = {"national": 0, "province": 1, "cma": 2}
+    meta = (df.drop_duplicates(geo_col)[[geo_col, geo_level_col, geo_name_col]]
+            .assign(_o=lambda x: x[geo_level_col].map(lambda l: order.get(l, 9)))
+            .sort_values(["_o", geo_name_col]))
+
+    fig = go.Figure()
+    for g in groups:
+        fig.add_trace(go.Scatter(
+            x=years, y=yvals(default_geo, g), name=str(g), mode="lines",
+            line=dict(color=colors[g], width=line_width),
+            hovertemplate=f"{g}: %{{y:,.0f}}{hover_unit}<extra></extra>"))
+    xaxis = dict(title="", gridcolor="#e0e0e0", dtick=5)
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
+    # A title carrying the selected geography keeps that context in a downloaded PNG
+    # (the <select> sits outside the figure, so it isn't captured otherwise); the
+    # geography-select JS keeps it in sync.
+    _dn = df[df[geo_col] == default_geo][geo_name_col]
+    default_name = _dn.iloc[0] if len(_dn) else default_geo
+    fig.update_layout(
+        plot_bgcolor="white", height=height, hovermode="x unified",
+        xaxis=xaxis,
+        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        margin=dict(l=10, r=190, t=(50 if title else 20), b=(130 if rangeslider else 80)))
+    if title:
+        fig.update_layout(title=dict(text=f"{title} — {default_name}", x=0, xanchor="left",
+                                     font=dict(size=15, color="#333")))
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=(-0.30 if rangeslider else -0.16),
+                           showarrow=False, font=dict(size=10, color="#999"))
+
+    # Grouped <select> + per-geography data blob + a namespaced restyle handler.
+    geo_data, bare, optgroups = {}, [], {}
+    for _, r in meta.iterrows():
+        geo, lvl, nm = r[geo_col], r[geo_level_col], r[geo_name_col]
+        geo_data[geo] = [yvals(geo, g) for g in groups]
+        opt = (f'<option value="{_html.escape(str(geo))}"'
+               f'{" selected" if geo == default_geo else ""}>{_html.escape(str(nm))}</option>')
+        grp_label = labels.get(lvl, lvl)
+        (bare if grp_label is None else optgroups.setdefault(grp_label, [])).append(opt)
+    sel_inner = "".join(bare) + "".join(
+        f'<optgroup label="{_html.escape(str(lbl))}">{"".join(opts)}</optgroup>'
+        for lbl, opts in optgroups.items())
+    jsid = _re.sub(r"\W", "_", div_id)
+    fn = f"geoSel_{jsid}"
+    hfn = f"hoverSet_{jsid}"
+    # Optional Hover on/off buttons, right-aligned in the controls row (outside the
+    # plot), flipping hovermode via relayout — the maps' toggle, but out of the chart.
+    hover_html, hover_js = "", ""
+    if hover_toggle:
+        _bs = ("font-size:0.8em;padding:2px 9px;border:1px solid #ccc;background:#fff;"
+               "border-radius:4px;cursor:pointer;color:#555;")
+        hover_html = (
+            '<span style="margin-left:auto;display:inline-flex;align-items:center;gap:4px;">'
+            '<span style="font-size:0.82em;color:#888;">Hover:</span>'
+            f'<button type="button" onclick="{hfn}(true)" style="{_bs}">on</button>'
+            f'<button type="button" onclick="{hfn}(false)" style="{_bs}">off</button></span>')
+        hover_js = (
+            f'function {hfn}(on){{'
+            f'var gd=document.querySelector("#{div_id} .plotly-graph-div");'
+            'var P=window.Plotly;try{if(!P&&window.requirejs)P=window.requirejs("plotly");}catch(e){}'
+            f'if(!P||!gd){{return setTimeout(function(){{{hfn}(on);}},300);}}'
+            'P.relayout(gd,{hovermode: on ? "x unified" : false});}')
+    title_js = ""
+    if title:
+        title_js = (f'var s=document.getElementById("sel_{jsid}");'
+                    'var nm=s?s.options[s.selectedIndex].text:v;'
+                    f'P.relayout(gd,{{"title.text":{_json.dumps(title + " — ")}+nm}});')
+    controls = (
+        '<div style="display:flex;align-items:center;gap:0.5em;flex-wrap:wrap;margin-bottom:0.4em;">'
+        f'<label for="sel_{jsid}" style="font-size:0.9em;color:#555;">Geography:</label>'
+        f'<select id="sel_{jsid}" onchange="{fn}(this.value)" '
+        'style="font-size:0.9em;padding:3px 6px;border:1px solid #ccc;border-radius:4px;">'
+        f'{sel_inner}</select>'
+        f'{hover_html}</div>'
+        f'<script>window.__geo_{jsid}={_json.dumps(geo_data)};'
+        f'function {fn}(v){{'
+        f'var gd=document.querySelector("#{div_id} .plotly-graph-div");'
+        'var P=window.Plotly;try{if(!P&&window.requirejs)P=window.requirejs("plotly");}catch(e){}'
+        f'if(!P||!gd||!window.__geo_{jsid}){{return setTimeout(function(){{{fn}(v);}},300);}}'
+        f'var ys=window.__geo_{jsid}[v];if(!ys)return;'
+        'P.restyle(gd,{y:ys},ys.map(function(_,i){return i;}));'
+        f'{title_js}}}'
+        f'{hover_js}</script>')
+    return fig, controls
 
 
 def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=True,

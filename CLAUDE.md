@@ -50,6 +50,9 @@ DataCan/
 ├── population/neighbourhoods*.qmd ← per-metro **dissemination-area diversity** maps — Vancouver/Toronto/Montréal/Calgary/Ottawa (DA = StatCan's finest ~400–700-person geography; ~1–3 MB each, built by build_da_profile)
 ├── population/religion-neighbourhoods*.qmd ← per-metro **DA religion** maps, same 5 metros (religion-neighbourhoods.qmd = Vancouver)
 ├── population/age-neighbourhoods.qmd ← **median-age census-tract map** (~3.9 MB own page): colour = median age (Viridis, 2nd–98th-pct cap — student ~22 / retirement ~85 outlier tracts), hover = StatCan's own broad-group % distribution (0–14/15–64/65+) + population via `choropleth_map(extra_hover=…)`; cross-linked BOTH ways with the income + home-value tract maps (descriptive affordability companion)
+├── population/languages.qmd ← **Languages** (People-&-Society dropdown): home-language CT groups map (~5.3 MB) — 12 curated languages + "Other & multiple responses" (single responses ÷ base 735, so listed shares DON'T tile to 100; ids in `LANGUAGE_GROUPS` — Cantonese is **"Yue (Cantonese)" id 1032**, Tagalog 879, Mandarin 1028)
+├── population/citizenship.qmd ← **Citizenship** (People-&-Society dropdown): CT groups map (~4.5 MB) of **Canadian-born / naturalized / non-citizens** (DERIVED like White/Indigenous: born = "Non-immigrants" id 1528 [= citizens-by-birth], naturalized = citizens 1523 − 1528 clamped, non-citizens 1526 direct; tile to 100%; base 1522, 25% sample) + **NPR (1537) as a 4th overlapping option** excluded from the hover breakdown
+├── population/largest-group.qmd ← **plurality map** (own ~4.1 MB page; a 2nd embedded tract-geojson made diversity.qmd hit 9.6 MB → moved out, teaser-linked): each tract coloured by its largest single group via `choropleth_categorical(detail_col=)` — top-3-groups hover; **White-plurality tracts deliberately neutral grey** so colour distinguishes the other groups
 ├── geography/index.qmd    ← **Where People Live** (Land-&-Environment-dropdown landing, "The Land" group): population density (province log-scale + by-city) + "Canada in the world" framing
 ├── geography/land.qmd     ← 15 ecozones (categorical) + land cover by ecozone (dropdown); nav text "Ecozones & Land Cover"
 ├── geography/elevation.qmd ← Leaflet elevation web-map (NRCan CBME hillshade + named peaks + layer toggles; the site's first Leaflet page)
@@ -759,6 +762,17 @@ spending (SHA `HC51` per-capita `V` prices), measles + DTP3 immunization (WB
 `SH.IMM.MEAS`/`SH.IMM.IDPT`, 1980–; measles → scorecard good=high with a 95%
 herd-immunity benchmark line). The CCHS cube also carries age groups + provinces —
 future by-age/provincial cuts are one filter away.
+**Branch 3 (census map layers) BUILT 2026-06-10** (branch
+`census-maps-languages-citizenship`): three new map layers off the SAME cached CT
+profile pass (`build_ct_from_profile` now emits SIX CSVs) — **Languages**
+(`population/languages.qmd`, 6,163 tracts), **Citizenship** (`population/citizenship.qmd`,
+6,158 tracts; pop-weighted urban sanity 68.6 born / 20.7 naturalized / 10.7 non-citizen /
+3.1 NPR — matches the national figures' urban tilt; the 3 groups tile to 100.0), and the
+**largest-group plurality map** (`population/largest-group.qmd`, from the EXISTING
+ethnicity CSV — chart-only). People & Society dropdown grew to 6 items (Languages +
+Citizenship added). **The DA (dissemination-area) tier for languages/citizenship is the
+noted follow-up** — extend `build_da_profile` (the 5-metro pass) the same way these
+extended the CT pass.
 Deferred (candidates, not committed):
 **homeownership rate** (Census-only — no clean annual StatCan series; revisit when
 2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),

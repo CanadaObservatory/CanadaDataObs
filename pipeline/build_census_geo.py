@@ -198,6 +198,35 @@ def build_cma():
 AGE_CT_CHARS = {8: "population", 35: "share_0_14", 36: "share_15_64",
                 37: "share_65_plus", 38: "share_85_plus", 40: "median_age"}
 
+# Language spoken most often at home (100% data; single responses): the top home
+# languages nationally. Base 735 = total population excluding institutional
+# residents; multiple responses mean the listed shares don't tile to 100% — the
+# remainder is published as "Other & multiple responses" rather than hidden.
+LANGUAGE_BASE = 735
+LANGUAGE_GROUPS = [
+    (738, "english", "English"),
+    (739, "french", "French"),
+    (1028, "mandarin", "Mandarin"),
+    (963, "punjabi", "Punjabi"),
+    (1032, "cantonese", "Cantonese (Yue)"),
+    (985, "spanish", "Spanish"),
+    (849, "arabic", "Arabic"),
+    (879, "tagalog", "Tagalog (Filipino)"),
+    (982, "italian", "Italian"),
+    (861, "vietnamese", "Vietnamese"),
+    (983, "portuguese", "Portuguese"),
+    (967, "urdu", "Urdu"),
+]
+
+# Citizenship / nativity (25% sample data, private households). The three
+# top-level groups are DERIVED the same way as White/Indigenous on the diversity
+# layer: Canadian-born = "Non-immigrants" (StatCan: "Canadian citizens by birth"),
+# naturalized = Canadian citizens − non-immigrants (clamped ≥0 for small-area
+# rounding), non-citizens direct (1526). NPR (1537) overlaps non-citizens and is
+# kept as an extra dropdown option, excluded from the hover composition.
+CITIZENSHIP_CHARS = {1522: "base", 1523: "citizens", 1526: "non_citizens",
+                     1527: "imm_base", 1528: "non_immigrants", 1537: "npr"}
+
 # Visible-minority groups: (census CHARACTERISTIC_ID in the 2021 profile, column, label).
 # Descriptive only — no evaluative direction. "Visible minority" is StatCan's term.
 # 1683 is the population base (denominator); 1684 = all VM. The 10 subgroups follow.
@@ -365,7 +394,9 @@ def build_ct_from_profile():
 
     needed_ids = ({cid for cid, _, _ in VM_GROUPS} | {1683, NOT_VM_ID, INDIGENOUS_ID}
                   | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE}
-                  | set(AGE_CT_CHARS))
+                  | set(AGE_CT_CHARS)
+                  | {LANGUAGE_BASE} | {cid for cid, _, _ in LANGUAGE_GROUPS}
+                  | set(CITIZENSHIP_CHARS))
     cols = ["DGUID", "GEO_NAME", "CHARACTERISTIC_ID", "CHARACTERISTIC_NAME", "C1_COUNT_TOTAL"]
     keep = []
     for chunk in pd.read_csv(z.open(csvn), usecols=cols, dtype=str,
@@ -427,6 +458,34 @@ def build_ct_from_profile():
     age = age.dropna(subset=["median_age"])
     age.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_age_2021.csv", index=False)
     print(f"CT age: {len(age)} tracts")
+
+    # --- language spoken most often at home (% of population base 735) ---
+    lbase = ct_series(LANGUAGE_BASE)
+    lang = pd.DataFrame({"name": names})
+    for cid, col, _ in LANGUAGE_GROUPS:
+        lang[col] = (ct_series(cid) / lbase * 100).round(1)
+    listed = lang[[c for _, c, _ in LANGUAGE_GROUPS]].sum(axis=1)
+    lang["other"] = (100 - listed).clip(lower=0).round(1)   # other + multiple responses
+    lang["population"] = lbase.round().astype("Int64")
+    lang.index.name = "ctuid"
+    lang = lang.dropna(subset=["english"])
+    lang.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_language_2021.csv", index=False)
+    print(f"CT language: {len(lang)} tracts")
+
+    # --- citizenship / nativity (% of private-household base 1522; 25% sample) ---
+    cz = {col: ct_series(cid) for cid, col in CITIZENSHIP_CHARS.items()}
+    czbase = cz["base"]
+    cit = pd.DataFrame({"name": names})
+    cit["canadian_born"] = (cz["non_immigrants"] / czbase * 100).round(1)
+    cit["naturalized"] = ((cz["citizens"] - cz["non_immigrants"]).clip(lower=0)
+                          / czbase * 100).round(1)
+    cit["non_citizens"] = (cz["non_citizens"] / czbase * 100).round(1)
+    cit["npr"] = (cz["npr"] / czbase * 100).round(1)
+    cit["population"] = czbase.round().astype("Int64")
+    cit.index.name = "ctuid"
+    cit = cit.dropna(subset=["canadian_born"])
+    cit.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_citizenship_2021.csv", index=False)
+    print(f"CT citizenship: {len(cit)} tracts")
 
 
 # ---- Historical visible-minority composition (by census year) -------------------

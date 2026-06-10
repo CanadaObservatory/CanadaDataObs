@@ -1,0 +1,62 @@
+---
+title: "Median Age by Neighbourhood"
+description: "Census-tract median age across Canada's cities, with each neighbourhood's age breakdown — 2021 Census"
+---
+
+```{python}
+#| echo: false
+import os
+import json
+import pandas as pd
+from pipeline.config import get_data_date
+from pipeline.charts import choropleth_map
+```
+
+The median age of each **census tract** — roughly a neighbourhood of 2,500–8,000
+people — from the 2021 Census. **Zoom and pan to your own area**, and hover for the
+neighbourhood's full age mix (children, working age, seniors) and population. Census
+tracts cover cities and larger towns; sparsely populated rural areas aren't divided
+into tracts, so they appear blank.
+
+The contrasts are stark: tracts around universities have median ages in the low 20s,
+new outer suburbs cluster in the early 30s as young families move where homes are
+larger and cheaper, and some established or retirement communities have median ages
+above 60. Compare this map with the
+[median household income](../income/neighbourhoods.qmd) and
+[home value](../housing/neighbourhoods.qmd) maps — they share the same census
+tracts, so you can flip between who lives in a neighbourhood and what living there
+costs.
+
+This detailed view lives on its own page (≈3 MB of boundary data) so the main
+[Population & Growth](index.qmd) page stays fast to load.
+
+[← Back to Population & Growth](index.qmd)
+
+```{python}
+#| echo: false
+geo_path = "data/geo/ct_2021.geojson"
+ct_age_path = "data/geo/statcan_ct_age_2021.csv"
+if os.path.exists(geo_path) and os.path.exists(ct_age_path):
+    ct_geo = json.load(open(geo_path))
+    ct_df = pd.read_csv(ct_age_path, dtype={"ctuid": str})
+    ct_df["pop_fmt"] = ct_df["population"].map(
+        lambda v: f"{v:,.0f}" if pd.notna(v) else "n/a")
+    # Cap the colour range at the 2nd–98th percentile: a handful of student-housing
+    # (~22) and retirement/long-term-care (~85) tracts would otherwise stretch the
+    # scale and flatten typical neighbourhoods. Hover always shows the true value.
+    zlo = float(ct_df["median_age"].quantile(0.02))
+    zhi = float(ct_df["median_age"].quantile(0.98))
+    fig = choropleth_map(ct_geo, ct_df, "ctuid", "median_age", name_col="name",
+        colorbar_title="Median age", value_fmt=".1f", value_suffix=" yrs",
+        colorscale="Viridis", zmin=zlo, zmax=zhi, height=720,
+        extra_hover=[("0–14", "share_0_14", ".0f", "%"),
+                     ("15–64", "share_15_64", ".0f", "%"),
+                     ("65+", "share_65_plus", ".0f", "%"),
+                     ("Population", "pop_fmt", "", "")],
+        source_note="Source: 2021 Census of Population (Statistics Canada, Census Profile 98-401-X2021007); boundaries from StatCan. Colour scale capped at the 2nd–98th percentile.")
+    fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Census-tract age map not available — run `python -m pipeline.build_census_geo`.")
+```
+
+[← Back to Population & Growth](index.qmd)

@@ -501,6 +501,97 @@ def fetch_tuition_by_field():
     return df
 
 
+def fetch_age_structure():
+    """
+    Population by age and gender, Canada — single years of age (0–100+), broad
+    groups, and the median/average-age summary rows (UOM='Years'), 1971–.
+    StatCan Table: 17-10-0005-01 (~3.8 MB zip). Drives the population pyramid
+    and the median-age trend on the Population page.
+    """
+    logger.info("Fetching StatCan population by age and gender (17-10-0005-01)...")
+    try:
+        df = _get_table("17-10-0005-01")
+    except Exception as e:
+        logger.error(f"Failed to fetch StatCan table 17-10-0005-01: {e}")
+        return None
+
+    validate_columns(df, ["REF_DATE", "GEO", "Gender", "Age group", "UOM", "VALUE"],
+                     "age_structure")
+
+    df = df[df["GEO"] == "Canada"].rename(columns={
+        "REF_DATE": "year", "Gender": "gender",
+        "Age group": "age_group", "UOM": "uom", "VALUE": "value",
+    })
+    df["gender"] = df["gender"].map(
+        {"Total - gender": "Total", "Men+": "Men", "Women+": "Women"})
+    df = df.dropna(subset=["value", "gender"])
+    df = df[["year", "gender", "age_group", "uom", "value"]].copy()
+    df["year"] = pd.to_numeric(df["year"], errors="coerce").astype("Int64")
+    df = df.sort_values(["year", "gender"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "population" / "statcan_age_structure.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="Statistics Canada",
+        source_table="17-10-0005-01",
+        frequency="annual",
+        unit="persons (median/average age rows in years)",
+        transformations=["Canada only; gender labels simplified",
+                         "single-year ages + broad groups + median/average age kept"],
+    )
+    logger.info(f"Saved {len(df)} rows to {out_path}")
+    return df
+
+
+def fetch_interprovincial_migration():
+    """
+    Net interprovincial migration by province/territory — quarterly in- and
+    out-migrants summed to July–June estimate years (labelled by ENDING year),
+    1962–. Net = in-migrants − out-migrants; incomplete years are dropped.
+    StatCan Table: 17-10-0020-01 (~49 KB zip).
+    """
+    logger.info("Fetching StatCan interprovincial migration (17-10-0020-01)...")
+    try:
+        df = _get_table("17-10-0020-01")
+    except Exception as e:
+        logger.error(f"Failed to fetch StatCan table 17-10-0020-01: {e}")
+        return None
+
+    validate_columns(df, ["REF_DATE", "GEO", "Interprovincial migration", "VALUE"],
+                     "interprovincial_migration")
+
+    df = df[df["GEO"] != "Canada"].copy()      # national in == out by construction
+    wide = (df.pivot_table(index=["REF_DATE", "GEO"],
+                           columns="Interprovincial migration", values="VALUE",
+                           aggfunc="first")
+              .reset_index())
+    wide["net"] = wide["In-migrants"] - wide["Out-migrants"]
+
+    # Quarters run Jul/Oct/Jan/Apr — group into July–June years, label by end year.
+    d = pd.to_datetime(wide["REF_DATE"], format="%Y-%m")
+    wide["year"] = d.dt.year + (d.dt.month >= 7).astype(int)
+    g = wide.groupby(["year", "GEO"])["net"].agg(["sum", "count"]).reset_index()
+    g = g[g["count"] == 4].rename(columns={"GEO": "geography", "sum": "net_migration"})
+    out = g[["year", "geography", "net_migration"]].sort_values(
+        ["geography", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "population" / "statcan_interprovincial_migration.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Statistics Canada",
+        source_table="17-10-0020-01",
+        frequency="annual",
+        unit="persons (net)",
+        transformations=["net = in-migrants − out-migrants",
+                         "quarters summed to July–June years labelled by ending year",
+                         "incomplete years dropped"],
+    )
+    logger.info(f"Saved {len(out)} rows to {out_path}")
+    return out
+
+
 if __name__ == "__main__":
     fetch_population_quarterly()
     fetch_population_components()

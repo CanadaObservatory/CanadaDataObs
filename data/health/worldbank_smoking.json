@@ -1,0 +1,14 @@
+{
+  "dataset_id": "worldbank_smoking",
+  "source": "World Bank (World Development Indicators)",
+  "source_table": "World Bank / WHO Global Health Observatory",
+  "frequency": "annual",
+  "unit": "% of adults",
+  "retrieved_at": "2026-06-10T20:10:24.484286+00:00",
+  "latest_observation_date": "2022",
+  "transformations": [
+    "World Bank indicator SH.PRV.SMOK, filtered to 17 OECD peers"
+  ],
+  "notes": null,
+  "row_count": 136
+}

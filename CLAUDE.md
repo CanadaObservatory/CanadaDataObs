@@ -40,7 +40,7 @@ chart block to the relevant `.qmd`. No new fetch function for OECD/StatCan serie
 ```
 DataCan/
 ├── CLAUDE.md              ← this file
-├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances, Education & Science, Environment, Society & Well-being are dropdowns), theme
+├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances, Health, Education & Science, Environment, Society & Well-being are dropdowns), theme
 ├── index.qmd  about.qmd   ← landing + methodology
 ├── population/index.qmd   ← **Population & Growth** (Population-dropdown landing): total, by-province, growth rate, components, non-permanent residents
 ├── population/diversity.qmd ← population-group tract map (Viridis, soft 0.6 fill; dropdown incl. derived White & Indigenous) + diversity-over-time chart (census-year + geography dropdown) + per-metro DA diversity links
@@ -59,7 +59,8 @@ DataCan/
 ├── fiscal/index.qmd       ← **Government Finances** (Public-Finances dropdown): govt gross debt, budget balance, revenue, interest costs, defence (all vs OECD peers)
 ├── government/index.qmd   ← **Government Employment** (Public-Finances dropdown): employment by level of government, full public-sector composition (archived), OECD peer comparison, federal public-service headcount/by-department/demographics/executives, + sourced occupational note
 ├── government/spending.qmd ← **Federal Spending**: revenue & spending %GDP (1961–) + nominal, expense by economic type, by standard object, by department, by function (CCOFOG — all governments)
-├── health/index.qmd       ← life expectancy, avoidable mortality, health spending (%GDP + per person), beds, physicians, nurses, MRI units
+├── health/index.qmd       ← **Health & Health Care** (Health-dropdown landing): life expectancy (+ a Canada-vs-US **recent-decline** chart, 2019→2022, off the existing OECD CSV) + health spending (%GDP + per person) + beds/physicians/nurses/MRI + **Population Health & Risk Factors** (World Bank/WHO/UN/IDF: suicide, **tobacco+alcohol merged into one "Substance" dropdown chart** [different units → the dropdown rescales the y-axis], overweight, diabetes [ranked, IDF point estimates], maternal mortality — Canada 16/17, high) + UHC index + out-of-pocket %; wait times. WB rows are WHO/UN-sourced so NO OECD overlap; 7 added to the scorecard
+├── health/substance-use.qmd ← **Substance Use** (Health dropdown): Canada's opioid/toxic-drug crisis — national apparent-opioid-toxicity deaths (bars+rate, 2016→2024; 2,832→8,020 peak 2023) + provincial death-rate **ranked bar** (BC 41.3 vs PEI 3.9, 2024; dashed national-rate line — a bar not a choropleth, since resolution is only provincial) + deaths by age×sex (men ~3/4) + a poisoned-supply chart (% fentanyl/stimulant/accidental, partial years dropped — toxicology lags) + deaths-vs-hospitalizations footprint. Then **"Tobacco, Alcohol & Cannabis, by Age"** — a Canada-only **Substance dropdown** chart (Cannabis / Tobacco / Heavy drinking; age-group lines; **x = period end-year, horizontal labels** — CCHS is two-year pooled but angled "YYYY/YYYY" labels were dropped; cannabis starts 2019/2020 post-legalization, steep age gradient ~33%@18-34→8%@65+) from StatCan CCHS 13-10-0972 (build_substance_use.py). Sources: PHAC Substance-Related Harms (fetch_opioids.py) + StatCan CCHS (build_substance_use.py)
 ├── education/index.qmd   ← **Education** (Education-&-Science nav dropdown): university tuition — real by province, domestic vs international, by field (StatCan TLAC 37-10-0045-01 / 37-10-0003-01, bespoke fetch_tuition/_by_field)
 ├── science/index.qmd      ← **Science** (Education-&-Science dropdown): R&D (GERD), researchers
 ├── innovation/index.qmd   ← **Innovation** (Education-&-Science dropdown): business R&D (BERD) — starter page to grow
@@ -78,14 +79,16 @@ DataCan/
 │   ├── fetch_boc.py       ← fetch_boc_indicator (generic Bank of Canada Valet API; source="boc", Indicator.boc_series = {col: valet_code})
 │   ├── fetch_whr.py       ← World Happiness Report (bespoke)
 │   ├── metadata.py        ← save_metadata sidecars + validate_columns
-│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (age-bracket dropdown variants), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, bubble_map (proportional-symbol map, e.g. wildfire points), add_city_markers + add_boundaries (orient physical-geography maps — city dots, plus province/territory & national boundary line-layer overlays), history_lines, ranking_strip, lines_over_time, lines_over_time_geo_select, stacked_area, category_bar, single_line_multi, category_bar_views. Every choropleth/bubble map carries a **hover on/off toggle** (`_hover_toggle`); ranked bars show one clearly-labelled year (no duplicate "Data as of"). **`lines_over_time_geo_select`** returns `(fig, controls_html)` — a multi-line annual series whose geography is switched by a grouped, **searchable native `<select>`** (optgroups by level, browser type-ahead) that drives `Plotly.restyle`; it's the scalable replacement for Plotly's own dropdown when there are too many options to list flat (the page wraps both in a `::: {#div_id}` fence, `display(HTML(controls_html))`, then `fig.show()`; data + handler namespaced by div_id; resolve Plotly via `requirejs`). **`choropleth_groups_map`** now also maps non-percentage values (e.g. a crime **rate per 100k**) via `value_fmt`/`value_suffix`/`cbar_title`/`cbar_ticksuffix` with `breakdown=False` (percentage defaults preserved → existing share-map callers unchanged); each dropdown option can also override its units via an optional 3rd tuple element `(col, label, {fmt, suffix, cbar_suffix})`, so a Crime Severity **index** and **rate-per-100k** offences coexist in one map. **Site attribution is automatic:** a `Figure.show` interceptor (top of charts.py, idempotent) appends a `<br>{BRAND}` line — `BRAND="Canada Observatory"` in config.py — beneath every chart's source annotation (the one whose text contains "Source"), covering all ~140 source-note sites of every shape (builder `source_note=`, inline `add_annotation`/`annotations=[dict]`) in ONE place. Plotly's `<br>` only line-breaks inside an annotation, so a source rendered as **Quarto markdown** (rare — e.g. a caption under a chart whose builder can't place the note) must add the brand in its markdown via a literal `` `{python} SRC()`<br>`{python} BRAND` `` (an inline-code result is HTML-escaped, so `<br>` inside it renders literally — that was a real bug)
+│   ├── charts.py          ← peer_comparison_line, ranked_bar, peer_comparison_line_by_age + ranked_bar_by_age (a dropdown that restyles every peer trace across categories — age brackets, or any long-`age_col`; pass **`option_layouts`** {option→y-axis title} for options with **different units** [tobacco % vs alcohol litres] so the dropdown also rewrites the y-title + autoranges, and **`menu_label`** to retitle the caption), single_line, choropleth_map (+ log scale), choropleth_categorical, choropleth_groups_map, bubble_map (proportional-symbol map, e.g. wildfire points), add_city_markers + add_boundaries (orient physical-geography maps — city dots, plus province/territory & national boundary line-layer overlays), history_lines, ranking_strip, lines_over_time, lines_over_time_geo_select, stacked_area, category_bar, single_line_multi, category_bar_views. Every choropleth/bubble map carries a **hover on/off toggle** (`_hover_toggle`); ranked bars show one clearly-labelled year (no duplicate "Data as of"). **`lines_over_time_geo_select`** returns `(fig, controls_html)` — a multi-line annual series whose geography is switched by a grouped, **searchable native `<select>`** (optgroups by level, browser type-ahead) that drives `Plotly.restyle`; it's the scalable replacement for Plotly's own dropdown when there are too many options to list flat (the page wraps both in a `::: {#div_id}` fence, `display(HTML(controls_html))`, then `fig.show()`; data + handler namespaced by div_id; resolve Plotly via `requirejs`). **`choropleth_groups_map`** now also maps non-percentage values (e.g. a crime **rate per 100k**) via `value_fmt`/`value_suffix`/`cbar_title`/`cbar_ticksuffix` with `breakdown=False` (percentage defaults preserved → existing share-map callers unchanged); each dropdown option can also override its units via an optional 3rd tuple element `(col, label, {fmt, suffix, cbar_suffix})`, so a Crime Severity **index** and **rate-per-100k** offences coexist in one map. **Site attribution is automatic:** a `Figure.show` interceptor (top of charts.py, idempotent) appends a `<br>{BRAND}` line — `BRAND="Canada Observatory"` in config.py — beneath every chart's source annotation (the one whose text contains "Source"), covering all ~140 source-note sites of every shape (builder `source_note=`, inline `add_annotation`/`annotations=[dict]`) in ONE place. Plotly's `<br>` only line-breaks inside an annotation, so a source rendered as **Quarto markdown** (rare — e.g. a caption under a chart whose builder can't place the note) must add the brand in its markdown via a literal `` `{python} SRC()`<br>`{python} BRAND` `` (an inline-code result is HTML-escaped, so `<br>` inside it renders literally — that was a real bug)
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover, **major lakes (build_lakes, NRCan 1:1M waterbodies) + 2023 wildfire points (build_wildfire_points, NFDB)** (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
+│   ├── build_substance_use.py ← ANNUAL builder (not weekly; the source CSV is ~512 MB & the table is biennial): StatCan CCHS **13-10-0972** "Health characteristics, two-year period estimates" → data/health/statcan_substance_use_by_age.csv (Canada, both sexes, **Percent**: cannabis past-12mo / current smoker / heavy drinking × {Total 18+, 18-34, 35-49, 50-64, 65+} × 5 periods 2015/16–2023/24). Chunk-reads the zip; **18+ only (no 12-17 youth)**; cannabis begins 2019/2020. Re-run each spring. Drives the Substance Use page's by-age chart
 │   ├── build_naps_cities.py ← ANNUAL builder (not weekly): per-city annual + monthly air-quality means for ~30 major cities → data/environment/naps_city_{annual,monthly}.csv. Two eras: **2005– from NAPS Annual Summaries** (1HR block; CSV 2016+ / .xlsx ≤2015) + **pre-2005 aggregated from raw hourly** (gases to 1974, PM2.5 to late-1990s; ≥50%-of-month / ≥6-months-over-4-quarters validity). Normalised city matcher handles old spellings/province codes (St Johns, Montreal/PQ). Re-run each spring
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
 │   ├── fetch_environment.py ← registry custom fetchers: GHG emissions national total + by economic sector (ECCC National Inventory Report / CESI; year-stamped URL — bump GHG_RELEASE each spring)
 │   ├── fetch_air_quality.py ← registry custom fetchers (Air Quality page): CESI air-quality concentrations indexed (PM2.5/O3/NO2/SO2/VOC, NAPS-derived; year-stamped — bump CESI_AQ_RELEASE) + APEI national emissions (criteria air contaminants 1990–, az-host /api/file cube)
+│   ├── fetch_opioids.py    ← registry custom fetcher (Substance Use page): PHAC Substance-Related Harms — one small quarterly CSV (`SubstanceHarmsData.csv`, OGL-Canada) → 4 outputs (national deaths+hosp time series / provincial death rate by PRUID / deaths by age×sex / supply: %fentanyl·stimulant·accidental). Weekly (only 2.5 MB, unlike crime); handles 'Suppr.'/'n/a'; latest full year drives the maps/bars
 │   ├── fetch_climate.py    ← registry custom fetchers (Climate Change page): CESI national temperature departure (bump CESI_TEMP_RELEASE) + CTVB regional warming trends (bump CTVB_YEAR; cp1252) + per-city temperatures via GeoMet AHCCD — annual (homogenized + raw climate-daily tail), seasonal, monthly
 │   ├── fetch_government.py ← Government-section custom fetchers: StatCan workforce (employment by level 36-10-0489-01; public-sector composition by industry 14-10-0027-01 LFS) + federal finance (36-10-0477-01 1961– + GDP 36-10-0222-01; expense-by-type 10-10-0016-01; CCOFOG 10-10-0005-01) + TBS federal public service (open.canada.ca CKAN) + GC InfoBase (standard objects, by-dept, executives)
 │   ├── fetch_crime.py     ← ANNUAL builder (NOT in the weekly registry): StatCan UCR incident-based crime by detailed violation (35-10-0177-01; streams the 95MB zip, **chunk-reads the ~1.5GB CSV**) → data/wellbeing/statcan_crime_by_type.csv (Canada + provinces/territories + ~40 CMAs × curated everyday violations × rate/incidents/cleared/%-change; cmauid = last-3 of the CMA GEO code, joins cma_2021.geojson). Re-run each July when StatCan releases. CSI/homicide stay in the registry (tiny tables). Also `fetch_hate_crime()` (tiny tables, read whole): 35-10-0191-01 national rate/incidents + 35-10-0066-01 by motivation (Canada selected services) → data/wellbeing/statcan_hate_crime{,_motivation}.csv
@@ -122,7 +125,7 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (88 indicators / 12 sections)
+## Data sources (96 indicators / 12 sections)
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   components 17-10-0008-01, CPI 18-10-0004-01 (All-items + the "Rent" group),
@@ -181,8 +184,7 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   current-prices `V`, not `_Z`), hospital beds (`DSD_HEALTH_REAC_HOSP@DF_BEDS_FUNC`),
   physicians (`DSD_HEALTH_EMP_REAC@DF_PHYS`), nurses (`DSD_HEALTH_REAC_EMP@DF_NURSE`
   — note the reversed DSD name; HEALTH_PROF=MINU, activity P), MRI units
-  (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`), avoidable mortality (`DSD_HEALTH_STAT@DF_AM`,
-  MEASURE=AVM, deaths/100k), CO2 per capita + indexed and **mean population exposure
+  (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`), CO2 per capita + indexed and **mean population exposure
   to PM2.5** (`PM_PWM`, µg/m³) + % above the WHO-2021 guideline (`PM_SPEX5`) — all
   Green Growth `DSD_GG@DF_GREEN_GROWTH` (PM2.5 1990–2020, 16/17 peers — no South Korea).
 - **World Bank API** (`fetch_worldbank_indicator`, source="worldbank", `wb_indicator`
@@ -190,6 +192,21 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   capital formation %GDP (`NE.GDI.FTOT.ZS`) and defence spending %GDP
   (`MS.MIL.XPND.GD.ZS`, WB-sourced from SIPRI so all 17 peers are covered, not just
   NATO; the defence chart draws the NATO 2%-of-GDP guideline as a benchmark line).
+  And the **Health "Population Health & Risk Factors"** set — all WHO/UN/IDF-sourced
+  (so NO overlap with the OECD health series), 17/17 peer coverage, each a one-row add:
+  suicide (`SH.STA.SUIC.P5`), adult overweight (`SH.STA.OWAD.ZS`), tobacco use
+  (`SH.PRV.SMOK`), diabetes (`SH.STA.DIAB.ZS`, IDF — only ~2–3 point-years → ranked bar
+  not a line), alcohol (`SH.ALC.PCAP.LI`), out-of-pocket health % (`SH.XPD.OOPC.CH.ZS`),
+  UHC service-coverage index (`SH_UHC_SCI` — **underscore form; the dotted variants are
+  archived**), maternal mortality (`SH.STA.MMRT`).
+- **Public Health Agency of Canada — Health Infobase** (OGL-Canada; bespoke
+  `fetch_opioids.py`): the **Substance-Related Harms** dataset — a tidy ~2.5 MB quarterly
+  CSV (`health-infobase.canada.ca/src/doc/SRHD/SubstanceHarmsData.csv`) of apparent
+  opioid- & stimulant-toxicity **deaths / hospitalizations / ED visits / EMS responses**,
+  national + by province/territory (PRUID-keyed), 2016–; the most recent quarters are
+  preliminary. Drives the Substance Use page. (PHAC's "Health of People in Canada"
+  dashboard — ~70 Canada-only indicators with income/education equity breakdowns, on
+  CKAN — was assessed but **deferred**: mostly Canada-only, irregular "as needed" cadence.)
 - **Bank of Canada Valet API** (`fetch_boc_indicator`, source="boc", `boc_series`
   = {output_col: Valet series code}; JSON, reproduction permitted with attribution —
   every chart carries "Source: Bank of Canada"). One generic fetcher pulls all of an
@@ -674,6 +691,23 @@ aren't mutually comparable); the **perception / "fear gap" survey layer** (GSS/S
 victimization — reporting rates, feeling-safe-after-dark) is researched but deferred
 as a future manual layer (5-yearly, mostly Juristat article tables, not auto-refreshing).
 Full writeup: `_strategy/crime-safety-expansion.md`.
+A **2026-06-10 health expansion made Health a nav dropdown** (Health & Health Care /
+**Substance Use**) and broadened the section from system-centric (spending/capacity) to
+population health: **8 World Bank rows** (suicide, overweight, tobacco, diabetes, alcohol,
+out-of-pocket %, UHC index, maternal mortality — all WHO/UN/IDF-sourced, no OECD overlap,
+17/17 peers, 7 added to the scorecard), a Canada-vs-US **life-expectancy recent-decline**
+chart (off the existing OECD CSV, no new data), and the new **Substance Use** page
+(`health/substance-use.qmd`) on **PHAC Substance-Related Harms** (`fetch_opioids.py`,
+weekly registry custom — opioid deaths/hospitalizations time series, provincial death-rate
+map, age×sex, poisoned-supply breakdowns). The same review **removed "avoidable mortality"**
+(OECD AVM) — sound measure, but the "avoidable" label embeds a contestable evaluative
+judgment that sits awkwardly with the non-partisan scorecard; held for revival (see the
+`project_health_expansion_2026-06` memory). **Net 9 added − 1 removed (88→96).** Follow-up
+refinements: tobacco + alcohol **merged** into one Substance-dropdown peer chart, and a Canada-only
+**"Tobacco, Alcohol & Cannabis, by Age"** chart (Cannabis / Tobacco / Heavy drinking by age, CCHS
+13-10-0972, build_substance_use.py — an annual builder, not a registry indicator) added to the
+Substance Use page. Cannabis has **no peer-comparable feed** (verified across WB/WHO/OECD/UNODC/
+EMCDDA) so it's Canada-only by necessity.
 Deferred (candidates, not committed):
 **homeownership rate** (Census-only — no clean annual StatCan series; revisit when
 2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),

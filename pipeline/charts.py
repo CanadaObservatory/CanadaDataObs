@@ -324,13 +324,20 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
                                 show_average=True, avg_name="OECD peer average",
                                 hover_suffix="%", hover_decimals=1,
                                 source_note=None, rangeslider=True,
-                                initial_start=None, hide_peers=True):
-    """Peer-comparison line chart with an age-bracket dropdown.
+                                initial_start=None, hide_peers=True,
+                                option_layouts=None, menu_label="Age group:"):
+    """Peer-comparison line chart with a category dropdown.
 
     Same declutter as `peer_comparison_line` (Canada/comparators/average shown, grey
     peers legend-hidden, right-hand legend, range slider, builder-owned source note),
     but `df` is long over an extra `age_col`; a Plotly dropdown restyles every trace
-    to the selected bracket. `ages` is the dropdown order; `default_age` shows first."""
+    to the selected category. `ages` is the dropdown order; `default_age` shows first.
+
+    The original use is age brackets (one unit, shared y-axis). For options that DON'T
+    share a unit (e.g. tobacco use in %, alcohol in litres), pass `option_layouts`
+    (a dict option->y-axis title): the dropdown then also rewrites the y-axis title and
+    `autorange`s on switch, so each option gets its own scale. `menu_label` overrides
+    the small "Age group:" caption above the menu (e.g. "Substance:")."""
     highlight = [HIGHLIGHT_COUNTRY]
 
     def _name(code):
@@ -402,7 +409,12 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
         for kind, code in order:
             x, y = (avg_series(age) if kind == "avg" else series(code, age))
             xs.append(x); ys.append(y)
-        buttons.append(dict(method="restyle", label=age, args=[{"x": xs, "y": ys}]))
+        if option_layouts:
+            buttons.append(dict(method="update", label=age, args=[{"x": xs, "y": ys},
+                {"yaxis.title.text": option_layouts.get(age, yaxis_title),
+                 "yaxis.autorange": True}]))
+        else:
+            buttons.append(dict(method="restyle", label=age, args=[{"x": xs, "y": ys}]))
 
     _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
                             rangeslider, initial_start, extra_top=70)
@@ -410,7 +422,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
         updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.13, yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1)])
-    fig.add_annotation(text="Age group:", xref="paper", yref="paper",
+    fig.add_annotation(text=menu_label, xref="paper", yref="paper",
         x=1, xanchor="right", y=1.17, yanchor="bottom", showarrow=False,
         font=dict(size=11, color="#666"))
     return fig

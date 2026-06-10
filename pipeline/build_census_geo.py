@@ -191,6 +191,13 @@ def build_cma():
     print(f"wrote {path}: {round(os.path.getsize(path)/1e6, 2)} MB")
 
 
+# Age structure (100% data) in the 2021 CT profile: 8 = total population; 35–38 are
+# StatCan's OWN pre-computed broad-group % distribution (0–14 / 15–64 / 65+ / 85+ —
+# use these, not the count rows 9/13/24/29, to avoid share math on randomly-rounded
+# counts); 40 = median age. IDs verified against the profile metadata 2026-06.
+AGE_CT_CHARS = {8: "population", 35: "share_0_14", 36: "share_15_64",
+                37: "share_65_plus", 38: "share_85_plus", 40: "median_age"}
+
 # Visible-minority groups: (census CHARACTERISTIC_ID in the 2021 profile, column, label).
 # Descriptive only — no evaluative direction. "Visible minority" is StatCan's term.
 # 1683 is the population base (denominator); 1684 = all VM. The 10 subgroups follow.
@@ -357,7 +364,8 @@ def build_ct_from_profile():
     csvn = [n for n in z.namelist() if n.endswith("_data.csv")][0]
 
     needed_ids = ({cid for cid, _, _ in VM_GROUPS} | {1683, NOT_VM_ID, INDIGENOUS_ID}
-                  | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE})
+                  | {cid for cid, _, _ in RELIGION_GROUPS} | {RELIGION_BASE}
+                  | set(AGE_CT_CHARS))
     cols = ["DGUID", "GEO_NAME", "CHARACTERISTIC_ID", "CHARACTERISTIC_NAME", "C1_COUNT_TOTAL"]
     keep = []
     for chunk in pd.read_csv(z.open(csvn), usecols=cols, dtype=str,
@@ -409,6 +417,16 @@ def build_ct_from_profile():
     rel = rel.dropna(subset=["christian"])
     rel.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_religion_2021.csv", index=False)
     print(f"CT religion: {len(rel)} tracts")
+
+    # --- age structure (median age + StatCan's own broad-group % distribution) ---
+    age = pd.DataFrame({"name": names})
+    for cid, col in AGE_CT_CHARS.items():
+        age[col] = ct_series(cid)
+    age["population"] = age["population"].round().astype("Int64")
+    age.index.name = "ctuid"
+    age = age.dropna(subset=["median_age"])
+    age.reset_index().to_csv(f"{GEO_DIR}/statcan_ct_age_2021.csv", index=False)
+    print(f"CT age: {len(age)} tracts")
 
 
 # ---- Historical visible-minority composition (by census year) -------------------

@@ -746,11 +746,85 @@ def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color=
     return fig
 
 
+def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender",
+                       value_col="value", men_label="Men", women_label="Women",
+                       men_color="#4477aa", women_color="#ee8866",
+                       source_note=None, height=640):
+    """Two-sided age pyramid (single-year ages) with a year slider.
+
+    `df` is tidy: one row per (year, gender, age), `age` numeric (0–100, where
+    100 = "100 and over") and `value` the head-count. A Plotly slider restyles
+    both bar traces' x arrays across years (the same restyle idiom as the
+    dropdown maps — no animation frames), opening on the latest year. The x-axis
+    is FIXED to the all-year maximum so dragging the slider reads as the cohorts
+    moving through the pyramid, not as an axis rescale. The men side is plotted
+    negative but displayed positive everywhere (tick labels and hover read from
+    abs customdata). Colours are a neutral colourblind-safe blue/orange pair —
+    Canada-red stays reserved for Canada-vs-peer charts."""
+    import numpy as np
+    import pandas as pd
+
+    ages = np.sort(pd.to_numeric(df[age_col], errors="coerce").dropna().unique())
+    years = sorted(pd.to_numeric(df[year_col], errors="coerce").dropna().unique().astype(int))
+
+    def side(year, gender):
+        s = (df[(df[year_col] == year) & (df[gender_col] == gender)]
+             .set_index(age_col)[value_col].reindex(ages))
+        return s.to_numpy(dtype=float)
+
+    data = {y: (side(y, men_label), side(y, women_label)) for y in years}
+    y0 = years[-1]
+    xmax = max(np.nanmax(np.concatenate(v)) for v in data.values())
+    step = 10 ** np.floor(np.log10(xmax))
+    if xmax / step < 4:
+        step /= 2
+    ticks = np.arange(0, xmax + step, step)
+    tickvals = np.concatenate([-ticks[:0:-1], ticks])
+    ticktext = [f"{abs(t) / 1000:,.0f}k" if abs(t) >= 1000 else f"{abs(t):,.0f}"
+                for t in tickvals]
+
+    m0, w0 = data[y0]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        y=ages, x=-m0, customdata=m0, name=men_label, orientation="h",
+        marker_color=men_color,
+        hovertemplate=f"{men_label}, age %{{y}}: %{{customdata:,.0f}}<extra></extra>"))
+    fig.add_trace(go.Bar(
+        y=ages, x=w0, customdata=w0, name=women_label, orientation="h",
+        marker_color=women_color,
+        hovertemplate=f"{women_label}, age %{{y}}: %{{customdata:,.0f}}<extra></extra>"))
+
+    steps = [dict(method="restyle", label=str(y),
+                  args=[{"x": [-data[y][0], data[y][1]],
+                         "customdata": [data[y][0], data[y][1]]}])
+             for y in years]
+
+    fig.update_layout(
+        barmode="overlay", bargap=0.08,
+        xaxis=dict(tickvals=tickvals, ticktext=ticktext, title="Population",
+                   gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#bbb",
+                   range=[-xmax * 1.06, xmax * 1.06]),
+        yaxis=dict(title="Age", dtick=10, gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", x=0, y=1.04, xanchor="left"),
+        plot_bgcolor="white", height=height,
+        margin=dict(l=60, r=20, t=30, b=130),
+        sliders=[dict(active=len(steps) - 1, steps=steps,
+                      currentvalue=dict(prefix="Year: ", font=dict(size=13)),
+                      font=dict(size=10), pad=dict(t=34, b=6))],
+    )
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=-0.31, showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,
                    center=None, zoom=2.6, height=640, zmin=None, zmax=None, log=False,
-                   line_color="rgba(255,255,255,0.4)", line_width=0.2, opacity=0.82):
+                   line_color="rgba(255,255,255,0.4)", line_width=0.2, opacity=0.82,
+                   extra_hover=None):
     """Zoomable choropleth map (Plotly Choroplethmapbox, free carto-positron
     basemap — no API token). The `geojson` features must carry a top-level `id`
     equal to df[location_col]. Used for the census-tract maps so users can pan/
@@ -765,7 +839,13 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     `line_color`/`line_width` style the polygon outline (default a hairline white
     separator, right for dense tract maps); pass a dark colour + a slightly larger
     width for sparse polygons over a basemap (e.g. the major-lakes map) so small,
-    light-filled features still read. `opacity` is the polygon fill opacity."""
+    light-filled features still read. `opacity` is the polygon fill opacity.
+
+    `extra_hover` (optional) appends hover lines beyond the coloured value, without
+    changing what the map colours: a list of (label, column, fmt, suffix) tuples,
+    e.g. [("0–14", "share_0_14", ".0f", "%")] → one "label: value" line each. Pass
+    fmt="" to insert the column's value verbatim (for pre-formatted strings such as
+    comma-grouped populations, dodging the bundled-Plotly d3-format quirk)."""
     import math
     import numpy as np
     import pandas as pd
@@ -773,10 +853,14 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     vals = pd.to_numeric(df[value_col], errors="coerce")
     base = df.copy()
     base["_v"] = vals.to_numpy()
-    cols = ([name_col] if name_col else []) + ["_v"]
+    extra_hover = extra_hover or []
+    cols = ([name_col] if name_col else []) + ["_v"] + [c for _, c, _, _ in extra_hover]
     customdata = base[cols].to_numpy()
     name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
     vidx = 1 if name_col else 0
+    extra_lines = "".join(
+        f"<br>{lbl}: %{{customdata[{vidx + 1 + i}]" + (f":{fmt}" if fmt else "") + f"}}{suf}"
+        for i, (lbl, _, fmt, suf) in enumerate(extra_hover))
 
     if log:
         z = np.where(vals.to_numpy() > 0, np.log10(vals.where(vals > 0).to_numpy()), np.nan)
@@ -798,7 +882,7 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
         marker=dict(line=dict(width=line_width, color=line_color), opacity=opacity),
         colorbar=colorbar,
         customdata=customdata,
-        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{customdata[{vidx}]:{value_fmt}}}{value_suffix}<extra></extra>",
+        hovertemplate=f"{name_line}{colorbar_title}: {value_prefix}%{{customdata[{vidx}]:{value_fmt}}}{value_suffix}{extra_lines}<extra></extra>",
     ))
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),

@@ -220,6 +220,11 @@ For the full **neighbourhood-level** view — every census tract, where you can 
 
 **[→ Home value by neighbourhood (census-tract map)](neighbourhoods.qmd)**
 
+The same census tracts also carry [median household income](../income/neighbourhoods.qmd)
+and [median age](../population/age-neighbourhoods.qmd) maps — flip between them to see
+how prices, incomes, and who lives where (young families at the urban edge, retirees in
+long-settled areas) line up across a city.
+
 ```{python}
 #| echo: false
 import json

@@ -47,9 +47,12 @@ deliberately omits gated/advocacy-parent comparators).
 ## Phase 2 — registry adds (owner-approved, by area)
 
 **People & Society**
-- Age structure & aging: pyramid, median age, old-age dependency (StatCan 17-10-0005-01; OECD peers).
-- Fertility rate vs peers (WB `SP.DYN.TFRT` — one row).
-- Interprovincial migration (17-10-0022-01).
+- ✅ **BUILT 2026-06-10 (Branch 1, branch `people-society-demographics`):** age structure
+  (17-10-0005-01 → pyramid with year slider + median age), fertility (`SP.DYN.TFRT.IN`)
+  + old-age dependency (`SP.POP.DPND.OL`) vs peers, net interprovincial migration
+  (17-10-0020-01, not 0022 — the components table nets cleanly), and the median-age
+  CT map (`population/age-neighbourhoods.qmd`, extra_hover age breakdown). 96→100
+  indicators. Items below remain.
 - Immigration composition: PRs by category (IRCC open data), target-vs-actual vs the levels plan.
 - **NEW (owner): citizenship/nativity map + data** — Canadian-born / foreign-born citizens
   (naturalized) / non-citizens (incl. PRs). Census characteristics (citizenship + immigrant
@@ -59,6 +62,19 @@ deliberately omits gated/advocacy-parent comparators).
 - **NEW (owner): "largest group" option on the Diversity map** — plurality
   visible-minority group (incl. derived White & Indigenous) per tract/CMA; categorical
   layer (`choropleth_categorical`-style) alongside the existing share dropdown.
+- **NEW (owner, 2026-06-10): median-age census-tract map** — part of Branch 1 (age &
+  aging). Colour = median age (Viridis, true range; cap_quantiles fallback for
+  student/LTC outlier tracts); hover = broad age breakdown (0–14 / 15–64 / 65+ shares +
+  population), NOT five-year bins. Data = add the age characteristic IDs ("Median age of
+  the population" + the broad group counts) to the `needed_ids` set in the existing
+  `build_ct_from_profile()` chunk-read pass → `data/geo/statcan_ct_age_2021.csv`; reuses
+  `ct_2021.geojson` (no new download). Needs a small ADDITIVE hover-extras param on
+  `charts.choropleth_map` (default None — existing callers unchanged). Own ~3 MB page
+  `population/age-neighbourhoods.qmd` (income/housing pattern), linked from the new Age
+  section + cross-linked BOTH WAYS with the housing/income maps — the affordability
+  connection is invited descriptively ("same tracts, compare the maps"), never asserted.
+  Future (deferred): a unified layer-switching neighbourhood explorer across
+  income/value/age/diversity.
 - DROPPED for now: charitable giving/volunteering (civic set narrowed to turnout + trust,
   and it moved to Government — below); perception-of-safety survey layer (stays deferred).
 

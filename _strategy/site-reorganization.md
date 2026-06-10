@@ -100,11 +100,11 @@ deliberately omits gated/advocacy-parent comparators).
   Budget-vs-PBO projections stay declined (no-hardcoded-values rule).
 
 **Health & Well-being**
-- % with a regular family doctor (CCHS 13-10-0484) — top priority, the public's #1 question.
-- Self-rated mental health (CCHS).
-- Long-term-care capacity (OECD).
-- Pharmaceutical spending (OECD SHA — existing dataflow).
-- Vaccination coverage (WB/WHO rows, e.g. measles/DTP).
+- ✅ **BUILT 2026-06-10 (Branch 2, branch `health-access-set`):** regular provider +
+  mental health (CCHS **13-10-0096-01**, not 0484 — annual estimates 2015–2022, both
+  generic-statcan rows), LTC beds (`DSD_HEALTH_LTCR@DF_HEALTH_LTCR_BED`,
+  `10P3HB_Y_GE65`), pharma spending (SHA `HC51`), measles+DTP3 (WB; measles →
+  scorecard with 95% benchmark line). 100→106. Items below remain.
 - Life satisfaction by province (StatCan Quality of Life hub) to deepen Well-being.
 - Avoidable mortality stays removed (2026-06 decision).
 

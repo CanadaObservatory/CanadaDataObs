@@ -1,5 +1,5 @@
 ---
-title: "Environment"
+title: "Emissions & Energy"
 description: "CO2 emissions, energy, and environmental indicators — Canada and OECD peers"
 ---
 

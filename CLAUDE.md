@@ -40,7 +40,7 @@ chart block to the relevant `.qmd`. No new fetch function for OECD/StatCan serie
 ```
 DataCan/
 ├── CLAUDE.md              ← this file
-├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances, Education & Science are dropdowns), theme
+├── _quarto.yml            ← site config, nav (Population, Geography, Economy, Public Finances, Education & Science, Environment are dropdowns), theme
 ├── index.qmd  about.qmd   ← landing + methodology
 ├── population/index.qmd   ← **Population & Growth** (Population-dropdown landing): total, by-province, growth rate, components, non-permanent residents
 ├── population/diversity.qmd ← population-group tract map (Viridis, soft 0.6 fill; dropdown incl. derived White & Indigenous) + diversity-over-time chart (census-year + geography dropdown) + per-metro DA diversity links
@@ -63,7 +63,10 @@ DataCan/
 ├── education/index.qmd   ← **Education** (Education-&-Science nav dropdown): university tuition — real by province, domestic vs international, by field (StatCan TLAC 37-10-0045-01 / 37-10-0003-01, bespoke fetch_tuition/_by_field)
 ├── science/index.qmd      ← **Science** (Education-&-Science dropdown): R&D (GERD), researchers
 ├── innovation/index.qmd   ← **Innovation** (Education-&-Science dropdown): business R&D (BERD) — starter page to grow
-├── environment/index.qmd  ← CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix
+├── environment/index.qmd  ← **Emissions & Energy** (Environment-dropdown landing): CO2 per capita, CO2 indexed, consumption CO2, low-carbon electricity, electricity mix (by country + by province), energy mix, GHG total + by sector
+├── environment/air-quality.qmd ← **Air Quality** (Environment dropdown): APEI emissions decline (SOx/NOx/VOC/CO 1990–), CESI concentrations indexed (PM2.5/O3/NO2/SO2 2009–; PM2.5 the rising exception), OECD peer PM2.5 (line + ranked bar, WHO-5 guideline line), wildfire-era PM2.5 (CESI 98th-pct peak + NFDB area, links Fire & Ice); links to air-quality-cities
+├── environment/air-quality-cities.qmd ← **Air Quality by City** (its own Environment-dropdown item): NAPS city dashboard — **15 cities shown** (`CITIES_SHOWN` — major metros + a regional/story spread; full ~30 built, trimmed in the page) × 5 pollutants, **gases 1974– / PM2.5 late-1990s–**; annual small-multiples (city dropdown) + a monthly chart with **City + Pollutant** dropdowns (one restyles data, the other toggles visibility); muted-blue lines (data from build_naps_cities)
+├── environment/climate-change.qmd ← **Climate Change** (Environment dropdown): national temperature anomaly (CESI 1948–, 2024=+3.1°C), regional warming / Arctic amplification (CTVB ranked bar relabelled to plain names + a marker map of the 11 regions, coloured by rate), two-trace long-run city temps (homogenized AHCCD + raw MSC tail) with least-squares trend, warming-by-season (AHCCD seasonal), and animated raw-monthly **warming spirals** (Toronto vs Eureka, scatterpolar)
 ├── wellbeing/index.qmd    ← happiness score + factor decomposition, safety (crime severity + homicide + by-city map)
 ├── pipeline/
 │   ├── config.py          ← Indicator dataclass + INDICATORS registry, peer group, COMPARATOR_COLORS, styling
@@ -78,8 +81,11 @@ DataCan/
 │   ├── build_census_geo.py ← ONE-TIME builder for the census-tract choropleth assets (not weekly)
 │   ├── build_geography.py ← ONE-TIME builder for the Geography section's static assets: province/ecozone/permafrost boundaries, province density + % freshwater, CMA density, land cover, **major lakes (build_lakes, NRCan 1:1M waterbodies) + 2023 wildfire points (build_wildfire_points, NFDB)** (not weekly)
 │   ├── build_wait_times.py ← ANNUAL builder (not weekly): CIHI wait times (% meeting benchmark, national, by procedure) → data/health/cihi_wait_times.csv; bump CIHI_URL each spring
+│   ├── build_naps_cities.py ← ANNUAL builder (not weekly): per-city annual + monthly air-quality means for ~30 major cities → data/environment/naps_city_{annual,monthly}.csv. Two eras: **2005– from NAPS Annual Summaries** (1HR block; CSV 2016+ / .xlsx ≤2015) + **pre-2005 aggregated from raw hourly** (gases to 1974, PM2.5 to late-1990s; ≥50%-of-month / ≥6-months-over-4-quarters validity). Normalised city matcher handles old spellings/province codes (St Johns, Montreal/PQ). Re-run each spring
 │   ├── fetch_geography.py ← registry custom fetchers: wildfire (NFDB, annual) + Arctic sea ice (NSIDC, monthly)
 │   ├── fetch_environment.py ← registry custom fetchers: GHG emissions national total + by economic sector (ECCC National Inventory Report / CESI; year-stamped URL — bump GHG_RELEASE each spring)
+│   ├── fetch_air_quality.py ← registry custom fetchers (Air Quality page): CESI air-quality concentrations indexed (PM2.5/O3/NO2/SO2/VOC, NAPS-derived; year-stamped — bump CESI_AQ_RELEASE) + APEI national emissions (criteria air contaminants 1990–, az-host /api/file cube)
+│   ├── fetch_climate.py    ← registry custom fetchers (Climate Change page): CESI national temperature departure (bump CESI_TEMP_RELEASE) + CTVB regional warming trends (bump CTVB_YEAR; cp1252) + per-city temperatures via GeoMet AHCCD — annual (homogenized + raw climate-daily tail), seasonal, monthly
 │   ├── fetch_government.py ← Government-section custom fetchers: StatCan workforce (employment by level 36-10-0489-01; public-sector composition by industry 14-10-0027-01 LFS) + federal finance (36-10-0477-01 1961– + GDP 36-10-0222-01; expense-by-type 10-10-0016-01; CCOFOG 10-10-0005-01) + TBS federal public service (open.canada.ca CKAN) + GC InfoBase (standard objects, by-dept, executives)
 │   └── run_pipeline.py    ← registry-driven orchestrator
 ├── data/<section>/        ← cleaned CSVs + metadata JSON sidecars
@@ -113,7 +119,7 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (64 indicators / 11 sections)
+## Data sources (88 indicators / 12 sections)
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   components 17-10-0008-01, CPI 18-10-0004-01 (All-items + the "Rent" group),
@@ -129,10 +135,26 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   food + CPI-trim core inflation (18-10-0004-01 / 18-10-0256-01), and merchandise
   trade with the US 12-10-0011-01 (export shares for the US, EU and China — scaling
   US dominance against the next-largest markets — + US-vs-rest-of-world balances).
-- **Environment & Climate Change Canada** (`fetch_environment.py`, OGL-Canada): GHG
-  emissions — national total + by economic sector — on the National Inventory Report
-  basis (the series Canada's 40–45%-below-2005 2030 target is defined against; ECCC
-  CESI year-stamped CSVs).
+- **Environment & Climate Change Canada** (OGL-Canada), several programs:
+  **GHG** emissions — national total + by economic sector — on the National Inventory
+  Report basis (`fetch_environment.py`; ECCC CESI year-stamped CSVs; the series
+  Canada's 40–45%-below-2005 2030 target is defined against). **Air quality**
+  (`fetch_air_quality.py`): CESI population-weighted concentration indicators
+  (PM2.5/O3/NO2/SO2/VOC, derived from the NAPS network, indexed to 2009) + the
+  **APEI** emissions inventory (criteria air contaminants 1990–, az-host
+  `/api/file?path=` cube, filter REGION=CA + GRAND TOTAL). **NAPS** raw monitoring —
+  per-station annual + monthly means aggregated to ~30 cities — **gases back to 1974,
+  PM2.5 to the late 1990s** (annual builder `build_naps_cities.py`: 2005+ from Annual
+  Summaries [CSV 2016+ / .xlsx ≤2015], pre-2005 aggregated from raw hourly). **Climate**
+  (`fetch_climate.py`): CESI national temperature departure (vs 1961–90, 1948–) + the
+  **Climate Trends and Variations Bulletin** regional warming trends (its 11 climate
+  regions — a bespoke ECCC delineation with NO open geometry, so the Climate page
+  shows a *marker map* at approximate region centres, not a choropleth) + per-city
+  temperatures via the **GeoMet OGC API**: homogenized **AHCCD** annual/seasonal/
+  monthly (`ahccd-*`, frozen at 2020, −9999.9 = missing; on ahccd-monthly the year is
+  dropped by the `properties=` filter so read it from the feature identifier) shown
+  with a raw recent tail from `climate-daily` (the two kept as distinct traces, never
+  spliced into one line).
 - **OECD SDMX** (`fetch_oecd_indicator`): R&D/BERD/researchers (MSTI
   `DSD_MSTI@DF_MSTI`), GDP/capita (`DSD_NAMAIN10@DF_TABLE1_EXPENDITURE_HCPC`),
   productivity (`DSD_PDB@DF_PDB_LV`), unemployment (`DSD_KEI@DF_KEI`), employment
@@ -157,7 +179,9 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   physicians (`DSD_HEALTH_EMP_REAC@DF_PHYS`), nurses (`DSD_HEALTH_REAC_EMP@DF_NURSE`
   — note the reversed DSD name; HEALTH_PROF=MINU, activity P), MRI units
   (`DSD_HEALTH_REAC_HOSP@DF_MED_TECH`), avoidable mortality (`DSD_HEALTH_STAT@DF_AM`,
-  MEASURE=AVM, deaths/100k), CO2 per capita + indexed (Green Growth `DSD_GG@DF_GREEN_GROWTH`).
+  MEASURE=AVM, deaths/100k), CO2 per capita + indexed and **mean population exposure
+  to PM2.5** (`PM_PWM`, µg/m³) + % above the WHO-2021 guideline (`PM_SPEX5`) — all
+  Green Growth `DSD_GG@DF_GREEN_GROWTH` (PM2.5 1990–2020, 16/17 peers — no South Korea).
 - **World Bank API** (`fetch_worldbank_indicator`, source="worldbank", `wb_indicator`
   code; JSON, ISO-3 codes match PEER_CODES, CC-BY): business investment / gross fixed
   capital formation %GDP (`NE.GDI.FTOT.ZS`) and defence spending %GDP
@@ -624,6 +648,15 @@ executives, and the OECD peer employment share) and a **federal spending** page
 (revenue/spending % of GDP since 1961 + nominal, expense by economic type, by standard
 object, by department, by function) — **12 new indicators** via `fetch_government.py`
 (StatCan + Treasury Board open data + GC InfoBase) plus 3 reusable chart builders.
+A **2026-06 atmospheric expansion** made **Environment** a nav dropdown — **Emissions
+& Energy** (the original page), **Air Quality** (APEI emissions + CESI concentrations
++ OECD peer PM2.5 + wildfire-era PM2.5), and **Climate Change** (national + regional/
+Arctic warming, two-trace AHCCD+MSC city temperatures with trend, warming-by-season,
+and animated raw-monthly warming spirals) — plus a linked **Air Quality by City**
+NAPS dashboard. **9 new registry indicators** (`fetch_air_quality.py` +
+`fetch_climate.py`) and one annual builder (`build_naps_cities.py`). Note: ECCC's 11
+CTVB climate regions have no openly-published polygons, so the Climate page uses a
+marker map at approximate region centres rather than a region choropleth.
 Deferred (candidates, not committed):
 **homeownership rate** (Census-only — no clean annual StatCan series; revisit when
 2026 Census tenure lands), top income shares / wealth (WID — patchy/lagged),

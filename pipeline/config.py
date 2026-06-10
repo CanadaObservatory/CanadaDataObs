@@ -662,6 +662,67 @@ INDICATORS = [
               fetch_fn="fetch_ghg_by_sector", output_subpath="eccc_ghg_by_sector.csv",
               source_table="ECCC CESI (by economic sector)"),
 
+    # ----- Air Quality (the Environment > Air Quality page) -----
+    # CESI national concentration trends (population-weighted, built on NAPS;
+    # OGL-Canada). Year-stamped URL — bump CESI_AQ_RELEASE in fetch_air_quality.py.
+    Indicator("cesi_air_quality", "environment", "custom",
+              "Air-pollutant concentrations (2009=100)", "index (2009=100)", "annual",
+              fetch_fn="fetch_cesi_air_quality", output_subpath="cesi_air_quality.csv",
+              source_table="ECCC CESI air-quality indicators (NAPS)"),
+    # APEI national emissions of the criteria air contaminants, 1990– (explains
+    # why concentrations fell — e.g. the acid-rain-era SOx controls).
+    Indicator("apei_emissions", "environment", "custom",
+              "Air-pollutant emissions (national)", "tonnes/year", "annual",
+              fetch_fn="fetch_apei_emissions", output_subpath="apei_emissions.csv",
+              source_table="ECCC Air Pollutant Emissions Inventory (APEI)"),
+    # Mean population exposure to PM2.5 — OECD Green Growth (SAME dataflow as the
+    # CO2 indicators). International peer comparison; satellite-derived; 16/17 peers
+    # (no South Korea), annual 1990–2020. Leave UNIT_MEASURE blank (..._T).
+    Indicator("pm25_exposure", "environment", "oecd",
+              "Mean population exposure to PM2.5", "µg/m³", "annual",
+              value_col="pm25", chart_recipe="ranked_bar",
+              dataflow="OECD.ENV.EPI,DSD_GG@DF_GREEN_GROWTH,1.1",
+              key=f"{_C}.A.PM_PWM..._T", start_period=1990,
+              source_table="OECD Green Growth Indicators"),
+    # Share of population exposed to PM2.5 above the WHO 2021 guideline (>5 µg/m³).
+    Indicator("pm25_above_who", "environment", "oecd",
+              "Population exposed to PM2.5 above WHO guideline", "% of population", "annual",
+              value_col="pct_above_who", chart_recipe="ranked_bar",
+              dataflow="OECD.ENV.EPI,DSD_GG@DF_GREEN_GROWTH,1.1",
+              key=f"{_C}.A.PM_SPEX5..._T", start_period=1990,
+              source_table="OECD Green Growth Indicators"),
+
+    # ----- Climate Change / Temperature (Environment > Climate Change page) -----
+    # National annual temperature departure vs 1961–1990 (CESI; year-stamped URL,
+    # bump CESI_TEMP_RELEASE in fetch_climate.py).
+    Indicator("cesi_temperature", "environment", "custom",
+              "National temperature departure", "°C vs 1961–1990", "annual",
+              fetch_fn="fetch_cesi_temperature", output_subpath="cesi_temperature.csv",
+              source_table="ECCC CESI (temperature change)"),
+    # Per-region warming trend 1948– (CTVB summary table; Arctic amplification).
+    Indicator("ctvb_regional", "environment", "custom",
+              "Regional warming trends", "°C trend 1948–latest", "annual",
+              fetch_fn="fetch_ctvb_regional", output_subpath="cesi_ctvb_regional.csv",
+              source_table="ECCC Climate Trends and Variations Bulletin"),
+    # Long-run city temperatures: homogenized AHCCD spine (to 2020) + raw daily
+    # tail to present, via GeoMet (two-trace, never spliced).
+    Indicator("city_temperatures", "environment", "custom",
+              "Long-run city temperatures", "°C annual mean", "annual",
+              fetch_fn="fetch_city_temperatures", output_subpath="city_temperatures.csv",
+              source_table="ECCC AHCCD + MSC daily (GeoMet)"),
+    # Seasonal homogenized means per city (warming-by-season view).
+    Indicator("city_temperatures_seasonal", "environment", "custom",
+              "Seasonal city temperatures", "°C seasonal mean", "annual",
+              fetch_fn="fetch_city_temperatures_seasonal",
+              output_subpath="city_temperatures_seasonal.csv",
+              source_table="ECCC AHCCD seasonal (GeoMet)"),
+    # Monthly homogenized means per city (input for the climate-spiral chart).
+    Indicator("city_temperatures_monthly", "environment", "custom",
+              "Monthly city temperatures", "°C monthly mean", "monthly",
+              fetch_fn="fetch_city_temperatures_monthly",
+              output_subpath="city_temperatures_monthly.csv",
+              source_table="ECCC AHCCD monthly (GeoMet)"),
+
     # ----- Society & Well-being (bespoke XLSX parse) -----
     Indicator("happiness", "wellbeing", "custom",
               "Happiness & well-being", "Cantril ladder (0–10)", "annual",

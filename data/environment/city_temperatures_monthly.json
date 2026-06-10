@@ -1,0 +1,14 @@
+{
+  "dataset_id": "city_temperatures_monthly",
+  "source": "Environment and Climate Change Canada",
+  "source_table": "ECCC AHCCD monthly (homogenized), via GeoMet",
+  "frequency": "monthly",
+  "unit": "\u00b0C monthly mean temperature (homogenized)",
+  "retrieved_at": "2026-06-09T20:53:07.057766+00:00",
+  "latest_observation_date": "2020",
+  "transformations": [
+    "homogenized monthly mean per city/year/month \u2014 input for the climate spiral"
+  ],
+  "notes": null,
+  "row_count": 8803
+}

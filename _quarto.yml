@@ -5,12 +5,12 @@ project:
 
 website:
   title: "DataCan"
-  description: "Interactive metrics about Canada — population, economy, housing, health, education, environment, and well-being"
+  description: "Interactive metrics about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
   navbar:
     left:
       - href: index.qmd
         text: Home
-      - text: Population
+      - text: People & Society
         menu:
           - href: population/index.qmd
             text: Population & Growth
@@ -18,25 +18,9 @@ website:
             text: Diversity
           - href: population/religion.qmd
             text: Religion
-      - text: Geography
-        menu:
-          - href: geography/index.qmd
-            text: Where People Live
-          - href: geography/land.qmd
-            text: The Land
-          - href: geography/elevation.qmd
-            text: Elevation
-          - href: geography/agriculture.qmd
-            text: Agriculture
-          - href: geography/water.qmd
-            text: Water
-          - href: geography/fire-ice.qmd
-            text: Fire & Ice
-          - href: geography/climate.qmd
-            text: Climate
-          - href: geography/protected.qmd
-            text: Protected Areas
-      - text: Economy
+          - href: wellbeing/crime-safety.qmd
+            text: Crime & Safety
+      - text: Economy & Affordability
         menu:
           - href: economics/index.qmd
             text: Growth & Jobs
@@ -46,7 +30,7 @@ website:
             text: Housing
           - href: income/index.qmd
             text: Income & Inequality
-      - text: Public Finances
+      - text: Government & Public Finances
         menu:
           - href: fiscal/index.qmd
             text: Government Finances
@@ -54,13 +38,44 @@ website:
             text: Government Employment
           - href: government/spending.qmd
             text: Federal Spending
-      - text: Health
+      - text: Health & Well-being
         menu:
           - href: health/index.qmd
             text: Health & Health Care
           - href: health/substance-use.qmd
             text: Substance Use
-      - text: Education & Science
+          - href: wellbeing/index.qmd
+            text: Well-being
+      - text: Land & Environment
+        menu:
+          - text: "The Land"
+          - href: geography/index.qmd
+            text: Where People Live
+          - href: geography/land.qmd
+            text: Ecozones & Land Cover
+          - href: geography/elevation.qmd
+            text: Elevation
+          - href: geography/water.qmd
+            text: Water
+          - href: geography/agriculture.qmd
+            text: Agriculture
+          - href: geography/protected.qmd
+            text: Protected Areas
+          - text: "---"
+          - text: "Climate & Atmosphere"
+          - href: geography/climate.qmd
+            text: Today's Climate
+          - href: environment/climate-change.qmd
+            text: Climate Change
+          - href: geography/fire-ice.qmd
+            text: Fire & Ice
+          - href: environment/air-quality.qmd
+            text: Air Quality
+          - href: environment/air-quality-cities.qmd
+            text: Air Quality by City
+          - href: environment/index.qmd
+            text: Emissions & Energy
+      - text: "Education, Science & Innovation"
         menu:
           - href: education/index.qmd
             text: Education
@@ -68,24 +83,18 @@ website:
             text: Science
           - href: innovation/index.qmd
             text: Innovation
-      - text: Environment
+      - text: About
         menu:
-          - href: environment/index.qmd
-            text: Emissions & Energy
-          - href: environment/air-quality.qmd
-            text: Air Quality
-          - href: environment/air-quality-cities.qmd
-            text: Air Quality by City
-          - href: environment/climate-change.qmd
-            text: Climate Change
-      - text: Society & Well-being
-        menu:
-          - href: wellbeing/index.qmd
-            text: Well-being
-          - href: wellbeing/crime-safety.qmd
-            text: Crime & Safety
-      - href: about.qmd
-        text: About
+          - href: about.qmd
+            text: Mission & Method
+          - href: about/people.qmd
+            text: People
+          - href: about/data-sources.qmd
+            text: Data Sources
+          - href: about/open-data.qmd
+            text: "Open Data: The One Cause"
+          - href: about/related.qmd
+            text: Sites We Like
     right:
       - icon: github
         href: https://github.com/CanadaObservatory/CanadaDataObs

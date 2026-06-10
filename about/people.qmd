@@ -1,0 +1,32 @@
+---
+title: "People"
+description: "Who is behind DataCan"
+---
+
+DataCan is an independent project with no commercial sponsor, political
+affiliation, or advocacy agenda (with [one deliberate
+exception](open-data.qmd)). It is built and maintained in the open — the data
+pipeline, the charts, and the site itself are all in the
+[public repository](https://github.com/CanadaObservatory/CanadaDataObs).
+
+<!-- TODO(owner): add who-we-are content. Suggested structure below — fill in
+     names/bios/photos as you want them public; nothing here is published yet
+     beyond the generic text above.
+
+## Who we are
+
+- **<Name>** — <one-or-two-line bio: background, why this project>
+
+## Acknowledgements
+
+- The statistical agencies whose work this site repackages — above all
+  Statistics Canada, the OECD, and Environment and Climate Change Canada.
+-->
+
+## Get in touch
+
+The best way to reach us is through the project's
+[GitHub issues](https://github.com/CanadaObservatory/CanadaDataObs/issues) —
+corrections, broken links, data questions, and suggestions for new indicators
+are all welcome. If you spot a number that looks wrong, please say so: a
+reference site earns trust by being correctable.

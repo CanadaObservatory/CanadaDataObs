@@ -1,0 +1,104 @@
+---
+title: "Data Sources"
+description: "Every source behind the site, what it is used for, and its licence"
+---
+
+Everything on DataCan comes from an authoritative primary source — a national
+statistical agency, a government department, an international organization, or
+an established research institution. We never use Wikipedia or third-party
+compilations, even as a cross-check. Every chart carries its own source note;
+this page is the full roster.
+
+## Canadian official sources
+
+- **[Statistics Canada](https://www.statcan.gc.ca/)** — the backbone of the
+  site. Population estimates and components, the 2021 Census (diversity,
+  religion, incomes, and home values down to the census-tract and
+  dissemination-area level), the Consumer Price Index, the New Housing Price
+  Index, incomes and low income, food insecurity, labour force series, housing
+  starts and rental vacancy (CMHC data published through Statistics Canada),
+  electricity generation, university tuition, crime (the Uniform Crime
+  Reporting survey, the Crime Severity Index, and hate crime), substance use
+  (the Canadian Community Health Survey), government finance and employment,
+  and merchandise trade. Used under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/reference/licence).
+- **[Environment and Climate Change Canada](https://www.canada.ca/en/environment-climate-change.html)** —
+  greenhouse-gas emissions (the National Inventory Report), the Canadian
+  Environmental Sustainability Indicators (temperature change, air-quality
+  concentrations), the Air Pollutant Emissions Inventory, raw air-quality
+  monitoring from the National Air Pollution Surveillance program (back to
+  1974), homogenized long-run city temperatures (AHCCD), and regional warming
+  trends. Open Government Licence – Canada.
+- **[Public Health Agency of Canada](https://health-infobase.canada.ca/)** —
+  the Substance-Related Harms dataset behind the Substance Use page: apparent
+  opioid- and stimulant-toxicity deaths and hospitalizations, national and by
+  province, updated quarterly. Open Government Licence – Canada.
+- **[Bank of Canada](https://www.bankofcanada.ca/valet/docs)** — the policy
+  rate back to 1935, mortgage rates, bond yields, and the exchange rate, via
+  the Valet API. Reproduced with attribution as the Bank requires.
+- **[Natural Resources Canada](https://natural-resources.canada.ca/)** — the
+  Canadian National Fire Database (wildfire), the Atlas of Canada (major lakes
+  and rivers, permafrost), elevation and named peaks, and the hillshade
+  basemap on the Elevation page. Open Government Licence – Canada.
+- **[Treasury Board of Canada Secretariat](https://www.canada.ca/en/treasury-board-secretariat.html) and
+  [GC InfoBase](https://www.tbs-sct.canada.ca/ems-sgd/edb-bdd/index-eng.html)** —
+  federal public-service headcounts and demographics, and federal spending by
+  department and standard object. Open Government Licence – Canada.
+- **[Canadian Institute for Health Information](https://www.cihi.ca/)** —
+  surgical wait times (the share of patients treated within the pan-Canadian
+  benchmark), updated annually from CIHI's published data tables.
+- **[Agriculture and Agri-Food Canada](https://agriculture.canada.ca/)** — the
+  National Ecological Framework behind the ecozone maps.
+- **[Toronto Police Service](https://data.torontopolice.on.ca/)** — the
+  neighbourhood crime map and crime-seasonality charts on the Crime & Safety
+  page. Open Government Licence – Ontario.
+
+## International sources
+
+- **[OECD](https://data-explorer.oecd.org/)** — the engine of the peer
+  comparisons: GDP per capita and growth, productivity, jobs, house prices,
+  household debt and disposable income, inequality and poverty, wages,
+  government debt, deficits, revenue and interest costs, life expectancy,
+  health spending and system capacity (beds, physicians, nurses, MRI units),
+  R&D and researchers, fine-particle air pollution, CO₂, and
+  general-government employment. Accessed through the OECD's SDMX API.
+- **[World Bank](https://data.worldbank.org/)** — peer comparisons sourced
+  from WHO, UN, SIPRI, and IDF data: business investment, defence spending,
+  suicide, overweight, tobacco and alcohol use, diabetes, maternal mortality,
+  universal-health-coverage index, and out-of-pocket health spending. CC BY 4.0.
+- **[Our World in Data](https://ourworldindata.org/)** — the energy mix
+  (compiled from the Energy Institute, Ember, and the U.S. EIA) and
+  consumption-based CO₂ (Global Carbon Project). CC BY.
+- **[World Happiness Report](https://worldhappiness.report/)** — life
+  evaluations from the Gallup World Poll and the factors that statistically
+  account for them.
+- **[National Snow and Ice Data Center](https://nsidc.org/data/seaice_index)** —
+  the Sea Ice Index behind the Arctic sea-ice extent chart.
+
+## One charts-only exception
+
+- **[CREA (Canadian Real Estate Association)](https://www.crea.ca/)** — the
+  MLS® Home Price Index series on the Housing page are published as **charts
+  only**, with CREA's written permission for educational use. Unlike every
+  other source on this site, the underlying CREA data is not redistributed and
+  is not available in our downloads. Each of those charts carries CREA's
+  attribution line.
+
+## Licences, in short
+
+Canadian government sources are used under the
+[Open Government Licence – Canada](https://open.canada.ca/en/open-government-licence-canada)
+(or the equivalent Statistics Canada and Ontario licences); the World Bank and
+Our World in Data are CC BY; the OECD permits reproduction with attribution,
+as does the Bank of Canada. Everything except the CREA series may be
+redistributed, and our cleaned CSVs are free to
+[download from GitHub](https://github.com/CanadaObservatory/CanadaDataObs).
+
+## How fresh is each series?
+
+Most series refresh automatically every week, picking up whatever the source
+agency has published — monthly for the CPI, quarterly for population, annually
+for most OECD series. A few sources have no machine-readable feed and are
+rebuilt manually about once a year when their agency publishes (CIHI wait
+times, the by-city air-quality history, the substance-use survey, detailed
+crime tables). Census-based maps are rebuilt once per census; their charts say
+so. Every chart shows the date of its most recent observation.

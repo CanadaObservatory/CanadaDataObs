@@ -1,0 +1,46 @@
+---
+title: "Sites We Like"
+description: "Projects we admire, learn from, and consult"
+---
+
+DataCan didn't invent the idea of patient, non-partisan, source-cited public
+data. These are projects we admire and regularly consult — some are role
+models for what this site tries to be, some cover ground we don't, and a few
+are sources we build on directly.
+
+## Role models
+
+- **[Our World in Data](https://ourworldindata.org/)** — the standard-setter
+  for open, rigorous, beautifully explained data publishing, on global and
+  long-run questions. Also one of our upstream sources (energy and
+  consumption-based CO₂). If you like DataCan, you will love OWID.
+- **[USAFacts](https://usafacts.org/)** — a non-partisan, government-data-only
+  portrait of the United States, with a source link on every figure. The
+  closest thing to DataCan's mission, one country south.
+- **[Gapminder](https://www.gapminder.org/)** — the late Hans Rosling's
+  project against statistical misconceptions. A standing reminder that the
+  data is usually more surprising — and less bleak — than the headlines.
+
+## Canada
+
+- **[CensusMapper](https://censusmapper.ca/)** — zoomable maps of any Canadian
+  census variable, by a single dedicated developer. The deepest census mapping
+  available anywhere; our neighbourhood maps cover a handful of curated
+  questions, CensusMapper covers them all.
+- **[Statistics Canada's Quality of Life Hub](https://www.statcan.gc.ca/en/topics-start/quality_of_life)** —
+  the official well-being framework: 90+ indicators on prosperity, health,
+  society, environment, and good governance, from the agency that collects
+  the data.
+
+## International data explorers
+
+- **[OECD Data Explorer](https://data-explorer.oecd.org/)** and the
+  **[OECD Better Life Index](https://www.oecdbetterlifeindex.org/)** — the
+  upstream home of most of our peer comparisons, and an interactive way to
+  weight what "doing well" means to you.
+- **[World Bank Open Data](https://data.worldbank.org/)** — free, global,
+  CC-licensed indicators; the source of our WHO- and UN-derived health
+  comparisons.
+
+*A listing here is our genuine recommendation, nothing more — there are no
+partnerships or endorsements in either direction.*

@@ -1,5 +1,6 @@
 ---
 title: "About DataCan"
+subtitle: "Mission & method"
 ---
 
 ## Purpose
@@ -13,27 +14,22 @@ It is a neutral, evidence-focused project, free and open to everyone. It aims to
 ## What makes DataCan different
 
 - **Every number in context.** Each indicator is shown alongside a group of 17 comparable OECD countries — not in isolation — so you can see not just what a figure is, but how Canada compares.
-- **Broad coverage in one place.** Population, geography, the economy, housing and the cost of living, incomes and inequality, public finances, health, education and innovation, the environment, and well-being — all under one roof and presented the same way.
+- **Broad coverage in one place.** Six themes — people & society, the economy and affordability, government and public finances, health and well-being, the land and environment, and education, science, and innovation — all under one roof and presented the same way.
 - **Descriptive, not prescriptive.** DataCan presents the data and the comparison without partisan or policy framing. Where a widely recognized benchmark exists — such as the Bank of Canada's inflation target — it is shown for context; otherwise, what the numbers mean is left to you.
 - **Built to stay current — and easy to share.** The site refreshes automatically every week from official sources, and every chart shows the date of its most recent data. Every chart has its own stable link you can copy, bookmark, and share — with no paywall and no login.
 - **Down to the neighbourhood.** Where the data allows, national figures are complemented by maps that reach all the way to the census-tract and dissemination-area level, so you can find your own community.
 - **Open and verifiable.** The data comes only from authoritative primary sources, every chart cites where its numbers come from, the cleaned datasets are free to download, and the code is open source.
 - **Independent.** DataCan has no commercial sponsor, political affiliation, or advocacy agenda. The data, the peer comparisons, and the official benchmarks do the work.
 
-## Data Sources
+## One deliberate exception
 
-- **Statistics Canada** — population estimates and components, the Consumer Price Index (including rent), the New Housing Price Index, median after-tax income, and the low-income rate. Downloaded from the [Statistics Canada](https://www.statcan.gc.ca/) bulk data tables.
-- **OECD** — international comparisons via the [OECD SDMX API](https://sdmx.oecd.org/): GDP per capita, real GDP growth, labour productivity, unemployment and the employment rate (National Accounts, Economic Outlook, Productivity, Key Economic Indicators, and Labour Force Statistics); house prices and household debt (Analytical House Prices, Household Dashboard); income inequality, poverty, and wages (Income Distribution Database, Average Annual Wages); government debt and budget balance (Economic Outlook); life expectancy and health spending (Health Statistics, System of Health Accounts); R&D and researchers (MSTI); and CO₂ and renewables (Green Growth Indicators).
-- **Our World in Data** — energy mix by source (Energy Institute, Ember, EIA), via direct CSV download.
-- **World Happiness Report** — life-evaluation scores from the Gallup World Poll.
+DataCan takes no policy positions — with a single exception: we advocate for
+the **creation, use, and open availability of public data** itself. A project
+like this can only exist because public agencies collect rigorous data and
+publish it openly, and we say so plainly. Read why on
+[Open Data: The One Cause](about/open-data.qmd).
 
-## Methodology
-
-- Data is fetched and cleaned by automated Python scripts
-- Charts use consistent styling: Canada is highlighted in red, peer countries in grey
-- Each chart notes its data source and the date of its most recent observation
-
-## Peer Group
+## The peer group
 
 For international comparisons, DataCan uses a set of 17 comparable OECD economies:
 
@@ -43,19 +39,37 @@ For international comparisons, DataCan uses a set of 17 comparable OECD economie
 
 This broader set provides more meaningful context than the G7 alone, which excludes important peers.
 
-## Update Schedule
+## How the site works
 
-Data is updated weekly via automated scripts. Source agencies refresh at
-different cadences — population estimates quarterly, most OECD series annually,
-the CPI monthly — and some are reported with a lag of a year or more. If a source
-is temporarily unavailable when the pipeline runs, the previous data is kept in
-place rather than overwritten, so a chart never goes blank because of a transient
-outage.
+- Data is fetched and cleaned by automated Python scripts that run weekly.
+- Source agencies refresh at different cadences — population estimates
+  quarterly, most OECD series annually, the CPI monthly — and some report with
+  a lag of a year or more. Each chart notes its source and the date of its most
+  recent observation.
+- If a source is temporarily unavailable when the pipeline runs, the previous
+  data is kept in place rather than overwritten, so a chart never goes blank
+  because of a transient outage.
+- Charts use consistent styling: Canada is highlighted in red, peer countries
+  in grey, with a small set of named comparators in colour.
 
-## Open Data
+## Where the data comes from
 
-All cleaned data files are freely available for download in CSV format. They are intended to be usable by students, journalists, researchers, and anyone else who wants to work with Canadian data in a simple, accessible format.
+Every series on this site comes from an authoritative primary source —
+Statistics Canada, the OECD, Environment and Climate Change Canada, the World
+Bank, the Bank of Canada, and others — under open licences (with one
+charts-only exception, noted there). The full list, with what each source is
+used for and its licence, is on the [Data Sources](about/data-sources.qmd) page.
 
-## Code
+## Open data downloads
 
-The source code for this project is open and available on [GitHub](https://github.com/CanadaObservatory/CanadaDataObs).
+All cleaned data files are freely available for download in CSV format from the
+[GitHub repository](https://github.com/CanadaObservatory/CanadaDataObs). They
+are intended to be usable by students, journalists, researchers, and anyone
+else who wants to work with Canadian data in a simple, accessible format.
+
+## People & code
+
+DataCan is an independent project — see [People](about/people.qmd) for who is
+behind it, and [Sites We Like](about/related.qmd) for the projects we admire
+and consult. The source code is open and available on
+[GitHub](https://github.com/CanadaObservatory/CanadaDataObs).

@@ -1,0 +1,33 @@
+/*-- scss:rules --*/
+
+// Stacked two-line navbar wordmark: the brand "Canada Observatory" wraps into
+// CANADA / OBSERVATORY inside a fixed-width brand container. Deliberately small
+// (0.72rem) so the navbar keeps a wide no-clip margin at the 992px breakpoint —
+// Bootstrap navbars clip from the right with no wrap and no scrollbar, so any
+// future nav addition must re-verify the row's width at 992px.
+.navbar .navbar-brand-container {
+  flex-shrink: 0;
+  width: 106px;
+}
+
+.navbar .navbar-brand,
+.navbar .navbar-brand .navbar-title {
+  white-space: normal;
+  overflow: visible;        // Bootstrap ellipsizes an overflowing brand —
+  text-overflow: clip;      // OBSERVATORY must never render as OBSERVAT…
+  width: 100%;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// A touch less horizontal padding per top-level nav item — width insurance
+// that more than pays for the wordmark being wider than a short brand.
+.navbar .navbar-nav .nav-link {
+  padding-left: 0.42rem;
+  padding-right: 0.42rem;
+}

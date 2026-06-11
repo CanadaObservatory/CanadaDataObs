@@ -13,7 +13,7 @@ website:
   title: "Canada Observatory"
   description: "Interactive metrics about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
   navbar:
-    title: "CanObs"
+    title: "Canada Observatory"
     left:
       - text: People
         menu:
@@ -112,7 +112,7 @@ website:
 
 format:
   html:
-    theme: flatly
+    theme: [flatly, custom.scss]
     toc: true
     code-fold: true
     code-summary: "Show code"

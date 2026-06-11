@@ -1,10 +1,14 @@
 # DataCan (Canada Observatory)
 
 **Public name (owner, 2026-06-10): "Canada Observatory", short form "CanObs"** —
-navbar brand = CanObs (`website.navbar.title`; the narrow form keeps the no-clip
-guarantee), tab/SEO title + landing H1 + footer + chart attribution = Canada
-Observatory, prose introduces "CanObs for short" then may use either. "DataCan" is
-now the INTERNAL codename only (repo dir, this file) — it must not appear in public
+the navbar brand is the FULL name as a **stacked two-line small-caps wordmark**
+(CANADA / OBSERVATORY at 0.68rem — `custom.scss` styles `navbar.title`, fixed
+106px `.navbar-brand-container`, `text-overflow: clip` because Bootstrap otherwise
+ellipsizes "OBSERVAT…"; nav-link padding trimmed to 0.42rem as width insurance →
+**39px no-clip slack at the 992px breakpoint, re-verify after ANY nav/brand
+change**). Tab/SEO title + landing H1 + footer + chart attribution = Canada
+Observatory; prose introduces "CanObs for short" then may use either. "DataCan" is
+the INTERNAL codename only (repo dir, this file) — it must not appear in public
 page text.
 
 Interactive data-visualization website on the **state of Canada**, organized into six
@@ -48,7 +52,7 @@ chart block to the relevant `.qmd`. No new fetch function for OECD/StatCan serie
 ```
 DataCan/
 ├── CLAUDE.md              ← this file
-├── _quarto.yml            ← site config, nav (**6 thematic dropdowns since the 2026-06-10 reorg**, with **compact top-level labels: People / Economy / Government / Health / Environment / Education & Science** — Bootstrap navbars CLIP from the right when too wide (no wrap, no scrollbar → items unreachable); the full area names needed ~1,590px so About/GitHub vanished on laptops; the compact set needs ~955px < the 992px hamburger breakpoint → can never clip. Full thematic names (People & Society, Economy & Affordability, Government & Public Finances, Health & Well-being, Land & Environment, Education-Science-&-Innovation) live on the landing cards + page titles, NOT the navbar. **No Home item** — the DataCan brand links home. The Environment menu's 12 items sit under two in-menu headers "The Land"/"Climate & Atmosphere" (a menu item with text but no href renders as a header) + an About dropdown; nav grouping is decoupled from directories — NO paths changed), theme
+├── _quarto.yml            ← site config, nav (**6 thematic dropdowns since the 2026-06-10 reorg**, with **compact top-level labels: People / Economy / Government / Health / Environment / Education & Science** — Bootstrap navbars CLIP from the right when too wide (no wrap, no scrollbar → items unreachable); the full area names needed ~1,590px so About/GitHub vanished on laptops; the compact set needs ~955px < the 992px hamburger breakpoint → can never clip. Full thematic names (People & Society, Economy & Affordability, Government & Public Finances, Health & Well-being, Land & Environment, Education-Science-&-Innovation) live on the landing cards + page titles, NOT the navbar. **No Home item** — the brand wordmark links home. The Environment menu's 12 items sit under two in-menu headers "The Land"/"Climate & Atmosphere" (a menu item with text but no href renders as a header) + an About dropdown; nav grouping is decoupled from directories — NO paths changed), theme `[flatly, custom.scss]` (custom.scss = the stacked brand wordmark + nav-link padding trim — see the naming note at the top of this file)
 ├── index.qmd  about.qmd   ← landing (6 area cards mirroring the nav + question router) + About: Mission & Method
 ├── about/                 ← About sub-pages: people.qmd (scaffold — owner to fill bios), data-sources.qmd (full source roster + licences), open-data.qmd (the SINGLE deliberate advocacy exception: creation/use/open access of public data, transparency framing), related.qmd (Sites We Like)
 ├── population/index.qmd   ← **Population & Growth** (People-&-Society-dropdown landing): total, by-province, growth rate, components, non-permanent residents, **Age Structure & Aging** (2026-06 Branch-1: single-year **population pyramid with a year slider** 1971– [ages 0–89 single + a "90 years and older" roll-up — the roll-up is the only 90+ form present in ALL years; labels say "and older" not "and over"], median age, old-age dependency + **fertility vs peers** [WB rows; replacement-level 2.1 dashed line], link to the age map) + **Moving Within Canada** (net interprovincial migration by province, 17-10-0020-01 quarterly summed to July–June years — Alberta 2024 = series-record inflow, Ontario = record outflow)

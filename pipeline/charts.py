@@ -4,11 +4,24 @@ Enforces consistent styling across all topics.
 """
 
 import plotly.graph_objects as go
+import plotly.io as pio
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, HIGHLIGHT_COUNTRY,
     PEER_COUNTRIES, COMPARATOR_COLORS, SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
+
+
+# --- Site typeface on every figure (visual_assets/brand/typography.md) ----------
+# Radio-Canada (adopted 2026-06-11). Plotly text is SVG text styled by page CSS,
+# so the family set here resolves against the site's self-hosted @font-face; no
+# builder sets a family of its own, so this one default template covers every
+# chart. Fallbacks mirror the site stack. Digits are tabular by default in
+# Radio-Canada — required, since Plotly text can't enable OpenType features.
+pio.templates["canobs"] = go.layout.Template(
+    layout=dict(font=dict(family='"Radio Canada", "Helvetica Neue", Arial, sans-serif'))
+)
+pio.templates.default = "plotly+canobs"
 
 
 # --- Site attribution on every figure (one cross-cutting interceptor) ----------

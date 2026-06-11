@@ -1,8 +1,34 @@
 # Typography — decision framework and audit
 
 Drafted 2026-06-11, mirroring the palette and silhouette processes: criteria
-first, then an evidence-based assessment. Decision pending owner sign-off;
-the incumbent remains the default until then.
+first, then an evidence-based assessment.
+
+## STATUS: ADOPTED — Radio-Canada (owner decision, 2026-06-11). Implemented.
+
+- **Self-hosted**: 4 variable woff2 subsets (latin/latin-ext × roman/italic,
+  ~176 KB total) in `brand/fonts/`; `@font-face` in `custom.scss` with
+  PROJECT-relative url()s (Quarto treats url() assets in theme SCSS as
+  dependencies resolved against the project root and copies them to
+  `site_libs/bootstrap/visual_assets/…` — `../`-style paths crash its copier).
+  `$web-font-path: false` removes the flatly theme's Lato CDN import;
+  `$font-family-sans-serif` leads with "Radio Canada". A preload hint in
+  `_includes/brand-head.html` targets the site_libs copy (the URL the CSS
+  actually loads).
+- **Charts**: one global Plotly template in `pipeline/charts.py`
+  (`pio.templates["canobs"]`, default `plotly+canobs`) sets the family for all
+  ~140 charts; verified live — every chart text node renders Radio-Canada.
+- **Navbar regression found & fixed**: Radio-Canada runs wider than Lato at nav
+  sizes — the 992px row clipped by 26px. Recovered with `font-stretch: 95%`
+  (the family's own width axis) + nav-link padding 0.34rem → **12px slack,
+  re-verified**. Any future nav/font change must re-measure.
+- **Masters**: all text-bearing SVGs re-set in Radio-Canada and re-exported via
+  `visual_assets/build_brand.py` (the reusable exporter). Local rendering needs
+  the static instances installed (`~/Library/Fonts/RadioCanada-{Regular,
+  SemiBold,Bold}.ttf`, instanced from the VF with fontTools varLib.instancer;
+  bold-resolution verified empirically). Text in masters is still live text —
+  outline before distributing masters outside the repo.
+- Bonus: the family ships a **Canadian Aboriginal syllabics** subset — load it
+  if Indigenous-language content ever lands.
 
 ## The incumbent (never deliberately chosen)
 

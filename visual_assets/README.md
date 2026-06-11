@@ -27,10 +27,12 @@ brand/                  ← the landed identity (stable set)
 ├── palette-sheet.svg / .png    the palette as a one-page infographic (swatches, tints,
 │                               WCAG pairings, rules, area mapping) — regenerate after
 │                               any palette change
-├── typography.md               the font decision framework + fontTools audit (2026-06-11):
-│                               incumbent = Lato (theme accident; charts = unchosen
-│                               Verdana fallback!); finalists Radio-Canada (recommended),
-│                               IBM Plex Sans, Source Sans 3, Lato — decision pending
+├── typography.md               the font framework + audit. **Radio-Canada ADOPTED
+│                               2026-06-11** — wired site-wide (custom.scss + the
+│                               global Plotly template in pipeline/charts.py) and
+│                               across all masters
+├── fonts/                      self-hosted Radio-Canada variable woff2 (latin +
+│                               latin-ext, roman + italic, ~176 KB total)
 ├── favicon/                    favicon.svg (bare botanical SMALL cut, maroon) + 16/32 PNG,
 │                               apple-touch-icon (180) + icon-192/512 (navy bg, off-white
 │                               ring, wheat small cut). No .ico (no ImageMagick on this
@@ -97,9 +99,13 @@ initial_drafts/         ← archive: ChatGPT/openart raster attempts (no alpha,
 ## Regenerating exports
 
 ```bash
-qlmanage -t -s 1024 -o /tmp brand/favicon/favicon.svg   # SVG → /tmp/favicon.svg.png
-sips -z 32 32 /tmp/favicon.svg.png --out brand/favicon/favicon-32.png
+python3 visual_assets/build_brand.py   # regenerates every PNG from the SVG masters
 ```
+
+Masters with text render via qlmanage, which uses installed system fonts —
+the Radio-Canada static instances must be in `~/Library/Fonts/`
+(`RadioCanada-{Regular,SemiBold,Bold}.ttf`; see typography.md for the
+fontTools instancing recipe).
 
 ## Next steps (not yet done)
 

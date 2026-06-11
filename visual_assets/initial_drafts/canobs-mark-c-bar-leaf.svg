@@ -1,0 +1,3 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs><path id="leafC" d="M50 6 L58 27 L76 16 L73 37 L94 35 L77 52 L84 66 L60 59 L62 75 L52.5 72 L52 95 L48 95 L47.5 72 L38 75 L40 59 L16 66 L23 52 L6 35 L27 37 L24 16 L42 27 Z"/><clipPath id="clipC"><use href="#leafC"/></clipPath></defs>
+<g clip-path="url(#clipC)" fill="#7A263A"><rect x="8.35" y="0" width="9.5" height="100"/><rect x="20.65" y="0" width="9.5" height="100"/><rect x="32.95" y="0" width="9.5" height="100"/><rect x="45.25" y="0" width="9.5" height="100"/><rect x="57.55" y="0" width="9.5" height="100"/><rect x="69.85" y="0" width="9.5" height="100"/><rect x="82.15" y="0" width="9.5" height="100"/></g></svg>

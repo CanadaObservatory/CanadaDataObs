@@ -15,3 +15,7 @@ GitHub_token.rtf
 # that must NOT be published or committed to this public repo). Local use only.
 internal/
 *MLS_HPI*
+
+# Brand archive: the extracted folder in visual_assets/initial_drafts/ is committed
+# for design history; this zip is a byte-for-byte duplicate of it (1.5 MB).
+visual_assets/initial_drafts/*.zip

@@ -1,3 +1,12 @@
+/*-- scss:defaults --*/
+
+// Canada Observatory palette (masters + rules: visual_assets/brand/palette.md,
+// locked 2026-06-10). Chrome colours only — chart colours live in
+// pipeline/config.py as a separate data-ink system; never mix the two.
+$primary: #17324D;        // Deep Navy — navbar, primary buttons
+$link-color: #1F6E8C;     // darkened Lake Blue — 5.2:1 on white/off-white (AA)
+$headings-color: #17324D;
+
 /*-- scss:rules --*/
 
 // Stacked two-line navbar wordmark: the brand "Canada Observatory" wraps into

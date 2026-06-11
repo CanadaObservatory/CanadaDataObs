@@ -8,10 +8,24 @@ project:
   render:
     - "*.qmd"
     - "**/*.qmd"
+  # The brand kit must be declared explicitly: Quarto only copies *referenced*
+  # resources, and the absolute-URL icon links in _includes/brand-head.html are
+  # invisible to its resource discovery. visual_assets/initial_drafts/ (internal
+  # archive) stays unpublished automatically — nothing references it.
+  # No trailing slash: "visual_assets/brand/" makes Quarto ALSO copy the dir's
+  # contents flattened into _site/visual_assets/ (rsync-style), duplicating the kit.
+  resources:
+    - visual_assets/brand
 
 website:
   title: "Canada Observatory"
+  site-url: https://canadaobservatory.github.io/CanadaDataObs/
   description: "Interactive metrics about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
+  favicon: visual_assets/brand/favicon/favicon-32.png
+  image: visual_assets/brand/social/og-card.png
+  open-graph: true
+  twitter-card:
+    card-style: summary_large_image
   navbar:
     title: "Canada Observatory"
     left:
@@ -116,4 +130,5 @@ format:
     toc: true
     code-fold: true
     code-summary: "Show code"
+    include-in-header: _includes/brand-head.html
     include-after-body: _includes/share-charts.html

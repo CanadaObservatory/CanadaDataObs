@@ -38,9 +38,8 @@ else:
 ## The Largest Group, Mapped
 
 A different cut of the same data: each tract coloured by its **largest single
-group** — a plurality, not necessarily a majority — with the top three groups in
-the hover. It lives on its own page (a second full set of tract boundaries is
-heavy):
+group** — a plurality, not necessarily a majority — with the tract's full mix in
+the hover (kept on its own page so this one stays fast to load):
 
 **[→ The largest group in each neighbourhood](largest-group.qmd)**
 

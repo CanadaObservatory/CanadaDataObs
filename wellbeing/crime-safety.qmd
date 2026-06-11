@@ -405,24 +405,6 @@ calendar, but most is not. Bike theft also illustrates the low-clearance pattern
 the nearly 40,000 reported in Toronto since 2014, only about **`{python} BIKE_REC`%**
 are ever recovered.
 
-## What this page leaves out (for now)
-
-Honesty about gaps matters as much as coverage:
-
-- **No "porch / parcel theft" statistic exists.** Neither Statistics Canada nor the
-  Toronto Police break it out; the closest measure is "theft under $5,000."
-- **No e-scooter collision data.** Kick-style e-scooters are not street-legal in
-  Toronto, so police collision data does not track them. The cyclist/pedestrian
-  *Killed-or-Seriously-Injured* dataset is a separate, buildable traffic-safety view.
-- **Perceived safety is a different question from recorded crime.** Whether people
-  *feel* safe — and how much crime never gets reported — comes from Statistics
-  Canada's victimization survey, which runs only every few years (2019 is current;
-  the next lands ~2027). It is worth adding as a clearly-labelled survey layer.
-- **Cross-city comparison uses StatCan only.** Other cities' police portals
-  (Vancouver, Montréal, Ottawa…) use incompatible categories and counting rules and
-  are explicitly *not* comparable to each other; the comparable layer is the StatCan
-  metro data above, with Toronto as a deeper local example.
-
 ## Download data
 
 - [Crime by type — Canada/provinces/metros (CSV)](../data/wellbeing/statcan_crime_by_type.csv) — Statistics Canada Table 35-10-0177-01

@@ -104,10 +104,10 @@ else:
 
 ## Safety
 
-Safety is a basic component of well-being. It now has its own page —
-**[Crime & Safety](crime-safety.qmd)** — covering the long-run Crime Severity Index
+Safety is a basic component of well-being. For the long-run Crime Severity Index
 and homicide rate, the specific kinds of crime people actually experience and how
-often they get solved, and how metropolitan areas and Toronto neighbourhoods compare.
+often they get solved, and how metropolitan areas and Toronto neighbourhoods
+compare, see **[Crime & Safety](crime-safety.qmd)**.
 
 ## Download Data
 

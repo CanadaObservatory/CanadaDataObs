@@ -130,8 +130,12 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
     fig.update_layout(
         xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
-        plot_bgcolor="white", hovermode="x unified", height=520,
+        # 560px tall + a 10px legend font so all 18 peer entries FIT the plot area —
+        # an overflowing Plotly legend grows an internal scrollbar that captures the
+        # mouse wheel and fights the page scroll (owner-reported).
+        plot_bgcolor="white", hovermode="x unified", height=560,
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02,
+                    font=dict(size=10), itemsizing="constant",
                     itemclick="toggle", itemdoubleclick="toggleothers"),
         margin=dict(l=10, r=175, t=extra_top, b=(120 if rangeslider else 80)),
     )
@@ -145,9 +149,15 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
                          country_col="country_code", name_col="country_name",
                          highlight=None, show_average=False,
                          avg_name="OECD peer average", source_note=None,
-                         rangeslider=True, initial_start=None, hide_peers=True):
+                         rangeslider=True, initial_start=None, hide_peers=True,
+                         initial_visible=None):
     """
     Line chart comparing Canada against OECD peers.
+
+    `initial_visible` (optional, list of country codes): named comparators NOT in
+    the list also start legend-hidden, so e.g. `initial_visible=["USA"]` opens with
+    just Canada, the US and the peer average (used on the busy fertility chart).
+    Everything stays one legend click away.
 
     Canada is red; named comparators get distinct colours; the rest of the peer group
     is light grey. By default (`hide_peers=True`) only Canada, the coloured comparators
@@ -210,6 +220,8 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
             x=_year_to_dt(s[x_col]), y=s[y_col], name=name, mode="lines",
             line=dict(color=COMPARATOR_COLORS[code], width=2),
             legendrank=10 + i,
+            visible=(True if initial_visible is None or code in initial_visible
+                     else "legendonly"),
             hovertemplate=f"<b>{name}</b>: %{{y:.2f}}<extra></extra>",
         ))
 
@@ -746,6 +758,82 @@ def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color=
     return fig
 
 
+def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
+               neg_color="#ee8866", rangeslider=False, source_note=None,
+               hover_fmt=",.0f", yticksuffix="", select_col=None,
+               default_option=None, height=440,
+               hovertemplate=None, customdata=None):
+    """Single-series bar chart for rate/flow series where the **zero baseline and
+    sign** carry the meaning (growth rates, net flows) — bars force an honest zero
+    base where a cropped line can mislead. Positive bars are muted blue, negative
+    muted orange, with an explicit zero line.
+
+    `select_col` adds a dropdown that switches the bars across that column's
+    options (e.g. provinces), one option at a time — the dropdown restyles y, the
+    sign colours and the hover, so the chart stays a single trace and the page
+    stays light. Opens on `default_option` (else the first option alphabetically).
+    `rangeslider=True` adds the draggable time slider below (long series), and the
+    builder places `source_note` beneath it like `single_line` does."""
+    import numpy as np
+    import pandas as pd
+
+    def _colors(vals):
+        return [neg_color if (v == v and v < 0) else color for v in vals]
+
+    options = None
+    if select_col is not None:
+        options = sorted(df[select_col].dropna().unique())
+        start = default_option if default_option in options else options[0]
+        xs = np.sort(df[x_col].dropna().unique())
+        series = {o: (df[df[select_col] == o].set_index(x_col)[y_col]
+                      .reindex(xs).to_numpy(dtype=float)) for o in options}
+        x_vals, y_vals, label = xs, series[start], start
+    else:
+        x_vals, y_vals, label = df[x_col], df[y_col].to_numpy(dtype=float), None
+
+    def _hover(opt):
+        head = f"<b>{opt} — %{{x}}</b>" if opt else "<b>%{x}</b>"
+        return f"{head}: %{{y:{hover_fmt}}}{yticksuffix}<extra></extra>"
+
+    fig = go.Figure(go.Bar(
+        x=x_vals, y=y_vals, marker_color=_colors(y_vals), name="",
+        customdata=(customdata if select_col is None else None),
+        hovertemplate=(hovertemplate if (hovertemplate and select_col is None)
+                       else _hover(label))))
+    fig.add_hline(y=0, line_color="#bbb", line_width=1)
+
+    # Only set the rangeslider key when wanted: an explicit rangeslider=None still
+    # instantiates the container, whose `visible` then DEFAULTS TO TRUE (plotly quirk
+    # — an unwanted slider appeared under the migration bars).
+    xaxis = dict(gridcolor="#e0e0e0")
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.09, bgcolor="#f5f5f5")
+    layout = dict(
+        plot_bgcolor="white", height=height, showlegend=False, xaxis=xaxis,
+        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0", ticksuffix=yticksuffix,
+                   zeroline=True, zerolinecolor="#bbb"),
+        margin=dict(l=10, r=20, t=(64 if select_col else 36),
+                    b=(110 if rangeslider else 70)),
+    )
+    if options is not None:
+        layout["updatemenus"] = [dict(
+            buttons=[dict(method="restyle", label=str(o),
+                          args=[{"y": [series[o]],
+                                 "marker.color": [_colors(series[o])],
+                                 "hovertemplate": [_hover(o)]}])
+                     for o in options],
+            active=options.index(start), direction="down",
+            x=0, xanchor="left", y=1.16, yanchor="top",
+            bgcolor="white", bordercolor="#ccc", font=dict(size=12),
+        )]
+    fig.update_layout(**layout)
+    if source_note:
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           y=(-0.30 if rangeslider else -0.20), showarrow=False,
+                           font=dict(size=10, color="#999"))
+    return fig
+
+
 def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender",
                        value_col="value", men_label="Men", women_label="Women",
                        men_color="#4477aa", women_color="#ee8866",
@@ -784,6 +872,7 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
                 for t in tickvals]
 
     m0, w0 = data[y0]
+    net = {y: data[y][1] - data[y][0] for y in years}     # women − men, per age
     fig = go.Figure()
     fig.add_trace(go.Bar(
         y=ages, x=-m0, customdata=m0, name=men_label, orientation="h",
@@ -793,10 +882,21 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
         y=ages, x=w0, customdata=w0, name=women_label, orientation="h",
         marker_color=women_color,
         hovertemplate=f"{women_label}, age %{{y}}: %{{customdata:,.0f}}<extra></extra>"))
+    # Net line (women − men): white over the bars with a soft grey shadow under it
+    # so it stays visible where the bars end. Right of zero = more women (old age),
+    # left = more men (boys outnumber girls at birth).
+    fig.add_trace(go.Scatter(
+        y=ages, x=net[y0], mode="lines", hoverinfo="skip", showlegend=False,
+        line=dict(color="rgba(80,80,80,0.45)", width=3.2)))
+    fig.add_trace(go.Scatter(
+        y=ages, x=net[y0], mode="lines", name="Net (women − men)",
+        customdata=net[y0],
+        line=dict(color="white", width=1.6),
+        hovertemplate="Net at age %{y}: %{customdata:+,.0f} (women − men)<extra></extra>"))
 
     steps = [dict(method="restyle", label=str(y),
-                  args=[{"x": [-data[y][0], data[y][1]],
-                         "customdata": [data[y][0], data[y][1]]}])
+                  args=[{"x": [-data[y][0], data[y][1], net[y], net[y]],
+                         "customdata": [data[y][0], data[y][1], net[y], net[y]]}])
              for y in years]
 
     fig.update_layout(

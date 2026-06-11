@@ -14,7 +14,7 @@ from pipeline.charts import (choropleth_categorical, choropleth_groups_map,
 Instead of one group's share at a time, this map colours each **census tract** by
 its **largest single group** (2021 Census). A plurality is not a majority — in
 mixed neighbourhoods the leading group may hold well under half — so **hover for
-the top three groups**, which makes a 90% tract read differently from a 31% one.
+the tract's full mix**, which makes a 90% tract read differently from a 31% one.
 White-plurality tracts, most of the country, are deliberately drawn in a neutral
 grey so colour is reserved for distinguishing the other groups.
 
@@ -38,10 +38,11 @@ if os.path.exists(eth_geo) and os.path.exists(eth_path):
     glabels = {g[0]: g[1] for g in gdefs}
     sub["largest"] = sub[gcols].astype(float).idxmax(axis=1).map(glabels)
 
-    def _top3(row):
-        s = row[gcols].astype(float).nlargest(3)
-        return " · ".join(f"{glabels[c]} {v:.0f}%" for c, v in s.items())
-    sub["detail"] = sub.apply(_top3, axis=1)
+    def _mix(row):
+        s = row[gcols].astype(float).sort_values(ascending=False)
+        s = s[s >= 0.5]                      # the tract's full mix, smallest slivers dropped
+        return "<br>".join(f"{glabels[c]}: {v:.1f}%" for c, v in s.items())
+    sub["detail"] = sub.apply(_mix, axis=1)
 
     order = sub["largest"].value_counts().index.tolist()
     cmap = {lab: CATEGORICAL_PALETTE[i % len(CATEGORICAL_PALETTE)]
@@ -50,7 +51,7 @@ if os.path.exists(eth_geo) and os.path.exists(eth_path):
     fig = choropleth_categorical(geo, sub, "ctuid", "largest", name_col="name",
         ordered=order, color_map=cmap, detail_col="detail", height=700,
         center={"lat": 51.5, "lon": -96.0}, zoom=3.0,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007). Largest single group per tract (plurality); hover shows the top three. White is derived (Not a visible minority − Indigenous identity); Indigenous = Indigenous identity. Descriptive only.")
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007). Largest single group per tract (plurality); hover shows the tract's full mix (groups ≥0.5%). White is derived (Not a visible minority − Indigenous identity); Indigenous = Indigenous identity. Descriptive only.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Map not yet available — run `python -m pipeline.build_census_geo`.")

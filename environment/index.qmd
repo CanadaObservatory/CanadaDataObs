@@ -182,7 +182,7 @@ if os.path.exists(cco2_path):
 
 ## Low-Carbon Electricity
 
-The share of electricity generated from non-fossil sources — hydro, nuclear, wind, and solar combined. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating.
+The share of electricity generated from non-fossil sources — hydro, nuclear, wind, and solar combined. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating.
 
 ```{python}
 #| echo: false

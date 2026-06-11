@@ -10,8 +10,8 @@ import re
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import (single_line, peer_comparison_line, ranked_bar,
-                             lines_over_time, population_pyramid)
+from pipeline.charts import (single_line, single_bar, peer_comparison_line,
+                             ranked_bar, population_pyramid)
 ```
 
 ## Canada's Population Over Time
@@ -118,11 +118,11 @@ canada_growth = canada_growth.sort_values("date")
 canada_growth["pop_yoy_pct"] = canada_growth["population"].pct_change(periods=4) * 100
 canada_growth = canada_growth.dropna(subset=["pop_yoy_pct"])
 
-fig = single_line(canada_growth, "date", "pop_yoy_pct", title="",
-                  yaxis_title="Year-over-Year Growth (%)", rangeslider=True,
-                  customdata=canada_growth["date"].dt.quarter,
-                  hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Growth: %{y:.2f}%<extra></extra>",
-                  source_note=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}")
+fig = single_bar(canada_growth, "date", "pop_yoy_pct", title="",
+                 yaxis_title="Year-over-Year Growth (%)", rangeslider=True,
+                 customdata=canada_growth["date"].dt.quarter,
+                 hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Growth: %{y:.2f}%<extra></extra>",
+                 source_note=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}")
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
@@ -197,7 +197,7 @@ else:
     print("Non-permanent residents data not yet available. Run the data pipeline.")
 ```
 
-## Age Structure & Aging
+## Age Structure
 
 How old is Canada? The pyramid below shows the full age distribution — every single
 year of age, men to the left, women to the right. **Drag the slider** to watch half a
@@ -205,6 +205,9 @@ century of change: the wide base of the early 1970s (the tail of the baby boom)
 narrows as births decline, and the boomer bulge climbs the pyramid into retirement.
 Recent years add a new feature — a visible widening through the 20s and 30s as
 immigration and non-permanent residents, who arrive young, fill in the working ages.
+The white line traces the **net difference between women and men** at each age:
+slightly more boys are born than girls, and women increasingly outnumber men from
+late middle age on.
 
 ```{python}
 #| echo: false
@@ -233,9 +236,8 @@ else:
 ### Median Age
 
 Half of Canadians are older than this line. The median age rose from about 26 in 1971
-to about 41 today — driven by longer lives and smaller families. The slight dip in the
-most recent years is the arrival of unusually many young immigrants and non-permanent
-residents.
+to about 41 today — driven by longer lives and smaller families. The slight dip in
+recent years is due to immigration.
 
 ```{python}
 #| echo: false
@@ -293,11 +295,11 @@ fert_path = "data/population/worldbank_fertility_rate.csv"
 if os.path.exists(fert_path):
     fert = pd.read_csv(fert_path)
     fig = peer_comparison_line(fert, "year", "fertility_rate", "",
-        "Births per woman", show_average=True,
+        "Births per woman", show_average=True, initial_visible=["USA"],
         source_note=f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(fert_path)}")
     fig.add_hline(y=2.1, line_dash="dash", line_color="#555", line_width=1,
                   annotation_text="Replacement level (≈2.1)",
-                  annotation_position="top left",
+                  annotation_position="top right",
                   annotation_font=dict(size=10, color="#555"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -328,24 +330,22 @@ you can flip between who lives somewhere and what living there costs.
 ## Moving Within Canada
 
 Beyond immigration, Canadians relocate between provinces — and the direction of
-that flow says a lot about relative job markets and housing costs. The chart shows
-**net** interprovincial migration (movers in minus movers out) by July–June year.
-Alberta's recent net inflows are the largest in the 60-year record — ahead of its
-1981 and 2006 energy-boom peaks — while Ontario's recent net outflows are also the
-largest on record. Click legend entries to isolate provinces.
+that flow says a lot about relative job markets and housing costs. The bars show
+**net** interprovincial migration (movers in minus movers out) by July–June year,
+one province at a time — **use the dropdown to switch province**. Alberta's recent
+net inflows are the largest in the 60-year record, ahead of its 1981 and 2006
+energy-boom peaks, while Ontario's recent net outflows are also the largest on
+record.
 
 ```{python}
 #| echo: false
 mig_path = "data/population/statcan_interprovincial_migration.csv"
 if os.path.exists(mig_path):
     mig = pd.read_csv(mig_path)
-    latest_order = (mig[mig["year"] == mig["year"].max()]
-                    .sort_values("net_migration", ascending=False)["geography"].tolist())
-    fig = lines_over_time(mig, "year", "net_migration", "geography",
+    fig = single_bar(mig, "year", "net_migration", title="",
         yaxis_title="Net interprovincial migration (persons)",
-        group_order=latest_order, height=520, rangemode="normal",
+        select_col="geography", default_option="Alberta", height=480,
         source_note=f"Source: Statistics Canada, Table 17-10-0020-01; July–June years labelled by ending year | Data as of: {get_data_date(mig_path)}")
-    fig.update_yaxes(zeroline=True, zerolinecolor="#bbb")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Interprovincial migration data not yet available. Run the data pipeline.")

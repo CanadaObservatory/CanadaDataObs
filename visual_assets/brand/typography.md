@@ -72,6 +72,32 @@ Lato's digits are tabular by default, contrary to its reputation.
   weaknesses are ubiquity (default-web flavour), no variable font, no condensed,
   and the theme's Google-CDN loading.
 
+## Chart feasibility — verified (2026-06-11)
+
+**Radio-Canada works in Plotly charts, full stop.** Plotly renders all chart
+text (axis ticks, labels, legends, hover, annotations) as SVG `<text>` in the
+DOM, styled by page CSS — any webfont the site loads is available to charts by
+setting `layout.font.family`. Demonstrated live with plotly.js side-by-side
+(Verdana fallback vs Radio-Canada). Its default-tabular digits (the audit's
+decisive criterion) mean ticks and values align without OpenType features.
+
+Caveats, all manageable:
+- **Load-before-draw:** if the webfont arrives after Plotly measures text,
+  labels can overflow their measured boxes. Mitigate with `<link rel=preload>`
+  for the woff2 + `font-display: swap`; charts draw late enough that a
+  preloaded font reliably wins.
+- **Static export (future-only):** kaleido/PNG export renders server-side and
+  needs the font installed on the machine. The site ships interactive HTML
+  only, so this doesn't bite today.
+- **SVG masters:** lockups/social-card SVGs carry live `<text>`; when the face
+  is final, outline the text in the masters so they render anywhere.
+
+**One family vs split:** a display/chart split is legitimate practice, but the
+chart face was the binding constraint — and Radio-Canada passes it. Consistency
+is therefore free; a single family everywhere (one voice, one woff2, simpler
+masters) is the recommendation. The only standing exception remains the
+monospace for code blocks.
+
 ## Implementation plan (when the owner decides)
 
 1. Self-host woff2 subsets under `visual_assets/brand/fonts/` (latin +

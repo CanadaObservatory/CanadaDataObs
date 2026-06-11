@@ -3,7 +3,7 @@ title: "Data Sources"
 description: "Every source behind the site, what it is used for, and its licence"
 ---
 
-Everything on DataCan comes from an authoritative primary source — a national
+Everything on Canada Observatory comes from an authoritative primary source — a national
 statistical agency, a government department, an international organization, or
 an established research institution. We never use Wikipedia or third-party
 compilations, even as a cross-check. Every chart carries its own source note;

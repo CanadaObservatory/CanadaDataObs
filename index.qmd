@@ -1,10 +1,10 @@
 ---
-title: "Canada Data Observatory"
+title: "Canada Observatory"
 subtitle: "Interactive metrics for informed civic conversation"
 ---
 
-Canada Data Observatory provides interactive, regularly updated charts and
-downloadable data on the state of the country, organized around six themes —
+Canada Observatory — CanObs for short — provides interactive, regularly updated
+charts and downloadable data on the state of the country, organized around six themes —
 **people & society**, **economy & affordability**, **government & public
 finances**, **health & well-being**, **land & environment**, and **education,
 science & innovation**. All data comes from official sources — primarily

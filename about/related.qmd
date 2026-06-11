@@ -3,7 +3,7 @@ title: "Sites We Like"
 description: "Projects we admire, learn from, and consult"
 ---
 
-DataCan didn't invent the idea of patient, non-partisan, source-cited public
+Canada Observatory didn't invent the idea of patient, non-partisan, source-cited public
 data. These are projects we admire and regularly consult — some are role
 models for what this site tries to be, some cover ground we don't, and a few
 are sources we build on directly.
@@ -13,10 +13,10 @@ are sources we build on directly.
 - **[Our World in Data](https://ourworldindata.org/)** — the standard-setter
   for open, rigorous, beautifully explained data publishing, on global and
   long-run questions. Also one of our upstream sources (energy and
-  consumption-based CO₂). If you like DataCan, you will love OWID.
+  consumption-based CO₂). If you like CanObs, you will love OWID.
 - **[USAFacts](https://usafacts.org/)** — a non-partisan, government-data-only
   portrait of the United States, with a source link on every figure. The
-  closest thing to DataCan's mission, one country south.
+  closest thing to Canada Observatory's mission, one country south.
 - **[Gapminder](https://www.gapminder.org/)** — the late Hans Rosling's
   project against statistical misconceptions. A standing reminder that the
   data is usually more surprising — and less bleak — than the headlines.

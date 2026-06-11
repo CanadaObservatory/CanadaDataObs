@@ -1,29 +1,29 @@
 ---
-title: "About DataCan"
+title: "About Canada Observatory"
 subtitle: "Mission & method"
 ---
 
 ## Purpose
 
-DataCan brings the key facts about Canada together in one place — and keeps them there.
+Canada Observatory — CanObs for short — brings the key facts about Canada together in one place — and keeps them there.
 
-Reliable data about the country already exists, but it tends to be scattered: spread across dozens of government agencies and international databases, or published as one-off charts in articles that can be hard to find again weeks later. DataCan gathers it into a single, consistent, continually updated reference with interactive charts you can explore — a place you *know* you can come back to: to check the latest figure, link to a chart, or settle a question when it comes up with friends, family, or colleagues.
+Reliable data about the country already exists, but it tends to be scattered: spread across dozens of government agencies and international databases, or published as one-off charts in articles that can be hard to find again weeks later. CanObs gathers it into a single, consistent, continually updated reference with interactive charts you can explore — a place you *know* you can come back to: to check the latest figure, link to a chart, or settle a question when it comes up with friends, family, or colleagues.
 
 It is a neutral, evidence-focused project, free and open to everyone. It aims to inform civic conversation with clear, quantified data — without policy advocacy or partisan framing.
 
-## What makes DataCan different
+## What makes Canada Observatory different
 
 - **Every number in context.** Each indicator is shown alongside a group of 17 comparable OECD countries — not in isolation — so you can see not just what a figure is, but how Canada compares.
 - **Broad coverage in one place.** Six themes — people & society, the economy and affordability, government and public finances, health and well-being, the land and environment, and education, science, and innovation — all under one roof and presented the same way.
-- **Descriptive, not prescriptive.** DataCan presents the data and the comparison without partisan or policy framing. Where a widely recognized benchmark exists — such as the Bank of Canada's inflation target — it is shown for context; otherwise, what the numbers mean is left to you.
+- **Descriptive, not prescriptive.** CanObs presents the data and the comparison without partisan or policy framing. Where a widely recognized benchmark exists — such as the Bank of Canada's inflation target — it is shown for context; otherwise, what the numbers mean is left to you.
 - **Built to stay current — and easy to share.** The site refreshes automatically every week from official sources, and every chart shows the date of its most recent data. Every chart has its own stable link you can copy, bookmark, and share — with no paywall and no login.
 - **Down to the neighbourhood.** Where the data allows, national figures are complemented by maps that reach all the way to the census-tract and dissemination-area level, so you can find your own community.
 - **Open and verifiable.** The data comes only from authoritative primary sources, every chart cites where its numbers come from, the cleaned datasets are free to download, and the code is open source.
-- **Independent.** DataCan has no commercial sponsor, political affiliation, or advocacy agenda. The data, the peer comparisons, and the official benchmarks do the work.
+- **Independent.** CanObs has no commercial sponsor, political affiliation, or advocacy agenda. The data, the peer comparisons, and the official benchmarks do the work.
 
 ## One deliberate exception
 
-DataCan takes no policy positions — with a single exception: we advocate for
+CanObs takes no policy positions — with a single exception: we advocate for
 the **creation, use, and open availability of public data** itself. A project
 like this can only exist because public agencies collect rigorous data and
 publish it openly, and we say so plainly. Read why on
@@ -31,7 +31,7 @@ publish it openly, and we say so plainly. Read why on
 
 ## The peer group
 
-For international comparisons, DataCan uses a set of 17 comparable OECD economies:
+For international comparisons, CanObs uses a set of 17 comparable OECD economies:
 
 **G7:** Canada, United States, United Kingdom, Germany, France, Italy, Japan
 
@@ -69,7 +69,7 @@ else who wants to work with Canadian data in a simple, accessible format.
 
 ## People & code
 
-DataCan is an independent project — see [People](about/people.qmd) for who is
+Canada Observatory is an independent project — see [People](about/people.qmd) for who is
 behind it, and [Sites We Like](about/related.qmd) for the projects we admire
 and consult. The source code is open and available on
 [GitHub](https://github.com/CanadaObservatory/CanadaDataObs).

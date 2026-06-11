@@ -1,9 +1,9 @@
 ---
 title: "Open Data: The One Cause"
-description: "DataCan's single exception to 'no advocacy' — the creation, use, and open availability of public data"
+description: "Canada Observatory's single exception to 'no advocacy' — the creation, use, and open availability of public data"
 ---
 
-DataCan does not take policy positions. We don't say whether taxes are too
+Canada Observatory does not take policy positions. We don't say whether taxes are too
 high, immigration too fast, or health spending too low — we show the numbers,
 the peer comparison, and the official benchmark, and leave the judgment to you.
 
@@ -11,7 +11,7 @@ We make **one deliberate exception**: we advocate for the **creation, use, and
 open availability of high-quality public data**. We hold this position openly
 because the project cannot pretend to be neutral about its own foundation.
 Every chart on this site exists because a public agency counted something
-carefully and published the result for anyone to use. No open data, no DataCan
+carefully and published the result for anyone to use. No open data, no Canada Observatory
 — and, more importantly, no shared factual ground for the country's arguments.
 
 ## Why it matters
@@ -54,7 +54,7 @@ restrictive licensing, the public conversation is poorer for it.
 
 **Use.** Data only matters when someone uses it. The final step of openness
 is making data *usable* — and used: cleaned, documented, visualized, taught.
-That is the part DataCan tries to contribute. We aggregate scattered official
+That is the part CanObs tries to contribute. We aggregate scattered official
 sources into one consistent, continually updated reference, cite everything,
 and publish our cleaned datasets and code so anyone can check or build on our
 work.

@@ -1,5 +1,12 @@
 # DataCan (Canada Observatory)
 
+**Public name (owner, 2026-06-10): "Canada Observatory", short form "CanObs"** —
+navbar brand = CanObs (`website.navbar.title`; the narrow form keeps the no-clip
+guarantee), tab/SEO title + landing H1 + footer + chart attribution = Canada
+Observatory, prose introduces "CanObs for short" then may use either. "DataCan" is
+now the INTERNAL codename only (repo dir, this file) — it must not appear in public
+page text.
+
 Interactive data-visualization website on the **state of Canada**, organized into six
 thematic areas — People & Society, Economy & Affordability, Government & Public
 Finances, Health & Well-being, Land & Environment, and Education, Science & Innovation

@@ -2,11 +2,18 @@ project:
   type: website
   output-dir: _site
   execute-dir: project
+  # Render ONLY .qmd pages: without this list Quarto also renders root-level .md
+  # files — CLAUDE.md and OVERVIEW.md (internal notes) were being published as
+  # /CLAUDE.html and /OVERVIEW.html and indexed into the site search.
+  render:
+    - "*.qmd"
+    - "**/*.qmd"
 
 website:
-  title: "DataCan"
+  title: "Canada Observatory"
   description: "Interactive metrics about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
   navbar:
+    title: "CanObs"
     left:
       - text: People
         menu:
@@ -101,7 +108,7 @@ website:
       - icon: github
         href: https://github.com/CanadaObservatory/CanadaDataObs
   page-footer:
-    center: "DataCan — Open data for informed civic conversation"
+    center: "Canada Observatory: Data and Charts for Informed Civic Conversations"
 
 format:
   html:

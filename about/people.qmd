@@ -1,9 +1,9 @@
 ---
 title: "People"
-description: "Who is behind DataCan"
+description: "Who is behind Canada Observatory"
 ---
 
-DataCan is an independent project with no commercial sponsor, political
+Canada Observatory is an independent project with no commercial sponsor, political
 affiliation, or advocacy agenda (with [one deliberate
 exception](open-data.qmd)). It is built and maintained in the open — the data
 pipeline, the charts, and the site itself are all in the

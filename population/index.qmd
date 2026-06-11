@@ -205,9 +205,7 @@ century of change: the wide base of the early 1970s (the tail of the baby boom)
 narrows as births decline, and the boomer bulge climbs the pyramid into retirement.
 Recent years add a new feature — a visible widening through the 20s and 30s as
 immigration and non-permanent residents, who arrive young, fill in the working ages.
-The white line traces the **net difference between women and men** at each age:
-slightly more boys are born than girls, and women increasingly outnumber men from
-late middle age on.
+The white line traces the **net difference between women and men** at each age.
 
 ```{python}
 #| echo: false

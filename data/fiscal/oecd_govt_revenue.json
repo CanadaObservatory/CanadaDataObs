@@ -4,7 +4,7 @@
   "source_table": "OECD Economic Outlook",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-06-09T16:36:09.634507+00:00",
+  "retrieved_at": "2026-06-11T17:39:58.787318+00:00",
   "latest_observation_date": "2026",
   "transformations": [
     "filtered to Government revenue for OECD peer group"

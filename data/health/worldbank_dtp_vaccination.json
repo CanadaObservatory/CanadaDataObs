@@ -4,7 +4,7 @@
   "source_table": "World Bank (WHO/UNICEF estimates)",
   "frequency": "annual",
   "unit": "% of children 12\u201323 months",
-  "retrieved_at": "2026-06-10T23:24:08.617553+00:00",
+  "retrieved_at": "2026-06-11T17:42:22.325231+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "World Bank indicator SH.IMM.IDPT, filtered to 17 OECD peers"

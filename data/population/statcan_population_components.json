@@ -4,7 +4,7 @@
   "source_table": "17-10-0008-01",
   "frequency": "quarterly",
   "unit": "persons",
-  "retrieved_at": "2026-06-09T16:34:11.860870+00:00",
+  "retrieved_at": "2026-06-11T17:38:40.745694+00:00",
   "latest_observation_date": "2025-01-01",
   "transformations": [
     "filtered to date, geography, component, value columns"

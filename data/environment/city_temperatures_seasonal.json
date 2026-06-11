@@ -4,7 +4,7 @@
   "source_table": "ECCC AHCCD seasonal (homogenized), via GeoMet",
   "frequency": "annual",
   "unit": "\u00b0C seasonal mean temperature (homogenized)",
-  "retrieved_at": "2026-06-09T20:40:00.936788+00:00",
+  "retrieved_at": "2026-06-11T17:43:47.939473+00:00",
   "latest_observation_date": "2020",
   "transformations": [
     "homogenized seasonal mean per city/season/year (Winter/Spring/Summer/Autumn)"

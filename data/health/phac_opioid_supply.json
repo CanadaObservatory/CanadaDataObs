@@ -4,7 +4,7 @@
   "source_table": "Substance-Related Harms (opioid death circumstances)",
   "frequency": "annual",
   "unit": "% of deaths",
-  "retrieved_at": "2026-06-10T20:11:14.060861+00:00",
+  "retrieved_at": "2026-06-11T17:42:23.542503+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "% of apparent opioid toxicity deaths involving fentanyl / a stimulant / ruled accidental, Canada"

@@ -3,6 +3,8 @@ title: "Canada Observatory"
 subtitle: "Interactive metrics for informed civic conversation"
 ---
 
+![](visual_assets/brand/botanical/leaf-botanical-cells.svg){.hero-leaf fig-alt="The Canada Observatory mark: a sugar-maple leaf divided into six colour cells"}
+
 Canada Observatory — CanObs for short — provides interactive, regularly updated
 charts and downloadable data on the state of the country, organized around six themes —
 **people & society**, **economy & affordability**, **government & public

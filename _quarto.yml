@@ -27,6 +27,9 @@ website:
   twitter-card:
     card-style: summary_large_image
   navbar:
+    # NO leaf logo here: the small-cut leaf was tried 2026-06-11 and REJECTED by
+    # the owner at navbar size ("three spikes"). Don't re-add a mark beside the
+    # wordmark until a redesigned small option exists (see CLAUDE.md).
     title: "Canada Observatory"
     left:
       - text: People
@@ -121,8 +124,11 @@ website:
     right:
       - icon: github
         href: https://github.com/CanadaObservatory/CanadaDataObs
+  # Footer brand: inline SVG north star (the approved secondary motif — its
+  # simple geometry survives footer size, where the leaf cuts don't). Inline so
+  # it needs no per-page path rewriting and works from file:// too.
   page-footer:
-    center: "Canada Observatory: Data and Charts for Informed Civic Conversations"
+    center: '<span class="footer-brand"><svg class="footer-leaf" viewBox="14 14 72 72" aria-hidden="true"><path fill="#7A263A" d="M50 18 L54.5 45.5 L82 50 L54.5 54.5 L50 82 L45.5 54.5 L18 50 L45.5 45.5 Z"/></svg>Canada Observatory: Data and Charts for Informed Civic Conversations</span>'
 
 format:
   html:

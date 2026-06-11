@@ -139,6 +139,53 @@ criterion to threshold check.** The 16 px case barely exists in practice:
   contexts, not as a decision driver — and with that, no criterion favours the
   classic at any weight.
 
+## Addendum 2 — the small cut is dead; THE SEAL is the tiny mark (owner, 2026-06-11)
+
+The two-optical-cuts resolution above failed in practice at its small end. Two
+rejection rounds, both owner-called from true-pixel boards:
+
+1. **Small cut v1** ("teeth removed, stem thickened"): at navbar/UI sizes it
+   reads as "three spikes / a Bart Simpson head" — the simplification kept the
+   crown spikes as the dominant feature.
+2. **Small cut v2** (four rebuilt silhouettes A–D, wider lobes, heavier mass):
+   "many of these variations look like a flying rodent silhouette." A dark
+   solid wide-lobed leaf at tiny sizes reads **bat**, structurally — wide
+   lateral lobes + central notch is the bat-signal gestalt. **Do not re-attempt
+   solid-silhouette tiny leaves; two independent failure modes (trident, bat)
+   bracket the whole solid-silhouette space.**
+
+**Resolution (owner: "L2 confirmed"): the tiny mark is THE SEAL** — the maroon
+disc (r 47/100) carrying the **display cut as a LINE DRAWING** (off-white
+stroke, sw 5 at leaf scale 0.78 in the disc). Why it works where silhouettes
+failed: the disc supplies the solid mass that tabs/avatars need (colour
+findability), while the line leaf supplies the maple identity as *drawing*,
+not silhouette — teeth render as waviness in the stroke, never as spikes or
+wings, and there is no solid leaf shape to misread. Verified 16–64 px on the
+true-pixel board (`studies/tiny-mark/`).
+
+System consequences (all executed 2026-06-11):
+
+- **The seal IS the monogram.** `monogram.svg` = the seal; `-reversed` =
+  off-white disc + maroon line leaf; `-cells` = off-white disc + cells-arc
+  line leaf. The old ring-around-small-cut construction is gone (and with it
+  the ring-washes-out-at-16px caveat — the seal's disc is solid).
+- **Favicon = the seal** (transparent corners); **apple-touch / icon-192/512 /
+  github-avatar = full-bleed maroon square + off-white line leaf** (iOS rounds
+  corners itself; full-bleed reads bigger at 20 px than a disc-in-square).
+- **Lockups + the wordmark-CanObs O** carry the seal.
+- **`solid/leaf-small-*` ×8 retired** → `initial_drafts/superseded-small-cut/`
+  (with `leaf-botanical-small.svg`). The system is now **one display leaf
+  (solid / cells / strata / outline) + ONE SEAL for everything tiny** —
+  simpler than two cuts, and the registers don't compete.
+- The line-leaf stroke is the seal's *internal* feature; the standalone
+  outline family remains display-register only (its 2.4/100 strokes thin out
+  below ~48 px; the seal's sw 5 at 0.78 scale ≈ 3.9/100 of the disc — but the
+  disc never renders below 16 px *of itself*, so the stroke holds ≥1 px).
+
+`brand/scale-evidence-seal.png` = the deciding board. The original
+`scale-evidence.png` (classic-vs-botanical) stays as the historical record of
+Addendum 1.
+
 ## Cheap empirical checks (optional, owner-runnable)
 
 - **Tab test:** pin the favicon among 10 busy tabs — find it in <2s?

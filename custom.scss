@@ -63,6 +63,10 @@ $font-family-sans-serif: "Radio Canada", -apple-system, BlinkMacSystemFont,
 // (0.72rem) so the navbar keeps a wide no-clip margin at the 992px breakpoint —
 // Bootstrap navbars clip from the right with no wrap and no scrollbar, so any
 // future nav addition must re-verify the row's width at 992px.
+// (A wheat small-cut leaf logo lived here for part of 2026-06-11 — owner
+// rejected the small cut at navbar size; the sizing rules and the 992–1099px
+// hide band went with it. If a redesigned small mark ever lands, remember:
+// a dimensionless SVG in Quarto's flex logo anchor needs an EXPLICIT height.)
 .navbar .navbar-brand-container {
   flex-shrink: 0;
   width: 106px;
@@ -92,4 +96,28 @@ $font-family-sans-serif: "Radio Canada", -apple-system, BlinkMacSystemFont,
   padding-left: 0.34rem;
   padding-right: 0.34rem;
   font-stretch: 95%;
+}
+
+// Landing-page hero mark (index.qmd): the cells leaf floated beside the intro,
+// og-card style. Multi-colour fills never render below ~96px (system rule).
+.content .hero-leaf {
+  float: right;
+  width: 176px;
+  margin: 0.3rem 0 1.25rem 1.75rem;
+}
+@media (max-width: 575.98px) {
+  .content .hero-leaf {
+    float: none;
+    display: block;
+    width: 132px;
+    margin: 0 auto 1.25rem;
+  }
+}
+
+// Footer brand line: inline maroon small-cut leaf sized to the text.
+.nav-footer .footer-leaf {
+  height: 1.1em;
+  width: auto;
+  vertical-align: -0.18em;
+  margin-right: 0.45em;
 }

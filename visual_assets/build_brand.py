@@ -29,10 +29,16 @@ SCALE = 2  # supersampling factor for PNG exports
 EXPORTS = {
     "social/og-card.svg":                (1200, 630),
     "social/og-card-strata.svg":         (1200, 630),
+    "social/og-card-line.svg":           (1200, 630),
     "social/github-social-preview.svg":  (1280, 640),
+    "social/github-social-preview-cells.svg": (1280, 640),
+    "social/github-social-preview-line.svg": (1280, 640),
     "social/x-header.svg":               (1500, 500),
+    "social/x-header-cells.svg":         (1500, 500),
+    "social/x-header-line.svg":          (1500, 500),
     "social/linkedin-banner.svg":        (1584, 396),
     "social/linkedin-banner-strata.svg": (1584, 396),
+    "social/linkedin-banner-line.svg":   (1584, 396),
     "social/facebook-cover.svg":         (820,  312),
     "social/instagram-card.svg":         (1080, 1080),
     "social/github-avatar.svg":          (512,  512),
@@ -47,9 +53,12 @@ FAVICON_LADDER = {"favicon.svg": [(32, "favicon-32.png"), (16, "favicon-16.png")
 OUTLINE = [
     "botanical/lockup-horizontal.svg", "botanical/lockup-stacked.svg",
     "botanical/lockup-stacked-cells.svg", "botanical/wordmark-canobs.svg",
-    "social/og-card.svg", "social/og-card-strata.svg",
-    "social/github-social-preview.svg", "social/x-header.svg",
+    "social/og-card.svg", "social/og-card-strata.svg", "social/og-card-line.svg",
+    "social/github-social-preview.svg", "social/github-social-preview-cells.svg",
+    "social/github-social-preview-line.svg",
+    "social/x-header.svg", "social/x-header-cells.svg", "social/x-header-line.svg",
     "social/linkedin-banner.svg", "social/linkedin-banner-strata.svg",
+    "social/linkedin-banner-line.svg",
     "social/facebook-cover.svg", "social/instagram-card.svg",
 ]
 

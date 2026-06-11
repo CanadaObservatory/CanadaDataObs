@@ -99,13 +99,22 @@ initial_drafts/         ← archive: ChatGPT/openart raster attempts (no alpha,
 ## Regenerating exports
 
 ```bash
-python3 visual_assets/build_brand.py   # regenerates every PNG from the SVG masters
+python3 visual_assets/build_brand.py   # PNGs (2x) + favicon ladder + outlined SVGs
 ```
 
-Masters with text render via qlmanage, which uses installed system fonts —
-the Radio-Canada static instances must be in `~/Library/Fonts/`
-(`RadioCanada-{Regular,SemiBold,Bold}.ttf`; see typography.md for the
-fontTools instancing recipe).
+- **PNG exports ship at 2× their nominal size** (e.g. og-card.png = 2400×1260)
+  — supersampled for Retina crispness; every platform accepts oversized
+  uploads and downscales.
+- **`*-outlined.svg` distribution copies** sit beside each text-bearing master:
+  text converted to vector paths (layout verified by pixel-diff against the
+  live-text renders, <1% divergence = AA noise), so they display identically on
+  machines without the font — use these when sharing SVGs outside the repo or
+  expecting GitHub previews to look right. The live-text masters remain the
+  editable sources.
+- Masters with live text render via qlmanage, which uses installed system
+  fonts — the Radio-Canada static instances must be in `~/Library/Fonts/`
+  (`RadioCanada-{Regular,SemiBold,Bold}.ttf`; see typography.md for the
+  fontTools instancing recipe).
 
 ## Next steps (not yet done)
 

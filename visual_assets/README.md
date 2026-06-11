@@ -16,7 +16,9 @@ brand/                  ← the landed identity (stable set)
 │                               leaf-botanical-strata.svg = the variety fill ("stability");
 │                               monogram.svg (ring + small cut, maroon) + -reversed
 │                               (off-white ring + wheat, for dark bg) + -cells;
-│                               lockup-horizontal.svg + wordmark-canobs.svg;
+│                               lockup-horizontal.svg + lockup-stacked.svg +
+│                               lockup-stacked-cells.svg (mark over centered
+│                               CANADA/OBSERVATORY) + wordmark-canobs.svg;
 │                               solid/ = 8 palette colours × both cuts (16 files)
 ├── classic/                    RETIRED archive (2026-06-11 swap executed) — kept for
 │                               history only; nothing references it
@@ -36,8 +38,15 @@ brand/                  ← the landed identity (stable set)
 │                               github-social-preview 1280×640 (navy, wheat display cut),
 │                               github-avatar 512 (ring + wheat SMALL cut on navy —
 │                               survives GitHub's ~20px rendering),
+│                               avatar-cells + avatar-strata (1024², off-white + navy
+│                               ring — the light profile-photo pair; circle-safe;
+│                               serve X / Instagram / Facebook alike),
 │                               x-header 1500×500 (X/Twitter profile header — same size
-│                               fits Bluesky + Mastodon; navy + wheat display cut)
+│                               fits Bluesky + Mastodon; navy + wheat display cut),
+│                               facebook-cover 820×312 (cells; text inside the ~640px
+│                               mobile-safe centre), instagram-card 1080×1080 (stacked
+│                               lockup tile — profile grid / first post; IG itself has
+│                               no banner, just the square profile photo)
 └── motifs/                     banner-people / banner-environment (wave bands —
                                 template for the other four areas),
                                 divider-ranking.svg (the house motif: peer dots

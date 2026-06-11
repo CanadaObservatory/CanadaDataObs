@@ -72,6 +72,24 @@ Lato's digits are tabular by default, contrary to its reputation.
   weaknesses are ubiquity (default-web flavour), no variable font, no condensed,
   and the theme's Google-CDN loading.
 
+## Family inventory (verified from the font files, 2026-06-11)
+
+- **Radio-Canada** (text family): variable **wght 300–700** with named instances
+  Light / Regular / Medium / SemiBold / Bold, × continuous **wdth 75–100**
+  (Condensed→Normal — combinations like Light Condensed exist on the axes), in
+  roman **and italic**. Two woff2 files cover the entire matrix.
+- **Radio-Canada Big** (display sibling): wght 400–700 + italics; letterforms
+  tuned for large sizes. No Light, no condensed (display cut by design).
+
+Suggested role mapping (palette-style):
+Light 300 = large quiet display — taglines, pull-quotes, big stat figures
+(≥ ~20px only; never body, never charts) · Regular 400 = body + all chart text ·
+Medium/SemiBold = UI emphasis, navbar, highlighted-series labels · Bold 700 =
+wordmark + headings · Condensed 75–85 = long chart categories (province names),
+dense tables · Italic = captions/asides, sparingly · Big = hero headlines and
+og-card display if adopted. (Webfonts rarely survive email clients — email stays
+system-font territory regardless of this choice.)
+
 ## Chart feasibility — verified (2026-06-11)
 
 **Radio-Canada works in Plotly charts, full stop.** Plotly renders all chart

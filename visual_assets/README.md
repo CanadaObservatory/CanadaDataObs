@@ -27,6 +27,10 @@ brand/                  ← the landed identity (stable set)
 ├── palette-sheet.svg / .png    the palette as a one-page infographic (swatches, tints,
 │                               WCAG pairings, rules, area mapping) — regenerate after
 │                               any palette change
+├── typography.md               the font decision framework + fontTools audit (2026-06-11):
+│                               incumbent = Lato (theme accident; charts = unchosen
+│                               Verdana fallback!); finalists Radio-Canada (recommended),
+│                               IBM Plex Sans, Source Sans 3, Lato — decision pending
 ├── favicon/                    favicon.svg (bare botanical SMALL cut, maroon) + 16/32 PNG,
 │                               apple-touch-icon (180) + icon-192/512 (navy bg, off-white
 │                               ring, wheat small cut). No .ico (no ImageMagick on this

@@ -4,7 +4,7 @@
   "source_table": "OECD Green Growth Indicators",
   "frequency": "annual",
   "unit": "% of population",
-  "retrieved_at": "2026-06-11T17:43:15.913768+00:00",
+  "retrieved_at": "2026-06-12T16:51:42.864930+00:00",
   "latest_observation_date": "2020",
   "transformations": [
     "filtered to Population exposed to PM2.5 above WHO guideline for OECD peer group"

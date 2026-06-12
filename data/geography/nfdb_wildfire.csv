@@ -65,6 +65,7 @@ Alberta,2021,65770.5
 Alberta,2022,136687.5
 Alberta,2023,2211873.22
 Alberta,2024,717199.45
+Alberta,2025,700305.85
 British Columbia,1959,109613.901
 British Columbia,1960,116217.8
 British Columbia,1961,483094.9
@@ -131,6 +132,7 @@ British Columbia,2021,866342.547
 British Columbia,2022,135060.915
 British Columbia,2023,2840246.973
 British Columbia,2024,1081194.234
+British Columbia,2025,605813.152
 Canada,1959,287625.801
 Canada,1960,597841.22686
 Canada,1961,2778095.6071200008
@@ -151,7 +153,7 @@ Canada,1975,995007.026957
 Canada,1976,2183524.7053869995
 Canada,1977,1393502.7215380003
 Canada,1978,280044.911758
-Canada,1979,3374029.388081
+Canada,1979,2524529.318082
 Canada,1980,4824673.106635001
 Canada,1981,6284457.996871999
 Canada,1982,1757247.1460509996
@@ -190,13 +192,14 @@ Canada,2014,4545654.853801001
 Canada,2015,3908375.130613
 Canada,2016,1319573.15541
 Canada,2017,3589424.061009001
-Canada,2018,2328851.351154001
+Canada,2018,2326356.861002
 Canada,2019,1786215.0278979996
 Canada,2020,218261.659403
 Canada,2021,4078894.9055249994
 Canada,2022,1576204.71106
 Canada,2023,17606546.66779
 Canada,2024,5374344.299956
+Canada,2025,8426718.040108
 Manitoba,1959,8406.01
 Manitoba,1960,148249.34
 Manitoba,1961,938971.8
@@ -263,6 +266,7 @@ Manitoba,2021,1142713.90896
 Manitoba,2022,191778.2
 Manitoba,2023,198634.3
 Manitoba,2024,235619.171103
+Manitoba,2025,2140969.171251
 New Brunswick,1980,2080.0
 New Brunswick,1982,5338.7
 New Brunswick,1983,590.0
@@ -306,6 +310,7 @@ New Brunswick,2021,380.1
 New Brunswick,2022,175.9
 New Brunswick,2023,853.8
 New Brunswick,2024,292.8
+New Brunswick,2025,3413.2
 Newfoundland and Labrador,1959,14467.0
 Newfoundland and Labrador,1960,12156.0
 Newfoundland and Labrador,1961,403713.0
@@ -372,6 +377,7 @@ Newfoundland and Labrador,2021,341.0
 Newfoundland and Labrador,2022,15012.5
 Newfoundland and Labrador,2023,16401.9
 Newfoundland and Labrador,2024,68079.9
+Newfoundland and Labrador,2025,18480.9
 Northwest Territories,1959,40328.0
 Northwest Territories,1960,42525.0
 Northwest Territories,1961,290777.2
@@ -438,6 +444,7 @@ Northwest Territories,2021,155491.15
 Northwest Territories,2022,586216.232
 Northwest Territories,2023,4164806.9048
 Northwest Territories,2024,1672980.524365
+Northwest Territories,2025,1109027.187946
 Nova Scotia,1960,5683.0
 Nova Scotia,1961,1233.0
 Nova Scotia,1963,215.0
@@ -480,6 +487,7 @@ Nova Scotia,2021,197.142001
 Nova Scotia,2022,3383.703
 Nova Scotia,2023,25093.26925
 Nova Scotia,2024,49.41
+Nova Scotia,2025,8848.030402
 Ontario,1959,239.0
 Ontario,1960,11032.0
 Ontario,1961,469978.0
@@ -546,6 +554,7 @@ Ontario,2021,784562.398963
 Ontario,2022,2625.299952
 Ontario,2023,441604.3
 Ontario,2024,90593.4
+Ontario,2025,600928.89742
 Prince Edward Island,2018,7.39
 Prince Edward Island,2019,14.21
 Prince Edward Island,2020,11.13
@@ -553,6 +562,7 @@ Prince Edward Island,2021,0.4
 Prince Edward Island,2022,0.52
 Prince Edward Island,2023,7.94
 Prince Edward Island,2024,18.291161
+Prince Edward Island,2025,13.48
 Quebec,1959,34629.01
 Quebec,1960,39932.06
 Quebec,1961,22208.1
@@ -619,6 +629,7 @@ Quebec,2021,49483.1
 Quebec,2022,29638.1
 Quebec,2023,4288263.62585
 Quebec,2024,265199.8
+Quebec,2025,8295.2
 Saskatchewan,1959,11530.19
 Saskatchewan,1960,200238.67
 Saskatchewan,1961,11026.22
@@ -685,6 +696,7 @@ Saskatchewan,2021,956060.9
 Saskatchewan,2022,265573.0
 Saskatchewan,2023,1883006.2
 Saskatchewan,2024,936676.3
+Saskatchewan,2025,2982279.5
 Yukon,1959,39498.46
 Yukon,1960,8878.31
 Yukon,1961,44037.1
@@ -751,3 +763,4 @@ Yukon,2021,14275.12
 Yukon,2022,170367.27
 Yukon,2023,528225.0
 Yukon,2024,209848.3
+Yukon,2025,177701.51

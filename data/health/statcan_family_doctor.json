@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 13-10-0096-01 (CCHS)",
   "frequency": "annual",
   "unit": "% aged 12+",
-  "retrieved_at": "2026-06-11T17:42:08.986137+00:00",
+  "retrieved_at": "2026-06-12T16:50:49.633179+00:00",
   "latest_observation_date": "2022-01-01",
   "transformations": [
     "filtered to {'GEO': 'Canada (excluding territories)', 'Age group': 'Total, 12 years and over', 'Sex': 'Both sexes', 'Indicators': 'Has a regular healthcare provider', 'Characteristics': 'Percent'}"

@@ -4,7 +4,7 @@
   "source_table": "ECCC Canadian Environmental Sustainability Indicators \u2014 temperature change",
   "frequency": "annual",
   "unit": "\u00b0C departure from the 1961\u20131990 average",
-  "retrieved_at": "2026-06-11T17:43:18.236712+00:00",
+  "retrieved_at": "2026-06-12T16:51:44.134676+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "national annual temperature departure vs 1961\u20131990 reference"

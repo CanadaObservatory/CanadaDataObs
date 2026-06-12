@@ -4,7 +4,7 @@
   "source_table": "GC InfoBase / Public Accounts of Canada",
   "frequency": "annual",
   "unit": "$ (latest Public Accounts year)",
-  "retrieved_at": "2026-06-11T17:40:40.880189+00:00",
+  "retrieved_at": "2026-06-12T16:49:18.678285+00:00",
   "latest_observation_date": "latest Public Accounts",
   "transformations": [
     "sum standard objects 1\u201312 across departments, latest PA year; shares of budgetary total"

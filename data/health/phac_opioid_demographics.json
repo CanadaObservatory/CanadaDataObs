@@ -4,7 +4,7 @@
   "source_table": "Substance-Related Harms (opioid toxicity deaths by age & sex)",
   "frequency": "annual",
   "unit": "number of deaths",
-  "retrieved_at": "2026-06-11T17:42:23.518867+00:00",
+  "retrieved_at": "2026-06-12T16:51:00.431686+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "Apparent opioid toxicity deaths by age group \u00d7 sex, Canada, 2024"

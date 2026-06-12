@@ -4,7 +4,7 @@
   "source_table": "OECD MSTI",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-06-11T17:42:29.073358+00:00",
+  "retrieved_at": "2026-06-12T16:51:04.151620+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to R&D expenditure (GERD) for OECD peer group"

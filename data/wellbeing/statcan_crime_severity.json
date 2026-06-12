@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 35-10-0026-01",
   "frequency": "annual",
   "unit": "index (2006=100)",
-  "retrieved_at": "2026-06-08T17:29:12.434985+00:00",
+  "retrieved_at": "2026-06-12T16:52:13.557534+00:00",
   "latest_observation_date": "2024-01-01",
   "transformations": [
     "filtered to {'GEO': 'Canada', 'Statistics': 'Crime severity index'}"

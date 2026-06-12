@@ -19,14 +19,18 @@ from pipeline.config import (
 )
 from pipeline.charts import peer_comparison_line, ranked_bar, peer_comparison_line_by_age, single_line
 
-def show_peer_line(path, value_col, yaxis_title, source, initial_start=None):
-    """Standard 17-peer line chart for a World Bank health series."""
+def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, topical=None):
+    """Standard 17-peer line chart for a World Bank health series.
+
+    `topical` (list of country codes) opens those non-comparator peers already
+    coloured + visible — used where the prose singles a country out (e.g. South
+    Korea on suicide); every other grey peer is still one legend click away."""
     if not os.path.exists(path):
         print("Data not yet available. Run the data pipeline.")
         return
     df = pd.read_csv(path)
     fig = peer_comparison_line(df, "year", value_col, title="", yaxis_title=yaxis_title,
-        show_average=True, initial_start=initial_start,
+        show_average=True, initial_start=initial_start, topical=topical,
         source_note=f"Source: {source} | Data as of: {get_data_date(path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
@@ -111,7 +115,8 @@ Deaths by suicide per 100,000 population. Canada sits mid-pack among peers at ro
 ```{python}
 #| echo: false
 show_peer_line("data/health/worldbank_suicide.csv", "suicide_rate",
-    "Deaths per 100,000", "World Bank / WHO Global Health Observatory")
+    "Deaths per 100,000", "World Bank / WHO Global Health Observatory",
+    topical=["KOR"])
 ```
 
 ## Mental Health
@@ -165,7 +170,8 @@ Share of adults with a body-mass index of 25 or higher. The measure has climbed 
 ```{python}
 #| echo: false
 show_peer_line("data/health/worldbank_overweight.csv", "overweight_pct",
-    "% of adults (BMI ≥ 25)", "World Bank / WHO Global Health Observatory")
+    "% of adults (BMI ≥ 25)", "World Bank / WHO Global Health Observatory",
+    topical=["JPN", "KOR"])
 ```
 
 ## Diabetes

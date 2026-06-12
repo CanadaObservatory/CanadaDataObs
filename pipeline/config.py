@@ -87,6 +87,35 @@ COMPARATOR_COLORS = {
     "SWE": "#8c564b",  # brown
 }
 
+# The other 11 peers each ALSO own a fixed identity colour, but their lines draw
+# grey + legend-hidden until the reader activates one from the legend, then it
+# snaps to this colour (and back to grey when toggled off). The swap is wired
+# site-wide in _includes/peer-legend-colours.html, which reads each grey trace's
+# fixed colour from its Plotly `meta.fixedColor` (stashed by the chart builders).
+# Keeping the default view calm (only Canada + the 5 comparators + average in
+# colour) while giving every country a distinct, CONSISTENT colour the moment it
+# is shown — and because inactive peers are grey, a colour clash can only ever
+# appear between two countries the reader deliberately shows together.
+#
+# Palette = matplotlib tab20: COMPARATOR_COLORS above are its saturated members;
+# these are tab20's remaining saturated hues (cyan/pink/olive) + light tints,
+# each tint sitting in its dark partner's hue family but separated by lightness
+# (Korea light-blue vs USA blue, Finland light-purple vs UK purple, …). The one
+# soft pair is Israel/France (both pink), only visible if both are activated.
+PEER_EXTRA_COLORS = {
+    "JPN": "#17becf",  # cyan
+    "FRA": "#e377c2",  # pink
+    "ITA": "#bcbd22",  # olive
+    "KOR": "#aec7e8",  # light blue    (vs USA blue, by lightness)
+    "NLD": "#ffbb78",  # light orange  (vs AUS orange)
+    "CHE": "#98df8a",  # light green   (vs DEU green)
+    "NOR": "#9edae5",  # light cyan    (vs JPN cyan)
+    "DNK": "#ff9896",  # salmon        (vs CAN red — Canada is bold + markers)
+    "FIN": "#c5b0d5",  # light purple  (vs GBR purple)
+    "ISR": "#f7b6d2",  # light pink    (vs FRA pink)
+    "NZL": "#c49c94",  # taupe         (vs SWE brown)
+}
+
 # --- Statistics Canada Table IDs ---
 STATCAN_TABLES = {
     "population_quarterly": "17-10-0009-01",  # Population estimates, quarterly
@@ -104,6 +133,9 @@ PEER_COLOR = "#bdbdbd"    # Light grey for non-highlighted peers
 OECD_AVG_COLOR = "#555555"  # Dark grey for OECD average (blue is now the US)
 HIGHLIGHT_WIDTH = 3
 PEER_WIDTH = 1.5
+PEER_ACTIVE_WIDTH = 2.6  # a grey peer's width once activated from the legend
+#                          (between PEER_WIDTH and HIGHLIGHT_WIDTH; thick enough
+#                           that the lighter tab20 tints read clearly as lines)
 
 # Site attribution appended beneath every chart's source note (see the Figure.show
 # interceptor in charts.py). Change here to update it everywhere.

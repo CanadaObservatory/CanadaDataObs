@@ -114,10 +114,52 @@ $font-family-sans-serif: "Radio Canada", -apple-system, BlinkMacSystemFont,
   }
 }
 
-// Footer brand line: inline maroon small-cut leaf sized to the text.
+// Footer brand line: inline maroon north-star mark sized to the text.
 .nav-footer .footer-leaf {
   height: 1.1em;
   width: auto;
   vertical-align: -0.18em;
   margin-right: 0.45em;
 }
+
+// Landing-page topic cards (index.qmd "## Topics"): each of the six thematic
+// columns becomes a card with its AREA-COLOUR wave band flush across the top
+// (visual_assets/brand/motifs/banner-*.svg, recoloured per palette.md's
+// six-area mapping). Borderless — a hairline shadow ring instead of a border so
+// the band can full-bleed to the card edge without a border seam. Chrome only:
+// the bands are decorative wave motifs, carry no valence, can't read as charts.
+.columns:has(> .area-card) { margin-bottom: 0.5rem; }
+// Desktop: force a flex row (Quarto's .columns computes to inline) so the three
+// cards share the tallest height. Scoped to ≥768px — an unscoped flex keeps the
+// cards in a nowrap row on phones (104px each); below the breakpoint they stack.
+@media (min-width: 768px) {
+  .columns:has(> .area-card) { display: flex; align-items: stretch; }
+}
+@media (max-width: 767.98px) {
+  .columns:has(> .area-card) { display: block; }
+  .columns:has(> .area-card) > .area-card {
+    width: 100% !important;   // beat the inline style="width:32%"
+    margin-bottom: 1rem;
+  }
+  .columns:has(> .area-card) > .column:not(.area-card) { display: none; }  // gutters
+}
+.area-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1.1rem 1.2rem;
+  border-radius: 10px;
+  overflow: hidden;         // clip the band's top corners to the radius
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(23, 50, 77, 0.10),
+              0 0 0 1px rgba(23, 50, 77, 0.07);
+}
+.area-card > p:first-child { margin: 0; }   // the band's wrapping <p>
+.area-card .area-banner {
+  display: block;
+  width: calc(100% + 2.2rem);
+  height: 30px;
+  margin: 0 -1.1rem 0.9rem;  // full-bleed past the horizontal padding
+  object-fit: fill;          // stretch the 1200×90 band to the strip
+}
+.area-card h3 { margin-top: 0; }
+.area-card p:last-child { margin-bottom: 0; }   // trim the sources line

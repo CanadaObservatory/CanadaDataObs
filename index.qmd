@@ -44,7 +44,9 @@ each links to the section behind it:
 
 ::::{.columns}
 
-:::{.column width="32%"}
+:::{.column .area-card width="32%"}
+![](visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
 ### [People & Society](population/)
 How many people live in Canada and why that's changing; diversity, religion,
 and crime & safety — with maps down to the neighbourhood level.
@@ -55,7 +57,9 @@ and crime & safety — with maps down to the neighbourhood level.
 :::{.column width="2%"}
 :::
 
-:::{.column width="32%"}
+:::{.column .area-card width="32%"}
+![](visual_assets/brand/motifs/banner-economy.svg){.area-banner}
+
 ### [Economy & Affordability](economics/)
 Growth, jobs, the cost of living, housing, and incomes & inequality — Canada
 against 17 OECD peers.
@@ -66,7 +70,9 @@ against 17 OECD peers.
 :::{.column width="2%"}
 :::
 
-:::{.column width="32%"}
+:::{.column .area-card width="32%"}
+![](visual_assets/brand/motifs/banner-government.svg){.area-banner}
+
 ### [Government & Public Finances](fiscal/)
 Debt, deficits, and interest costs compared with peers; the public-sector
 workforce; and what the federal government spends, back to 1961.
@@ -78,7 +84,9 @@ workforce; and what the federal government spends, back to 1961.
 
 ::::{.columns}
 
-:::{.column width="32%"}
+:::{.column .area-card width="32%"}
+![](visual_assets/brand/motifs/banner-health.svg){.area-banner}
+
 ### [Health & Well-being](health/)
 Life expectancy, health spending and system capacity, population health and
 risk factors, substance use, and life satisfaction.
@@ -89,7 +97,9 @@ risk factors, substance use, and life satisfaction.
 :::{.column width="2%"}
 :::
 
-:::{.column width="32%"}
+:::{.column .area-card width="32%"}
+![](visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
 ### [Land & Environment](geography/)
 The land itself — ecozones, elevation, water, agriculture, wildfire — plus
 climate change, air quality, emissions, and energy.
@@ -100,7 +110,9 @@ climate change, air quality, emissions, and energy.
 :::{.column width="2%"}
 :::
 
-:::{.column width="32%"}
+:::{.column .area-card width="32%"}
+![](visual_assets/brand/motifs/banner-education.svg){.area-banner}
+
 ### [Education, Science & Innovation](education/)
 University tuition across provinces and fields, R&D spending, and Canada's
 research workforce, compared with peers.

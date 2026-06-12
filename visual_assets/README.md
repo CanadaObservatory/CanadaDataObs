@@ -75,10 +75,15 @@ brand/                  ← the landed identity (stable set)
 │                               off-white) and x-header-line +
 │                               github-social-preview-line (off-white line leaf
 │                               on navy) — the outline family as featured mark
-└── motifs/                     banner-people / banner-environment (wave bands —
-                                template for the other four areas),
-                                divider-ranking.svg (the house motif: peer dots
-                                grey, Canada maroon, deliberately mid-pack)
+└── motifs/                     banner-{people,economy,government,health,
+                                environment,education} — the six AREA WAVE BANDS
+                                (1200×90, three stacked sine waves @ opacity
+                                0.2/0.45/1.0, recoloured per palette.md's
+                                six-area mapping; SVG-only, no PNG). DEPLOYED as
+                                the flush headers on the landing-page topic
+                                cards (index.qmd "## Topics" + custom.scss
+                                .area-card). divider-ranking.svg (the house
+                                motif: peer dots grey, Canada maroon, mid-pack)
 
 studies/                ← active explorations (promote winners into brand/):
                           cells-lines/ = cell-division variants of the botanical
@@ -190,8 +195,11 @@ candidate to try beside the wordmark, but adding it is an owner call — the
 1. Upload github-avatar.png + github-social-preview.png to the GitHub
    org/repo settings (MANUAL — github.com has no API for either). Unblocked:
    the avatar is now the seal-register full-bleed mark.
-2. Area banner motifs: only People + Environment waves exist — build the other
-   four before deploying section-page banners (motifs are chrome, never content).
-3. French lockup variant ("Observatoire du Canada") when the FR build lands.
-4. Optional, owner call: try the SEAL beside the navbar wordmark (the first
+2. French lockup variant ("Observatoire du Canada") when the FR build lands.
+3. Optional, owner call: try the SEAL beside the navbar wordmark (the first
    tiny mark that might survive there; re-verify 992px baseline parity).
+
+Done 2026-06-11: the six area wave bands are built and deployed on the
+landing-page topic cards. Section-page banners are deliberately NOT added —
+those pages are chart-heavy, where the brand rule puts the right motif count
+at zero. Revisit only for any future text-led section landing page.

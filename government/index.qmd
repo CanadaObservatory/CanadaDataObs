@@ -144,7 +144,7 @@ emp_path = "data/government/oecd_govt_employment.csv"
 if os.path.exists(emp_path):
     df = pd.read_csv(emp_path)
     fig = peer_comparison_line(df, "year", "govt_emp_pct", title="",
-        yaxis_title="% of total employment", show_average=True)
+        yaxis_title="% of total employment", show_average=True, topical=["JPN", "KOR"])
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Government at a Glance 2025 (general government employment) | Data as of: {get_data_date(emp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])

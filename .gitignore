@@ -9,6 +9,11 @@ __pycache__/
 GitHub_token.rtf
 *.h5
 
+# Local design/UX scratch (demos, mockups) — kept on disk for discussion, never
+# published or committed (e.g. _scratch/peer-colour-options/ bundles a 3.6 MB
+# plotly.min.js). Quarto already ignores it (no render path / not in resources).
+_scratch/
+
 /.quarto/
 
 # Internal-only / non-redistributable reference (e.g. CREA MLS HPI — licensed data

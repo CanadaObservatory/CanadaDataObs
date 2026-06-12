@@ -1,0 +1,88 @@
+<!--
+  Peer-line legend colours (site-wide, via _quarto.yml format.html.include-after-body).
+
+  The 17-country peer line charts open calm: only Canada, the five comparators and
+  the peer average are coloured; the other 11 peers draw light grey + legend-hidden.
+  Each grey trace carries its own fixed identity colour in `meta.fixedColor` (set by
+  the chart builders, from config.PEER_EXTRA_COLORS). This script swaps such a trace
+  between grey and its fixed colour when the reader toggles it in the legend — so the
+  default stays uncluttered, yet every country has a distinct, CONSISTENT colour the
+  moment it is shown.
+
+  Pairs with the legend-fit change (chart height 600px) which removes the legend
+  scrollbar; together they are the two peer-chart legend fixes.
+
+  Notes:
+  - Quarto loads Plotly via an AMD bundle, so `window.Plotly` is often undefined —
+    resolve the handle via `requirejs('plotly')` (the documented site gotcha).
+  - Quarto renders each chart asynchronously, so we poll for graph divs that are
+    initialised (have `.on` + `.data`) and wire each once. Charts without any
+    `meta.fixedColor` trace (every non-peer chart) are marked and skipped.
+  - Returning false from the plotly_legendclick listener cancels Plotly's default
+    show/hide toggle; we perform the visibility change ourselves in the same call.
+  - Double-clicking a legend entry (Plotly's "isolate" gesture) bypasses this and
+    keeps its native behaviour — acceptable.
+-->
+<script>
+(function () {
+  "use strict";
+
+  var GREY = "#bdbdbd";        // PEER_COLOR
+  var ACTIVE_WIDTH = 2.6;      // PEER_ACTIVE_WIDTH
+  var GREY_WIDTH = 1.5;        // PEER_WIDTH
+
+  function plotly() {
+    if (window.Plotly) return window.Plotly;
+    try { if (window.requirejs) return window.requirejs("plotly"); } catch (e) {}
+    return null;
+  }
+
+  function wire(gd, P) {
+    if (gd._peerColourWired) return;
+    if (typeof gd.on !== "function" || !gd.data) return;   // not initialised yet
+    gd._peerColourWired = true;
+    var hasFixed = gd.data.some(function (t) { return t.meta && t.meta.fixedColor; });
+    if (!hasFixed) return;                                  // not a peer chart — skip
+
+    gd.on("plotly_legendclick", function (ev) {
+      var i = ev.curveNumber;
+      var tr = gd.data[i];
+      var fixed = tr && tr.meta && tr.meta.fixedColor;
+      if (!fixed) return true;                              // Canada / comparators / average
+      if (tr.visible === "legendonly") {                   // activate -> its fixed colour
+        P.restyle(gd, { visible: true, "line.color": fixed,
+                        "line.width": ACTIVE_WIDTH, opacity: 1 }, [i]);
+      } else {                                             // deactivate -> back to grey
+        P.restyle(gd, { visible: "legendonly", "line.color": GREY,
+                        "line.width": GREY_WIDTH, opacity: 0.8 }, [i]);
+      }
+      return false;
+    });
+  }
+
+  function sweep() {
+    var P = plotly();
+    if (!P) return false;
+    var divs = document.querySelectorAll(".plotly-graph-div, .js-plotly-plot");
+    Array.prototype.forEach.call(divs, function (gd) { wire(gd, P); });
+    return true;
+  }
+
+  // Bounded poll: catch charts as Quarto renders them, then stop. Mirrors the
+  // CPI-rescale polling idiom used elsewhere on the site.
+  function start() {
+    sweep();
+    var ticks = 0;
+    var timer = setInterval(function () {
+      sweep();
+      if (++ticks >= 40) clearInterval(timer);             // ~12s at 300ms, then give up
+    }, 300);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+})();
+</script>

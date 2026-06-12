@@ -334,8 +334,23 @@ accounting distorts its GDP/productivity figures.)
 
 Canada is always red. A named **comparator set** gets distinct colours
 (`COMPARATOR_COLORS`): US blue, Australia orange, Germany green, UK purple, Sweden
-brown. Everyone else is light grey; the peer average is dark-grey dashed. Changing
-the highlighted set or peer list is a one-line edit in config.py.
+brown. The peer average is dark-grey dashed. Changing the highlighted set or peer
+list is a one-line edit in config.py. **The other 11 peers are NOT permanently grey
+(2026-06-12): each owns a fixed identity colour too (`PEER_EXTRA_COLORS`, tab20-based
+— cyan/pink/olive + 8 light tints), but their lines DRAW grey + legend-hidden until
+the reader activates one from the legend, then it snaps to its colour (and back to
+grey when toggled off).** So the default view stays calm (only Canada + the 5
+comparators + average in colour) yet every country has a distinct, CONSISTENT colour
+the instant it is shown — and because inactive peers are grey, a colour clash can
+only appear between two countries the reader deliberately shows together. The swap is
+wired site-wide in **`_includes/peer-legend-colours.html`** (`include-after-body`),
+which reads each grey trace's colour from its Plotly `meta.fixedColor` (stashed by the
+chart builders) and toggles it on `plotly_legendclick`; it resolves Plotly via
+`requirejs('plotly')` (window.Plotly is undefined under Quarto's AMD bundle), bounded-
+polls for async-rendered charts, and no-ops on every non-peer chart (bars + scorecards
+keep the grey scheme — they read well with only a few comparators highlighted). The
+decision record + interactive demos live in `_scratch/peer-colour-options/` (gitignored,
+never published).
 
 ## Chart conventions (pipeline/charts.py)
 
@@ -364,13 +379,23 @@ the highlighted set or peer list is a one-line edit in config.py.
   "Year" x-title, **own the source note** (`source_note=` param, placed below the
   slider), and by default (`hide_peers=True`) show only Canada + the colour
   comparators + the peer average at load — the grey peers start `legendonly` and the
-  reader adds them via the legend, which de-clutters the busy 17-line charts. Pass
-  `initial_start=<year>` to open on a recent window (e.g. 2015 for the GDP charts).
-  **`initial_visible=["USA"]`** (2026-06 owner review) goes further — comparators not
-  listed ALSO start legendonly (fertility opens with just Canada/US/average). Peer
-  charts are **560px tall with a 10px legend font so all 18 legend entries FIT** — an
-  overflowing Plotly legend grows an internal scrollbar that captures the mouse wheel
-  and fights page scrolling (owner-reported; never let a legend overflow the plot).
+  reader adds them via the legend (where each grey peer snaps to its own fixed colour
+  — see the peer-colour system in "Peer group & comparator colours" above), which
+  de-clutters the busy 17-line charts. Pass `initial_start=<year>` to open on a recent
+  window (e.g. 2015 for the GDP charts). **`initial_visible=["USA"]`** (2026-06 owner
+  review) goes further — comparators not listed ALSO start legendonly (fertility opens
+  with just Canada/US/average). **`topical=["JPN","ITA"]`** (2026-06-12) opens specific
+  NON-comparator peers already coloured + visible where a chart's prose singles them
+  out (aging→Japan/Italy, suicide→Korea, overweight & govt-employment→Japan/Korea,
+  PM2.5→Finland/Norway) — the chart then shows what the surrounding text discusses,
+  while every other grey peer is still one legend click away. Peer charts are **600px
+  tall so all 18 legend entries (17 + average) FIT the plot area** with a ~20px buffer
+  (measured: 18 entries need 342px, the legend is clamped to the plot area not the full
+  height, and the overflow clears at 580px) — an overflowing Plotly legend grows an
+  internal scrollbar that captures the mouse wheel and fights page scrolling (owner-
+  reported; never let a legend overflow the plot). **Font size does NOT fix overflow —
+  legend row height is driven by the line-sample symbol, not the text; raise the height
+  (the single site-wide lever in `_apply_peer_line_layout`, which both builders use).**
   Benchmark hline annotations (replacement 2.1, NATO 2%, measles 95%) must anchor
   where lines are sparse — fertility's sits "top right". **Public prose must never
   narrate site history** ("now has its own page", "moved", "switched") — no reader

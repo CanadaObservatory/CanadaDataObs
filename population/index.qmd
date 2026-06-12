@@ -263,7 +263,7 @@ dep_path = "data/population/worldbank_old_age_dependency.csv"
 if os.path.exists(dep_path):
     dep = pd.read_csv(dep_path)
     fig = peer_comparison_line(dep, "year", "old_age_dependency", "",
-        "People 65+ per 100 aged 15–64", show_average=True,
+        "People 65+ per 100 aged 15–64", show_average=True, topical=["JPN", "ITA"],
         source_note=f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(dep_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

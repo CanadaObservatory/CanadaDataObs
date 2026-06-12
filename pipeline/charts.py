@@ -7,8 +7,9 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
-    HIGHLIGHT_WIDTH, PEER_WIDTH, HIGHLIGHT_COUNTRY,
-    PEER_COUNTRIES, COMPARATOR_COLORS, SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
+    HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
+    PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS,
+    SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
 
@@ -143,10 +144,15 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
     fig.update_layout(
         xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
-        # 560px tall + a 10px legend font so all 18 peer entries FIT the plot area —
-        # an overflowing Plotly legend grows an internal scrollbar that captures the
-        # mouse wheel and fights the page scroll (owner-reported).
-        plot_bgcolor="white", hovermode="x unified", height=560,
+        # 600px tall so all 18 peer entries (17 + average) FIT the plot area with a
+        # ~20px buffer — an overflowing Plotly legend grows an internal scrollbar that
+        # captures the mouse wheel and fights the page scroll (owner-reported). The
+        # 18 entries need 342px and clear the overflow at a measured 580px chart
+        # height; 600 leaves margin for page-to-page variance (Quarto column widths,
+        # the by-age dropdown). Font size does NOT help — legend row height is driven
+        # by the line-sample symbol, not the text. This height is the single site-wide
+        # lever (both peer-line builders route through here).
+        plot_bgcolor="white", hovermode="x unified", height=600,
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02,
                     font=dict(size=10), itemsizing="constant",
                     itemclick="toggle", itemdoubleclick="toggleothers"),
@@ -163,7 +169,7 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
                          highlight=None, show_average=False,
                          avg_name="OECD peer average", source_note=None,
                          rangeslider=True, initial_start=None, hide_peers=True,
-                         initial_visible=None):
+                         initial_visible=None, topical=None):
     """
     Line chart comparing Canada against OECD peers.
 
@@ -171,6 +177,13 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
     the list also start legend-hidden, so e.g. `initial_visible=["USA"]` opens with
     just Canada, the US and the peer average (used on the busy fertility chart).
     Everything stays one legend click away.
+
+    `topical` (optional, list of country codes): non-comparator peers that THIS
+    chart's prose singles out (e.g. Japan + Italy on the aging chart) — they open
+    coloured and visible in their own fixed `PEER_EXTRA_COLORS` hue instead of grey
+    + hidden, so the chart shows what the surrounding text discusses. Every other
+    grey peer still snaps to its fixed colour on its first legend click (wired in
+    _includes/peer-legend-colours.html, which reads each trace's `meta.fixedColor`).
 
     Canada is red; named comparators get distinct colours; the rest of the peer group
     is light grey. By default (`hide_peers=True`) only Canada, the coloured comparators
@@ -200,13 +213,23 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
 
     # 1) Non-highlighted peers: light grey, behind; hidden at load when hide_peers
     #    (added back via the legend), so only Canada/comparators/average show first.
+    #    Each carries its fixed colour in meta.fixedColor so the site-wide legend
+    #    handler can snap it grey<->colour on click. `topical` peers open already
+    #    coloured + visible (the chart's prose names them).
+    topical = topical or []
     for i, code in enumerate(others):
         s = df[df[country_col] == code]
         name = _name(code)
+        fixed = PEER_EXTRA_COLORS.get(code)
+        is_top = code in topical and fixed is not None
         fig.add_trace(go.Scatter(
             x=_year_to_dt(s[x_col]), y=s[y_col], name=name, mode="lines",
-            line=dict(color=PEER_COLOR, width=PEER_WIDTH), opacity=0.8,
-            legendrank=100 + i, visible=("legendonly" if hide_peers else True),
+            line=dict(color=(fixed if is_top else PEER_COLOR),
+                      width=(PEER_ACTIVE_WIDTH if is_top else PEER_WIDTH)),
+            opacity=(1 if is_top else 0.8),
+            legendrank=100 + i,
+            visible=(True if (is_top or not hide_peers) else "legendonly"),
+            meta=({"fixedColor": fixed} if fixed else None),
             hovertemplate=f"{name}: %{{y:.2f}}<extra></extra>",
         ))
 
@@ -350,7 +373,8 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
                                 hover_suffix="%", hover_decimals=1,
                                 source_note=None, rangeslider=True,
                                 initial_start=None, hide_peers=True,
-                                option_layouts=None, menu_label="Age group:"):
+                                option_layouts=None, menu_label="Age group:",
+                                topical=None):
     """Peer-comparison line chart with a category dropdown.
 
     Same declutter as `peer_comparison_line` (Canada/comparators/average shown, grey
@@ -402,15 +426,22 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
         lab = f"<b>{label}</b>" if bold else label
         return f"{lab}: %{{y:.{hover_decimals}f}}{hover_suffix}<extra></extra>"
 
+    topical = topical or []
     fig = go.Figure()
     oi = 0
     for kind, code in order:
         x, y = (avg_series(default_age) if kind == "avg" else series(code, default_age))
         if kind == "other":
             name = _name(code)
+            fixed = PEER_EXTRA_COLORS.get(code)
+            is_top = code in topical and fixed is not None
             fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
-                line=dict(color=PEER_COLOR, width=PEER_WIDTH), opacity=0.8,
-                legendrank=100 + oi, visible=("legendonly" if hide_peers else True),
+                line=dict(color=(fixed if is_top else PEER_COLOR),
+                          width=(PEER_ACTIVE_WIDTH if is_top else PEER_WIDTH)),
+                opacity=(1 if is_top else 0.8),
+                legendrank=100 + oi,
+                visible=(True if (is_top or not hide_peers) else "legendonly"),
+                meta=({"fixedColor": fixed} if fixed else None),
                 hovertemplate=_hov(name)))
             oi += 1
         elif kind == "avg":

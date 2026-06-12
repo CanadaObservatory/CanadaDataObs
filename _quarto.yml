@@ -137,4 +137,6 @@ format:
     code-fold: true
     code-summary: "Show code"
     include-in-header: _includes/brand-head.html
-    include-after-body: _includes/share-charts.html
+    include-after-body:
+      - _includes/share-charts.html
+      - _includes/peer-legend-colours.html

@@ -4,7 +4,7 @@
   "source_table": "Bank of Canada (Bank Rate, V122530)",
   "frequency": "monthly",
   "unit": "%",
-  "retrieved_at": "2026-06-12T16:48:34.500797+00:00",
+  "retrieved_at": "2026-06-13T15:45:23.685899+00:00",
   "latest_observation_date": "2026-05-01",
   "transformations": [
     "BoC Valet series V122530 -> wide CSV"

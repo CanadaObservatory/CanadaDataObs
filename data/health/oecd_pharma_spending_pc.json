@@ -4,7 +4,7 @@
   "source_table": "OECD Health Expenditure (SHA)",
   "frequency": "annual",
   "unit": "USD PPP per capita",
-  "retrieved_at": "2026-06-12T16:50:58.955311+00:00",
+  "retrieved_at": "2026-06-13T15:49:07.798097+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to Pharmaceutical spending per person for OECD peer group"

@@ -4,7 +4,7 @@
   "source_table": "OECD Income Distribution Database (IDD)",
   "frequency": "annual",
   "unit": "% of population",
-  "retrieved_at": "2026-06-12T16:49:43.598419+00:00",
+  "retrieved_at": "2026-06-13T15:47:02.057727+00:00",
   "latest_observation_date": "2023",
   "transformations": [
     "filtered to Relative poverty rate (<50% median) for OECD peer group"

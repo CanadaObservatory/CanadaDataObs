@@ -4,7 +4,7 @@
   "source_table": "OECD Labour Force Statistics",
   "frequency": "annual",
   "unit": "% of working-age population",
-  "retrieved_at": "2026-06-15T18:47:04.681334+00:00",
+  "retrieved_at": "2026-06-16T18:32:48.297415+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to Employment rate (15\u201364) for OECD peer group"

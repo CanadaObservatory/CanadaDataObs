@@ -4,7 +4,7 @@
   "source_table": "OECD Average Annual Wages",
   "frequency": "annual",
   "unit": "USD PPP, constant prices",
-  "retrieved_at": "2026-06-13T15:47:12.961265+00:00",
+  "retrieved_at": "2026-06-17T16:59:03.652460+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to Average annual wage (real) for OECD peer group"

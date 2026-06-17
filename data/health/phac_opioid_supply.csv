@@ -6,6 +6,6 @@ year,partial,fentanyl_pct,stimulant_pct,accidental_pct
 2020,False,81,63.0,95
 2021,False,86,66.0,96
 2022,False,82,66.0,95
-2023,False,82,70.0,96
+2023,False,83,71.0,96
 2024,False,75,73.0,96
-2025,True,58,70.0,96
+2025,False,56,70.0,96

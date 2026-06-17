@@ -4,7 +4,7 @@
   "source_table": "18-10-0004-01",
   "frequency": "monthly",
   "unit": "index (2002=100)",
-  "retrieved_at": "2026-06-16T18:33:31.943916+00:00",
+  "retrieved_at": "2026-06-17T16:57:35.980755+00:00",
   "latest_observation_date": "2026-04-01",
   "transformations": [
     "filtered to All-items CPI, Canada only",

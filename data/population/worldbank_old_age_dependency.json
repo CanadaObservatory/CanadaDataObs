@@ -4,7 +4,7 @@
   "source_table": "World Bank WDI (UN World Population Prospects)",
   "frequency": "annual",
   "unit": "people 65+ per 100 aged 15\u201364",
-  "retrieved_at": "2026-06-16T18:30:36.705333+00:00",
+  "retrieved_at": "2026-06-17T16:57:07.054068+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "World Bank indicator SP.POP.DPND.OL, filtered to 17 OECD peers"

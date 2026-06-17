@@ -4,11 +4,11 @@
   "source_table": "OECD Income Distribution Database (IDD)",
   "frequency": "annual",
   "unit": "0\u20131 (lower = more equal)",
-  "retrieved_at": "2026-06-13T15:46:57.900243+00:00",
-  "latest_observation_date": "2023",
+  "retrieved_at": "2026-06-17T16:58:54.757260+00:00",
+  "latest_observation_date": "2024",
   "transformations": [
     "filtered to Gini coefficient (disposable income) for OECD peer group"
   ],
   "notes": null,
-  "row_count": 236
+  "row_count": 232
 }

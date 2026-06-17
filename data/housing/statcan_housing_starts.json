@@ -4,11 +4,11 @@
   "source_table": "Statistics Canada 34-10-0143-01 (CMHC)",
   "frequency": "monthly",
   "unit": "units (monthly)",
-  "retrieved_at": "2026-06-13T15:46:52.442654+00:00",
-  "latest_observation_date": "2026-04-01",
+  "retrieved_at": "2026-06-17T16:58:50.926535+00:00",
+  "latest_observation_date": "2026-05-01",
   "transformations": [
     "filtered to {'GEO': 'Canada', 'Housing estimates': 'Housing starts', 'Type of unit': 'Total units'}"
   ],
   "notes": null,
-  "row_count": 940
+  "row_count": 941
 }

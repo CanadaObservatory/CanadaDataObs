@@ -4,7 +4,7 @@
   "source_table": "OECD National Accounts (SNA_TABLE1)",
   "frequency": "annual",
   "unit": "USD (PPP, current prices)",
-  "retrieved_at": "2026-06-15T18:46:46.181999+00:00",
+  "retrieved_at": "2026-06-17T16:57:12.231236+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to GDP per capita (PPP) for OECD peer group"

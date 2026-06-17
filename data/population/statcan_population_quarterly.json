@@ -4,11 +4,11 @@
   "source_table": "17-10-0009-01",
   "frequency": "quarterly",
   "unit": "persons",
-  "retrieved_at": "2026-06-16T18:30:17.579972+00:00",
-  "latest_observation_date": "2026-01-01",
+  "retrieved_at": "2026-06-17T16:57:02.485533+00:00",
+  "latest_observation_date": "2026-04-01",
   "transformations": [
     "filtered to date, geography, population columns"
   ],
   "notes": null,
-  "row_count": 4049
+  "row_count": 4063
 }

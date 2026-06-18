@@ -47,7 +47,7 @@ if os.path.exists(national_path):
         yaxis=dict(title="Deaths", gridcolor="#e0e0e0", rangemode="tozero"),
         yaxis2=dict(title="Per 100,000", overlaying="y", side="right",
                     showgrid=False, rangemode="tozero"),
-        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=70),
+        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=120),
         annotations=[dict(text=note, xref="paper", yref="paper", x=0, y=-0.16,
                           showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config=SHOW)
@@ -97,7 +97,7 @@ if os.path.exists(demo_path):
     fig.update_layout(barmode="group", plot_bgcolor="white", hovermode="x unified",
         legend=dict(orientation="h", y=1.08, x=0),
         yaxis=dict(title="Deaths", gridcolor="#e0e0e0"),
-        xaxis=dict(title=""), margin=dict(t=50, b=80),
+        xaxis=dict(title=""), margin=dict(t=50, b=120),
         annotations=[dict(text=f"Source: PHAC, Substance-Related Harms — apparent opioid-toxicity deaths by age and sex, {yr}.",
                           xref="paper", yref="paper", x=0, y=-0.2, showarrow=False,
                           font=dict(size=10, color="#999"))])
@@ -127,7 +127,7 @@ if os.path.exists(supply_path):
         legend=dict(orientation="h", y=1.12, x=0),
         yaxis=dict(title="% of opioid-toxicity deaths", gridcolor="#e0e0e0",
                    range=[0, 100], ticksuffix="%"),
-        xaxis=dict(title="", dtick=1), margin=dict(t=60, b=70),
+        xaxis=dict(title="", dtick=1), margin=dict(t=60, b=120),
         annotations=[dict(text=f"Source: PHAC, Substance-Related Harms | Data as of: {get_data_date(supply_path)}. Shares can sum above 100% (a death may involve more than one substance).",
                           xref="paper", yref="paper", x=0, y=-0.16, showarrow=False,
                           font=dict(size=10, color="#999"))])
@@ -155,7 +155,7 @@ if os.path.exists(national_path):
     fig.update_layout(plot_bgcolor="white", hovermode="x unified",
         legend=dict(orientation="h", y=1.08, x=0),
         yaxis=dict(title="Per 100,000", gridcolor="#e0e0e0", rangemode="tozero"),
-        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=70),
+        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=120),
         annotations=[dict(text=f"Source: PHAC, Substance-Related Harms | Data as of: {get_data_date(national_path)}. Hospitalization rates exclude Quebec.",
                           xref="paper", yref="paper", x=0, y=-0.16, showarrow=False,
                           font=dict(size=10, color="#999"))])

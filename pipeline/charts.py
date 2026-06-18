@@ -47,7 +47,7 @@ if not getattr(go.Figure, "_datacan_branded", False):
                 # hangs BELOW its y instead of centring on it (centring is what rode up
                 # into range sliders / x-axis labels). One place → every chart. `_wrap`
                 # is module-level by call time (show() runs at render, after load).
-                _ann.text = f"{_wrap(_t)}<br>{BRAND}"
+                _ann.text = _wrap(f"{_t}  ·  {BRAND}", 118)
                 if _ann.yanchor is None:
                     _ann.yanchor = "top"
                 _ann.align = "left"
@@ -233,7 +233,11 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
         # the by-age dropdown). Font size does NOT help — legend row height is driven
         # by the line-sample symbol, not the text. This height is the single site-wide
         # lever (both peer-line builders route through here).
-        plot_bgcolor="white", hovermode="x unified", height=600,
+        # 600 fits all 18 legend entries (see below) when extra_top is the default 40.
+        # The by-age dropdown builder passes extra_top=70 (room for its menu); add that
+        # extra top back to the height so the plot area — and the legend's room — stays
+        # constant, otherwise the 18-entry legend overflows and grows a scroll-stealing bar.
+        plot_bgcolor="white", hovermode="x unified", height=600 + max(0, extra_top - 40),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02,
                     font=dict(size=10), itemsizing="constant",
                     itemclick="toggle", itemdoubleclick="toggleothers"),
@@ -1773,7 +1777,7 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=dict(title="", gridcolor="#e0e0e0"), yaxis=yaxis, legend=legend,
         margin=dict(l=10, r=(175 if legend_orientation == "v" else 20),
-                    t=(60 if measures else 30), b=80))
+                    t=(60 if measures else 30), b=100))
     if measures:
         buttons = [dict(method="update", label=m["label"],
                         args=[{"y": [subsets[g][m["col"]].tolist() for g in groups]},

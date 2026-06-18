@@ -57,8 +57,11 @@ Canada + US + Australia + Germany + OECD average** (Sweden/UK coloured but unloa
   low-income, federal headcount, executives, revenue/spending). Per-chart judgement.
   *(§31, §41, §251, §297, §315, §333, §460)*
 - ☐ **G11 Pages stand alone** — remove cross-page "linking" sentences. *(§225, §538)*
-- ☐ **G4 Legend scrollbar** — still hijacks page scroll on dropdown/by-age charts;
-  the 560→600 fix didn't fully take. Robust site-wide re-fix. *(§49, §53, §127)*
+- ☑ **G4 Legend scrollbar** — fixed: the by-age dropdown builder passes `extra_top=70` (menu
+  room), which shrank the plot area below the 18-entry legend → overflow scrollbar. Height in
+  `_apply_peer_line_layout` now adds that extra top back (`600 + max(0, extra_top-40)` → 630 for
+  by-age), restoring the regular charts' plot/legend area. Verified: legend overflow now false on
+  both economics by-age charts (was true); regular peer charts unchanged. *(§49, §53, §127)*
 - 🔬 **G5 Y-axis scale navigation** — consistent default range + period-aware rescale
   (autoscale doesn't solve it). Affects inflation, borrowing costs, vaccination, … *(§37,
   §156, §159, §212, §377)*
@@ -126,6 +129,18 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   cause was a long single line (vertical spacing can't fix a horizontal clip). Added
   `_wrap` (auto `<br>`) + `_map_source_note` (yanchor=top), b→80; the 6 map builders now
   wrap. Screenshot-verified on the diversity tract map (worst case: 5 lines, no clip).
+- **2026-06-18 #10 (G4 + source-note clipping — ⭐RESUME HERE; context near full):**
+  **G4 ✅** legend overflow fixed (`_apply_peer_line_layout` height `600+max(0,extra_top-40)`
+  → 630 for by-age). **Source notes were clipping on bespoke `go.Figure` charts** (peer/builder
+  charts fine) → the `Figure.show` interceptor now appends BRAND **INLINE**
+  (`_wrap(f"{src}  ·  {BRAND}", 118)`) not on its own line, so notes stay ~1 line; + bumps
+  substance-use bespoke b=70/80→120 and `lines_over_time` b=80→100. Verified clear (bottom+right)
+  on substance-use + income. **UNCOMMITTED**; full bg render (/tmp/full_render3.log) propagating it.
+  **⚠️ OPEN: owner confirms inline-vs-own-line brand** (inline is visible site-wide; if own-line,
+  revert + per-chart margins). **NEXT:** verify render → run the clip-detector sweep on
+  economics/environment/geography/crime/climate for stragglers → fix → COMMIT G4+clipping → then
+  the per-section pass. (Clip-detector: per `.plotly-graph-div`, compare each Source `g.annotation`
+  bbox vs the div bbox; bottom/right `>0` = clip.)
 - **2026-06-18 #9 (G8 — sentence-case titles):** 179 `##`/`###` headings → sentence case via
   a reviewed script (acronyms/proper nouns preserved); 3 owner shortenings
   (tuition / bond-yields / revenue-spending). Verified on economics/housing/government/education.

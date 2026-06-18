@@ -37,7 +37,7 @@ if os.path.exists(norm):
         groups=[("jan_temp", "January"), ("jul_temp", "July"), ("annual_temp", "Annual")],
         colorscale="RdBu", reversescale=True, cmid=0,
         cbar_title="Mean temp", value_suffix=" °C", name_col="station", zoom=2.3,
-        source_note="Source: Environment and Climate Change Canada — Canadian Climate Normals 1981–2010 (station data, via the MSC GeoMet API). Each dot is a weather station; colour = mean daily temperature for the selected period; diverging scale centred at 0 °C.")
+        source_note="Source: ECCC, Canadian Climate Normals 1981–2010 (station data).")
     fig.show(config=MAP_CONFIG)
 else:
     print("Climate normals not yet available — run `python -m pipeline.build_geography`.")
@@ -59,7 +59,7 @@ if os.path.exists(norm):
         groups=[("annual_precip", "Annual precipitation")],
         colorscale="Blues", cmin=0, cbar_title="Precip", value_suffix=" mm",
         value_fmt=",.0f", name_col="station", zoom=2.3,
-        source_note="Source: Environment and Climate Change Canada — Canadian Climate Normals 1981–2010 (station data). Annual total precipitation (rainfall + snow-water equivalent).")
+        source_note="Source: ECCC, Canadian Climate Normals 1981–2010 (station data).")
     fig.show(config=MAP_CONFIG)
 ```
 

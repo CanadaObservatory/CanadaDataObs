@@ -56,7 +56,7 @@ if os.path.exists(fp_path):
         customdata=fp[["province", "size_ha", "cause"]].to_numpy(),
         hovertemplate="<b>%{customdata[0]}</b><br>%{customdata[1]:,.0f} ha burned · %{customdata[2]}<extra></extra>",
         center={"lat": 60, "lon": -100}, zoom=2.3,
-        source_note="Source: NRCan Canadian National Fire Database (NFDB), individual fire points, 2023. Each dot is one fire; marker area ∝ hectares burned.")
+        source_note="Source: NRCan Canadian National Fire Database (NFDB), 2023 fire points; marker area ∝ hectares burned.")
     fig.show(config=MAP_CONFIG)
 else:
     print("Wildfire-points data not yet available — run `python -m pipeline.build_geography`.")
@@ -79,7 +79,7 @@ if os.path.exists(pf_geo_path) and os.path.exists(pf_csv):
     fig = choropleth_categorical(pf_geo, pf, "fid", "zone",
         color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_orientation="h",
         center={"lat": 64, "lon": -96}, zoom=2.2,
-        source_note="Source: Permafrost map of Canada, Atlas of Canada 5th edition (Natural Resources Canada). Mapping ~1995; extent has since declined.")
+        source_note="Source: NRCan, Atlas of Canada 5th ed. — permafrost (~1995; extent has since declined).")
     fig.show(config=MAP_CONFIG)
 else:
     print("Permafrost data not yet available — run `python -m pipeline.build_geography`.")

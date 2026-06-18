@@ -47,7 +47,7 @@ if os.path.exists(geo) and os.path.exists(csv):
     fig = choropleth_categorical(g, dd, "caruid", "dominant_ftype", name_col="name",
         ordered=order, color_map=colors, legend_title="Most common farm type", zoom=2.5,
         detail_col="hover_detail",
-        source_note="Source: Statistics Canada, Census of Agriculture 2021 (32-10-0231-01); most common type by farm count.")
+        source_note="Source: Statistics Canada, 2021 Census of Agriculture (32-10-0231-01).")
     # Hover off on load (the "Hover on" button enables it): the breakdown tooltip is rich, so
     # don't fire it as the cursor sweeps the national view.
     fig.update_layout(hovermode=False)
@@ -74,7 +74,7 @@ if os.path.exists(geo) and os.path.exists(csv):
     d = pd.read_csv(csv, dtype={"caruid": str})
     fig = choropleth_map(g, d, "caruid", "cropland_share", name_col="name",
         colorbar_title="Cropland", colorscale="YlGn", value_suffix="%", value_fmt=".0f",
-        zoom=2.5, source_note="Source: Statistics Canada, 2021 Census of Agriculture (land in crops, table 32-10-0249-01) ÷ census land area, by census agricultural region.")
+        zoom=2.5, source_note="Source: Statistics Canada, 2021 Census of Agriculture (Table 32-10-0249-01); cropland ÷ land area.")
     fig.show(config=MAP_CONFIG)
 ```
 

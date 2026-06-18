@@ -34,7 +34,7 @@ if os.path.exists(lakes_geo) and os.path.exists(lakes_csv):
         colorbar_title="Surface area", colorscale="Blues", value_suffix=" km²", value_fmt=",.0f",
         log=True, center={"lat": 59, "lon": -98}, zoom=2.4,
         line_color="#222", line_width=0.8,
-        source_note="Source: Natural Resources Canada, Atlas of Canada 1:1,000,000 waterbodies. The 40 largest named natural lakes and rivers touching Canada (shared Great Lakes included; reservoirs excluded). Surface area approximate, from 1:1M-scale outlines; lakes coloured on a log scale.")
+        source_note="Source: Natural Resources Canada, Atlas of Canada (1:1M waterbodies); 40 largest natural lakes & rivers.")
     if len(rivers_df):
         river_area = rivers_df["area_km2"].map(lambda v: f"{v:,.0f}").tolist()
         fig.add_trace(go.Choroplethmapbox(

@@ -21,7 +21,7 @@ Canada + US + Australia + Germany + OECD average** (Sweden/UK coloured but unloa
   good-or-bad reading / how high it *should* be is political / shown without a favourable
   direction / not a gap in this site / Descriptive only." Keep the principle ONLY on the
   Landing page + About. *(§64, §76, §98, §266, §290, §327, §336, §388, §418, §538)*
-- ◐ **G1 Source-note standard** (bars left-anchored; all 6 map builders WRAP long source
+- ☑ **G1 Source-note standard** (bars left-anchored; all 6 map builders WRAP long source
   notes via `_wrap`/`_map_source_note` [yanchor=top, grows downward, b→80] so they no
   longer clip at the right edge or touch the map — screenshot-verified 2026-06-18.
   PLUS the Figure.show interceptor now wraps + top-anchors every source note site-wide, so
@@ -115,6 +115,12 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   cause was a long single line (vertical spacing can't fix a horizontal clip). Added
   `_wrap` (auto `<br>`) + `_map_source_note` (yanchor=top), b→80; the 6 map builders now
   wrap. Screenshot-verified on the diversity tract map (worst case: 5 lines, no clip).
+- **2026-06-18 #8 (finish G1 — owner "(1)"):** trimmed 16 other-section map source notes
+  (income/housing/geography) to provenance + essential caveats (owner-estimated, the
+  affordability ratio, permafrost ~1995, bubble sizing). Verified the two stragglers:
+  happiness-factor source now sits below its legend (§413); the population pyramid's
+  bottom margin → 170 so its note clears the year slider (§45). Affected pages re-rendered.
+  **G1 done.**
 - **2026-06-18 #6 (G1 time-series — owner "(2)"):** the `Figure.show` interceptor now
   WRAPS + top-anchors + left-aligns every source note in ONE place — so notes hang BELOW
   the range slider / x-axis label instead of centring on it (the overlap cause). Removed

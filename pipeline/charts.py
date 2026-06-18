@@ -1039,7 +1039,7 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
         yaxis=dict(title="Age", dtick=10, gridcolor="#e0e0e0"),
         legend=dict(orientation="h", x=0, y=1.04, xanchor="left"),
         plot_bgcolor="white", height=height,
-        margin=dict(l=60, r=20, t=30, b=130),
+        margin=dict(l=60, r=20, t=30, b=170),
         sliders=[dict(active=len(steps) - 1, steps=steps,
                       currentvalue=dict(prefix="Year: ", font=dict(size=13)),
                       font=dict(size=10), pad=dict(t=34, b=6))],

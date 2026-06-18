@@ -34,7 +34,7 @@ if os.path.exists(geo_path) and os.path.exists(ct_income_path):
     fig = choropleth_map(ct_geo, ct_df, "ctuid", "median_income", name_col="name",
         colorbar_title="Median household income", value_prefix="$", colorscale="Viridis",
         zmin=zlo, zmax=zhi, height=720,
-        source_note="Source: 2021 Census (Statistics Canada, Table 98-10-0058-01); income is for 2020; boundaries from StatCan.")
+        source_note="Source: Statistics Canada, 2021 Census (Table 98-10-0058-01); 2020 income.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Census-tract income map not available — run `python -m pipeline.build_census_geo`.")

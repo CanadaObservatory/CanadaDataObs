@@ -31,7 +31,7 @@ if os.path.exists(prov_geo) and os.path.exists(prov_csv):
     d = pd.read_csv(prov_csv, dtype={"pruid": str})
     fig = choropleth_map(g, d, "pruid", "pct_conserved", name_col="name",
         colorbar_title="% conserved", colorscale="Greens", value_suffix="%", value_fmt=".1f",
-        zoom=2.3, source_note="Source: Environment and Climate Change Canada — Canadian Environmental Sustainability Indicators, conserved areas (2024). Share of each province/territory's land that is protected or under other effective area-based conservation measures (OECMs).")
+        zoom=2.3, source_note="Source: ECCC, Canadian Environmental Sustainability Indicators — conserved areas (2024).")
     fig.show(config=MAP_CONFIG)
 else:
     print("Protected-areas data not yet available — run `python -m pipeline.build_geography`.")

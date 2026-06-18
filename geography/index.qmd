@@ -32,7 +32,7 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_den):
     fig = choropleth_map(cma_geo, cd, "cmauid", "density", name_col="name",
         colorbar_title="People per km²", colorscale="YlOrRd", value_fmt=",.0f", log=True,
         center={"lat": 56, "lon": -96}, zoom=2.6,
-        source_note="Source: 2021 Census, Statistics Canada. Density within each metropolitan area (CMA/CA); logarithmic scale.")
+        source_note="Source: Statistics Canada, 2021 Census.")
     fig.show(config=MAP_CONFIG)
 else:
     print("City density not yet available — run `python -m pipeline.build_geography`.")

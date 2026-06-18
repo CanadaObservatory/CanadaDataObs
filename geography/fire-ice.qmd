@@ -36,7 +36,7 @@ if os.path.exists(wf_path):
         plot_bgcolor="white", height=420,
         xaxis=dict(title="", gridcolor="#e0e0e0"),
         yaxis=dict(title="Million hectares burned", gridcolor="#e0e0e0"),
-        margin=dict(t=30, b=70),
+        margin=dict(t=30, b=120),
         annotations=[dict(text=f"Source: Natural Resources Canada, Canadian National Fire Database | Data as of: {get_data_date(wf_path)}",
                           xref="paper", yref="paper", x=0, y=-0.18, showarrow=False,
                           font=dict(size=10, color="#999"))])
@@ -106,7 +106,7 @@ if os.path.exists(si_path):
         xaxis=dict(title="", gridcolor="#e0e0e0"),
         yaxis=dict(title="Sea-ice extent (million km²)", gridcolor="#e0e0e0", rangemode="tozero"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        margin=dict(t=40, b=70),
+        margin=dict(t=40, b=120),
         annotations=[dict(text=f"Source: NSIDC Sea Ice Index (G02135), Northern Hemisphere | Data as of: {get_data_date(si_path)}",
                           xref="paper", yref="paper", x=0, y=-0.18, showarrow=False,
                           font=dict(size=10, color="#999"))])

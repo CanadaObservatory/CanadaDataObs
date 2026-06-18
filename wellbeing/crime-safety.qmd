@@ -215,7 +215,7 @@ fig.update_layout(
     plot_bgcolor="white", showlegend=False, height=170 + 30 * len(sub),
     xaxis=dict(title=RATE_TITLE, gridcolor="#e0e0e0"),
     yaxis=dict(title="", categoryorder="array", categoryarray=ry),
-    margin=dict(l=10, r=70, t=54, b=70),
+    margin=dict(l=10, r=70, t=54, b=120),
     updatemenus=[dict(active=0, x=0, xanchor="left", y=1.0, yanchor="bottom",
         bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True,
         buttons=[btn_rate, btn_count])])
@@ -386,7 +386,7 @@ fig.update_layout(
     xaxis=dict(title="", gridcolor="#e0e0e0"),
     yaxis=dict(title="Share of the year's incidents", gridcolor="#e0e0e0", ticksuffix="%"),
     legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
-    margin=dict(l=10, r=160, t=20, b=70))
+    margin=dict(l=10, r=160, t=20, b=120))
 fig.add_annotation(
     text="Source: Toronto Police Service open data (occurrences 2014–, by month). Each crime's 12 months sum to 100%.",
     xref="paper", yref="paper", x=0, xanchor="left", y=-0.16, showarrow=False,

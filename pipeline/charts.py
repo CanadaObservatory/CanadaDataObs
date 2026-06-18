@@ -47,7 +47,7 @@ if not getattr(go.Figure, "_datacan_branded", False):
                 # hangs BELOW its y instead of centring on it (centring is what rode up
                 # into range sliders / x-axis labels). One place → every chart. `_wrap`
                 # is module-level by call time (show() runs at render, after load).
-                _ann.text = _wrap(f"{_t}  ·  {BRAND}", 118)
+                _ann.text = f"{_wrap(_t, 115)}<br>{BRAND}"
                 if _ann.yanchor is None:
                     _ann.yanchor = "top"
                 _ann.align = "left"

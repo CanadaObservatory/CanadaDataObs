@@ -40,7 +40,7 @@ if os.path.exists(temp_path):
         yaxis=dict(title="Departure from 1961–1990 average (°C)", gridcolor="#e0e0e0",
                    ticksuffix=" °C", zeroline=False),
         xaxis=dict(title="", gridcolor="#e0e0e0", dtick=10),
-        margin=dict(t=30, b=90),
+        margin=dict(t=30, b=120),
         annotations=[dict(
             text=f"Source: Environment and Climate Change Canada, Canadian Environmental Sustainability Indicators (temperature change) | Data as of: {get_data_date(temp_path)}",
             xref="paper", yref="paper", x=0, y=-0.20, showarrow=False,

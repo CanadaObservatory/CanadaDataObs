@@ -98,7 +98,7 @@ if os.path.exists(le_path):
         legend=dict(orientation="h", y=1.04, x=0),
         yaxis=dict(title="Years", gridcolor="#e0e0e0"),
         xaxis=dict(title="", gridcolor="#e0e0e0"),
-        margin=dict(t=40, b=80),
+        margin=dict(t=40, b=120),
         annotations=[dict(text=f"Source: OECD Health Statistics | Data as of: {get_data_date(le_path)}",
             xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

@@ -236,7 +236,7 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
     cma = pd.read_csv(cma_path, dtype={"cmauid": str})
     sub = cma.dropna(subset=["dwelling_value"])
     fig = choropleth_map(cma_geo, sub, "cmauid", "dwelling_value", name_col="name",
-        colorbar_title="Median dwelling value", value_prefix="$", value_fmt=",.0f", colorscale="Viridis",
+        colorbar_title="Median home<br>value", value_prefix="$", value_fmt=",.0f", colorscale="Viridis",
         zmin=float(sub["dwelling_value"].quantile(0.05)), zmax=float(sub["dwelling_value"].quantile(0.95)),
         source_note="Source: Statistics Canada, 2021 Census; owner-estimated dwelling value.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -253,7 +253,7 @@ Home value divided by median household income — roughly how many years of a ty
 if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
     sub = cma.dropna(subset=["value_to_income"])
     fig = choropleth_map(cma_geo, sub, "cmauid", "value_to_income", name_col="name",
-        colorbar_title="Home value ÷ income", value_suffix="×", value_fmt=".1f", colorscale="YlOrRd",
+        colorbar_title="Home value<br>÷ income", value_suffix="×", value_fmt=".1f", colorscale="YlOrRd",
         zmin=float(sub["value_to_income"].quantile(0.05)), zmax=float(sub["value_to_income"].quantile(0.95)),
         source_note="Source: Statistics Canada, 2021 Census; owner-estimated dwelling value ÷ median household income.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -337,6 +337,8 @@ else:
 ```
 
 ## Latest household debt: ranked
+
+**Data current to `{python} get_data_date("data/housing/oecd_household_debt.csv")`.**
 
 ```{python}
 #| echo: false

@@ -286,7 +286,7 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_unemp_path):
     sub = pd.read_csv(cma_unemp_path, dtype={"cmauid": str}).dropna(subset=["unemployment"])
     period = pd.to_datetime(str(sub["period"].iloc[0]) + "-01").strftime("%b %Y")
     fig = choropleth_map(cma_geo, sub, "cmauid", "unemployment", name_col="name",
-        colorbar_title="Unemployment rate", value_suffix="%", value_fmt=".1f", colorscale="YlOrRd",
+        colorbar_title="Unemployment<br>rate", value_suffix="%", value_fmt=".1f", colorscale="YlOrRd",
         zmin=float(sub["unemployment"].quantile(0.05)), zmax=float(sub["unemployment"].quantile(0.95)),
         source_note=f"Source: Statistics Canada Labour Force Survey 14-10-0459-01 (3-month moving average, seasonally adjusted) | 3 months ending {period}")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

@@ -32,7 +32,7 @@ if os.path.exists(geo_path) and os.path.exists(ct_income_path):
     zlo = float(ct_df["median_income"].quantile(0.05))
     zhi = float(ct_df["median_income"].quantile(0.95))
     fig = choropleth_map(ct_geo, ct_df, "ctuid", "median_income", name_col="name",
-        colorbar_title="Median household income", value_prefix="$", colorscale="Viridis",
+        colorbar_title="Median<br>household<br>income", value_prefix="$", colorscale="Viridis",
         zmin=zlo, zmax=zhi, height=720,
         source_note="Source: Statistics Canada, 2021 Census (Table 98-10-0058-01); 2020 income.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

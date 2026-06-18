@@ -84,7 +84,7 @@ if os.path.exists(cma_geo_p) and os.path.exists(cma_p):
     cgeo = json.load(open(cma_geo_p))
     cdf = pd.read_csv(cma_p, dtype={"cmauid": str}).dropna(subset=["median_income"])
     fig = choropleth_map(cgeo, cdf, "cmauid", "median_income", name_col="name",
-        colorbar_title="Median household income", value_prefix="$", value_fmt=",.0f",
+        colorbar_title="Median<br>household<br>income", value_prefix="$", value_fmt=",.0f",
         colorscale="Viridis",
         zmin=float(cdf["median_income"].quantile(0.05)), zmax=float(cdf["median_income"].quantile(0.95)),
         source_note="Source: 2021 Census (Statistics Canada), by metropolitan area.")

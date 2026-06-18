@@ -36,16 +36,23 @@ Canada + US + Australia + Germany + OECD average** (Sweden/UK coloured but unloa
   buffer so the latest point isn't flush against the edge (2026-06-18; verified population
   total + economics peer charts). `single_line_multi`/`single_bar` auto-range (already
   padded). *(§199, §203, §254, §300, §313, §338)*
-- ☐ **G7 "Data current to" prominence** — a clear data-currency line near each chart
-  title (not only in the small source text), esp. maps + CREA. *(§134, §178, §208, §230)*
+- ◐ **G7 "Data current to" prominence** — pattern established: a bold inline-python line under
+  the heading (`**Data current to {get_data_date(path)}.**`), done on the household-debt ranked
+  chart (§208 → "2025"). **Caveat: it's per-chart, not global** — bespoke files (the unemployment
+  map's computed `period`, CREA's HPI month) return None from `get_data_date`, so those get their
+  own date var in the per-section pass (the unemployment line was reverted to avoid "None").
+  *(§134, §178, §208, §230)*
 - ☑ **G8 Title policy** — 179 `##`/`###` headings → sentence case site-wide via a reviewed
   script (proper nouns/acronyms preserved: Canada, GDP, CO2, US, Gini, PM2.5, R&D, USD…;
   navigational area-card links + page `title:` fields left as-is). 3 owner-flagged shortenings
   done (tuition / bond-yields / revenue-spending; no inbound links broke). Heading IDs are
   case-insensitive in Quarto so internal links still resolve. Remaining renames (elevation
   §439, air-quality §502) → per-section pass. *(§216, §330, §427)*
-- ☐ **G9 Map colourbar titles** — short, split across 2 lines, to reclaim map width;
-  general rule. *(§190, §195, §232, §444, §470)*
+- ☑ **G9 Map colourbar titles** — 8 long single-value colourbar titles split with `<br>` to
+  reclaim map width (income → 3 lines per §232; "dwelling"→"home" per §193; home-value, value÷
+  income, unemployment, density, surface area). Verified: the home-value map's bar is now a
+  narrow 2-line "Median home / value" and the map fills the column. Groups-map `% {label}` bars
+  left as-is (not flagged). *(§190, §195, §232, §444)*
 - ☐ **G10 Bar-vs-line guideline** — single-series counts/rates default to bars (NPR,
   low-income, federal headcount, executives, revenue/spending). Per-chart judgement.
   *(§31, §41, §251, §297, §315, §333, §460)*

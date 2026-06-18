@@ -31,7 +31,7 @@ if os.path.exists(lakes_geo) and os.path.exists(lakes_csv):
     is_river = ld["name"].str.contains("River")
     lakes_df, rivers_df = ld[~is_river], ld[is_river]
     fig = choropleth_map(lg, lakes_df, "lakeid", "area_km2", name_col="name",
-        colorbar_title="Surface area", colorscale="Blues", value_suffix=" km²", value_fmt=",.0f",
+        colorbar_title="Surface<br>area", colorscale="Blues", value_suffix=" km²", value_fmt=",.0f",
         log=True, center={"lat": 59, "lon": -98}, zoom=2.4,
         line_color="#222", line_width=0.8,
         source_note="Source: Natural Resources Canada, Atlas of Canada (1:1M waterbodies); 40 largest natural lakes & rivers.")

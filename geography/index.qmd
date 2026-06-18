@@ -30,7 +30,7 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_den):
     cma_geo = json.load(open(cma_geo_path))
     cd = pd.read_csv(cma_den, dtype={"cmauid": str})
     fig = choropleth_map(cma_geo, cd, "cmauid", "density", name_col="name",
-        colorbar_title="People per km²", colorscale="YlOrRd", value_fmt=",.0f", log=True,
+        colorbar_title="People<br>per km²", colorscale="YlOrRd", value_fmt=",.0f", log=True,
         center={"lat": 56, "lon": -96}, zoom=2.6,
         source_note="Source: Statistics Canada, 2021 Census.")
     fig.show(config=MAP_CONFIG)

@@ -26,7 +26,7 @@ hour of work is, and how many people who want work can find it — these indicat
 place Canada's output and labour market alongside 17 OECD peers. Inflation and the
 cost of living have their own page: [Housing & Cost of Living](../housing/).
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures like unemployment are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -36,7 +36,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("economics").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Real GDP Growth
+## Real GDP growth
 
 Annual percentage change in real (inflation-adjusted) GDP — the headline measure of how fast the economy is expanding or contracting. The most recent year or two are OECD projections rather than final figures.
 
@@ -58,7 +58,7 @@ else:
     print("Real GDP growth data not yet available. Run the data pipeline.")
 ```
 
-## Quarterly GDP Growth
+## Quarterly GDP growth
 
 Real (inflation-adjusted) gross domestic product, shown as the change from the previous quarter, for every quarter back to 1961. Red bars mark quarters in which the economy contracted. A **recession** is commonly defined as two consecutive quarters of declining real GDP, though in Canada the official arbiter is the C.D. Howe Institute's Business Cycle Council; the recessions it has dated since 1980 are marked here as shaded bands. The full record places recent quarters alongside past downturns — the contractions of the early 1980s and early 1990s, the 2008–09 financial crisis, and the record swings of the 2020 pandemic. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
 
@@ -123,7 +123,7 @@ else:
     print("Quarterly GDP data not yet available. Run the data pipeline.")
 ```
 
-## GDP per Capita (PPP, Current USD)
+## GDP per capita (PPP, current USD)
 
 GDP per capita at purchasing power parity allows meaningful comparison of living standards across countries. Canada is shown in red; the United States and other key comparators are highlighted in colour, with the remaining peers in light grey.
 
@@ -143,7 +143,7 @@ else:
     print("GDP per capita data not yet available. Run the data pipeline.")
 ```
 
-## Latest GDP per Capita: Ranked
+## Latest GDP per capita: ranked
 
 ```{python}
 #| echo: false
@@ -155,7 +155,7 @@ if os.path.exists(gdppc_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## GDP per Capita Relative to the US and Peers
+## GDP per capita relative to the US and peers
 
 One of the most-discussed economic questions is whether Canadian living standards are slipping behind. This chart answers it directly: Canada's GDP per capita (PPP) shown **as a percentage of the United States** and **of the peer-group average** (the other 16 OECD economies), over time. A value of 100% means parity; below 100% means Canada trails. We compare against the full peer group rather than the narrower G7, with the United States shown as a single named comparator.
 
@@ -195,7 +195,7 @@ else:
     print("GDP per capita data not yet available. Run the data pipeline.")
 ```
 
-## Labour Productivity (GDP per Hour Worked)
+## Labour productivity (GDP per hour worked)
 
 GDP per hour worked measures how efficiently an economy converts labour into output. Canada's productivity gap relative to the United States and other leading economies is a persistent concern.
 
@@ -225,7 +225,7 @@ else:
     print("Labour productivity data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest Labour Productivity: Ranked
+## Latest labour productivity: ranked
 
 ```{python}
 #| echo: false
@@ -237,7 +237,7 @@ if os.path.exists(prod_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Unemployment Rate
+## Unemployment rate
 
 Harmonised unemployment rate as a percentage of the labour force, allowing consistent comparison across countries. **Use the dropdown to switch age bracket** — youth (15–24) unemployment runs far above the prime-age rate, and the peer ranking shifts with it.
 
@@ -258,7 +258,7 @@ else:
     print("Unemployment-by-age data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest Unemployment Rate: Ranked
+## Latest unemployment rate: ranked
 
 ```{python}
 #| echo: false
@@ -271,7 +271,7 @@ if os.path.exists(unemp_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Unemployment by City
+## Unemployment by city
 
 The national rate hides large regional differences. This map shows the **current** unemployment rate in each of Canada's largest metropolitan areas — **zoom and pan to your area.** From the monthly Labour Force Survey (three-month moving average, seasonally adjusted), so it stays current with the national series above; it covers the ~40 largest CMAs (smaller centres aren't separately estimated by the LFS).
 
@@ -294,7 +294,7 @@ else:
     print("City unemployment map not yet available. Run the data pipeline.")
 ```
 
-## Employment Rate
+## Employment rate
 
 The share of an age group that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work. **Use the dropdown to switch age bracket:** older-worker (55–64) employment, in particular, has trended up across most peers.
 
@@ -316,7 +316,7 @@ else:
     print("Employment rate data not yet available. Run the data pipeline.")
 ```
 
-## Latest Employment Rate: Ranked
+## Latest employment rate: ranked
 
 ```{python}
 #| echo: false
@@ -329,7 +329,7 @@ if os.path.exists(emp_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Business Investment
+## Business investment
 
 Gross fixed capital formation — spending on machinery, equipment, buildings, and intellectual property — as a share of GDP. Investment is what builds the capital each worker has to work with, so it is closely tied to the productivity and GDP-per-capita pictures above: persistently weak investment is one of the most common explanations for weak productivity growth.
 
@@ -348,7 +348,7 @@ else:
     print("Business investment data not yet available. Run the data pipeline.")
 ```
 
-## Latest Business Investment: Ranked
+## Latest business investment: ranked
 
 ```{python}
 #| echo: false
@@ -360,7 +360,7 @@ if os.path.exists(inv_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Current Account Balance
+## Current account balance
 
 Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus.
 
@@ -380,7 +380,7 @@ else:
     print("Current account data not yet available. Run the data pipeline.")
 ```
 
-## Latest Current Account Balance: Ranked
+## Latest current account balance: ranked
 
 ```{python}
 #| echo: false
@@ -392,7 +392,7 @@ if os.path.exists(ca_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Trade Exposure to the United States
+## Trade exposure to the United States
 
 The United States takes about two-thirds of Canada's merchandise exports — a share that peaked near 88% around 2000, drifted down over the following two decades, and dropped sharply during the 2025 tariff conflict. Shown for scale, the **European Union** and **China** — Canada's next-largest export markets — each account for only about 5–6%, a measure of how concentrated Canada's trade is on a single partner. (Customs basis, seasonally adjusted.)
 
@@ -428,7 +428,7 @@ else:
     print("Trade data not yet available. Run the data pipeline.")
 ```
 
-## Trade Balance: the US vs. the Rest of the World
+## Trade balance: the US vs. the rest of the world
 
 Canada runs a large merchandise **surplus with the United States** and a **deficit with every other market combined** — so the overall trade balance hinges on the US relationship. (Monthly, seasonally adjusted; balance = exports − imports.)
 
@@ -459,7 +459,7 @@ if os.path.exists(trade_path):
     figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## The Canadian Dollar
+## The Canadian dollar
 
 The exchange rate against the **US dollar** — Canada's dominant trading partner (see the trade-exposure chart above). Shown as the Bank of Canada publishes it: **Canadian dollars per US dollar**, so a *higher* line means a *weaker* loonie. The daily average series begins in 2017.
 
@@ -479,7 +479,7 @@ else:
     print("Exchange-rate data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
 - [GDP per Capita (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts, PPP current USD

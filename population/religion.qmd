@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 ```
 
-## Religion by Neighbourhood
+## Religion by neighbourhood
 
 The religious make-up of Canada down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. Religion is self-reported, and the census asks it only once a decade. **"No religion / secular"** is now the second-largest group nationally and is included; the many Christian denominations are rolled into a single "Christian" total. This is a separate concept from ethnicity and from Indigenous identity.
 
@@ -33,7 +33,7 @@ else:
     print("Religion map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## How Religious Affiliation Has Changed
+## How religious affiliation has changed
 
 Canada has recorded religion in its census roughly **once a decade since 1871**, so the long view is unusually deep. The chart below traces Canada's composition over 150 years: a country that was about **95% Christian** from the 1870s through the mid-20th century became, by 2021, **53% Christian** — while **"No religion / secular"** rose from **0.2% to 35%**, now the second-largest group. Muslim, Hindu, Sikh and Buddhist populations were a negligible share until first counted separately in 1981, and each has grown steadily since. Use the **Show:** selector to switch between each group's *share* of the population and the *absolute number of people* — in raw counts even Christianity grew (Canada's population rose roughly tenfold over the period), even as its share fell.
 
@@ -117,7 +117,7 @@ else:
     print("Religion-by-city data not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Download data
 
 - [Religion by City (CSV)](../data/geo/statcan_cma_religion.csv) — 2021 Census (Statistics Canada)
 - [Religion by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_religion_2021.csv) — 2021 Census (Statistics Canada)

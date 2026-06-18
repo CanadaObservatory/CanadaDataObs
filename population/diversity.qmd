@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 ```
 
-## Diversity by Neighbourhood
+## Diversity by neighbourhood
 
 Where Canada's population groups live, down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area (tracts are labelled by their Statistics Canada ID). Census tracts are defined only for larger urban areas (census metropolitan areas and agglomerations), so rural and remote regions are left blank.
 
@@ -35,7 +35,7 @@ else:
     print("Diversity map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## The Largest Group, Mapped
+## The largest group, mapped
 
 A different cut of the same data: each tract coloured by its **largest single
 group** — a plurality, not necessarily a majority — with the tract's full mix in
@@ -43,7 +43,7 @@ the hover (kept on its own page so this one stays fast to load):
 
 **[→ The largest group in each neighbourhood](largest-group.qmd)**
 
-## How the Diversity of Canada Has Changed
+## How the diversity of Canada has changed
 
 Canada's visible-minority population has grown from roughly one in eight people in the early 2000s to more than one in four. This chart traces each group's share across recent censuses. **Use the dropdown to switch geography** — Canada, a province, or a major city — and click legend entries to add or remove groups (the "Not a visible minority" majority starts hidden so the smaller groups are legible; click it on to see the full composition).
 
@@ -65,7 +65,7 @@ else:
     print("Historical diversity data not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Download data
 
 - [Population Groups by City — incl. White & Indigenous (CSV)](../data/geo/statcan_cma_ethnicity.csv) — 2021 Census (Statistics Canada)
 - [Population Groups by Neighbourhood / census tract — incl. White & Indigenous (CSV)](../data/geo/statcan_ct_ethnicity_2021.csv) — 2021 Census (Statistics Canada)

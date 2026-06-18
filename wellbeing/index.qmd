@@ -21,7 +21,7 @@ average of responses to the Cantril ladder question, where people rate their
 current life from 0 (worst possible) to 10 (best possible). Scores shown are
 three-year averages.
 
-## Happiness Score (Life Evaluation)
+## Happiness score (life evaluation)
 
 ```{python}
 #| echo: false
@@ -39,7 +39,7 @@ else:
     print("Happiness data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest Happiness Score: Ranked
+## Latest happiness score: ranked
 
 ```{python}
 #| echo: false
@@ -51,7 +51,7 @@ if os.path.exists(whr_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## What Underlies the Score
+## What underlies the score
 
 The World Happiness Report uses statistical analysis to estimate how much of each
 country's score is associated with six factors plus a baseline ("Dystopia +
@@ -109,7 +109,7 @@ and homicide rate, the specific kinds of crime people actually experience and ho
 often they get solved, and how metropolitan areas and Toronto neighbourhoods
 compare, see **[Crime & Safety](crime-safety.qmd)**.
 
-## Download Data
+## Download data
 
 - [Happiness Scores & Factor Decomposition (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)
 

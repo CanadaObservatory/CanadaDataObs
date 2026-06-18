@@ -18,7 +18,7 @@ from pipeline.config import get_data_date
 from pipeline.charts import peer_comparison_line, ranked_bar
 ```
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -28,7 +28,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("fiscal").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Government Gross Debt
+## Government gross debt
 
 General government gross financial liabilities as a percentage of GDP — the broad measure of what all levels of government owe. This gross figure is higher than the "net" debt often cited in Canadian budgets, which subtracts financial assets the government holds.
 
@@ -48,7 +48,7 @@ else:
     print("Government debt data not yet available. Run the data pipeline.")
 ```
 
-## Latest Government Gross Debt: Ranked
+## Latest government gross debt: ranked
 
 ```{python}
 #| echo: false
@@ -60,7 +60,7 @@ if os.path.exists(debt_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Government Net Debt: Ranked
+## Government net debt: ranked
 
 Net debt subtracts the financial assets governments hold (such as public-pension reserves) from gross debt. On this measure Canada's general-government debt is far lower than its gross figure and among the lowest in the peer group — a different picture from the gross-debt and deficit headlines. Comparison is against the OECD peer set, not only the G7. (Norway is omitted: its sovereign wealth fund puts net debt at roughly −340% of GDP, far off this scale.)
 
@@ -78,7 +78,7 @@ else:
     print("Net debt data not yet available. Run the data pipeline.")
 ```
 
-## Government Budget Balance
+## Government budget balance
 
 General government net lending as a percentage of GDP. Positive values are surpluses; negative values are deficits. The dotted line marks a balanced budget (zero).
 
@@ -99,7 +99,7 @@ else:
     print("Government balance data not yet available. Run the data pipeline.")
 ```
 
-## Latest Government Budget Balance: Ranked
+## Latest government budget balance: ranked
 
 ```{python}
 #| echo: false
@@ -111,7 +111,7 @@ if os.path.exists(bal_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Government Revenue
+## Government revenue
 
 Total general-government revenue as a share of GDP — taxes plus other receipts, across all levels of government. It is the broadest measure of the size of government's claim on the economy.
 
@@ -130,7 +130,7 @@ else:
     print("Government revenue data not yet available. Run the data pipeline.")
 ```
 
-## Latest Government Revenue: Ranked
+## Latest government revenue: ranked
 
 ```{python}
 #| echo: false
@@ -142,7 +142,7 @@ if os.path.exists(rev_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Government Interest Costs
+## Government interest costs
 
 Net interest paid by government as a share of GDP — the cost of servicing public debt. Interest is a first charge on revenue: the more that goes to creditors, the less is available for programs or tax relief at a given level of revenue, so lower is less constraining.
 
@@ -161,7 +161,7 @@ else:
     print("Government interest data not yet available. Run the data pipeline.")
 ```
 
-## Latest Government Interest Costs: Ranked
+## Latest government interest costs: ranked
 
 ```{python}
 #| echo: false
@@ -173,7 +173,7 @@ if os.path.exists(int_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Defence Spending
+## Defence spending
 
 Military expenditure as a share of GDP. NATO members have agreed to a guideline of spending at least **2% of GDP** on defence (shown as a dashed line). The measure is shown for all 17 peers — NATO and non-NATO alike — for comparison.
 
@@ -195,7 +195,7 @@ else:
     print("Defence spending data not yet available. Run the data pipeline.")
 ```
 
-## Latest Defence Spending: Ranked
+## Latest defence spending: ranked
 
 ```{python}
 #| echo: false
@@ -209,7 +209,7 @@ if os.path.exists(def_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Download Data
+## Download data
 
 - [Government Gross Debt (CSV)](../data/fiscal/oecd_govt_debt.csv) — OECD Economic Outlook
 - [Government Budget Balance (CSV)](../data/fiscal/oecd_govt_balance.csv) — OECD Economic Outlook

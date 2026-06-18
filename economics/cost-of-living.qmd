@@ -19,7 +19,7 @@ import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
 ```
 
-## Inflation (CPI, Year-over-Year)
+## Inflation (CPI, year-over-year)
 
 Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
 
@@ -83,7 +83,7 @@ except FileNotFoundError:
     print("CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Headline, Core, and Food
+## Headline, core, and food
 
 Three views of the same question. **All-items** is the headline rate; **CPI-trim** is the Bank of Canada's preferred *core* measure, which strips out the most volatile price movements to show the underlying trend; **food** is the most-felt component, and has generally run hotter than overall inflation.
 
@@ -127,7 +127,7 @@ except FileNotFoundError:
     print("Core/food CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## The Policy Rate vs. Inflation
+## The policy rate vs. inflation
 
 The Bank of Canada raises its **policy interest rate** to cool inflation and lowers it to support the economy — so the two move together over time. This pairs the policy rate (the **Bank Rate**, the consistent series back to 1935) with year-over-year inflation, both on one scale. The early-1980s spike — the rate above **20%** against double-digit inflation — and the 2022–23 tightening cycle stand out. The grey band is the 1–3% inflation target.
 
@@ -169,14 +169,14 @@ except FileNotFoundError:
     print("Policy-rate data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Other Cost Pressures
+## Other cost pressures
 
 Inflation is only part of the cost-of-living picture. See also:
 
 - [Housing](../housing/) — house prices, the price-to-income gap, rent, and household debt
 - [Income & Inequality](../income/) — wages, median income, and low-income and food-insecurity rates
 
-## Download Data
+## Download data
 
 - [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada 18-10-0004-01
 - [Food CPI (CSV)](../data/economics/statcan_food_cpi.csv) — Statistics Canada 18-10-0004-01

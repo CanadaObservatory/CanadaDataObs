@@ -188,7 +188,7 @@ else:
     print("Wildfire and/or PM2.5 data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [Air-pollutant concentrations, indexed (CSV)](../data/environment/cesi_air_quality.csv) — ECCC CESI air-quality indicators (NAPS)
 - [Air-pollutant emissions, national (CSV)](../data/environment/apei_emissions.csv) — ECCC Air Pollutant Emissions Inventory (APEI)

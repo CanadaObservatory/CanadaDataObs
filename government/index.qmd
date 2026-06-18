@@ -35,7 +35,7 @@ from pipeline.charts import (peer_comparison_line, ranked_bar, single_line,
                              single_line_multi, lines_over_time, stacked_area, category_bar)
 ```
 
-## Employment by Level of Government
+## Employment by level of government
 
 The chart below counts **jobs in public administration** — the core bureaucracy of
 each level of government — back to 1997. Local government (municipalities and
@@ -64,7 +64,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## The Bureaucracy vs. the Whole Public Sector
+## The bureaucracy vs. the whole public sector
 
 "Government workers" are far more than the bureaucracy. The Labour Force Survey
 counts everyone whose employer is a government, a public institution, or a
@@ -129,7 +129,7 @@ local split is the chart above. (This replaces an older institutional-sector tab
 that Statistics Canada discontinued in 2011.)
 :::
 
-## How Canada Compares
+## How Canada compares
 
 Across the OECD, the share of total employment that works for **general
 government** (all levels combined, including public health and education staff)
@@ -169,7 +169,7 @@ Canada Revenue Agency and Parks Canada), measured as a headcount on March 31 eac
 year. It **excludes** the Canadian Armed Forces and RCMP regular and civilian
 members, who are reported under their own frameworks.
 
-## Total Headcount Over Time
+## Total headcount over time
 
 The federal public service has moved in waves: growth through the late 2000s, a
 contraction after the 2012 budget's spending review, and renewed growth since,
@@ -206,7 +206,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## Which Parts of the Public Service Grew
+## Which parts of the public service grew
 
 The public service added roughly **75,000 people between 2010 and 2025**. The
 increase was concentrated in **benefits and service delivery** — Employment and
@@ -246,7 +246,7 @@ Services Canada**) shift staff between departments and so do not appear as "grow
 here.
 :::
 
-## Where Federal Public Servants Work
+## Where federal public servants work
 
 The largest federal employers are the service-delivery and operational
 organizations — the Canada Revenue Agency, Employment and Social Development
@@ -270,7 +270,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## The Changing Shape of the Workforce
+## The changing shape of the workforce
 
 Over time the federal public service has shifted toward more senior,
 knowledge-intensive work. One measure available as a consistent series is the
@@ -318,7 +318,7 @@ executive workforce grew **56%** over that period — consistent with the trend 
 the chart above.
 :::
 
-## Who the Public Service Is
+## Who the public service is
 
 ```{python}
 #| echo: false
@@ -383,7 +383,7 @@ if demo is not None:
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Download Data
+## Download data
 
 - [Government employment by level (CSV)](../data/government/statcan_govt_employment_by_level.csv) — Statistics Canada 36-10-0489-01
 - [Public sector by institutional sector (CSV)](../data/government/statcan_public_sector_composition.csv) — Statistics Canada 10-10-0025-01 (archived)

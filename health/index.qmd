@@ -35,7 +35,7 @@ def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, top
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -45,7 +45,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("health").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Life Expectancy at Birth
+## Life expectancy at birth
 
 Life expectancy at birth (both sexes) — the average number of years a newborn
 could expect to live if current mortality rates held. It is the most widely used
@@ -67,7 +67,7 @@ else:
     print("Life expectancy data not yet available. Run the data pipeline.")
 ```
 
-## Latest Life Expectancy: Ranked
+## Latest life expectancy: ranked
 
 ```{python}
 #| echo: false
@@ -79,7 +79,7 @@ if os.path.exists(le_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## The Recent Decline
+## The recent decline
 
 For most of the post-war era, life expectancy rose almost every year. That changed in 2020: Canada's fell from 82.2 years in 2019 to 81.3 in 2022 — the first sustained decline in decades — pushed down by COVID-19 and the [drug-toxicity crisis](substance-use.qmd). It edged back to 81.7 in 2023. The fall was milder than in the United States, shown here for contrast, where the decline was steeper and recovery slower.
 
@@ -104,7 +104,7 @@ if os.path.exists(le_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Population Health & Risk Factors
+## Population health & risk factors
 
 Life expectancy summarises the overall outcome; the measures here look upstream — at the behaviours and conditions that shape it, and at mental health. They come from the World Bank's compilation of World Health Organization, UN and International Diabetes Federation data, so all 17 peers are reported on a common basis. By default each chart shows Canada, the named comparators and the peer average; use the legend to add the other peers.
 
@@ -119,7 +119,7 @@ show_peer_line("data/health/worldbank_suicide.csv", "suicide_rate",
     topical=["KOR"])
 ```
 
-## Mental Health
+## Mental health
 
 The share of Canadians aged 12 and over rating their own mental health **very good
 or excellent** has fallen from 72% in 2015 to 55% in 2022 — one of the clearest
@@ -142,7 +142,7 @@ else:
     print("Mental-health data not yet available. Run the data pipeline.")
 ```
 
-## Tobacco & Alcohol
+## Tobacco & alcohol
 
 Two everyday risk factors on one chart — use the **Substance** menu (top right) to switch between them. Canada has one of the *lowest* tobacco-use rates in the peer group, around 12% of adults — less than half the heaviest-smoking European peers — and sits near the middle of the pack on alcohol (litres of pure alcohol per person aged 15+). The two use different units, so the y-axis rescales when you switch.
 
@@ -189,7 +189,7 @@ if os.path.exists(dm_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Maternal Mortality
+## Maternal mortality
 
 Maternal deaths per 100,000 live births (modelled estimates on a consistent international basis). Most peers cluster at very low ratios — a peer median around 4 — but Canada, at roughly 12, sits near the high end of the group; only the United States is higher.
 
@@ -199,7 +199,7 @@ show_peer_line("data/health/worldbank_maternal_mortality.csv", "maternal_mortali
     "Per 100,000 live births", "World Bank (WHO/UNICEF/UNFPA/World Bank/UNDESA)")
 ```
 
-## Childhood Vaccination
+## Childhood vaccination
 
 The share of children aged 12–23 months immunized against measles (first dose).
 Because measles is so contagious, roughly **95%** coverage — the dashed line — is
@@ -233,7 +233,7 @@ if os.path.exists(vac_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Health Spending
+## Health spending
 
 Current expenditure on health as a percentage of GDP — covering both public and
 private spending. It measures the share of the economy devoted to health care.
@@ -254,7 +254,7 @@ else:
     print("Health spending data not yet available. Run the data pipeline.")
 ```
 
-## Latest Health Spending: Ranked
+## Latest health spending: ranked
 
 ```{python}
 #| echo: false
@@ -266,7 +266,7 @@ if os.path.exists(hs_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Health Spending per Person
+## Health spending per person
 
 The same spending expressed **per person**, in US dollars adjusted for purchasing
 power (PPP) so amounts are comparable across countries. This is often more
@@ -290,7 +290,7 @@ else:
     print("Health spending per capita data not yet available. Run the data pipeline.")
 ```
 
-## Latest Health Spending per Person: Ranked
+## Latest health spending per person: ranked
 
 ```{python}
 #| echo: false
@@ -303,7 +303,7 @@ if os.path.exists(hspc_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Pharmaceutical Spending per Person
+## Pharmaceutical spending per person
 
 Spending on retail pharmaceuticals and other medical non-durables (SHA function
 HC.5.1), in US dollars at purchasing-power parity per person. Canada is among the
@@ -334,7 +334,7 @@ if os.path.exists(rx_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Universal Health Coverage
+## Universal health coverage
 
 Spending measures the money going in; the WHO's universal-health-coverage service-coverage index (0–100) measures how fully a population actually receives the essential health services it needs. Canada scores around 92 — among the highest in the peer group, reflecting broad access notwithstanding the wait-time pressures shown below.
 
@@ -344,7 +344,7 @@ show_peer_line("data/health/worldbank_uhc_index.csv", "uhc_index",
     "Index (0–100)", "World Bank / WHO Universal Health Coverage")
 ```
 
-## Out-of-Pocket Costs
+## Out-of-pocket costs
 
 The share of total health spending that households pay directly, out of their own pockets — a common gauge of financial protection, where lower means more care is covered by public or pooled funding. At roughly 15%, Canada sits mid-pack: lower than Switzerland or South Korea, higher than France or the Netherlands.
 
@@ -354,11 +354,11 @@ show_peer_line("data/health/worldbank_health_oop.csv", "oop_pct",
     "% of current health spending", "World Bank / WHO Global Health Expenditure Database")
 ```
 
-## Health-System Capacity
+## Health-system capacity
 
 Spending and outcomes describe the system's size and results; capacity describes what it physically has to work with — beds, doctors, and diagnostic equipment. These inputs bear directly on access and wait times, and are a common lens for discussions of the Canadian system.
 
-## Hospital Beds
+## Hospital beds
 
 Total hospital beds per 1,000 population (all care functions).
 
@@ -378,7 +378,7 @@ else:
     print("Hospital beds data not yet available. Run the data pipeline.")
 ```
 
-## Latest Hospital Beds: Ranked
+## Latest hospital beds: ranked
 
 ```{python}
 #| echo: false
@@ -390,7 +390,7 @@ if os.path.exists(beds_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Practising Physicians
+## Practising physicians
 
 Practising physicians per 1,000 population.
 
@@ -410,7 +410,7 @@ else:
     print("Physician data not yet available. Run the data pipeline.")
 ```
 
-## Latest Practising Physicians: Ranked
+## Latest practising physicians: ranked
 
 ```{python}
 #| echo: false
@@ -422,7 +422,7 @@ if os.path.exists(phys_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Practising Nurses
+## Practising nurses
 
 Practising nurses per 1,000 population. Nurses are the largest part of the health workforce, so this is a central measure of system capacity alongside physicians and beds.
 
@@ -441,7 +441,7 @@ else:
     print("Nurses data not yet available. Run the data pipeline.")
 ```
 
-## Latest Practising Nurses: Ranked
+## Latest practising nurses: ranked
 
 ```{python}
 #| echo: false
@@ -453,7 +453,7 @@ if os.path.exists(nurses_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## MRI Units
+## MRI units
 
 Magnetic resonance imaging (MRI) units per million population — a measure of diagnostic-imaging capacity.
 
@@ -473,7 +473,7 @@ else:
     print("MRI data not yet available. Run the data pipeline.")
 ```
 
-## Latest MRI Units: Ranked
+## Latest MRI units: ranked
 
 ```{python}
 #| echo: false
@@ -485,7 +485,7 @@ if os.path.exists(mri_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Long-Term Care Beds
+## Long-term care beds
 
 Beds in long-term care facilities and the long-term-care wards of hospitals, per
 1,000 people aged 65 and over — the institutional capacity behind aging-population
@@ -516,7 +516,7 @@ if os.path.exists(ltc_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## A Regular Health-Care Provider
+## A regular health-care provider
 
 The share of Canadians aged 12 and over who report having a **regular health-care
 provider** — a family doctor or nurse practitioner they usually see. In 2022 it was
@@ -540,7 +540,7 @@ else:
     print("Regular-provider data not yet available. Run the data pipeline.")
 ```
 
-## Wait Times for Priority Procedures
+## Wait times for priority procedures
 
 The share of patients treated within the agreed **pan-Canadian benchmark** time, for five priority procedures (Canada-wide). Higher is better — more patients treated on time. The pandemic sharply cut access to scheduled surgeries (hip, knee, cataract) in 2020, and most have only partly recovered since; emergency hip-fracture repair and radiation therapy held up. Unlike most charts on this page, this is a **Canada-only** series — there is no comparable peer feed — and the Canadian Institute for Health Information (CIHI) publishes it **annually each spring**, so it is refreshed once a year rather than weekly with the rest of the site.
 
@@ -561,7 +561,7 @@ else:
 
 The capacity measures above — beds, physicians, and imaging units — are the closest internationally comparable proxies; the benchmark series here adds the domestic, access-focused view that the public most directly experiences.
 
-## Download Data
+## Download data
 
 - [Life Expectancy at Birth (CSV)](../data/health/oecd_life_expectancy.csv) — OECD Health Statistics
 - [Health Spending, % of GDP (CSV)](../data/health/oecd_health_spending_gdp.csv) — OECD Health Expenditure (SHA)

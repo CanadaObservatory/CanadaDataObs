@@ -33,7 +33,7 @@ if os.path.exists(tuition_path):
                   for row in tu.itertuples()]
 ```
 
-## Undergraduate Tuition Over Time
+## Undergraduate tuition
 
 Average undergraduate tuition for Canadian students, for Canada and the three provinces home to most of the country's largest universities. Quebec (and Newfoundland) hold tuition well below the national average; Ontario sits above it. Use the dropdown to switch between **real** (inflation-adjusted, constant dollars) and **nominal** (current dollars) — real terms isolate increases beyond general inflation.
 
@@ -55,7 +55,7 @@ else:
     print("Tuition data not yet available. Run the data pipeline.")
 ```
 
-## Domestic vs. International Tuition
+## Domestic vs. international tuition
 
 International students pay several times what domestic students do, and that gap has widened sharply — international undergraduate fees have far outpaced inflation, becoming a significant revenue source for universities. Use the dropdown to switch between real (constant) and nominal (current) dollars (Canada-wide).
 
@@ -75,7 +75,7 @@ if tu is not None:
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Undergraduate Tuition by Field of Study
+## Undergraduate tuition by field of study
 
 What students pay varies widely by program. Professional fields — dentistry, medicine, law, pharmacy — sit far above the average, while education and the humanities are lowest. (Canada-wide, Canadian undergraduate students, latest year.)
 
@@ -96,7 +96,7 @@ else:
     print("Tuition-by-field data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [University tuition by level & province (CSV)](../data/education/statcan_tuition.csv) — Statistics Canada 37-10-0045-01
 - [Undergraduate tuition by field of study (CSV)](../data/education/statcan_tuition_by_field.csv) — Statistics Canada 37-10-0003-01

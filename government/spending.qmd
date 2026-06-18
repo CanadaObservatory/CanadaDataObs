@@ -23,7 +23,7 @@ from pipeline.charts import (single_line, lines_over_time, stacked_area,
                              category_bar, category_bar_views)
 ```
 
-## Revenue and Spending Over Time
+## Revenue and spending
 
 Measured against the size of the economy, federal revenue and spending have been
 relatively stable for decades — typically in the mid-to-high teens as a share of
@@ -71,7 +71,7 @@ if os.path.exists(fin_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## The Budget Balance, by Era
+## The budget balance, by era
 
 The gap between revenue and spending is the federal **budget balance** — a surplus when revenue exceeds spending, a deficit when it falls short. This view makes the balance explicit as a share of GDP, with the periods in office of successive federal governments shaded for reference. (Shares of GDP begin in 1981; fiscal years are matched to governments approximately.)
 
@@ -114,7 +114,7 @@ if os.path.exists(fin_path):
     figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## What the Money Is Spent On — by Type
+## What the money is spent on — by type
 
 The federal government's own statement of operations splits spending by economic
 type. **Transfers dominate**: grants (largely to other governments and
@@ -163,7 +163,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## Which Departments the Money Flows Through
+## Which departments the money flows through
 
 Ranking departments by spending gives a very different picture from ranking them
 by **headcount** (on the [employment page](index.qmd)). The Department of Finance
@@ -220,7 +220,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## What Governments Spend On — by Function
+## What governments spend on — by function
 
 Finally, a functional view: what the public sector funds, classified by purpose.
 Social protection (pensions, benefits), health, and education are the largest
@@ -251,7 +251,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## Download Data
+## Download data
 
 - [Federal revenue, spending & balance, 1961– (CSV)](../data/government/statcan_federal_finance.csv) — Statistics Canada 36-10-0477-01 / 36-10-0222-01
 - [Federal expense by economic type (CSV)](../data/government/statcan_federal_expense_by_type.csv) — Statistics Canada 10-10-0016-01

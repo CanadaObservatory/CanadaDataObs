@@ -14,7 +14,7 @@ from pipeline.charts import (single_line, single_bar, peer_comparison_line,
                              ranked_bar, population_pyramid)
 ```
 
-## Canada's Population Over Time
+## Canada's population over time
 
 Canada's population has grown steadily since the mid-20th century. This chart shows quarterly population estimates for Canada as a whole.
 
@@ -34,7 +34,7 @@ fig = single_line(canada, "date", "pop_m", title="", yaxis_title="Population (mi
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Population by Province and Territory
+## Population by province and territory
 
 Select provinces and territories to compare using the legend. Click a name to toggle it; double-click to isolate one. The three territories appear as low, near-flat lines: together they are home to under 0.13 million people, against more than 15 million in Ontario.
 
@@ -106,7 +106,7 @@ fig.update_layout(
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Population Growth Rate
+## Population growth rate
 
 Year-over-year percentage change in Canada's quarterly population. This is derived from the same quarterly estimates shown above — each quarter is compared to the same quarter one year earlier.
 
@@ -126,7 +126,7 @@ fig = single_bar(canada_growth, "date", "pop_yoy_pct", title="",
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Where Canada's Population Growth Comes From
+## Where Canada's population growth comes from
 
 Population growth breaks into three parts: **natural increase** (births minus deaths), **net permanent immigration** (new permanent residents minus people leaving), and **net temporary residents** (the non-permanent population — people on work and study permits, plus asylum claimants). Stacking them shows what actually drove growth each year; the surge of the early 2020s was overwhelmingly temporary residents, and that component has since turned negative. **Use the dropdown to isolate a single component** or view all three stacked. For a sense of scale, a net change of about 170,000 people in a year is roughly a city the size of Guelph, Kingston, or Greater Sudbury.
 
@@ -176,7 +176,7 @@ else:
     print("Population components data not yet available. Run the data pipeline.")
 ```
 
-## Non-Permanent Residents
+## Non-permanent residents
 
 The number of non-permanent residents — people in Canada on work or study permits, or as asylum claimants and protected persons — has risen sharply in recent years. It is central to current debates about the pace of population growth, housing demand, and the capacity of public services. The line shows the total across all permit types.
 
@@ -197,7 +197,7 @@ else:
     print("Non-permanent residents data not yet available. Run the data pipeline.")
 ```
 
-## Age Structure
+## Age structure
 
 How old is Canada? The pyramid below shows the full age distribution — every single
 year of age, men to the left, women to the right. **Drag the slider** to watch half a
@@ -231,7 +231,7 @@ else:
     print("Age-structure data not yet available. Run the data pipeline.")
 ```
 
-### Median Age
+### Median age
 
 Half of Canadians are older than this line. The median age rose from about 26 in 1971
 to about 41 today — driven by longer lives and smaller families. The slight dip in
@@ -250,7 +250,7 @@ if os.path.exists(ages_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-### Aging Among Peer Countries
+### Aging among peer countries
 
 The old-age dependency ratio — people 65 and over per 100 people of working age
 (15–64) — is the standard gauge of how the population's weight is shifting onto
@@ -313,7 +313,7 @@ if os.path.exists(fert_path):
     fig.show(config={"displaylogo": False})
 ```
 
-### Median Age by Neighbourhood
+### Median age by neighbourhood
 
 Where do the young and the old actually live? A census-tract map of **median age**
 — with each neighbourhood's full age breakdown in the hover — is on its own page
@@ -325,7 +325,7 @@ It pairs naturally with the [median household income](../income/neighbourhoods.q
 and [home value](../housing/neighbourhoods.qmd) maps — the same census tracts, so
 you can flip between who lives somewhere and what living there costs.
 
-## Moving Within Canada
+## Moving within Canada
 
 Beyond immigration, Canadians relocate between provinces — and the direction of
 that flow says a lot about relative job markets and housing costs. The bars show
@@ -349,7 +349,7 @@ else:
     print("Interprovincial migration data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01
 - [Non-Permanent Residents (CSV)](../data/population/statcan_temp_residents.csv) — Statistics Canada Table 17-10-0121-01

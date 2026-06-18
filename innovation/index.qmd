@@ -38,7 +38,7 @@ else:
     print("Business R&D data not yet available. Run the data pipeline.")
 ```
 
-## Latest Business R&D: Ranked
+## Latest business R&D: ranked
 
 ```{python}
 #| echo: false
@@ -50,6 +50,6 @@ if os.path.exists(berd_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Download Data
+## Download data
 
 - [Business R&D, BERD (CSV)](../data/science/oecd_berd.csv) — OECD MSTI

@@ -22,7 +22,7 @@ from pipeline.config import (
 from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 ```
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -32,7 +32,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("housing").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Real House Prices
+## Real house prices
 
 Inflation-adjusted ("real") house price index, set to 100 in 2015. Because it
 removes general inflation, it shows how house prices have moved relative to the
@@ -55,7 +55,7 @@ else:
     print("Real house price data not yet available. Run the data pipeline.")
 ```
 
-## Real House Price Growth Since 2015: Ranked
+## Real house price growth since 2015: ranked
 
 Each country's index equals 100 in 2015, so this ranks **how much real house prices have risen since 2015** — not which country's housing is most expensive today. A rebased index can't show price *levels*; it shows change from a common starting point.
 
@@ -69,7 +69,7 @@ if os.path.exists(path):
     fig.show(config={"displaylogo": False})
 ```
 
-## House Prices Relative to Incomes
+## House prices relative to incomes
 
 The price-to-income ratio divides house prices by household disposable income
 (indexed to 2015 = 100). It is a standard affordability gauge: when the line
@@ -92,7 +92,7 @@ else:
     print("Price-to-income data not yet available. Run the data pipeline.")
 ```
 
-## Change in Price-to-Income Since 2015: Ranked
+## Change in price-to-income since 2015: ranked
 
 This series is also rebased to 2015 = 100, so it ranks the **change** in the price-to-income ratio since 2015 — i.e. how much affordability has shifted — not the level of the ratio across countries.
 
@@ -106,7 +106,7 @@ if os.path.exists(path2):
     fig.show(config={"displaylogo": False})
 ```
 
-## New Housing Prices in Canada
+## New housing prices in Canada
 
 Statistics Canada's New Housing Price Index tracks changes in builders' selling
 prices of new homes (the "total" of house and land), monthly. This is a
@@ -126,7 +126,7 @@ else:
     print("New Housing Price Index not yet available. Run the data pipeline.")
 ```
 
-## Home Prices vs. Incomes
+## Home prices vs. incomes
 
 House prices and household incomes, both in **real (inflation-adjusted) terms** and indexed to 2000 = 100 so they share one scale. Plotting the two paths together shows the affordability gap directly: the wider they spread, the more home prices have outrun what households actually earn. The price line is the OECD's real house-price index for Canada (which reflects the resale market); the income line is Statistics Canada's median after-tax income, also in constant dollars. (The New Housing Price Index isn't used here — it tracks builders' prices for *new* homes, which have lagged the resale run-up.)
 
@@ -169,7 +169,7 @@ else:
     print("Price/income data not yet available. Run the data pipeline.")
 ```
 
-## Actual Home Prices by City and Type
+## Actual home prices by city and type
 
 The charts above use index and proxy measures because actual transaction prices are tightly licensed. The figures in this section use the **CREA MLS® Home Price Index** — the real estate industry's benchmark for the price of a "typical" home in each market — **published here with CREA's written permission for educational use**. Unlike the census's owner-estimated values or the New Housing Price Index, this tracks actual resale prices and breaks them out by dwelling type.
 
@@ -188,7 +188,7 @@ except Exception as e:
     print("CREA price data temporarily unavailable.")
 ```
 
-## Detached House Prices Over Time, by City
+## Detached house prices over time, by city
 
 How the benchmark price of a detached (single-family) home has moved in each major market — the run-up that the index and proxy charts above can only hint at. Drag the slider to focus on a period.
 
@@ -200,7 +200,7 @@ else:
     print("CREA price data temporarily unavailable.")
 ```
 
-## How Many Years of Income a Home Costs
+## How many years of income a home costs
 
 Dividing the national benchmark price by median after-tax income gives an intuitive affordability gauge: how many years of a typical household's after-tax income it would take to buy the typical home. (The benchmark is deflated to 2024 dollars via CPI so it is comparable with the inflation-adjusted income series.) The ratio has climbed from roughly **5.7× in 2005 to 9.3× in 2024**.
 
@@ -212,7 +212,7 @@ else:
     print("CREA price data temporarily unavailable.")
 ```
 
-## Home Values by City
+## Home values by city
 
 Sale prices by city aren't openly available, but the census asks owners to estimate their home's value — a usable proxy. This maps **median dwelling value** across metropolitan areas (2021 Census). **Zoom and pan to your area.** Owner-estimated, 2021; city-level (CMA/CA).
 
@@ -244,7 +244,7 @@ else:
     print("Home-value map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Affordability by City (home value ÷ income)
+## Affordability by city (home value ÷ income)
 
 Home value divided by median household income — roughly how many years of a typical household's income a typical home costs. It turns the price map into an *affordability* map: the same $1M home is far less attainable where incomes are lower. **Zoom and pan to your area.** (2021 Census; owner-estimated value ÷ median household income.)
 
@@ -279,7 +279,7 @@ else:
     print("Rent data not yet available. Run the data pipeline.")
 ```
 
-## Housing Starts
+## Housing starts
 
 The number of new homes on which construction began, monthly. Starts are the clearest gauge of new housing *supply* — the other side of the affordability story from the prices, rents, and demand above. Whether new supply keeps pace with population growth is central to the debate.
 
@@ -296,7 +296,7 @@ else:
     print("Housing starts data not yet available. Run the data pipeline.")
 ```
 
-## Rental Vacancy Rate
+## Rental vacancy rate
 
 The share of purpose-built rental apartments sitting empty, across census metropolitan areas. A low vacancy rate signals a tight rental market with little slack — upward pressure on rents and harder searches for tenants.
 
@@ -313,7 +313,7 @@ else:
     print("Vacancy rate data not yet available. Run the data pipeline.")
 ```
 
-## Household Debt
+## Household debt
 
 Household debt as a percentage of net disposable income. A value of 180% means
 households owe $1.80 for every dollar of annual after-tax income. It captures how
@@ -336,7 +336,7 @@ else:
     print("Household debt data not yet available. Run the data pipeline.")
 ```
 
-## Latest Household Debt: Ranked
+## Latest household debt: ranked
 
 ```{python}
 #| echo: false
@@ -348,7 +348,7 @@ if os.path.exists(debt_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Borrowing Costs: Prime & Mortgage Rates
+## Borrowing costs: prime & mortgage rates
 
 What households pay to borrow. The **prime rate** moves with the Bank of Canada's policy rate and underpins variable-rate mortgages and lines of credit; the **conventional 5-year mortgage rate** is the benchmark for the most common fixed term (and tracks the 5-year government bond yield below).
 
@@ -380,7 +380,7 @@ else:
     print("Prime/mortgage rate data not yet available. Run the data pipeline.")
 ```
 
-## Government Bond Yields by Term
+## Government bond yields
 
 What investors charge to lend to the Government of Canada at each term — the benchmark fixed borrowing costs are priced from. **Use the dropdown to switch term:** the 2-, 3- and 5-year yields map onto the common fixed-mortgage terms (the **5-year** especially drives 5-year fixed mortgage rates), while the 10-year and long-term reflect longer-horizon expectations.
 
@@ -406,7 +406,7 @@ else:
     print("Bond-yield data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [Real House Price Index (CSV)](../data/housing/oecd_house_price_real.csv) — OECD Analytical House Prices
 - [Price-to-Income Ratio (CSV)](../data/housing/oecd_house_price_income.csv) — OECD Analytical House Prices

@@ -10,7 +10,7 @@ import pandas as pd
 from pipeline.charts import choropleth_groups_map
 ```
 
-## The Language of Home, by Neighbourhood
+## The language of home, by neighbourhood
 
 The language each household **speaks most often at home** — the census's most
 lived-in language measure — mapped by **census tract** (2021). **Use the dropdown
@@ -49,6 +49,6 @@ else:
     print("Language map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Download data
 
 - [Home Language by Census Tract (CSV)](../data/geo/statcan_ct_language_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007

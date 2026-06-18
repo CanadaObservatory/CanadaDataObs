@@ -10,7 +10,7 @@ import pandas as pd
 from pipeline.charts import choropleth_groups_map
 ```
 
-## Citizenship & Nativity, by Neighbourhood
+## Citizenship & nativity, by neighbourhood
 
 Where the **Canadian-born**, **naturalized citizens** (immigrants who have become
 citizens), and **non-citizens** live, by **census tract** (2021). **Use the
@@ -54,6 +54,6 @@ else:
     print("Citizenship map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Download data
 
 - [Citizenship & Nativity by Census Tract (CSV)](../data/geo/statcan_ct_citizenship_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007

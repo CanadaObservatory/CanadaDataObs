@@ -442,7 +442,7 @@ show_spiral("Eureka", "Eureka · High Arctic")
 
 *Same scale on both, 1948 onward (when the Arctic stations begin). Full monthly anomalies — no smoothing — from the homogenized record (to 2020); the green ring is the 1961–1990 normal; each loop is coloured by that year's average departure. Source: ECCC AHCCD, via the GeoMet API.*
 
-## Download Data
+## Download data
 
 - [National temperature departure (CSV)](../data/environment/cesi_temperature.csv) — ECCC CESI (vs 1961–1990)
 - [Regional warming trends (CSV)](../data/environment/cesi_ctvb_regional.csv) — ECCC Climate Trends and Variations Bulletin

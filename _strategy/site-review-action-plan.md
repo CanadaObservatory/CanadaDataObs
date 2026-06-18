@@ -38,8 +38,12 @@ Canada + US + Australia + Germany + OECD average** (Sweden/UK coloured but unloa
   padded). *(§199, §203, §254, §300, §313, §338)*
 - ☐ **G7 "Data current to" prominence** — a clear data-currency line near each chart
   title (not only in the small source text), esp. maps + CREA. *(§134, §178, §208, §230)*
-- ⟳ **G8 Title policy** — sentence case site-wide (LOCKED); shorten over-long titles; drop
-  redundant "Over Time" / "by Term". *(§216, §330, §427, §439, §502, §525)*
+- ☑ **G8 Title policy** — 179 `##`/`###` headings → sentence case site-wide via a reviewed
+  script (proper nouns/acronyms preserved: Canada, GDP, CO2, US, Gini, PM2.5, R&D, USD…;
+  navigational area-card links + page `title:` fields left as-is). 3 owner-flagged shortenings
+  done (tuition / bond-yields / revenue-spending; no inbound links broke). Heading IDs are
+  case-insensitive in Quarto so internal links still resolve. Remaining renames (elevation
+  §439, air-quality §502) → per-section pass. *(§216, §330, §427)*
 - ☐ **G9 Map colourbar titles** — short, split across 2 lines, to reclaim map width;
   general rule. *(§190, §195, §232, §444, §470)*
 - ☐ **G10 Bar-vs-line guideline** — single-series counts/rates default to bars (NPR,
@@ -115,6 +119,10 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   cause was a long single line (vertical spacing can't fix a horizontal clip). Added
   `_wrap` (auto `<br>`) + `_map_source_note` (yanchor=top), b→80; the 6 map builders now
   wrap. Screenshot-verified on the diversity tract map (worst case: 5 lines, no clip).
+- **2026-06-18 #9 (G8 — sentence-case titles):** 179 `##`/`###` headings → sentence case via
+  a reviewed script (acronyms/proper nouns preserved); 3 owner shortenings
+  (tuition / bond-yields / revenue-spending). Verified on economics/housing/government/education.
+  Source done; the other ~18 affected pages' _site refresh on the next full render.
 - **2026-06-18 #8 (finish G1 — owner "(1)"):** trimmed 16 other-section map source notes
   (income/housing/geography) to provenance + essential caveats (owner-estimated, the
   affordability ratio, permafrost ~1995, bubble sizing). Verified the two stragglers:

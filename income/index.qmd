@@ -20,7 +20,7 @@ from pipeline.config import (
 from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 ```
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -30,7 +30,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("income").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Median After-Tax Income in Canada
+## Median after-tax income in Canada
 
 Median after-tax income of **economic families and unattached individuals**
 (Statistics Canada's income unit — *not* equivalized per person), in 2024 constant
@@ -68,7 +68,7 @@ and shifts in market income and transfers — read it as a one-off, not a durabl
 living standards.
 :::
 
-## Median Household Income by City
+## Median household income by city
 
 Median household total income by metropolitan area (2021 Census). For the full **neighbourhood-level** view — every census tract, where you can zoom right to your own street — open the dedicated map (kept on its own page so this one stays fast to load):
 
@@ -93,7 +93,7 @@ else:
     print("Income map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Average Annual Wage (Real)
+## Average annual wage (real)
 
 Average annual wages converted to US dollars at purchasing power parity and held
 in constant prices, so levels can be compared across countries and over time.
@@ -114,7 +114,7 @@ else:
     print("Average wage data not yet available. Run the data pipeline.")
 ```
 
-## Latest Average Annual Wage: Ranked
+## Latest average annual wage: ranked
 
 ```{python}
 #| echo: false
@@ -126,7 +126,7 @@ if os.path.exists(wage_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Real Household Disposable Income per Capita
+## Real household disposable income per capita
 
 Real (inflation-adjusted) household disposable income per person, indexed to 2007 = 100. Disposable income is what households actually have to spend or save after taxes and transfers — a more direct gauge of household living standards than GDP per capita, which can rise without households feeling better off. Because it is indexed, the lines show *growth* since 2007 rather than dollar levels.
 
@@ -145,7 +145,7 @@ else:
     print("Disposable income data not yet available. Run the data pipeline.")
 ```
 
-## Growth in Disposable Income Since 2007: Ranked
+## Growth in disposable income since 2007: ranked
 
 ```{python}
 #| echo: false
@@ -157,7 +157,7 @@ if os.path.exists(disp_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Income Inequality (Gini Coefficient)
+## Income inequality (Gini coefficient)
 
 The Gini coefficient of disposable (after-tax, after-transfer) income runs from 0
 (everyone has the same income) to 1 (one person has all of it). Lower values
@@ -179,7 +179,7 @@ else:
     print("Gini data not yet available. Run the data pipeline.")
 ```
 
-## Latest Gini Coefficient: Ranked
+## Latest Gini coefficient: ranked
 
 ```{python}
 #| echo: false
@@ -191,7 +191,7 @@ if os.path.exists(gini_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Relative Poverty Rate
+## Relative poverty rate
 
 The relative poverty rate is the share of people living on less than half of the
 national median disposable income. It measures low income relative to the
@@ -213,7 +213,7 @@ else:
     print("Poverty data not yet available. Run the data pipeline.")
 ```
 
-## Low-Income Rate in Canada (LIM-AT)
+## Low-income rate in Canada (LIM-AT)
 
 Statistics Canada's Low Income Measure, after tax (LIM-AT): the share of Canadians
 in households below half the median adjusted household income. This is the
@@ -233,7 +233,7 @@ else:
     print("Low-income data not yet available. Run the data pipeline.")
 ```
 
-## Food Insecurity
+## Food insecurity
 
 The share of people in households that experienced food insecurity in the past year — worrying about running out of food, compromising on quality or quantity, or going without. It is a direct measure of material hardship that income and poverty lines alone can miss, and has risen sharply in recent years.
 
@@ -250,7 +250,7 @@ else:
     print("Food insecurity data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [Median After-Tax Income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada Table 11-10-0190-01
 - [Neighbourhood income, GeoJSON](../data/geo/ct_income_2021.geojson) — 2021 Census, median household income by census tract

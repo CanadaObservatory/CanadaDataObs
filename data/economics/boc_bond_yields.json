@@ -4,11 +4,11 @@
   "source_table": "Bank of Canada (Government of Canada benchmark bond yields)",
   "frequency": "daily",
   "unit": "%",
-  "retrieved_at": "2026-06-17T16:57:48.382433+00:00",
-  "latest_observation_date": "2026-06-16",
+  "retrieved_at": "2026-06-18T17:22:26.849129+00:00",
+  "latest_observation_date": "2026-06-17",
   "transformations": [
     "BoC Valet series BD.CDN.2YR.DQ.YLD, BD.CDN.3YR.DQ.YLD, BD.CDN.5YR.DQ.YLD, BD.CDN.7YR.DQ.YLD, BD.CDN.10YR.DQ.YLD, BD.CDN.LONG.DQ.YLD -> wide CSV"
   ],
   "notes": null,
-  "row_count": 6366
+  "row_count": 6367
 }

@@ -4,7 +4,7 @@
   "source_table": "OECD Economic Outlook",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-06-17T16:58:10.173538+00:00",
+  "retrieved_at": "2026-06-18T17:22:50.155461+00:00",
   "latest_observation_date": "2026",
   "transformations": [
     "filtered to Government interest costs for OECD peer group"

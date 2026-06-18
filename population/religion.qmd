@@ -27,7 +27,7 @@ if os.path.exists(rel_geo) and os.path.exists(rel_path):
     geo = json.load(open(rel_geo))
     rel = pd.read_csv(rel_path, dtype={"ctuid": str})
     fig = choropleth_groups_map(geo, rel, "ctuid", RELIGION_MAP_GROUPS, name_col="name", pop_col="population", colorscale="Viridis", opacity=0.6,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. Religion is self-reported. Opens on 'No religion / secular'.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Religion map not yet available — run `python -m pipeline.build_census_geo`.")

@@ -43,7 +43,14 @@ if not getattr(go.Figure, "_datacan_branded", False):
         for _ann in (self.layout.annotations or ()):
             _t = _ann.text or ""
             if "Source" in _t and BRAND not in _t:
-                _ann.text = f"{_t}<br>{BRAND}"
+                # Wrap long notes (no right-edge clip) + anchor to the top so the note
+                # hangs BELOW its y instead of centring on it (centring is what rode up
+                # into range sliders / x-axis labels). One place → every chart. `_wrap`
+                # is module-level by call time (show() runs at render, after load).
+                _ann.text = f"{_wrap(_t)}<br>{BRAND}"
+                if _ann.yanchor is None:
+                    _ann.yanchor = "top"
+                _ann.align = "left"
                 break
         return _orig_show(self, *args, **kwargs)
 
@@ -164,6 +171,34 @@ def _year_to_dt(years):
     return list(pd.to_datetime(pd.Index(years).astype(int).astype(str), format="%Y"))
 
 
+def _wrap(text, width=88):
+    """Word-wrap a source note with <br> so a long line doesn't clip at the figure's
+    right edge (Plotly annotations don't auto-wrap). Existing <br> breaks are kept."""
+    if not text:
+        return text
+    out = []
+    for seg in str(text).split("<br>"):
+        cur = ""
+        for w in seg.split(" "):
+            if cur and len(cur) + 1 + len(w) > width:
+                out.append(cur); cur = w
+            else:
+                cur = f"{cur} {w}" if cur else w
+        out.append(cur)
+    return "<br>".join(out)
+
+
+def _map_source_note(fig, source_note, y=-0.03):
+    """Add a wrapped, left-anchored source note below a map that grows DOWNWARD
+    (yanchor='top') so a long census source line never clips at the right edge or
+    rides up into the map. Map builders pair this with a bottom margin (b≈80) sized
+    for the wrapped lines plus the brand line the Figure.show interceptor appends."""
+    fig.add_annotation(text=_wrap(source_note), xref="paper", yref="paper",
+                       x=0, xanchor="left", y=y, yanchor="top", align="left",
+                       showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
 def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
                             rangeslider, initial_start, extra_top=40):
     """Shared layout for the peer-comparison line charts: right-hand vertical legend
@@ -183,8 +218,10 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
     if rangeslider:
         xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
     if initial_start is not None:
-        xaxis["range"] = [_year_to_dt([initial_start])[0],
-                          _year_to_dt([int(df[x_col].max())])[0]]
+        _s = _year_to_dt([initial_start])[0]
+        _e = _year_to_dt([int(df[x_col].max())])[0]
+        # small right buffer so the latest point isn't flush against the edge
+        xaxis["range"] = [_s, _e + (_e - _s) * 0.02]
     fig.update_layout(
         xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
@@ -847,10 +884,9 @@ def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color=
     fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
     fig.update_layout(mapbox_style="white-bg", mapbox_layers=layers,
                       mapbox_zoom=zoom, mapbox_center=center,
-                      margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white")
+                      margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white")
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1083,13 +1119,11 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         updatemenus=[_hover_toggle()],
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper",
-                           x=0, xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1212,15 +1246,14 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=46, b=36), height=height,
+        margin=dict(l=0, r=0, t=46, b=80), height=height,
         updatemenus=[dict(buttons=buttons, active=0, x=0.01, y=0.99,
                           xanchor="left", yanchor="top", bgcolor="white",
                           bordercolor="#ccc", borderwidth=1, showactive=True),
                      _hover_toggle()],
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1289,13 +1322,11 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         legend=legend, showlegend=True, updatemenus=[_hover_toggle()],
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1320,12 +1351,10 @@ def bubble_map(df, lat_col, lon_col, size_col, *, color="#e3492a", opacity=0.5,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         updatemenus=[_hover_toggle()])
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1371,12 +1400,10 @@ def point_value_map(df, lat_col, lon_col, groups, *, colorscale="RdBu", reverses
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         updatemenus=menus)
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1479,7 +1506,7 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                       width=3 if g == thick_group else 1.8),
             marker=dict(size=6), hovertemplate=hover(g, init)))
 
-    xaxis = dict(title="Census year", gridcolor="#e0e0e0",
+    xaxis = dict(title="", gridcolor="#e0e0e0",
                  tickmode="array", tickvals=years)
     if rangeslider:   # draggable time window for the deep (1871–) long-run series
         xaxis["rangeslider"] = dict(visible=True, thickness=0.07, bgcolor="#f5f5f5")
@@ -1673,7 +1700,10 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
         # initial_full=True opens on the whole record instead.
         import pandas as pd
         xmin, xmax = df[x_col].min(), df[x_col].max()
-        xaxis["range"] = [xmin if initial_full else max(xmin, pd.Timestamp("1999-01-01")), xmax]
+        _start = xmin if initial_full else max(xmin, pd.Timestamp("1999-01-01"))
+        # Small right buffer (~2% of the visible span) so the latest point isn't flush
+        # against the edge, which reads as "clipped".
+        xaxis["range"] = [_start, xmax + (xmax - _start) * 0.02]
     yaxis = dict(title=yaxis_title, gridcolor="#e0e0e0")
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat

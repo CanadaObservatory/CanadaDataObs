@@ -23,7 +23,7 @@ if os.path.exists(da_geo) and os.path.exists(da_path):
     da = pd.read_csv(da_path, dtype={"dauid": str})
     fig = choropleth_groups_map(geo, da, "dauid", RELIGION_MAP_GROUPS, name_col="name",
         pop_col="population", colorscale="Viridis", opacity=0.6, center={"lat": 49.18, "lon": -122.9}, zoom=8.3, height=720,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021006); % of population by dissemination area, Vancouver CMA. Religion is self-reported.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021006 — Vancouver CMA.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Vancouver DA religion map not available — run build_da_profile in pipeline.build_census_geo.")

@@ -21,13 +21,21 @@ Canada + US + Australia + Germany + OECD average** (Sweden/UK coloured but unloa
   good-or-bad reading / how high it *should* be is political / shown without a favourable
   direction / not a gap in this site / Descriptive only." Keep the principle ONLY on the
   Landing page + About. *(§64, §76, §98, §266, §290, §327, §336, §388, §418, §538)*
-- ◐ **G1 Source-note standard** (bar source notes left-anchored 2026-06-18; time-series +
-  map margins/overlaps remaining) — a single consistent placement that never overlaps the
+- ◐ **G1 Source-note standard** (bars left-anchored; all 6 map builders WRAP long source
+  notes via `_wrap`/`_map_source_note` [yanchor=top, grows downward, b→80] so they no
+  longer clip at the right edge or touch the map — screenshot-verified 2026-06-18.
+  PLUS the Figure.show interceptor now wraps + top-anchors every source note site-wide, so
+  notes hang below the slider/x-label, not into it (verified single_line / single_bar /
+  history_lines / lines_over_time). Remaining: shorten non-pop map notes; spot-check
+  stragglers (pyramid, happiness-factor)) — a single
+  consistent placement that never overlaps the
   x-axis label, range slider, map bottom, legend, or clips at the right; never right-
   aligned on ranked bars (left or centre). Layout work across builders; verify per render.
   *(~30+ refs)*
-- ☐ **G6 Right-edge x-padding** — small buffer past the latest data point on every time
-  series (done inconsistently today). *(§199, §203, §254, §300, §313, §338)*
+- ◐ **G6 Right-edge x-padding** — `single_line` + the peer-line layout now add a ~2% right
+  buffer so the latest point isn't flush against the edge (2026-06-18; verified population
+  total + economics peer charts). `single_line_multi`/`single_bar` auto-range (already
+  padded). *(§199, §203, §254, §300, §313, §338)*
 - ☐ **G7 "Data current to" prominence** — a clear data-currency line near each chart
   title (not only in the small source text), esp. maps + CREA. *(§134, §178, §208, §230)*
 - ⟳ **G8 Title policy** — sentence case site-wide (LOCKED); shorten over-long titles; drop
@@ -101,5 +109,24 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   defensive-boilerplate sweep started (main section pages + source-note tags).
 - **2026-06-18 #2:** G2 finished (10 neighbourhood pages, templated find-replace); G1
   started — all ranked/category bar source notes moved off the right edge to left-anchored.
-- Next: G1 source-note margins/overlaps across the time-series + map builders (the bulk);
-  then sentence-case (G8) sweep; then per-section text + structure.
+- **2026-06-18 #3:** committed batches 1–2 (`58f08fe`, branch `site-review-2026-06`);
+  then G1 maps — all 6 map builders' source notes spaced off the map bottom (uncommitted).
+- **2026-06-18 #4:** owner flagged map source notes STILL clipping at the right — root
+  cause was a long single line (vertical spacing can't fix a horizontal clip). Added
+  `_wrap` (auto `<br>`) + `_map_source_note` (yanchor=top), b→80; the 6 map builders now
+  wrap. Screenshot-verified on the diversity tract map (worst case: 5 lines, no clip).
+- **2026-06-18 #6 (G1 time-series — owner "(2)"):** the `Figure.show` interceptor now
+  WRAPS + top-anchors + left-aligns every source note in ONE place — so notes hang BELOW
+  the range slider / x-axis label instead of centring on it (the overlap cause). Removed
+  `history_lines`' "Census year" x-title (the lone x-axis title, which the long note
+  collided with). Screenshot-verified: population (single_line + single_bar sliders),
+  religion long-run (history_lines + 5-line note), government spending (lines_over_time +
+  bottom legend). Remaining: shorten non-population map notes; spot-check the pyramid (§45)
+  and happiness-factor (§413).
+- **2026-06-18 #5:** owner confirmed (0) the neighbourhood pages were just STALE (the wrap
+  fix is in the shared builder, not yet re-rendered); (1) shortened all 15 population
+  census/DA map source notes to provenance-only (agency + Census Profile table + metro),
+  methodology stays in prose. Re-rendered all 15; screenshot-verified Vancouver DA (1 concise
+  line, no clip). **New rule:** map source notes = provenance only, kept concise.
+- Remaining maps (income/housing/geography/crime/economy) need the same concise-note pass.
+- Next (owner: "(2)"): G1 time-series slider/label overlaps.

@@ -50,7 +50,7 @@ if os.path.exists(eth_geo) and os.path.exists(eth_path):
     fig = choropleth_categorical(geo, sub, "ctuid", "largest", name_col="name",
         ordered=order, color_map=cmap, detail_col="detail", height=700,
         center={"lat": 51.5, "lon": -96.0}, zoom=3.0,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007). Largest single group per tract (plurality); hover shows the tract's full mix (groups ≥0.5%). White is derived (Not a visible minority − Indigenous identity); Indigenous = Indigenous identity.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Map not yet available — run `python -m pipeline.build_census_geo`.")

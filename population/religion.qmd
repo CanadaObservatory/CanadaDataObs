@@ -11,7 +11,7 @@ import pandas as pd
 
 ## Religion by Neighbourhood
 
-The religious make-up of Canada down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. Religion is self-reported, and the census asks it only once a decade. Like the diversity map above, this is a descriptive picture of where people live — there is no "good" or "bad" reading. **"No religion / secular"** is now the second-largest group nationally and is included; the many Christian denominations are rolled into a single "Christian" total. This is a separate concept from ethnicity and from Indigenous identity.
+The religious make-up of Canada down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. Religion is self-reported, and the census asks it only once a decade. **"No religion / secular"** is now the second-largest group nationally and is included; the many Christian denominations are rolled into a single "Christian" total. This is a separate concept from ethnicity and from Indigenous identity.
 
 For an even finer view — Statistics Canada's smallest standard areas (**dissemination areas**, ~400–700 people each) — open a metro's dedicated map (each on its own page for load speed):
 
@@ -27,7 +27,7 @@ if os.path.exists(rel_geo) and os.path.exists(rel_path):
     geo = json.load(open(rel_geo))
     rel = pd.read_csv(rel_path, dtype={"ctuid": str})
     fig = choropleth_groups_map(geo, rel, "ctuid", RELIGION_MAP_GROUPS, name_col="name", pop_col="population", colorscale="Viridis", opacity=0.6,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. Religion is self-reported. Opens on 'No religion / secular'. Descriptive only.")
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. Religion is self-reported. Opens on 'No religion / secular'.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Religion map not yet available — run `python -m pipeline.build_census_geo`.")

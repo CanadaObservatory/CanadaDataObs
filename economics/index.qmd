@@ -60,7 +60,7 @@ else:
 
 ## Quarterly GDP Growth
 
-Real (inflation-adjusted) gross domestic product, shown as the change from the previous quarter, for every quarter back to 1961. Red bars mark quarters in which the economy contracted. A **recession** is commonly defined as two consecutive quarters of declining real GDP. The full record places recent quarters alongside past downturns — the contractions of the early 1980s and early 1990s, the 2008–09 financial crisis, and the record swings of the 2020 pandemic. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
+Real (inflation-adjusted) gross domestic product, shown as the change from the previous quarter, for every quarter back to 1961. Red bars mark quarters in which the economy contracted. A **recession** is commonly defined as two consecutive quarters of declining real GDP, though in Canada the official arbiter is the C.D. Howe Institute's Business Cycle Council; the recessions it has dated since 1980 are marked here as shaded bands. The full record places recent quarters alongside past downturns — the contractions of the early 1980s and early 1990s, the 2008–09 financial crisis, and the record swings of the 2020 pandemic. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
 
 ```{python}
 #| echo: false
@@ -78,6 +78,7 @@ if os.path.exists(gdpq_path):
                   for lbl, g in zip(q["qlabel"], q["growth"])]
     bar_colors = ["#d62728" if v < 0 else "#4e79a7" for v in q["growth"]]
     import math
+    from pipeline.charts import add_recession_bands
     # Clip the y-axis to normal quarters so past recessions stay legible; the
     # 2020 pandemic swings (≈ −11% / +9%) are ~5× any other quarter and would
     # otherwise crush the whole series into a flat band near zero.
@@ -94,6 +95,9 @@ if os.path.exists(gdpq_path):
         customdata=q["hover"],
         hovertemplate="%{customdata}<extra></extra>"))
     figq.add_hline(y=0, line_color="#888", line_width=1)
+    # Shade the C.D. Howe Business Cycle Council's dated recessions behind the bars
+    # (neutral grey, below the data) — visible once the slider is zoomed out past 2008.
+    add_recession_bands(figq)
     figq.update_layout(
         plot_bgcolor="white", showlegend=False, height=460, bargap=0.15,
         yaxis=dict(title="Quarter-over-quarter % change",
@@ -107,7 +111,7 @@ if os.path.exists(gdpq_path):
                    rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
         margin=dict(t=40, b=120))
     figq.add_annotation(
-        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted) | Data as of: {q['qlabel'].iloc[-1]}",
+        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted); recession bands: C.D. Howe Institute Business Cycle Council | Data as of: {q['qlabel'].iloc[-1]}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
         font=dict(size=10, color="#999"))
     if (q["growth"].abs() > 5).any():
@@ -358,7 +362,7 @@ if os.path.exists(inv_path):
 
 ## Current Account Balance
 
-Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus. Whether a deficit is a concern depends on what it funds, so no favourable direction is implied.
+Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus.
 
 ```{python}
 #| echo: false

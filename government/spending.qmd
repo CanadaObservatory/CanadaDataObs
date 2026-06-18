@@ -9,9 +9,7 @@ spent on, and which departments it flows through. It complements the
 *general*-government finances with OECD peers) and the
 [Government Employment](index.qmd) page (the people behind the payroll line).
 
-As with the workforce, how much government *should* spend is a political question.
-The charts below describe the composition and trend without a favourable
-direction. A recurring theme: most federal spending is not the government
+A recurring theme: most federal spending is not the government
 operating itself — it is **transfers**, money moved to people (benefits like the
 Canada Child Benefit and elderly benefits) and to other governments (health and
 social transfers to the provinces).
@@ -75,7 +73,7 @@ if os.path.exists(fin_path):
 
 ## The Budget Balance, by Era
 
-The gap between revenue and spending is the federal **budget balance** — a surplus when revenue exceeds spending, a deficit when it falls short. This view makes the balance explicit as a share of GDP, with the periods in office of successive federal governments shaded for reference. It is descriptive: the shading shows *when* governments changed, not a claim about cause. (Shares of GDP begin in 1981; fiscal years are matched to governments approximately.)
+The gap between revenue and spending is the federal **budget balance** — a surplus when revenue exceeds spending, a deficit when it falls short. This view makes the balance explicit as a share of GDP, with the periods in office of successive federal governments shaded for reference. (Shares of GDP begin in 1981; fiscal years are matched to governments approximately.)
 
 ```{python}
 #| echo: false

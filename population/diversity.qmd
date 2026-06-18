@@ -11,7 +11,7 @@ import pandas as pd
 
 ## Diversity by Neighbourhood
 
-Where Canada's population groups live, down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area (tracts are labelled by their Statistics Canada ID). This is a descriptive picture of residential geography; there is no "good" or "bad" reading here, it simply shows where people live. Census tracts are defined only for larger urban areas (census metropolitan areas and agglomerations), so rural and remote regions are left blank — that is a Statistics Canada geography convention, not a gap in this site.
+Where Canada's population groups live, down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area (tracts are labelled by their Statistics Canada ID). Census tracts are defined only for larger urban areas (census metropolitan areas and agglomerations), so rural and remote regions are left blank.
 
 **How the groups are assembled.** Statistics Canada's "visible minority" variable (its term) has no distinct White category and folds Indigenous people into a single "Not a visible minority" residual. To show **White** and **Indigenous** explicitly, we split that residual using the 2021 Census on a common population base: **Indigenous** is StatCan's single-response *Indigenous identity* count, and **White** is a **derived** figure — "Not a visible minority" *minus* Indigenous identity (i.e. the non-Indigenous, non-visible-minority population). The three top-level groups — *All visible minorities*, *White* and *Indigenous* — therefore sum to 100%. Visible minority remains a separate concept from Indigenous identity.
 
@@ -29,7 +29,7 @@ if os.path.exists(eth_geo) and os.path.exists(eth_path):
     geo = json.load(open(eth_geo))
     eth = pd.read_csv(eth_path, dtype={"ctuid": str})
     fig = choropleth_groups_map(geo, eth, "ctuid", DIVERSITY_MAP_GROUPS, name_col="name", breakdown_exclude=["all_vm"], pop_col="population", colorscale="Viridis", opacity=0.6,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. 'Visible minority' is StatCan's term. 'White' is derived (Not a visible minority − Indigenous identity); 'Indigenous' is Indigenous identity; with 'All visible minorities' they sum to 100%. Descriptive only.")
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. 'Visible minority' is StatCan's term. 'White' is derived (Not a visible minority − Indigenous identity); 'Indigenous' is Indigenous identity; with 'All visible minorities' they sum to 100%.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Diversity map not yet available — run `python -m pipeline.build_census_geo`.")

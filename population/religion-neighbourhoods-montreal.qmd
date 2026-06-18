@@ -12,7 +12,7 @@ from pipeline.charts import choropleth_groups_map, RELIGION_MAP_GROUPS
 
 This map drops below the census tract to the **dissemination area (DA)** — Statistics Canada's *smallest* standard geography, about **400–700 people each** — for **Montréal**. Religion is self-reported and asked only once a decade. Other metros are linked from the [main Population page](religion.qmd#religion-by-neighbourhood).
 
-Descriptive only — no "good"/"bad" reading. "No religion / secular" is included, and the Christian denominations are rolled into a single total. **Use the dropdown** to switch groups; zoom and pan to your street.
+"No religion / secular" is included, and the Christian denominations are rolled into a single total. **Use the dropdown** to switch groups; zoom and pan to your street.
 
 ```{python}
 #| echo: false
@@ -23,7 +23,7 @@ if os.path.exists(da_geo) and os.path.exists(da_path):
     da = pd.read_csv(da_path, dtype={"dauid": str})
     fig = choropleth_groups_map(geo, da, "dauid", RELIGION_MAP_GROUPS, name_col="name",
         pop_col="population", colorscale="Viridis", opacity=0.6, center={"lat": 45.55, "lon": -73.65}, zoom=9.0, height=720,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021006); % of population by dissemination area, Montréal CMA. Religion is self-reported. Descriptive only.")
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021006); % of population by dissemination area, Montréal CMA. Religion is self-reported.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Montréal DA religion map not available — run build_da_profile in pipeline.build_census_geo.")

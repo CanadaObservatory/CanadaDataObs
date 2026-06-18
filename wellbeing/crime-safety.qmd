@@ -22,9 +22,8 @@ SRC = lambda t=CRIME: f"Source: Statistics Canada, Table 35-10-0177-01 | Data as
 
 Safety is a basic part of well-being, and crime is usually discussed one incident
 at a time. This page puts those incidents in context — from the long-run *severity*
-of crime down to what is happening in a single neighbourhood. It is descriptive and
-non-partisan: the data, official measures, and comparisons across places and time do
-the work. The two authoritative sources are Statistics Canada's incident-based crime
+of crime down to what is happening in a single neighbourhood. The two
+authoritative sources are Statistics Canada's incident-based crime
 statistics (the UCR) and, for the local view, the Toronto Police Service open-data
 portal.
 

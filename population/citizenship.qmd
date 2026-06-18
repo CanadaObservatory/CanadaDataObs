@@ -30,7 +30,7 @@ citizenship, temporary residents, and others). The three groups sum to 100%.
 central to the recent [population-growth story](index.qmd) — are a *subset* of
 non-citizens, shown as a fourth map option. Census citizenship questions are
 asked of a 25% sample, so small tracts carry more noise than the diversity and
-language layers. Descriptive only: this maps who lives where, nothing more.
+language layers.
 
 ```{python}
 #| echo: false
@@ -48,7 +48,7 @@ if os.path.exists(geo_path) and os.path.exists(cit_path):
     fig = choropleth_groups_map(geo, cit, "ctuid", CIT_GROUPS, name_col="name",
         pop_col="population", colorscale="Viridis", opacity=0.6,
         breakdown_exclude=["npr"],
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population in private households (25% sample). Canadian-born = non-immigrants; naturalized = citizens − Canadian-born; NPR is a subset of non-citizens. Descriptive only.")
+        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population in private households (25% sample). Canadian-born = non-immigrants; naturalized = citizens − Canadian-born; NPR is a subset of non-citizens.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Citizenship map not yet available — run `python -m pipeline.build_census_geo`.")

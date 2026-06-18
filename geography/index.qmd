@@ -17,7 +17,7 @@ MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
 
 Canada is a country defined by its physical extent. At **9.98 million km²** it is the second-largest country on Earth, with the **longest coastline of any nation** (about 243,000 km) and roughly **a fifth of the world's fresh water**. Yet it is home to only about 40 million people — so most of that vastness is boreal forest, tundra, rock and ice, and most Canadians live in a narrow band along the southern edge. The maps below describe that geography: where people are, what the land is made of, where the water is, and how fire and ice are changing.
 
-*These pages are descriptive. They show physical and natural features and how they vary across the country; the sources are official (Statistics Canada, Natural Resources Canada, ECCC, NSIDC), and the maps carry no "good" or "bad" reading.*
+*Sources are official: Statistics Canada, Natural Resources Canada, Environment and Climate Change Canada, and the U.S. National Snow and Ice Data Center.*
 
 ## Where Canadians live
 

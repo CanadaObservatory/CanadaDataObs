@@ -8,7 +8,7 @@ import plotly.io as pio
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
-    PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS,
+    PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS, DEFAULT_VISIBLE_COMPARATORS,
     SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
@@ -112,6 +112,50 @@ def _base_layout(title, yaxis_title, xaxis_title="", range_slider=True,
     )
 
 
+# --- Recession shading for Canadian macro time series --------------------------
+# Official Canadian business-cycle peaks→troughs from the C.D. Howe Institute
+# Business Cycle Council — the Canadian counterpart to the U.S. NBER (Philip Cross,
+# "Turning Points: Business Cycles in Canada since 1926"). These are immutable
+# historical facts, so hardcoding them is appropriate (cf. era markers): the COVID-19
+# (Feb–Apr 2020) and 2008/09 (Oct 2008–May 2009) turning points are from the
+# Council's communiqués; the early-1980s (Jun 1981–Oct 1982) and early-1990s
+# (Mar 1990–Apr 1992; the trough was later revised to May 1992) dates follow the
+# Council's published chronology. Only the four post-1980 downturns the Economy page
+# narrates are listed (so a shaded band always matches the prose); the 1974–75
+# recession is in range but omitted for that reason. Neutral grey — no valence; a
+# recession is a dated fact, not a judgment.
+CANADA_RECESSIONS = [
+    ("1981-06-01", "1982-10-31", "1981–82"),
+    ("1990-03-01", "1992-04-30", "1990–92"),
+    ("2008-10-01", "2009-05-31", "2008–09"),
+    ("2020-02-01", "2020-04-30", "2020"),
+]
+
+
+def add_recession_bands(fig, recessions=CANADA_RECESSIONS, *,
+                        fillcolor="rgba(120,120,120,0.13)", label=False,
+                        label_color="#999", line_width=0):
+    """Shade official recession periods behind a date-axis time series — the standard
+    macro convention, which orients a reader against the cycle without editorialising.
+
+    Defaults to the C.D. Howe Business Cycle Council's Canadian recession dating
+    (`CANADA_RECESSIONS`); each entry is (start, end, label) with ISO date strings.
+    Bands are layout `vrect` shapes drawn BELOW the data (`layer="below"`), so bars
+    and lines stay legible on top, and they do NOT change the axis range (a band
+    outside the current view is simply clipped). `label=True` writes the short label
+    at the top of each band (useful on a full-history view). Returns `fig` for
+    chaining. Reusable on any Canada macro series with a real date x-axis (quarterly
+    GDP, the policy rate, unemployment, …)."""
+    for start, end, lab in recessions:
+        fig.add_vrect(x0=start, x1=end, fillcolor=fillcolor, line_width=line_width,
+                      layer="below")
+        if label:
+            fig.add_annotation(x=start, y=1.0, yref="paper", yanchor="bottom",
+                               xanchor="left", text=lab, showarrow=False,
+                               font=dict(size=9, color=label_color))
+    return fig
+
+
 def _year_to_dt(years):
     """Plot an integer-year axis as real Jan-1 dates so Plotly's range slider and
     range-selector buttons (which only work on date axes) function; the axis and
@@ -173,10 +217,12 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
     """
     Line chart comparing Canada against OECD peers.
 
-    `initial_visible` (optional, list of country codes): named comparators NOT in
-    the list also start legend-hidden, so e.g. `initial_visible=["USA"]` opens with
-    just Canada, the US and the peer average (used on the busy fertility chart).
-    Everything stays one legend click away.
+    `initial_visible` (optional, list of country codes): named comparators NOT in the
+    list start legend-hidden. Defaults to DEFAULT_VISIBLE_COMPARATORS (Canada + US +
+    Australia + Germany + the average on load; Sweden/UK coloured but hidden) — the
+    owner's 2026-06 site-review default that keeps the busy 17-line charts legible. Pass
+    an explicit list to override (e.g. `["USA"]` on fertility, `["GBR"]` where the prose
+    singles out the UK); everything stays one legend click away.
 
     `topical` (optional, list of country codes): non-comparator peers that THIS
     chart's prose singles out (e.g. Japan + Italy on the aging chart) — they open
@@ -195,6 +241,8 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
     """
     if highlight is None:
         highlight = [HIGHLIGHT_COUNTRY]
+    if initial_visible is None:
+        initial_visible = DEFAULT_VISIBLE_COMPARATORS
 
     def _name(code):
         s = df[df[country_col] == code]
@@ -359,7 +407,7 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
         margin=dict(t=30, b=90, l=10, r=20),
         annotations=[dict(
             text=_ranked_footnote(source_note, year),
-            xref="paper", yref="paper", x=1, y=-0.15,
+            xref="paper", yref="paper", x=0, xanchor="left", y=-0.15,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
@@ -372,7 +420,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
                                 show_average=True, avg_name="OECD peer average",
                                 hover_suffix="%", hover_decimals=1,
                                 source_note=None, rangeslider=True,
-                                initial_start=None, hide_peers=True,
+                                initial_start=None, hide_peers=True, initial_visible=None,
                                 option_layouts=None, menu_label="Age group:",
                                 topical=None):
     """Peer-comparison line chart with a category dropdown.
@@ -386,8 +434,11 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
     share a unit (e.g. tobacco use in %, alcohol in litres), pass `option_layouts`
     (a dict option->y-axis title): the dropdown then also rewrites the y-axis title and
     `autorange`s on switch, so each option gets its own scale. `menu_label` overrides
-    the small "Age group:" caption above the menu (e.g. "Substance:")."""
+    the small "Age group:" caption above the menu (e.g. "Substance:").
+    `initial_visible` overrides which comparators load (default DEFAULT_VISIBLE_COMPARATORS)."""
     highlight = [HIGHLIGHT_COUNTRY]
+    if initial_visible is None:
+        initial_visible = DEFAULT_VISIBLE_COMPARATORS
 
     def _name(code):
         s = df[df[country_col] == code]
@@ -452,6 +503,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
             name = _name(code)
             fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
                 line=dict(color=COMPARATOR_COLORS[code], width=2),
+                visible=(True if code in initial_visible else "legendonly"),
                 legendrank=10 + comparators.index(code), hovertemplate=_hov(name, True)))
         else:
             name = _name(code)
@@ -535,7 +587,7 @@ def ranked_bar_by_age(df, value_col, age_col, xaxis_title, source_note, *,
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.06, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1)],
         annotations=[dict(text=_ranked_footnote(source_note, d0['year']),
-            xref="paper", yref="paper", x=1, y=-0.15, showarrow=False,
+            xref="paper", yref="paper", x=0, xanchor="left", y=-0.15, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.add_annotation(text="Age group:", xref="paper", yref="paper",
         x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
@@ -1964,8 +2016,8 @@ def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
                    tickprefix=tickprefix, ticksuffix=ticksuffix),
         yaxis=dict(title=""), margin=dict(l=10, r=(70 if text else 20), t=20, b=70))
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=1,
-                           xanchor="right", y=-0.12, showarrow=False,
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.12, showarrow=False,
                            font=dict(size=10, color="#999"))
     return fig
 
@@ -2015,7 +2067,7 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
                           yanchor="bottom", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)])
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=1,
-                           xanchor="right", y=-0.06, showarrow=False,
+        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=-0.06, showarrow=False,
                            font=dict(size=10, color="#999"))
     return fig

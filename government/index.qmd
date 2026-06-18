@@ -134,9 +134,7 @@ that Statistics Canada discontinued in 2011.)
 Across the OECD, the share of total employment that works for **general
 government** (all levels combined, including public health and education staff)
 varies widely — from around 5% in Japan and South Korea to nearly 30% in the
-Nordic countries. Canada sits a little above the middle of its peer group. How
-large this share "should" be is a political choice, so it is shown without a
-favourable direction.
+Nordic countries. Canada sits a little above the middle of its peer group.
 
 ```{python}
 #| echo: false

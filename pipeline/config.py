@@ -116,6 +116,14 @@ PEER_EXTRA_COLORS = {
     "NZL": "#c49c94",  # taupe         (vs SWE brown)
 }
 
+# Comparators shown ON LOAD for the peer line charts (owner, 2026-06-18 site review):
+# Canada + US + Australia + Germany + the peer average. The other named comparators
+# (Sweden, UK) keep their colour + top-of-legend rank but start hidden (legendonly),
+# and the 11 grey peers stay hidden too, so a busy 17-line chart opens legible. Global
+# default for peer_comparison_line / _by_age; a chart passes initial_visible=[...] to
+# override (e.g. ["USA"] on fertility, or ["GBR"] where the prose singles out the UK).
+DEFAULT_VISIBLE_COMPARATORS = ["USA", "AUS", "DEU"]
+
 # --- Statistics Canada Table IDs ---
 STATCAN_TABLES = {
     "population_quarterly": "17-10-0009-01",  # Population estimates, quarterly

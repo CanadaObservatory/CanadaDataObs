@@ -113,7 +113,7 @@ if os.path.exists(bal_path):
 
 ## Government Revenue
 
-Total general-government revenue as a share of GDP — taxes plus other receipts, across all levels of government. It is the broadest measure of the size of government's claim on the economy. How high it "should" be is a political choice, so this is shown without a favourable direction.
+Total general-government revenue as a share of GDP — taxes plus other receipts, across all levels of government. It is the broadest measure of the size of government's claim on the economy.
 
 ```{python}
 #| echo: false
@@ -175,7 +175,7 @@ if os.path.exists(int_path):
 
 ## Defence Spending
 
-Military expenditure as a share of GDP. NATO members have agreed to a guideline of spending at least **2% of GDP** on defence (shown as a dashed line). The measure is shown for all 17 peers — NATO and non-NATO alike — for comparison; how much to spend is a policy choice, so beyond the agreed benchmark no favourable direction is implied.
+Military expenditure as a share of GDP. NATO members have agreed to a guideline of spending at least **2% of GDP** on defence (shown as a dashed line). The measure is shown for all 17 peers — NATO and non-NATO alike — for comparison.
 
 ```{python}
 #| echo: false

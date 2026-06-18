@@ -21,8 +21,6 @@ supply_path = "data/health/phac_opioid_supply.csv"
 
 The overdose crisis is among the most severe public-health emergencies in Canada's recent history, and a leading driver of the [recent decline in life expectancy](index.qmd#the-recent-decline). Since national surveillance began in 2016, tens of thousands of people have died from the acute toxicity of opioids — increasingly from an illegal drug supply contaminated with fentanyl and, more recently, mixed with stimulants. This page tracks that toll: how it has grown, where it falls hardest, who it affects, and how the drugs themselves have changed — then steps back to tobacco, alcohol and cannabis use across age groups.
 
-*These charts are descriptive. The data are the federal government's own surveillance figures (the Public Health Agency of Canada); the page carries no policy position. A note on definitions and limitations is at the foot of the page.*
-
 ## The Scale of the Crisis
 
 Apparent opioid-toxicity deaths rose from about 2,800 in 2016 to a peak of roughly 8,000 in 2023 — close to a death every hour — before easing in 2024. The bars show the number of deaths each year; the line shows the rate per 100,000 people, which removes the effect of a growing population.

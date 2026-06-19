@@ -17,6 +17,7 @@ from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import category_bar
 ```
 
 ## Inflation (CPI, year-over-year)
@@ -130,6 +131,39 @@ except FileNotFoundError:
     print("Core/food CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## Where inflation is coming from
+
+Inflation is an average across a basket of goods and services, but the pieces move at very different speeds. This shows the 12-month change in each of the eight major components of the Consumer Price Index — which corners of the basket are running hot and which are cool. It is the *rate* each component is rising, not its weight in the headline figure (shelter and food carry the most weight in the average); the all-items rate is marked in grey for reference.
+
+```{python}
+#| echo: false
+try:
+    comp = pd.read_csv("data/economics/statcan_cpi_components.csv", parse_dates=["date"])
+    comp["cpi_value"] = pd.to_numeric(comp["cpi_value"], errors="coerce")
+    comp = comp.sort_values(["product_group", "date"])
+    comp["yoy"] = comp.groupby("product_group")["cpi_value"].pct_change(12) * 100
+    latest = comp["date"].max()
+    cur = comp[comp["date"] == latest].dropna(subset=["yoy"]).copy()
+    short = {
+        "Household operations, furnishings and equipment": "Household operations & furnishings",
+        "Recreation, education and reading": "Recreation, education & reading",
+        "Alcoholic beverages, tobacco products and recreational cannabis": "Alcohol, tobacco & cannabis",
+        "Health and personal care": "Health & personal care",
+        "Clothing and footwear": "Clothing & footwear",
+    }
+    cur["label"] = cur["product_group"].map(lambda p: short.get(p, p))
+    cur["lbl"] = [f"{v:+.1f}%" for v in cur["yoy"]]
+    fig = category_bar(cur, "label", "yoy",
+        xaxis_title="12-month change (%)", ticksuffix="%",
+        highlight={"All-items"}, highlight_color="#555",
+        text_col="lbl", text_fmt="{}",
+        hovertemplate="%{y}: %{x:+.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada 18-10-0004-01 | {latest:%B %Y}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("CPI components data not yet available. Run the data pipeline to fetch it.")
+```
+
 ## The policy rate vs. inflation
 
 The Bank of Canada raises its **policy interest rate** to cool inflation and lowers it to support the economy — so the two move together over time. This pairs the policy rate (the **Bank Rate**, the consistent series back to 1935) with year-over-year inflation, both on one scale. The early-1980s spike — the rate above **20%** against double-digit inflation — and the 2022–23 tightening cycle stand out. The grey band is the 1–3% inflation target.
@@ -183,5 +217,6 @@ Inflation is only part of the cost-of-living picture. See also:
 
 - [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada 18-10-0004-01
 - [Food CPI (CSV)](../data/economics/statcan_food_cpi.csv) — Statistics Canada 18-10-0004-01
+- [CPI by major component (CSV)](../data/economics/statcan_cpi_components.csv) — Statistics Canada 18-10-0004-01
 - [CPI-trim core inflation (CSV)](../data/economics/statcan_cpi_trim.csv) — Statistics Canada 18-10-0256-01
 - [Bank of Canada policy rate (CSV)](../data/economics/boc_policy_rate.csv) — Bank of Canada (Bank Rate)

@@ -202,6 +202,7 @@ def fetch_cpi():
         "VALUE": "cpi_value",
     })
     df = df[["date", "geography", "product_group", "cpi_value"]].copy()
+    df_all = df.copy()   # keep every product group before narrowing to All-items
 
     # Keep only All-items CPI for Canada
     df = df[df["product_group"] == "All-items"]
@@ -229,6 +230,28 @@ def fetch_cpi():
         ],
     )
     logger.info(f"Saved {len(df)} rows to {out_path}")
+
+    # Side output: the major-component sub-indices (Canada) for the
+    # "where inflation is coming from" breakdown — the 8 standard CPI components
+    # plus All-items, monthly index. YoY is computed per component at render time.
+    majors = ["All-items", "Food", "Shelter",
+              "Household operations, furnishings and equipment",
+              "Clothing and footwear", "Transportation", "Health and personal care",
+              "Recreation, education and reading",
+              "Alcoholic beverages, tobacco products and recreational cannabis"]
+    comp = df_all[(df_all["geography"] == "Canada")
+                  & (df_all["product_group"].isin(majors))].copy()
+    comp["date"] = pd.to_datetime(comp["date"])
+    comp["cpi_value"] = pd.to_numeric(comp["cpi_value"], errors="coerce")
+    comp = (comp.dropna(subset=["cpi_value"])
+            .sort_values(["product_group", "date"]).reset_index(drop=True))
+    comp_path = DATA_DIR / "economics" / "statcan_cpi_components.csv"
+    comp.to_csv(comp_path, index=False)
+    save_metadata(comp_path, df=comp,
+        source="Statistics Canada", source_table="18-10-0004-01",
+        frequency="monthly", unit="index (2002=100)",
+        transformations=["filtered to the 8 major CPI components + All-items, Canada only"])
+    logger.info(f"Saved {len(comp)} rows to {comp_path}")
 
     return df
 

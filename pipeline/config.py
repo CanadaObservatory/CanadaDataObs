@@ -587,6 +587,14 @@ INDICATORS = [
               dataflow="OECD.WISE.INE,DSD_WISE_IDD@DF_IDD,1.0",
               key=f"{_C}.A.INC_DISP_GINI..._T.METH2012.D_CUR.",
               source_table="OECD Income Distribution Database (IDD)"),
+    # Gini of MARKET income (before taxes & transfers). Paired with the disposable
+    # Gini above, the gap is the redistributive effect of taxes and transfers.
+    Indicator("gini_market", "income", "oecd",
+              "Gini coefficient (market income)", "0–1 (lower = more equal)",
+              "annual", value_col="gini_market", chart_recipe="line",
+              dataflow="OECD.WISE.INE,DSD_WISE_IDD@DF_IDD,1.0",
+              key=f"{_C}.A.INC_MRKT_GINI..._T.METH2012.D_CUR.",
+              source_table="OECD Income Distribution Database (IDD)"),
     Indicator("poverty", "income", "oecd",
               "Relative poverty rate (<50% median)", "% of population", "annual",
               value_col="poverty_rate", chart_recipe="ranked_bar",

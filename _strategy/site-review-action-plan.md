@@ -193,3 +193,16 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   2–5 (Phase 2 = Substance-Use reorg §386-7 + Health split §354/380 + min wage + CREA type
   dropdown). Colours AFTER. Broad safe-sweep (air-quality titles, well-being, ecozones hover)
   still partial.
+- **2026-06-19 #2 (structural reorgs — owner: "yes, those structural changes are a logical
+  next step"):** finished Phase 1 + the structural moves of Phase 2. `db5ae51` **Fire & Ice →
+  Wildfire + Ice** (two pages; nav split under "Climate & Atmosphere"; air-quality cross-link →
+  Wildfire; fire-ice.qmd removed). `c83987e` **Substance Use reorg** (§386-7): leads with
+  "Tobacco, alcohol and cannabis" (the peer tobacco/alcohol chart MOVED off Health + the by-age
+  chart); opioids → "## The opioid-toxicity crisis" with ### sub-sections; general intro; Health
+  loses its tobacco/alcohol chart + a one-line pointer. `1602351` **Health split into TWO PAGES**
+  (§354/§380 — owner picked separate pages via AskUserQuestion): health/index.qmd = "Health of
+  Canadians" (life expectancy + recent decline + risk factors; KEEPS the full scorecard) + new
+  health/health-care-system.qmd = "The Health-Care System" (spending + UHC + OOP + capacity +
+  access). Health dropdown → 4 items. All verified in rendered Quarto; a full site render
+  confirms nav propagation. **NEXT: Phase-2 data items** (minimum wage — needs ESDC/StatCan
+  source check; CREA dwelling-type dropdown — data in hand), then Phases 3–5, then colours.

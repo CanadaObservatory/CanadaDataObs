@@ -1,6 +1,7 @@
 ---
 title: "Crime & Safety"
 description: "Safety in Canada — from long-run severity down to the neighbourhood: trends, who solves what, and where it happens"
+body-classes: area-people   # nav-grouped under People & Society (not the Health area of this directory)
 ---
 
 ```{python}

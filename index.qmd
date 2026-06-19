@@ -44,7 +44,7 @@ each links to the section behind it:
 
 ::::{.columns}
 
-:::{.column .area-card width="32%"}
+:::{.column .area-card .area-people width="32%"}
 ![](visual_assets/brand/motifs/banner-people.svg){.area-banner}
 
 ### [People & Society](population/)
@@ -57,7 +57,7 @@ and crime & safety — with maps down to the neighbourhood level.
 :::{.column width="2%"}
 :::
 
-:::{.column .area-card width="32%"}
+:::{.column .area-card .area-economy width="32%"}
 ![](visual_assets/brand/motifs/banner-economy.svg){.area-banner}
 
 ### [Economy & Affordability](economics/)
@@ -70,7 +70,7 @@ against 17 OECD peers.
 :::{.column width="2%"}
 :::
 
-:::{.column .area-card width="32%"}
+:::{.column .area-card .area-government width="32%"}
 ![](visual_assets/brand/motifs/banner-government.svg){.area-banner}
 
 ### [Government & Public Finances](fiscal/)
@@ -84,7 +84,7 @@ workforce; and what the federal government spends, back to 1961.
 
 ::::{.columns}
 
-:::{.column .area-card width="32%"}
+:::{.column .area-card .area-health width="32%"}
 ![](visual_assets/brand/motifs/banner-health.svg){.area-banner}
 
 ### [Health & Well-being](health/)
@@ -97,7 +97,7 @@ risk factors, substance use, and life satisfaction.
 :::{.column width="2%"}
 :::
 
-:::{.column .area-card width="32%"}
+:::{.column .area-card .area-environment width="32%"}
 ![](visual_assets/brand/motifs/banner-environment.svg){.area-banner}
 
 ### [Land & Environment](geography/)
@@ -110,7 +110,7 @@ climate change, air quality, emissions, and energy.
 :::{.column width="2%"}
 :::
 
-:::{.column .area-card width="32%"}
+:::{.column .area-card .area-education width="32%"}
 ![](visual_assets/brand/motifs/banner-education.svg){.area-banner}
 
 ### [Education, Science & Innovation](education/)

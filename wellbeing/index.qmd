@@ -1,6 +1,7 @@
 ---
 title: "Well-being"
 description: "Life satisfaction and what underlies it — Canada and OECD peers"
+body-classes: area-health   # nav-grouped under Health & Well-being
 ---
 
 ```{python}

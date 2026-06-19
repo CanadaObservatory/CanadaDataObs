@@ -265,6 +265,11 @@ INDICATORS = [
               value_col="population", chart_recipe="bar",
               fetch_fn="fetch_world_population", output_subpath="worldbank_population.csv",
               source_table="World Bank (SP.POP.TOTL)"),
+    Indicator("voter_turnout", "population", "custom",
+              "Federal voter turnout", "% of electors", "per election",
+              value_col="turnout", chart_recipe="line",
+              fetch_fn="fetch_voter_turnout", output_subpath="voter_turnout.csv",
+              source_table="Elections Canada"),
 
     # ----- Economy & Jobs (OECD) -----
     Indicator("gdp_per_capita", "economics", "oecd",

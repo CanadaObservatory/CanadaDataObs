@@ -332,6 +332,82 @@ def fetch_minimum_wage():
     return out
 
 
+TURNOUT_URL = "https://www.elections.ca/content.aspx?section=ele&dir=turn&document=index&lang=e"
+TURNOUT_AGE_URL = ("https://open.canada.ca/data/dataset/b545fe25-5cf5-4488-9923-b5c2ebeeb8cc/"
+                   "resource/73586e35-290d-431c-94ba-5cf8a97c4ae5/download/"
+                   "turnout_by_age_gender_and_province_ge38_ge45.csv")
+_REFERENDUM_YEARS = {1898, 1942, 1992}   # the only non-election rows in the historical table
+_TURNOUT_AGES = ["18 to 24 years", "25 to 34 years", "35 to 44 years", "45 to 54 years",
+                 "55 to 64 years", "65 to 74 years", "75 years and over"]
+
+
+def fetch_voter_turnout():
+    """Federal voter turnout: the long historical series (Elections Canada, 1867–)
+    and turnout by age group (Elections Canada open data, 2004–).
+
+    The historical series is the turnout table on elections.ca, read with
+    pandas.read_html; the three referendum years (1898/1942/1992) are dropped so
+    the line is general-elections only. The by-age file is national, all-genders
+    turnout for the seven standard age groups — the persistent young-vs-old gap.
+    Emits two CSVs (the by-age one as a side output).
+    """
+    import io, requests
+    logger.info("Fetching federal voter turnout (Elections Canada)...")
+
+    # 1. Historical turnout, 1867– (HTML table)
+    try:
+        tables = pd.read_html(TURNOUT_URL)
+    except Exception as e:
+        logger.error(f"  Failed historical-turnout fetch: {e}")
+        return None
+    t = max(tables, key=len).copy()       # the turnout table is the largest on the page
+    t.columns = ["date", "population", "electors", "ballots", "turnout"][:len(t.columns)]
+    t["year"] = pd.to_numeric(t["date"].astype(str).str.extract(r"(\d{4})")[0], errors="coerce")
+    t["turnout"] = pd.to_numeric(
+        t["turnout"].astype(str).str.extract(r"([\d.]+)")[0], errors="coerce")
+    hist = (t.dropna(subset=["year", "turnout"])
+            .astype({"year": int})
+            .query("year not in @_REFERENDUM_YEARS")[["year", "turnout"]]
+            .drop_duplicates("year").sort_values("year").reset_index(drop=True))
+    if hist.empty:
+        return None
+    out_path = DATA_DIR / "population" / "voter_turnout.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    hist.to_csv(out_path, index=False)
+    save_metadata(out_path, df=hist, date_column="year",
+        source="Elections Canada (Voter Turnout at Federal Elections and Referendums)",
+        source_table="elections.ca turnout table",
+        frequency="per election", unit="% of registered electors",
+        transformations=["general elections only (1898/1942/1992 referendums dropped)"])
+    logger.info(f"  saved {len(hist)} elections -> {out_path.name}")
+
+    # 2. Turnout by age group, national, 2004– (open.canada.ca)
+    try:
+        r = requests.get(TURNOUT_AGE_URL, timeout=60)
+        r.raise_for_status()
+        a = pd.read_csv(io.BytesIO(r.content), encoding="utf-8-sig")  # file has a UTF-8 BOM
+        a = a[(a["PROVINCE_E"] == "Canada") & (a["GENDER_E"] == "All genders")
+              & (a["AGE_GROUP_E"].isin(_TURNOUT_AGES))].copy()
+        a = a.rename(columns={"YEAR": "year", "AGE_GROUP_E": "age_group",
+                              "TURNOUT_ELIGIBLE_ELECTOR": "turnout"})
+        # the open-data turnout is a 0–1 fraction; express as % to match the historical series
+        a["turnout"] = pd.to_numeric(a["turnout"], errors="coerce") * 100
+        a = (a.dropna(subset=["turnout"])[["year", "age_group", "turnout"]]
+             .sort_values(["year", "age_group"]).reset_index(drop=True))
+        age_path = DATA_DIR / "population" / "voter_turnout_by_age.csv"
+        a.to_csv(age_path, index=False)
+        save_metadata(age_path, df=a, date_column="year",
+            source="Elections Canada (Turnout by Age, Gender and Province)",
+            source_table="open.canada.ca b545fe25",
+            frequency="per election", unit="% of eligible electors",
+            transformations=["Canada, all genders, 7 standard age groups, 2004–"])
+        logger.info(f"  saved {len(a)} by-age rows -> {age_path.name}")
+    except Exception as e:
+        logger.warning(f"  by-age turnout unavailable (historical series still saved): {e}")
+
+    return hist
+
+
 PROVINCES = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",
              "New Brunswick", "Quebec", "Ontario", "Manitoba", "Saskatchewan",
              "Alberta", "British Columbia"]

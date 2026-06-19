@@ -121,29 +121,6 @@ show_peer_line("data/health/worldbank_suicide.csv", "suicide_rate",
     initial_visible=["USA", "GBR"])
 ```
 
-## Mental health
-
-The share of Canadians aged 12 and over rating their own mental health **very good
-or excellent** has fallen from 72% in 2015 to 55% in 2022 — one of the clearest
-trends in the national health survey. Unlike the charts above, this is a
-**Canada-only** series (Canadian Community Health Survey): self-rated mental health
-isn't collected on a comparable basis across the peer group.
-
-```{python}
-#| echo: false
-mh_path = "data/health/statcan_mental_health.csv"
-if os.path.exists(mh_path):
-    mh = pd.read_csv(mh_path, parse_dates=["date"])
-    fig = single_line(mh, "date", "pct_mh_very_good", title="",
-        yaxis_title="% rating mental health very good or excellent",
-        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
-        source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(mh_path)}")
-    fig.update_yaxes(ticksuffix="%")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Mental-health data not yet available. Run the data pipeline.")
-```
-
 ## Tobacco & alcohol
 
 Two everyday risk factors on one chart — use the **Substance** menu (top right) to switch between them. Canada has one of the *lowest* tobacco-use rates in the peer group and sits near the middle of the pack on alcohol. The two use different units, so the y-axis rescales when you switch.
@@ -582,7 +559,6 @@ The capacity measures above — beds, physicians, and imaging units — are the 
 - [Universal Health Coverage Index (CSV)](../data/health/worldbank_uhc_index.csv) — World Bank / WHO Universal Health Coverage
 - [Out-of-Pocket Health Spending (CSV)](../data/health/worldbank_health_oop.csv) — World Bank / WHO Global Health Expenditure Database
 - [Has a Regular Health-Care Provider (CSV)](../data/health/statcan_family_doctor.csv) — Statistics Canada Table 13-10-0096-01 (CCHS)
-- [Perceived Mental Health, Very Good or Excellent (CSV)](../data/health/statcan_mental_health.csv) — Statistics Canada Table 13-10-0096-01 (CCHS)
 - [Long-Term Care Beds (CSV)](../data/health/oecd_ltc_beds.csv) — OECD Health Statistics (Long-Term Care Resources)
 - [Pharmaceutical Spending per Person (CSV)](../data/health/oecd_pharma_spending_pc.csv) — OECD Health Expenditure (SHA, HC.5.1)
 - [Measles Immunization (CSV)](../data/health/worldbank_measles_vaccination.csv) — World Bank (WHO/UNICEF estimates)

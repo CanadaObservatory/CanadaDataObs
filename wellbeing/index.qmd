@@ -103,6 +103,29 @@ else:
     print("Happiness data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## Mental health
+
+The share of Canadians aged 12 and over rating their own mental health **very good
+or excellent** has fallen from 72% in 2015 to 55% in 2022 — one of the clearest
+trends in the national health survey. Unlike the charts above, this is a
+**Canada-only** series (Canadian Community Health Survey): self-rated mental health
+isn't collected on a comparable basis across the peer group.
+
+```{python}
+#| echo: false
+mh_path = "data/health/statcan_mental_health.csv"
+if os.path.exists(mh_path):
+    mh = pd.read_csv(mh_path, parse_dates=["date"])
+    fig = single_line(mh, "date", "pct_mh_very_good", title="",
+        yaxis_title="% rating mental health very good or excellent",
+        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(mh_path)}")
+    fig.update_yaxes(ticksuffix="%")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Mental-health data not yet available. Run the data pipeline.")
+```
+
 ## Safety
 
 Safety is a basic component of well-being. For the long-run Crime Severity Index
@@ -113,5 +136,6 @@ compare, see **[Crime & Safety](crime-safety.qmd)**.
 ## Download data
 
 - [Happiness Scores & Factor Decomposition (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)
+- [Perceived Mental Health, Very Good or Excellent (CSV)](../data/health/statcan_mental_health.csv) — Statistics Canada Table 13-10-0096-01 (CCHS)
 
 Crime & safety data downloads are on the [Crime & Safety](crime-safety.qmd) page.

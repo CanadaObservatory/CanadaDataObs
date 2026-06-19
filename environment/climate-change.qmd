@@ -42,7 +42,7 @@ if os.path.exists(temp_path):
         xaxis=dict(title="", gridcolor="#e0e0e0", dtick=10),
         margin=dict(t=30, b=120),
         annotations=[dict(
-            text=f"Source: Environment and Climate Change Canada, Canadian Environmental Sustainability Indicators (temperature change) | Data as of: {get_data_date(temp_path)}",
+            text=f"Source: ECCC, Canadian Environmental Sustainability Indicators | Data as of: {get_data_date(temp_path)}",
             xref="paper", yref="paper", x=0, y=-0.20, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -114,7 +114,7 @@ if os.path.exists(ctvb_path):
         yaxis=dict(title="", tickfont=dict(size=11), automargin=True),
         margin=dict(t=30, b=90, l=10),
         annotations=[dict(
-            text=f"Source: Environment and Climate Change Canada, Climate Trends and Variations Bulletin (Annual 2024) | trend over 1948–2024",
+            text="Source: ECCC Climate Trends and Variations Bulletin | 1948–2024 trend",
             xref="paper", yref="paper", x=0, y=-0.16, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -164,7 +164,7 @@ if os.path.exists(ctvb_path):
         mapbox=dict(style="carto-positron", center=dict(lat=64, lon=-96), zoom=1.9),
         height=430, margin=dict(t=10, b=34, l=0, r=0),
         annotations=[dict(
-            text="Markers = each region's approximate centre (regions are areas, not points); colour = 1948–2024 warming trend. Source: ECCC Climate Trends and Variations Bulletin.",
+            text="Source: ECCC Climate Trends and Variations Bulletin",
             xref="paper", yref="paper", x=0, y=-0.07, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "scrollZoom": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -241,7 +241,7 @@ if os.path.exists(city_path):
                           borderwidth=1, showactive=True)],
         margin=dict(t=50, b=120, r=180),
         annotations=[dict(
-            text=f"Sources: ECCC AHCCD (homogenized, to 2020) + MSC daily observations (raw recent), via the GeoMet API | as of {get_data_date(city_path)}",
+            text=f"Source: ECCC AHCCD (homogenized) + MSC daily observations | as of {get_data_date(city_path)}",
             xref="paper", yref="paper", x=0, y=-0.42, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

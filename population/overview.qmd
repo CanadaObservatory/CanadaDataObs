@@ -1,0 +1,92 @@
+---
+title: "People & Society"
+title-block-banner: "#7A263A"
+title-block-banner-color: "#F7F4EE"
+body-classes: area-people
+---
+
+How many people live in Canada and why that's changing, who they are, and how safe their communities feel — with maps that reach down to the neighbourhood level.
+
+::::{.columns}
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Population & Growth](index.qmd)
+Totals and growth, the components of change, non-permanent residents, the ageing
+population, and migration between provinces.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Diversity](diversity.qmd)
+Visible-minority and population-group composition over time and mapped to the
+census tract, with per-metro neighbourhood detail.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Religion](religion.qmd)
+Religious affiliation from 1871 to today — the long-run shift, and the 2021
+picture mapped down to the neighbourhood.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Languages](languages.qmd)
+The languages spoken at home across Canada's cities, mapped to the census tract.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Citizenship](citizenship.qmd)
+Canadian-born, naturalized, and non-citizens by neighbourhood — plus federal
+voter turnout over time.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Commuting](commuting.qmd)
+How Canadians get to work and how long it takes, by city (2021 Census).
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Crime & Safety](../wellbeing/crime-safety.qmd)
+Long-run severity and homicide, everyday-crime trends, hate crime, clearance
+rates, and city and neighbourhood maps.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+:::
+
+::::

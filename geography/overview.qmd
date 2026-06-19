@@ -1,0 +1,153 @@
+---
+title: "Land & Environment"
+title-block-banner: "#3F6F5E"
+title-block-banner-color: "#F7F4EE"
+body-classes: area-environment
+---
+
+The physical country — its land, water, and ecosystems — and the atmosphere above it: climate change, air quality, and the emissions and energy behind them.
+
+## The Land
+
+::::{.columns}
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Where People Live](index.qmd)
+Population density by province and city, and Canada's place in the world.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Ecozones & Land Cover](land.qmd)
+Canada's 15 terrestrial ecozones and how land cover varies across them.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Elevation](elevation.qmd)
+A relief web-map of the landscape, with named peaks.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Water](water.qmd)
+The 40 largest lakes and rivers.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Agriculture](agriculture.qmd)
+Agricultural land across the country.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Protected Areas](protected.qmd)
+Protected and conserved lands and waters.
+:::
+
+::::
+
+## Climate & Atmosphere
+
+::::{.columns}
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Today's Climate](climate.qmd)
+Climate normals across the country.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Climate Change](../environment/climate-change.qmd)
+National, regional, and city warming, by season, with warming spirals.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Wildfire](wildfire.qmd)
+Area burned since 1959 and the 2023 fire locations.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Ice](ice.qmd)
+Permafrost zones and Arctic sea-ice extent.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Air Quality](../environment/air-quality.qmd)
+Emissions and concentrations over time, against peers, including wildfire smoke.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Air Quality by City](../environment/air-quality-cities.qmd)
+A monitoring dashboard for major cities, back to 1974.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-environment width="32%"}
+![](../visual_assets/brand/motifs/banner-environment.svg){.area-banner}
+
+### [Emissions & Energy](../environment/index.qmd)
+Greenhouse-gas emissions, the electricity mix, and the path to a low-carbon grid.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+:::
+
+::::

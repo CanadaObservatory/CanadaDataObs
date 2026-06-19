@@ -1,0 +1,58 @@
+---
+title: "Health & Well-being"
+title-block-banner: "#2A7F9E"
+title-block-banner-color: "#F7F4EE"
+body-classes: area-health
+---
+
+How long and how well Canadians live, how their health-care system performs, and how satisfied they are with life — against a broad group of OECD peers.
+
+::::{.columns}
+
+:::{.column .area-card .area-health width="32%"}
+![](../visual_assets/brand/motifs/banner-health.svg){.area-banner}
+
+### [Health of Canadians](index.qmd)
+Life expectancy and its recent decline, and population health and risk factors —
+suicide, overweight, diabetes, vaccination, and more.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-health width="32%"}
+![](../visual_assets/brand/motifs/banner-health.svg){.area-banner}
+
+### [The Health-Care System](health-care-system.qmd)
+Health spending and capacity — beds, physicians, nurses, MRI units — plus
+pharmaceutical spending, access, and wait times.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-health width="32%"}
+![](../visual_assets/brand/motifs/banner-health.svg){.area-banner}
+
+### [Substance Use](substance-use.qmd)
+Tobacco, alcohol and cannabis by age, and Canada's opioid- and toxic-drug crisis.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-health width="32%"}
+![](../visual_assets/brand/motifs/banner-health.svg){.area-banner}
+
+### [Well-being](../wellbeing/index.qmd)
+Life satisfaction and the factors that underlie it, compared with peers.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+:::
+
+::::

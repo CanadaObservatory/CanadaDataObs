@@ -34,6 +34,8 @@ website:
     left:
       - text: People
         menu:
+          - href: population/overview.qmd
+            text: Overview
           - href: population/index.qmd
             text: Population & Growth
           - href: population/diversity.qmd
@@ -50,6 +52,8 @@ website:
             text: Crime & Safety
       - text: Economy
         menu:
+          - href: economics/overview.qmd
+            text: Overview
           - href: economics/index.qmd
             text: Growth & Jobs
           - href: economics/cost-of-living.qmd
@@ -62,6 +66,8 @@ website:
             text: Income & Inequality
       - text: Government
         menu:
+          - href: fiscal/overview.qmd
+            text: Overview
           - href: fiscal/index.qmd
             text: Government Finances
           - href: government/index.qmd
@@ -70,6 +76,8 @@ website:
             text: Federal Spending
       - text: Health
         menu:
+          - href: health/overview.qmd
+            text: Overview
           - href: health/index.qmd
             text: Health of Canadians
           - href: health/health-care-system.qmd
@@ -80,6 +88,8 @@ website:
             text: Well-being
       - text: Environment
         menu:
+          - href: geography/overview.qmd
+            text: Overview
           - text: "The Land"
           - href: geography/index.qmd
             text: Where People Live
@@ -111,6 +121,8 @@ website:
             text: Emissions & Energy
       - text: Education & Science
         menu:
+          - href: education/overview.qmd
+            text: Overview
           - href: education/index.qmd
             text: Education
           - href: science/index.qmd

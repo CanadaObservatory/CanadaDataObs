@@ -166,6 +166,38 @@ if os.path.exists(cco2_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## CO2 emissions intensity
+
+Emissions per dollar of economic output — how much CO2 the economy releases to produce a given amount of GDP. It is one gauge of how carbon-heavy growth is, and most peers have brought it down steadily while their economies grew. Canada runs among the highest in the group: a cold climate, long transport distances, and an energy- and resource-heavy economy all raise the carbon released per dollar of output.
+
+```{python}
+#| echo: false
+co2gdp_path = "data/environment/owid_co2_per_gdp.csv"
+if os.path.exists(co2gdp_path):
+    df = pd.read_csv(co2gdp_path)
+    df = df[df["year"] >= 1990]
+    fig = peer_comparison_line(df, "year", "co2_per_gdp",
+        title="", yaxis_title="kg CO2 per $ of GDP", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(co2gdp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CO2 intensity data not yet available. Run the data pipeline.")
+```
+
+## Latest CO2 emissions intensity: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(co2gdp_path):
+    df = pd.read_csv(co2gdp_path)
+    fig = ranked_bar(df, "co2_per_gdp", "kg CO2 per $ of GDP",
+        f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(co2gdp_path)}",
+        hover_template="%{y}: %{x:.2f} kg per $<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
 ## Low-carbon electricity
 
 The share of electricity generated from non-fossil sources — hydro, nuclear, wind, and solar combined. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating.
@@ -367,5 +399,6 @@ else:
 - [CO2 per Capita (CSV)](../data/environment/oecd_co2_per_capita.csv) — OECD Green Growth Indicators
 - [CO2 Emissions Indexed (CSV)](../data/environment/oecd_co2_indexed.csv) — OECD Green Growth Indicators
 - [Consumption-Based CO2 per Capita (CSV)](../data/environment/owid_consumption_co2.csv) — Our World in Data (Global Carbon Project)
+- [CO2 Emissions Intensity per GDP (CSV)](../data/environment/owid_co2_per_gdp.csv) — Our World in Data (Global Carbon Project)
 - [Energy Mix — electricity & primary (CSV)](../data/environment/owid_energy_mix.csv) — Our World in Data (Energy Institute, Ember)
 - [Provincial Electricity Generation (CSV)](../data/environment/statcan_provincial_electricity.csv) — Statistics Canada 25-10-0015-01

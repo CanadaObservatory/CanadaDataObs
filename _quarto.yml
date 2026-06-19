@@ -67,7 +67,9 @@ website:
       - text: Health
         menu:
           - href: health/index.qmd
-            text: Health & Health Care
+            text: Health of Canadians
+          - href: health/health-care-system.qmd
+            text: The Health-Care System
           - href: health/substance-use.qmd
             text: Substance Use
           - href: wellbeing/index.qmd

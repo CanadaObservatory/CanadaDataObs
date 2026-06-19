@@ -1,0 +1,368 @@
+---
+title: "The Health-Care System"
+description: "Health spending, system capacity, and access — Canada and OECD peers"
+---
+
+What Canada spends on health care, and what the system has to deliver it: spending as a share of GDP and per person, the physical capacity behind care — hospital beds, doctors, nurses and imaging — long-term-care beds, access to a regular provider, and wait times. Most measures are shown for Canada and 17 OECD peers; a few access measures are Canada-only. For how long Canadians live and the conditions that shape it, see [Health of Canadians](index.qmd).
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, lines_over_time
+
+def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, topical=None,
+                   initial_visible=None):
+    """Standard 17-peer line chart for a World Bank health series."""
+    if not os.path.exists(path):
+        print("Data not yet available. Run the data pipeline.")
+        return
+    df = pd.read_csv(path)
+    fig = peer_comparison_line(df, "year", value_col, title="", yaxis_title=yaxis_title,
+        show_average=True, initial_start=initial_start, topical=topical,
+        initial_visible=initial_visible,
+        source_note=f"Source: {source} | Data as of: {get_data_date(path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+## Health spending
+
+Current expenditure on health as a percentage of GDP — covering both public and
+private spending. It measures the share of the economy devoted to health care.
+
+```{python}
+#| echo: false
+hs_path = "data/health/oecd_health_spending_gdp.csv"
+if os.path.exists(hs_path):
+    df = pd.read_csv(hs_path)
+    fig = peer_comparison_line(df, "year", "health_pct_gdp",
+        title="", yaxis_title="% of GDP", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Expenditure (SHA) | Data as of: {get_data_date(hs_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Health spending data not yet available. Run the data pipeline.")
+```
+
+## Latest health spending: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(hs_path):
+    df = pd.read_csv(hs_path)
+    fig = ranked_bar(df, "health_pct_gdp", "% of GDP",
+        f"Source: OECD Health Expenditure (SHA) | Data as of: {get_data_date(hs_path)}",
+        hover_template="%{y}: %{x:.1f}%<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Health spending per person
+
+The same spending expressed **per person**, in US dollars adjusted for purchasing
+power (PPP) so amounts are comparable across countries. This is often more
+tangible than the share of GDP — it is roughly what the system spends, on
+average, for each resident in a year.
+
+```{python}
+#| echo: false
+hspc_path = "data/health/oecd_health_spending_pc.csv"
+if os.path.exists(hspc_path):
+    df = pd.read_csv(hspc_path)
+    fig = peer_comparison_line(df, "year", "health_pc_usd",
+        title="", yaxis_title="US$ PPP per person", show_average=True)
+    fig.update_yaxes(tickprefix="$", tickformat=",")
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Expenditure (SHA), USD PPP | Data as of: {get_data_date(hspc_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Health spending per capita data not yet available. Run the data pipeline.")
+```
+
+## Latest health spending per person: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(hspc_path):
+    df = pd.read_csv(hspc_path)
+    fig = ranked_bar(df, "health_pc_usd", "US$ PPP per person",
+        f"Source: OECD Health Expenditure (SHA), USD PPP | Data as of: {get_data_date(hspc_path)}",
+        hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.update_xaxes(tickprefix="$", tickformat=",")
+    fig.show(config={"displaylogo": False})
+```
+
+## Pharmaceutical spending per person
+
+Spending on retail pharmaceuticals and other medical non-durables (SHA function
+HC.5.1), in US dollars at purchasing-power parity per person. Canada is among the
+highest spenders in the peer group — behind only the United States in most years.
+Definitions differ slightly across countries (Canada's figure is flagged by the
+OECD as differing in definition), so read small gaps loosely.
+
+```{python}
+#| echo: false
+rx_path = "data/health/oecd_pharma_spending_pc.csv"
+if os.path.exists(rx_path):
+    rx = pd.read_csv(rx_path)
+    fig = peer_comparison_line(rx, "year", "pharma_pc_usd", "",
+        "US$ PPP per person", show_average=True,
+        source_note=f"Source: OECD Health Expenditure (SHA), retail pharmaceuticals (HC.5.1), USD PPP | Data as of: {get_data_date(rx_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Pharmaceutical-spending data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(rx_path):
+    fig = ranked_bar(rx, "pharma_pc_usd", "US$ PPP per person",
+        f"Source: OECD Health Expenditure (SHA), retail pharmaceuticals (HC.5.1) | Data as of: {get_data_date(rx_path)}",
+        hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.update_xaxes(tickprefix="$", tickformat=",")
+    fig.show(config={"displaylogo": False})
+```
+
+## Universal health coverage
+
+Spending measures the money going in; the WHO's universal-health-coverage service-coverage index (0–100) measures how fully a population actually receives the essential health services it needs. Canada scores around 92 — among the highest in the peer group, reflecting broad access notwithstanding the wait-time pressures shown below.
+
+```{python}
+#| echo: false
+show_peer_line("data/health/worldbank_uhc_index.csv", "uhc_index",
+    "Index (0–100)", "World Bank / WHO Universal Health Coverage")
+```
+
+## Out-of-pocket costs
+
+The share of total health spending that households pay directly, out of their own pockets — a common gauge of financial protection, where lower means more care is covered by public or pooled funding. At roughly 15%, Canada sits mid-pack: lower than Switzerland or South Korea, higher than France or the Netherlands.
+
+```{python}
+#| echo: false
+show_peer_line("data/health/worldbank_health_oop.csv", "oop_pct",
+    "% of current health spending", "World Bank / WHO Global Health Expenditure Database")
+```
+
+## Health-system capacity
+
+Spending and outcomes describe the system's size and results; capacity describes what it physically has to work with — beds, doctors, and diagnostic equipment. These inputs bear directly on access and wait times, and are a common lens for discussions of the Canadian system.
+
+## Hospital beds
+
+Total hospital beds per 1,000 population (all care functions).
+
+```{python}
+#| echo: false
+beds_path = "data/health/oecd_hospital_beds.csv"
+if os.path.exists(beds_path):
+    df = pd.read_csv(beds_path)
+    fig = peer_comparison_line(df, "year", "hospital_beds",
+        title="", yaxis_title="Beds per 1,000 population", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Statistics | Data as of: {get_data_date(beds_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Hospital beds data not yet available. Run the data pipeline.")
+```
+
+## Latest hospital beds: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(beds_path):
+    df = pd.read_csv(beds_path)
+    fig = ranked_bar(df, "hospital_beds", "Beds per 1,000 population",
+        f"Source: OECD Health Statistics | Data as of: {get_data_date(beds_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Practising physicians
+
+Practising physicians per 1,000 population.
+
+```{python}
+#| echo: false
+phys_path = "data/health/oecd_physicians.csv"
+if os.path.exists(phys_path):
+    df = pd.read_csv(phys_path)
+    fig = peer_comparison_line(df, "year", "physicians",
+        title="", yaxis_title="Physicians per 1,000 population", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Statistics | Data as of: {get_data_date(phys_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Physician data not yet available. Run the data pipeline.")
+```
+
+## Latest practising physicians: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(phys_path):
+    df = pd.read_csv(phys_path)
+    fig = ranked_bar(df, "physicians", "Physicians per 1,000 population",
+        f"Source: OECD Health Statistics | Data as of: {get_data_date(phys_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Practising nurses
+
+Practising nurses per 1,000 population. Nurses are the largest part of the health workforce, so this is a central measure of system capacity alongside physicians and beds.
+
+```{python}
+#| echo: false
+nurses_path = "data/health/oecd_nurses.csv"
+if os.path.exists(nurses_path):
+    df = pd.read_csv(nurses_path)
+    fig = peer_comparison_line(df, "year", "nurses",
+        title="", yaxis_title="Nurses per 1,000 population", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Statistics | Data as of: {get_data_date(nurses_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Nurses data not yet available. Run the data pipeline.")
+```
+
+## Latest practising nurses: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(nurses_path):
+    df = pd.read_csv(nurses_path)
+    fig = ranked_bar(df, "nurses", "Nurses per 1,000 population",
+        f"Source: OECD Health Statistics | Data as of: {get_data_date(nurses_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## MRI units
+
+Magnetic resonance imaging (MRI) units per million population — a measure of diagnostic-imaging capacity.
+
+```{python}
+#| echo: false
+mri_path = "data/health/oecd_mri_units.csv"
+if os.path.exists(mri_path):
+    df = pd.read_csv(mri_path)
+    fig = peer_comparison_line(df, "year", "mri_units",
+        title="", yaxis_title="MRI units per million population", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: OECD Health Statistics | Data as of: {get_data_date(mri_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("MRI data not yet available. Run the data pipeline.")
+```
+
+## Latest MRI units: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(mri_path):
+    df = pd.read_csv(mri_path)
+    fig = ranked_bar(df, "mri_units", "MRI units per million population",
+        f"Source: OECD Health Statistics | Data as of: {get_data_date(mri_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Long-term care beds
+
+Beds in long-term care facilities and the long-term-care wards of hospitals, per
+1,000 people aged 65 and over — the institutional capacity behind aging-population
+pressures (see the [age structure of the population](../population/index.qmd)).
+Countries organize elder care very differently — some emphasize home care over
+institutions — so this measures capacity in one model of care, not the quality of
+elder care overall.
+
+```{python}
+#| echo: false
+ltc_path = "data/health/oecd_ltc_beds.csv"
+if os.path.exists(ltc_path):
+    ltc = pd.read_csv(ltc_path)
+    fig = peer_comparison_line(ltc, "year", "ltc_beds_per_1k_65plus", "",
+        "Beds per 1,000 aged 65+", show_average=True,
+        source_note=f"Source: OECD Health Statistics (Long-Term Care Resources) | Data as of: {get_data_date(ltc_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Long-term-care data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(ltc_path):
+    fig = ranked_bar(ltc, "ltc_beds_per_1k_65plus", "Beds per 1,000 aged 65+",
+        f"Source: OECD Health Statistics (Long-Term Care Resources) | Data as of: {get_data_date(ltc_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## A regular health-care provider
+
+The share of Canadians aged 12 and over who report having a **regular health-care
+provider** — a family doctor or nurse practitioner they usually see. In 2022 it was
+86%, which still leaves roughly **one in seven** without one. A **Canada-only**
+series (Canadian Community Health Survey, annual estimates to 2022; the survey was
+redesigned afterwards, so later years will appear when published on a comparable
+basis).
+
+```{python}
+#| echo: false
+fd_path = "data/health/statcan_family_doctor.csv"
+if os.path.exists(fd_path):
+    fd = pd.read_csv(fd_path, parse_dates=["date"])
+    fig = single_line(fd, "date", "pct_regular_provider", title="",
+        yaxis_title="% with a regular health-care provider",
+        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(fd_path)}")
+    fig.update_yaxes(ticksuffix="%")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Regular-provider data not yet available. Run the data pipeline.")
+```
+
+## Wait times for priority procedures
+
+The share of patients treated within the agreed **pan-Canadian benchmark** time, for five priority procedures (Canada-wide). Higher is better — more patients treated on time. The pandemic sharply cut access to scheduled surgeries (hip, knee, cataract) in 2020, and most have only partly recovered since; emergency hip-fracture repair and radiation therapy held up. Unlike most charts on this page, this is a **Canada-only** series — there is no comparable peer feed — and the Canadian Institute for Health Information (CIHI) publishes it **annually each spring**, so it is refreshed once a year rather than weekly with the rest of the site.
+
+```{python}
+#| echo: false
+wt_path = "data/health/cihi_wait_times.csv"
+if os.path.exists(wt_path):
+    wt = pd.read_csv(wt_path)
+    fig = lines_over_time(wt, "year", "pct_meeting_benchmark", "procedure",
+        yaxis_title="% treated within benchmark", yticksuffix="%", hover_decimals=0,
+        rangemode="tozero",
+        source_note=f"Source: CIHI, Wait Times for Priority Procedures in Canada (April–September) | Data as of: {get_data_date(wt_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Wait-times data not yet available. Run: python -m pipeline.build_wait_times")
+```
+
+The capacity measures above — beds, physicians, and imaging units — are the closest internationally comparable proxies; the benchmark series here adds the domestic, access-focused view that the public most directly experiences.
+
+## Download data
+
+- [Health Spending, % of GDP (CSV)](../data/health/oecd_health_spending_gdp.csv) — OECD Health Expenditure (SHA)
+- [Health Spending per Person, US$ PPP (CSV)](../data/health/oecd_health_spending_pc.csv) — OECD Health Expenditure (SHA)
+- [Pharmaceutical Spending per Person (CSV)](../data/health/oecd_pharma_spending_pc.csv) — OECD Health Expenditure (SHA)
+- [Hospital Beds (CSV)](../data/health/oecd_hospital_beds.csv) — OECD Health Statistics
+- [Practising Physicians (CSV)](../data/health/oecd_physicians.csv) — OECD Health Statistics
+- [Practising Nurses (CSV)](../data/health/oecd_nurses.csv) — OECD Health Statistics
+- [MRI Units (CSV)](../data/health/oecd_mri_units.csv) — OECD Health Statistics
+- [Long-Term Care Beds (CSV)](../data/health/oecd_ltc_beds.csv) — OECD Health Statistics
+- [Regular Health-Care Provider (CSV)](../data/health/statcan_family_doctor.csv) — Statistics Canada (CCHS)
+- [Wait Times for Priority Procedures (CSV)](../data/health/cihi_wait_times.csv) — CIHI

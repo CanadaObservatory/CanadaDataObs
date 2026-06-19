@@ -1,0 +1,73 @@
+---
+title: "Commuting"
+description: "How Canadians get to work, and how long it takes — by city, 2021 Census"
+---
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.charts import category_bar
+
+MAJOR = ["Canada", "Toronto", "Montréal", "Vancouver", "Ottawa - Gatineau", "Calgary",
+         "Edmonton", "Winnipeg", "Québec", "Hamilton", "Kitchener - Cambridge - Waterloo",
+         "London", "Halifax", "Victoria", "Windsor"]
+SHOW = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+```
+
+How Canadians get to work says a lot about a city's shape. The car dominates almost everywhere, but the largest metros — Toronto, Montréal, Vancouver — carry far more of their commuters on public transit, and the cities built before the car keep higher walking shares. (2021 Census; the pandemic depressed transit use that year, so treat the levels as a recent snapshot rather than a long-run norm.)
+
+## How people commute, by city
+
+```{python}
+#| echo: false
+mode_path = "data/population/commute_mode.csv"
+if os.path.exists(mode_path):
+    m = pd.read_csv(mode_path)
+    m = m[m["geo"].isin(MAJOR)]
+    MODE_ORDER = ["Car, truck or van", "Public transit", "Walked", "Bicycle", "Other"]
+    MODE_COLOR = {"Car, truck or van": "#9aa0a6", "Public transit": "#1f77b4",
+                  "Walked": "#2ca02c", "Bicycle": "#ff7f0e", "Other": "#cbb9ad"}
+    piv = m.pivot(index="geo", columns="mode", values="share")
+    order = piv.sort_values("Public transit", ascending=True).index.tolist()  # most transit at top
+    fig = go.Figure()
+    for mode in MODE_ORDER:
+        fig.add_trace(go.Bar(y=order, x=piv.loc[order, mode], name=mode, orientation="h",
+            marker_color=MODE_COLOR[mode],
+            hovertemplate=f"{mode}: %{{x:.1f}}%<extra>%{{y}}</extra>"))
+    fig.update_layout(barmode="stack", plot_bgcolor="white", height=520,
+        xaxis=dict(title="Share of commuters (%)", gridcolor="#e0e0e0", ticksuffix="%"),
+        yaxis=dict(title=""), legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(l=10, r=20, t=40, b=80),
+        annotations=[dict(text="Source: Statistics Canada, 2021 Census, Table 98-10-0457-01.",
+            xref="paper", yref="paper", x=0, y=-0.13, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config=SHOW)
+else:
+    print("Commute-mode data not yet available — run `python -m pipeline.build_commute`.")
+```
+
+## How long the commute takes
+
+The average one-way commute is about 24 minutes nationally, but it is far longer in the big-city regions — and longest of all across the Greater Toronto Area, where many commute between suburbs and the core.
+
+```{python}
+#| echo: false
+dur_path = "data/population/commute_duration.csv"
+if os.path.exists(dur_path):
+    d = pd.read_csv(dur_path)
+    d = d[d["geo"].isin(MAJOR)]
+    fig = category_bar(d, "geo", "avg_min", xaxis_title="Average one-way commute (minutes)",
+        value_fmt=".0f", ticksuffix=" min",
+        highlight={"Toronto", "Montréal", "Vancouver", "Calgary", "Ottawa - Gatineau"},
+        hovertemplate="%{y}: %{x:.1f} min<extra></extra>",
+        source_note="Source: Statistics Canada, 2021 Census, Table 98-10-0457-01.")
+    fig.show(config=SHOW)
+else:
+    print("Commute-duration data not yet available — run `python -m pipeline.build_commute`.")
+```
+
+## Download data
+
+- [Commute mode by city (CSV)](../data/population/commute_mode.csv) — 2021 Census, Table 98-10-0457-01
+- [Average commute duration by city (CSV)](../data/population/commute_duration.csv) — 2021 Census, Table 98-10-0457-01

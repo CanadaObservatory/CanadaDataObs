@@ -44,6 +44,8 @@ website:
             text: Languages
           - href: population/citizenship.qmd
             text: Citizenship
+          - href: population/commuting.qmd
+            text: Commuting
           - href: wellbeing/crime-safety.qmd
             text: Crime & Safety
       - text: Economy

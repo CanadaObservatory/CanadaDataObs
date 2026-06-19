@@ -52,6 +52,8 @@ website:
             text: Growth & Jobs
           - href: economics/cost-of-living.qmd
             text: Cost of Living
+          - href: economics/borrowing-costs.qmd
+            text: Borrowing Costs
           - href: housing/index.qmd
             text: Housing
           - href: income/index.qmd

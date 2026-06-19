@@ -362,7 +362,11 @@ if os.path.exists(inv_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Current account balance
+## Trade with the world
+
+Canada is a deeply trade-dependent economy — and overwhelmingly dependent on a single partner. This section covers the overall balance with the rest of the world, the concentration of exports on the United States, and where the surplus and deficit actually sit.
+
+### Current account balance
 
 Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus.
 
@@ -382,7 +386,7 @@ else:
     print("Current account data not yet available. Run the data pipeline.")
 ```
 
-## Latest current account balance: ranked
+### Latest current account balance: ranked
 
 ```{python}
 #| echo: false
@@ -394,7 +398,7 @@ if os.path.exists(ca_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Trade exposure to the United States
+### Trade exposure to the United States
 
 The United States takes about two-thirds of Canada's merchandise exports — a share that peaked near 88% around 2000, drifted down over the following two decades, and dropped sharply during the 2025 tariff conflict. Shown for scale, the **European Union** and **China** — Canada's next-largest export markets — each account for only about 5–6%, a measure of how concentrated Canada's trade is on a single partner. (Customs basis, seasonally adjusted.)
 
@@ -430,7 +434,7 @@ else:
     print("Trade data not yet available. Run the data pipeline.")
 ```
 
-## Trade balance: the US vs. the rest of the world
+### Trade balance: the US vs. the rest of the world
 
 Canada runs a large merchandise **surplus with the United States** and a **deficit with every other market combined** — so the overall trade balance hinges on the US relationship. (Monthly, seasonally adjusted; balance = exports − imports.)
 

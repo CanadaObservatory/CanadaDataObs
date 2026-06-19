@@ -241,7 +241,9 @@ transfers to the provinces that deliver those services. So read the chart below 
 fn_path = "data/government/statcan_govt_spending_by_function.csv"
 if os.path.exists(fn_path):
     df = pd.read_csv(fn_path)
-    latest = df[df["year"] == df["year"].max()]
+    latest = df[df["year"] == df["year"].max()].copy()
+    latest["function"] = latest["function"].replace(
+        {"Social protection": "Social protection (pensions, benefits)"})
     yr = int(df["year"].max())
     fig = category_bar(latest, "function", "value_millions", xaxis_title=f"$ billions ({yr}, all governments)",
         value_scale=1000.0, value_fmt=",.0f", tickprefix="$",

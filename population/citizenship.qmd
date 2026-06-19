@@ -22,10 +22,12 @@ the rest of the urban map is 80–95% Canadian-born.
 **How the groups are assembled.** The census reports *citizenship* (citizen or
 not) and *immigrant status* (non-immigrant / immigrant / non-permanent resident)
 on the same population base, and we combine them transparently:
-**Canadian-born** is StatCan's "non-immigrants" (Canadian citizens by birth);
-**naturalized citizens** is Canadian citizens *minus* the Canadian-born; and
-**non-citizens** is direct from the census (permanent residents on track to
-citizenship, temporary residents, and others). The three groups sum to 100%.
+
+- **Canadian-born** — StatCan's "non-immigrants" (Canadian citizens by birth).
+- **Naturalized citizens** — Canadian citizens *minus* the Canadian-born.
+- **Non-citizens** — direct from the census (permanent residents on track to citizenship, temporary residents, and others).
+
+The three groups sum to 100%.
 **Non-permanent residents** — people on work or study permits or claiming asylum,
 central to the recent [population-growth story](index.qmd) — are a *subset* of
 non-citizens, shown as a fourth map option. Census citizenship questions are

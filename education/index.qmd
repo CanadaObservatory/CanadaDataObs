@@ -86,7 +86,14 @@ if os.path.exists(field_path):
     bf = pd.read_csv(field_path)
     bf = bf[(bf["geography"] == "Canada") & (bf["field"] != "Total, field of study")]
     latest = int(bf["year"].max())
-    bf = bf[bf["year"] == latest]
+    bf = bf[bf["year"] == latest].copy()
+    bf["field"] = bf["field"].replace({
+        "Business, management and public administration": "Business and public admin",
+        "Social and behavioural sciences, and legal studies": "Social sciences",
+        "Mathematics, computer and information sciences": "Math and computer sciences",
+        "Physical and life sciences and technologies": "Physical & life sciences",
+        "Visual and performing arts": "Visual & performing arts",
+    })
     fig = category_bar(bf, "field", "tuition",
         xaxis_title=f"Average undergraduate tuition, {latest}/{latest + 1} ($)",
         tickprefix="$", value_fmt=",.0f",

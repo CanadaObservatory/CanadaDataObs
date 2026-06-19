@@ -27,39 +27,25 @@ from pipeline.charts import page_snapshot
 page_snapshot("environment").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Greenhouse gas emissions and the 2030 target
+## Greenhouse gas emissions
 
-Canada's total greenhouse gas emissions — all gases, on the National Inventory Report basis (the official series). Canada has pledged to cut emissions **40–45% below the 2005 level by 2030**; the green marker shows that target band, and the dotted line is the decline still required from the latest year. Emissions have drifted down from their mid-2000s peak but remain well above the 2030 path.
+Canada's total greenhouse gas emissions — all gases, on the National Inventory Report basis (the official series). Emissions have drifted down from their mid-2000s peak. Successive federal governments have committed to reducing emissions, though progress has remained challenging.
 
 ```{python}
 #| echo: false
 ghg_path = "data/environment/eccc_ghg.csv"
 if os.path.exists(ghg_path):
     g = pd.read_csv(ghg_path)
-    v2005 = g.loc[g["year"] == 2005, "ghg_mt"].iloc[0]
-    t_lo, t_hi = v2005 * 0.55, v2005 * 0.60      # 45% and 40% below 2005
-    t_mid = (t_lo + t_hi) / 2
-    last_year = int(g["year"].max()); last_val = g.loc[g["year"] == last_year, "ghg_mt"].iloc[0]
     figg = go.Figure()
     figg.add_trace(go.Scatter(x=g["year"], y=g["ghg_mt"], mode="lines", name="Emissions",
         line=dict(color=CANADA_COLOR, width=3), hovertemplate="%{x}: %{y:.0f} Mt<extra></extra>"))
-    figg.add_trace(go.Scatter(x=[last_year, 2030], y=[last_val, t_mid], mode="lines",
-        name="Decline required to hit target", line=dict(color="#888888", width=2, dash="dot"),
-        hovertemplate="%{x}: %{y:.0f} Mt<extra></extra>"))
-    figg.add_trace(go.Scatter(x=[2030], y=[t_mid], mode="markers",
-        name="2030 target (40–45% below 2005)",
-        marker=dict(color="#2ca02c", size=10, symbol="diamond"),
-        error_y=dict(type="data", symmetric=False, array=[t_hi - t_mid], arrayminus=[t_mid - t_lo],
-                     color="#2ca02c", thickness=2, width=8),
-        hovertemplate="2030 target: %{y:.0f} Mt (40–45% below 2005)<extra></extra>"))
     figg.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
         yaxis=dict(title="GHG emissions (Mt CO2e)", gridcolor="#e0e0e0", rangemode="tozero", ticksuffix=" Mt"),
         xaxis=dict(title="", gridcolor="#e0e0e0", dtick=5),
-        legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="left", x=0),
-        margin=dict(t=30, b=120, r=20))
+        margin=dict(t=30, b=90, r=20))
     figg.add_annotation(
         text=f"Source: Environment and Climate Change Canada, National Inventory Report (CESI) | Data as of: {get_data_date(ghg_path)}",
-        xref="paper", yref="paper", x=0, y=-0.30, showarrow=False, font=dict(size=10, color="#999"))
+        xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))
     figg.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("GHG data not yet available. Run the data pipeline.")

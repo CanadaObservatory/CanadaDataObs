@@ -80,7 +80,7 @@ else:
 
 ## Who is dying
 
-The dead are overwhelmingly men — about three in four — and concentrated in the working-age years from the 20s through the 50s, though no age group is untouched. The chart shows deaths by age group and sex for the latest complete year.
+Those most often dying from the opioid crisis are working-age men — about three in four of the deaths are male, concentrated in the years from the 20s through the 50s. The chart shows deaths by age group and sex for the latest complete year.
 
 ```{python}
 #| echo: false
@@ -108,7 +108,7 @@ else:
 
 ## A poisoned, volatile supply
 
-What makes the recent years so deadly is the drug supply itself. **Fentanyl** — a synthetic opioid roughly 100 times stronger than morphine — was detected in about half of deaths in 2016 but the great majority in recent years. Increasingly, deaths also involve a **stimulant** such as cocaine or methamphetamine, making the supply less predictable still. And these are overwhelmingly **accidental** poisonings, not suicides.
+What makes the recent years so deadly is the drug supply itself. **Fentanyl** — a synthetic opioid roughly 100 times stronger than morphine — was detected in about half of deaths in 2016 but the great majority in recent years. Increasingly, deaths also involve a **stimulant** such as cocaine or methamphetamine, making the supply less predictable still. This uncertainty in the composition of the drug being taken has led to overwhelmingly **accidental** poisonings.
 
 ```{python}
 #| echo: false
@@ -164,7 +164,7 @@ if os.path.exists(national_path):
 
 ## Tobacco, alcohol & cannabis, by age
 
-The opioid crisis is the acute edge of substance use; stepping back, most use is of legal or legalized substances — tobacco, alcohol, and, since 2018, cannabis. This chart shows the share of Canadians who report each, by age group — use the **Substance** menu to switch between them. The age patterns differ sharply: cannabis use and heavy drinking are highest among younger adults and taper off with age, while smoking peaks in middle age. Cannabis was added to the national survey only after legalization in 2018, so its line begins in 2019/2020.
+Most substance use is of legal substances: tobacco, alcohol, and cannabis. This chart shows the share of Canadians who report each, by age group. Use the **Substance** menu to switch between them. The age patterns differ sharply: cannabis use and heavy drinking are highest among younger adults and taper off with age, while smoking peaks in middle age. Cannabis was added to the national survey only after legalization in 2018, so its line begins in 2019/2020.
 
 ```{python}
 #| echo: false

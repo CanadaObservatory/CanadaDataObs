@@ -108,19 +108,37 @@ def fig_price_by_type(sheets, month):
 
 
 def fig_price_time_series(sheets):
-    """Detached (single-family) benchmark price over time, by city (with slider)."""
+    """Benchmark price over time by city, with a dwelling-type dropdown
+    (detached / townhouse / apartment). Detached shows first."""
+    short = {"Single_Family_Benchmark_SA": "detached",
+             "Townhouse_Benchmark_SA": "townhouse",
+             "Apartment_Benchmark_SA": "apartment / condo"}
+    default_col = TYPES[0][0]
     fig = go.Figure()
     for (sheet, label), color in zip(MARKETS, CITY_PALETTE):
-        df = sheets[sheet][["Date", "Single_Family_Benchmark_SA"]].dropna()
-        fig.add_trace(go.Scatter(x=df["Date"], y=df["Single_Family_Benchmark_SA"],
+        df = sheets[sheet][["Date", default_col]].dropna()
+        fig.add_trace(go.Scatter(x=df["Date"], y=df[default_col],
                                  name=label, mode="lines", line=dict(color=color, width=2),
                                  hovertemplate=f"{label}: $%{{y:,.0f}}<extra>%{{x|%b %Y}}</extra>"))
+    # Each dwelling type re-styles every city trace's x/y (date ranges differ by type)
+    buttons = []
+    for col, tlabel, _ in TYPES:
+        xs, ys = [], []
+        for sheet, _label in MARKETS:
+            d = sheets[sheet][["Date", col]].dropna()
+            xs.append(d["Date"]); ys.append(d[col])
+        buttons.append(dict(method="update", label=tlabel,
+            args=[{"x": xs, "y": ys},
+                  {"yaxis.title.text": f"Benchmark price ({short[col]})"}]))
     fig.update_layout(plot_bgcolor="white",
-        yaxis=dict(title="Benchmark price (detached)", tickprefix="$", tickformat=",", gridcolor="#e0e0e0"),
+        yaxis=dict(title=f"Benchmark price ({short[default_col]})",
+                   tickprefix="$", tickformat=",", gridcolor="#e0e0e0"),
         xaxis=dict(title="", gridcolor="#e0e0e0",
                    rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
-        height=560, margin=dict(b=120, t=30, r=160),
-        legend=dict(orientation="v", x=1.02, y=1))
+        height=560, margin=dict(b=120, t=54, r=160),
+        legend=dict(orientation="v", x=1.02, y=1),
+        updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.07,
+            yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)])
     _src(fig, ATTRIB, y=-0.30)
     return fig
 

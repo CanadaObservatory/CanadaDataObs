@@ -186,9 +186,9 @@ except Exception as e:
     print("CREA price data temporarily unavailable.")
 ```
 
-## Detached house prices over time, by city
+## House prices over time, by city and type
 
-How the benchmark price of a detached (single-family) home has moved in each major market — the run-up that the index and proxy charts above can only hint at. Drag the slider to focus on a period.
+How the benchmark price of a typical home has moved in each major market, by dwelling type — detached, townhouse, or apartment/condo. This is the run-up that the index and proxy charts above can only hint at.
 
 ```{python}
 #| echo: false

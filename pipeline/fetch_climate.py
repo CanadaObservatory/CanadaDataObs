@@ -212,17 +212,19 @@ def fetch_city_temperatures():
 
 
 def fetch_city_temperatures_seasonal():
-    """Per-city *seasonal* homogenized mean temperature (°C), from ECCC's AHCCD
+    """Per-city *seasonal* homogenized temperature (°C), from ECCC's AHCCD
     seasonal collection — the data behind the 'which season is warming fastest'
     view (winter warms fastest). Homogenized record only (to 2020). Output tidy
-    long: city, season, year, temp."""
+    long: city, season, year, temp (seasonal mean), temp_max (seasonal mean of
+    daily-high temperatures)."""
     logger.info("Fetching seasonal city temperatures (AHCCD seasonal)...")
     rows = []
     for city, sid in CITY_STATIONS.items():
         try:
             url = (f"{_GEOMET}/ahccd-seasonal/items?station_id__id_station={sid}"
                    "&f=json&limit=1200"
-                   "&properties=year__annee,period_value__valeur_periode,temp_mean__temp_moyenne")
+                   "&properties=year__annee,period_value__valeur_periode,"
+                   "temp_mean__temp_moyenne,temp_max__temp_max")
             feats = _get(url).json().get("features", [])
         except Exception as e:
             logger.warning(f"  seasonal fetch failed for {city}: {e}")
@@ -231,9 +233,13 @@ def fetch_city_temperatures_seasonal():
             p = f["properties"]
             season = _SEASON_MAP.get(p.get("period_value__valeur_periode"))
             y, t = p.get("year__annee"), p.get("temp_mean__temp_moyenne")
+            tx = p.get("temp_max__temp_max")
             if season and y is not None and t is not None and t > _AHCCD_MISSING + 1:
                 rows.append({"city": city, "season": season, "year": int(y),
-                             "temp": round(float(t), 2)})
+                             "temp": round(float(t), 2),
+                             "temp_max": (round(float(tx), 2)
+                                          if tx is not None and tx > _AHCCD_MISSING + 1
+                                          else None)})
     out_df = pd.DataFrame(rows).sort_values(["city", "season", "year"]).reset_index(drop=True)
     if out_df.empty:
         return None
@@ -243,8 +249,8 @@ def fetch_city_temperatures_seasonal():
     save_metadata(out, df=out_df, latest_observation_date=str(int(out_df["year"].max())),
         source="Environment and Climate Change Canada",
         source_table="ECCC AHCCD seasonal (homogenized), via GeoMet",
-        frequency="annual", unit="°C seasonal mean temperature (homogenized)",
-        transformations=["homogenized seasonal mean per city/season/year (Winter/Spring/Summer/Autumn)"])
+        frequency="annual", unit="°C seasonal mean / mean daily-high (homogenized)",
+        transformations=["homogenized seasonal mean + mean daily-high per city/season/year (Winter/Spring/Summer/Autumn)"])
     logger.info(f"  saved {len(out_df)} rows ({out_df.city.nunique()} cities) -> {out.name}")
     return out_df
 

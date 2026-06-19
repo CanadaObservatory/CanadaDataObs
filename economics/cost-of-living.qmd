@@ -17,7 +17,7 @@ from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import category_bar
+from pipeline.charts import category_bar, lines_over_time
 ```
 
 ## Inflation (CPI, year-over-year)
@@ -206,6 +206,43 @@ except FileNotFoundError:
     print("Policy-rate data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## The minimum wage, nominal and real
+
+Minimum wages are set by each province and territory, so there is no single national rate. This shows the four most populous provinces. In **nominal** dollars the minimum wage only ever rises; switch to **real** to adjust for inflation, which is what tells you whether the lowest-paid are actually gaining ground. (All 14 jurisdictions, including the federal rate, are in the data download.)
+
+```{python}
+#| echo: false
+mw_path = "data/economics/esdc_minimum_wage.csv"
+try:
+    mw = pd.read_csv(mw_path)
+    cpi = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in cpi.columns:
+        cpi = cpi[cpi["product_group"] == "All-items"]
+    cpi["yr"] = cpi["date"].dt.year
+    cpi_annual = cpi.groupby("yr")["cpi_value"].mean()
+    full_year = cpi.groupby("yr")["date"].nunique()
+    base_year = int(full_year[full_year >= 12].index.max())   # latest complete CPI year
+    base_cpi = cpi_annual[base_year]
+    PROVS = ["Ontario", "Quebec", "British Columbia", "Alberta"]
+    m = mw[(mw["jurisdiction"].isin(PROVS)) & (mw["year"] <= base_year)].copy()
+    m["real"] = m["min_wage"] * base_cpi / m["year"].map(cpi_annual)
+    m = m.dropna(subset=["real"])
+    fig = lines_over_time(m, "year", "min_wage", "jurisdiction",
+        yaxis_title="$ per hour", group_order=PROVS,
+        colors={"Ontario": "#4e79a7", "Quebec": "#59a14f",
+                "British Columbia": "#f28e2b", "Alberta": "#e15759"},
+        measures=[
+            {"col": "min_wage", "label": "Nominal", "yaxis_title": "$ per hour (nominal)",
+             "ytickprefix": "$", "hover_decimals": 2},
+            {"col": "real", "label": f"Real ({base_year} $)",
+             "yaxis_title": f"$ per hour (constant {base_year} $)", "ytickprefix": "$", "hover_decimals": 2},
+        ],
+        source_note=f"Source: ESDC, Historical Minimum Wage Rates in Canada (open.canada.ca); deflated by StatCan all-items CPI | Data as of: {get_data_date(mw_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("Minimum-wage data not yet available. Run the data pipeline to fetch it.")
+```
+
 ## Other cost pressures
 
 Inflation is only part of the cost-of-living picture. See also:
@@ -216,6 +253,7 @@ Inflation is only part of the cost-of-living picture. See also:
 ## Download data
 
 - [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada 18-10-0004-01
+- [Minimum wage by jurisdiction (CSV)](../data/economics/esdc_minimum_wage.csv) — ESDC, Historical Minimum Wage Rates in Canada
 - [Food CPI (CSV)](../data/economics/statcan_food_cpi.csv) — Statistics Canada 18-10-0004-01
 - [CPI by major component (CSV)](../data/economics/statcan_cpi_components.csv) — Statistics Canada 18-10-0004-01
 - [CPI-trim core inflation (CSV)](../data/economics/statcan_cpi_trim.csv) — Statistics Canada 18-10-0256-01

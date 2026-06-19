@@ -347,6 +347,13 @@ INDICATORS = [
                                "Alternative measures": "Measure of core inflation based on a trimmed mean approach, CPI-trim (year-over-year percent change)"},
               output_subpath="statcan_cpi_trim.csv",
               source_table="Statistics Canada 18-10-0256-01"),
+    # Minimum wage by jurisdiction over time (ESDC via open.canada.ca) — the
+    # cost-of-living companion; the page deflates to real with the CPI above.
+    Indicator("minimum_wage", "economics", "custom",
+              "Minimum wage by jurisdiction", "nominal CAD per hour", "annual",
+              value_col="min_wage", chart_recipe="line",
+              fetch_fn="fetch_minimum_wage", output_subpath="esdc_minimum_wage.csv",
+              source_table="ESDC, Historical Minimum Wage Rates in Canada (open.canada.ca)"),
     # Merchandise trade with the US (export dependence + balances) — bespoke
     # multi-series; the salient US-tariff/trade exposure indicator.
     Indicator("trade_us", "economics", "custom",

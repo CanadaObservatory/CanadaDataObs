@@ -256,6 +256,82 @@ def fetch_cpi():
     return df
 
 
+MINWAGE_URL = ("https://open.canada.ca/data/dataset/390ee890-59bb-4f34-a37c-9732781ef8a0/"
+               "resource/2ddfbfd4-8347-467d-b6d5-797c5421f4fb/download/"
+               "general-historical-minimum-wage.csv")
+
+_MINWAGE_NAMES = {
+    "FJ": "Federal", "AB": "Alberta", "BC": "British Columbia", "MB": "Manitoba",
+    "NB": "New Brunswick", "NL": "Newfoundland and Labrador", "NS": "Nova Scotia",
+    "NWT": "Northwest Territories", "NU": "Nunavut", "ON": "Ontario",
+    "PEI": "Prince Edward Island", "QC": "Quebec", "SK": "Saskatchewan", "YT": "Yukon",
+}
+
+
+def fetch_minimum_wage():
+    """General adult minimum wage by jurisdiction, as an annual panel.
+
+    Source: ESDC "Historical Minimum Wage Rates in Canada" (open.canada.ca, OGL-
+    Canada). The file lists each rate *change* (jurisdiction, effective date, rate);
+    we forward-fill to the rate in effect at year-end for every year, for the 13
+    provinces/territories plus the federal jurisdiction. Nominal dollars; the page
+    deflates to real using the CPI already fetched. The real-vs-nominal gap is the
+    cost-of-living story.
+
+    Gotchas handled: the effective date is `DD-Mon-YY`, so pandas mis-parses the
+    1960s rows to 20xx — any parsed year far in the future is shifted back a century.
+    The rate is a `$`-prefixed string.
+    """
+    import requests, io, datetime
+    logger.info("Fetching ESDC historical minimum wage...")
+    try:
+        r = requests.get(MINWAGE_URL, timeout=60)
+        r.raise_for_status()
+        df = pd.read_csv(io.StringIO(r.text))
+    except Exception as e:
+        logger.error(f"  Failed minimum-wage fetch: {e}")
+        return None
+
+    validate_columns(df, ["Jurisdiction", "Effective Date", "Minimum Wage"], "minimum_wage")
+    df = df.rename(columns={"Jurisdiction": "code", "Effective Date": "eff",
+                            "Minimum Wage": "wage_raw"})
+    df["date"] = pd.to_datetime(df["eff"], format="%d-%b-%y", errors="coerce")
+    # 2-digit years pivot at 1969, so pre-1969 rows land a century too late.
+    too_late = df["date"].dt.year > 2040
+    df.loc[too_late, "date"] = df.loc[too_late, "date"] - pd.DateOffset(years=100)
+    df["wage"] = pd.to_numeric(
+        df["wage_raw"].astype(str).str.replace(r"[\$,]", "", regex=True), errors="coerce")
+    df["jurisdiction"] = df["code"].map(_MINWAGE_NAMES)
+    df = (df.dropna(subset=["date", "wage", "jurisdiction"])
+            .drop_duplicates(subset=["code", "date"], keep="last")
+            .sort_values(["code", "date"]))
+    if df.empty:
+        return None
+
+    cur_year = datetime.date.today().year
+    rows = []
+    for code, g in df.groupby("code"):
+        name = g["jurisdiction"].iloc[0]
+        for y in range(int(g["date"].dt.year.min()), cur_year + 1):
+            asof = pd.Timestamp(year=y, month=12, day=31)
+            in_effect = g[g["date"] <= asof]
+            if len(in_effect):
+                rows.append({"code": code, "jurisdiction": name, "year": y,
+                             "min_wage": round(float(in_effect["wage"].iloc[-1]), 2)})
+    out = pd.DataFrame(rows).sort_values(["jurisdiction", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "esdc_minimum_wage.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Employment and Social Development Canada (Historical Minimum Wage Rates in Canada)",
+        source_table="open.canada.ca 390ee890",
+        frequency="annual", unit="nominal CAD per hour",
+        transformations=["rate in effect at year-end, forward-filled per jurisdiction; 14 jurisdictions"])
+    logger.info(f"  saved {len(out)} rows ({out.jurisdiction.nunique()} jurisdictions) -> {out_path.name}")
+    return out
+
+
 PROVINCES = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",
              "New Brunswick", "Quebec", "Ontario", "Manitoba", "Saskatchewan",
              "Alberta", "British Columbia"]

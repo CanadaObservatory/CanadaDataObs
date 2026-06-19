@@ -363,6 +363,7 @@ if os.path.exists(rates_path):
     figm.add_trace(go.Scatter(x=rt["date"], y=rt["prime"], name="Prime rate",
         mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="Prime: %{y:.2f}%<extra></extra>"))
     figm.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+        meta=dict(autoscaleY=dict(include=[0], min=0)),
         yaxis=dict(title="Interest rate (%)", gridcolor="#e0e0e0", ticksuffix="%", rangemode="tozero"),
         xaxis=dict(title="", gridcolor="#e0e0e0",
             rangeselector=dict(buttons=[

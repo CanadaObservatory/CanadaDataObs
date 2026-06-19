@@ -139,6 +139,40 @@ if os.path.exists(pm_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Air quality in global context
+
+The peer comparison is among countries with broadly clean air. Globally, the differences are far larger. Mean exposure to PM2.5 in China and India runs several times higher than in Canada, the United States, or any OECD peer — a gap that dwarfs the differences within the peer group, even as both countries have begun to improve. Canada's air is not only clean by rich-country standards; it is among the cleanest in the world. (China and India are shown here for global context; they are not part of the OECD peer group used elsewhere.)
+
+```{python}
+#| echo: false
+pmglob_path = "data/environment/worldbank_pm25_global.csv"
+if os.path.exists(pmglob_path):
+    pg = pd.read_csv(pmglob_path)
+    GSTYLE = {"CAN": (CANADA_COLOR, 3), "USA": ("#1f77b4", 2),
+              "CHN": ("#ff7f0e", 2), "IND": ("#2ca02c", 2)}
+    GORDER = [("CAN", "Canada"), ("USA", "United States"), ("CHN", "China"), ("IND", "India")]
+    fig = go.Figure()
+    for code, label in GORDER:
+        s = pg[pg["country_code"] == code].sort_values("year")
+        col, w = GSTYLE[code]
+        fig.add_trace(go.Scatter(x=s["year"], y=s["pm25"], name=label, mode="lines",
+            line=dict(color=col, width=w),
+            hovertemplate=f"{label}: %{{y:.1f}} µg/m³<extra></extra>"))
+    fig.add_hline(y=5, line_dash="dot", line_color="#888", opacity=0.8,
+                  annotation_text="WHO 2021 guideline (5 µg/m³)", annotation_position="bottom right",
+                  annotation_font=dict(size=10, color="#888"))
+    fig.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title="PM2.5 (µg/m³, mean annual exposure)", gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        margin=dict(t=30, b=90, r=150),
+        annotations=[dict(text=f"Source: World Bank (PM2.5 mean annual exposure) | Data as of: {get_data_date(pmglob_path)}",
+            xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Global-context PM2.5 data not yet available. Run the data pipeline.")
+```
+
 ## The new challenge: wildfire smoke
 
 The one pollutant moving the wrong way is fine particulate matter, and wildfire is
@@ -193,6 +227,7 @@ else:
 - [Air-pollutant emissions, national (CSV)](../data/environment/apei_emissions.csv) — ECCC Air Pollutant Emissions Inventory (APEI)
 - [Mean population exposure to PM2.5 (CSV)](../data/environment/oecd_pm25_exposure.csv) — OECD Green Growth Indicators
 - [Population exposed to PM2.5 above WHO guideline (CSV)](../data/environment/oecd_pm25_above_who.csv) — OECD Green Growth Indicators
+- [PM2.5 exposure — global context (CSV)](../data/environment/worldbank_pm25_global.csv) — World Bank, EN.ATM.PM25.MC.M3
 
 ::: {.callout-note collapse="true"}
 ## About these data

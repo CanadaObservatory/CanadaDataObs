@@ -194,6 +194,46 @@ def fetch_co2_per_gdp():
     return df
 
 
+def fetch_co2_global_context():
+    """CO2 per capita for a small, curated global-context set — Canada, the US,
+    China, India, and the world average (OWID). A deliberate companion to the
+    OECD peer chart (kept separate, not bolted onto the 17-peer lines): it places
+    Canada among the world's highest per-capita emitters while showing the
+    emerging giants (China risen sharply, India still low) and the world line.
+    """
+    logger.info("Fetching OWID CO2 per capita (global context)...")
+    df = _load_owid_co2()
+    if df is None:
+        return None
+    validate_columns(df, ["iso_code", "country", "year", "co2_per_capita"], "co2_global")
+    sel = {"CAN": "Canada", "USA": "United States", "CHN": "China", "IND": "India"}
+    countries = df[df["iso_code"].isin(sel)].copy()
+    countries["country_code"] = countries["iso_code"]
+    countries["country_name"] = countries["iso_code"].map(sel)
+    world = df[df["country"] == "World"].copy()   # OWID aggregate has no iso_code
+    world["country_code"] = "WLD"
+    world["country_name"] = "World"
+    out = pd.concat([countries, world], ignore_index=True)
+    out["co2_per_capita"] = pd.to_numeric(out["co2_per_capita"], errors="coerce")
+    out = out.dropna(subset=["co2_per_capita"])
+    out["year"] = out["year"].astype(int)
+    out = out[out["year"] >= 1950]   # the modern era (China's rise is post-2000)
+    out = (out[["country_code", "country_name", "year", "co2_per_capita"]]
+           .sort_values(["country_code", "year"]).reset_index(drop=True))
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "environment" / "owid_co2_global_context.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Our World in Data (Global Carbon Project)",
+        source_table="owid-co2-data",
+        frequency="annual", unit="tonnes CO2 per capita (production-based)",
+        transformations=["curated global-context set: Canada, US, China, India, World; 1950–"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
 if __name__ == "__main__":
     fetch_energy_mix()
     fetch_consumption_co2()

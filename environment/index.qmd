@@ -107,6 +107,39 @@ if os.path.exists(co2cap_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## CO2 per capita in global context
+
+The comparison above is among wealthy countries, where Canada sits at the high end. Widening the lens to the whole world changes the picture. Canada and the United States are among the highest per-capita emitters anywhere; China's emissions per person have climbed steeply since 2000 to around the world's upper-middle, while India's remain low. The world average (dashed) sits well below all of them — high per-capita emissions are a feature of rich, energy-intensive economies. (China and India are shown here for global context; they are not part of the OECD peer group used elsewhere.)
+
+```{python}
+#| echo: false
+co2glob_path = "data/environment/owid_co2_global_context.csv"
+if os.path.exists(co2glob_path):
+    g = pd.read_csv(co2glob_path)
+    STYLE = {"CAN": (CANADA_COLOR, 3, "solid"), "USA": ("#1f77b4", 2, "solid"),
+             "CHN": ("#ff7f0e", 2, "solid"), "IND": ("#2ca02c", 2, "solid"),
+             "WLD": ("#888888", 2, "dot")}
+    ORDER = [("CAN", "Canada"), ("USA", "United States"), ("CHN", "China"),
+             ("IND", "India"), ("WLD", "World average")]
+    fig = go.Figure()
+    for code, label in ORDER:
+        s = g[g["country_code"] == code].sort_values("year")
+        col, w, dash = STYLE[code]
+        fig.add_trace(go.Scatter(x=s["year"], y=s["co2_per_capita"], name=label,
+            mode="lines", line=dict(color=col, width=w, dash=dash),
+            hovertemplate=f"{label}: %{{y:.1f}} t<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title="Tonnes CO2 per capita", gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        margin=dict(t=30, b=90, r=160),
+        annotations=[dict(text=f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(co2glob_path)}",
+            xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Global-context CO2 data not yet available. Run the data pipeline.")
+```
+
 ## CO2 emissions trend (indexed, 2000 = 100)
 
 How each country's CO2 emissions have changed relative to 2000 levels. Values below 100 indicate reductions since 2000; above 100 indicate growth.
@@ -400,5 +433,6 @@ else:
 - [CO2 Emissions Indexed (CSV)](../data/environment/oecd_co2_indexed.csv) — OECD Green Growth Indicators
 - [Consumption-Based CO2 per Capita (CSV)](../data/environment/owid_consumption_co2.csv) — Our World in Data (Global Carbon Project)
 - [CO2 Emissions Intensity per GDP (CSV)](../data/environment/owid_co2_per_gdp.csv) — Our World in Data (Global Carbon Project)
+- [CO2 per Capita — Global Context (CSV)](../data/environment/owid_co2_global_context.csv) — Our World in Data (Global Carbon Project)
 - [Energy Mix — electricity & primary (CSV)](../data/environment/owid_energy_mix.csv) — Our World in Data (Energy Institute, Ember)
 - [Provincial Electricity Generation (CSV)](../data/environment/statcan_provincial_electricity.csv) — Statistics Canada 25-10-0015-01

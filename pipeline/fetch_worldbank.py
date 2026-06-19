@@ -73,6 +73,45 @@ def fetch_world_population():
     return df
 
 
+def fetch_pm25_global_context():
+    """Mean population exposure to PM2.5 (World Bank EN.ATM.PM25.MC.M3, µg/m³) for
+    a curated global-context set — Canada, the US, China, India. The deliberate
+    "how clean is Canada's air, globally" companion to the OECD peer chart (the
+    OECD Green Growth series is members-only, so it can't show China/India). The
+    WHO 2021 guideline is 5 µg/m³.
+    """
+    logger.info("Fetching World Bank PM2.5 (global context)...")
+    sel = {"CAN": "Canada", "USA": "United States", "CHN": "China", "IND": "India"}
+    try:
+        js = requests.get(f"{WB_BASE}/country/{';'.join(sel)}/indicator/EN.ATM.PM25.MC.M3",
+                          params={"format": "json", "per_page": "5000"}, timeout=120).json()
+    except Exception as e:
+        logger.error(f"  Failed World Bank PM2.5 fetch: {e}")
+        return None
+    if not isinstance(js, list) or len(js) < 2 or not js[1]:
+        logger.warning("  World Bank returned no PM2.5 data")
+        return None
+    rows = [{"country_code": d["countryiso3code"], "year": int(d["date"]),
+             "pm25": d["value"]} for d in js[1] if d.get("value") is not None]
+    df = pd.DataFrame(rows)
+    df = df[df["country_code"].isin(sel)].copy()
+    if df.empty:
+        return None
+    df["country_name"] = df["country_code"].map(sel)
+    df = (df[["country_code", "country_name", "year", "pm25"]]
+          .sort_values(["country_code", "year"]).reset_index(drop=True))
+    out_path = DATA_DIR / "environment" / "worldbank_pm25_global.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="World Bank (World Development Indicators)",
+        source_table="EN.ATM.PM25.MC.M3",
+        frequency="annual", unit="µg/m³ (mean annual PM2.5 exposure)",
+        transformations=["curated global-context set: Canada, US, China, India"])
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
+    return df
+
+
 def fetch_worldbank_indicator(ind):
     """Generic World Bank fetch driven by an Indicator (source='worldbank').
 

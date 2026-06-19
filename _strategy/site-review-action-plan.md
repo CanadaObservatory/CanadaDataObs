@@ -206,3 +206,14 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   access). Health dropdown → 4 items. All verified in rendered Quarto; a full site render
   confirms nav propagation. **NEXT: Phase-2 data items** (minimum wage — needs ESDC/StatCan
   source check; CREA dwelling-type dropdown — data in hand), then Phases 3–5, then colours.
+- **2026-06-19 #3 (Phase 2 data items — owner "proceed as suggested"):** PHASE 2 COMPLETE.
+  `0d181e1` **minimum wage over time** (new `fetch_minimum_wage` from ESDC "Historical Minimum
+  Wage Rates in Canada", open.canada.ca CKAN; annual year-end panel, 14 jurisdictions, 1965–;
+  century-fix for the DD-Mon-YY 1960s rows + `$` strip). Chart on cost-of-living.qmd: 4 major
+  provinces, Nominal/Real toggle (deflated by the all-items CPI to the latest full year).
+  `d2ee315` **CREA dwelling-type dropdown** on the benchmark-price-over-time chart
+  (detached/townhouse/apartment; restyles x/y + y-title; charts-only, no data committed).
+  +1 indicator (→111). Both verified in rendered Quarto. **NEXT: Phase 3** (Economy
+  Trade/Currency/Borrowing split + rent/vacancy-by-city + voter turnout [federal] +
+  income-distribution slider), then Phase 4 (4 topic adds), Phase 5 (landing pages, provincial
+  fiscal, parks map), then colours. Several Phase-3+ items need a source-confirmation pass first.

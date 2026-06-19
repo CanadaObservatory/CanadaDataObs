@@ -233,3 +233,14 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   table (34-10-0133, unverified). (3) **income-distribution slider** — StatCan decile/quintile
   cube still to confirm. NEXT: owner steer on the data-item placements/forms, then build; then
   Phase 4 (commute + productivity-decomposition first), Phase 5, colours.
+- **2026-06-19 #5 (Phase-3 data builds):** `c9972ef` **federal voter turnout** → owner-steered
+  onto the Citizenship page ("Voting" section): historical turnout 1867–2025 (Elections Canada
+  table via pd.read_html, referendum years dropped) + turnout-by-age 2004–2025 (open data; gotchas:
+  UTF-8-BOM → utf-8-sig, 0–1 fraction → ×100). `3503c3d` **rental vacancy by city** → ranked bar
+  of 33 CMAs on the Housing page (fetch_cma_vacancy off 34-10-0127-01; Sudbury ~1.3% tightest →
+  Kelowna ~6.3% loosest; big metros highlighted) — fixes the "misleading as all-Canada" note.
+  +2 indicators (→113). **REMAINING Phase-3 data item: income-distribution over time** — source
+  confirmed (StatCan 11-10-0193-01: share/average/upper-limit by decile, 1976–2024, market/
+  total/after-tax). DESIGN FORK for the owner: a decile year-slider (report's "like the age
+  pyramid") vs a simpler top-vs-bottom share-over-time line with a market/after-tax toggle. Then
+  Phase 4 (commute + productivity-decomposition first), Phase 5, colours.

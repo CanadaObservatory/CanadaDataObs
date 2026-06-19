@@ -260,6 +260,11 @@ INDICATORS = [
               value_col="old_age_dependency", chart_recipe="line",
               wb_indicator="SP.POP.DPND.OL", start_period=1960,
               source_table="World Bank WDI (UN World Population Prospects)"),
+    Indicator("world_population", "population", "custom",
+              "Population of every country (global context)", "people", "annual",
+              value_col="population", chart_recipe="bar",
+              fetch_fn="fetch_world_population", output_subpath="worldbank_population.csv",
+              source_table="World Bank (SP.POP.TOTL)"),
 
     # ----- Economy & Jobs (OECD) -----
     Indicator("gdp_per_capita", "economics", "oecd",

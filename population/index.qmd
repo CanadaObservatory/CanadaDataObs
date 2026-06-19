@@ -7,11 +7,55 @@ description: "Population over time, growth rate, components of change, non-perma
 #| echo: false
 import os
 import re
+import math
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
 from pipeline.charts import (single_line, single_bar, peer_comparison_line,
                              ranked_bar, population_pyramid)
+```
+
+## Canada in the world
+
+Canada is often called a small country. By population, it isn't. With about 41 million people it sits in the **top fifth** of the world: more populous than the great majority of countries, even if it is dwarfed by giants like India, China, and the United States. Each dot below is a country, sorted by population on a ratio (logarithmic) scale; Canada is in red.
+
+```{python}
+#| echo: false
+wp_path = "data/population/worldbank_population.csv"
+if os.path.exists(wp_path):
+    wp = pd.read_csv(wp_path).sort_values("population", ascending=False).reset_index(drop=True)
+    wp["rank"] = wp.index + 1
+    n = len(wp)
+    can = wp[wp["country_code"] == "CAN"].iloc[0]
+    can_rank = int(can["rank"])
+    is_can = (wp["country_code"] == "CAN").tolist()
+
+    fig = go.Figure(go.Scatter(
+        x=wp["rank"], y=wp["population"], mode="markers",
+        marker=dict(size=[12 if c else 5 for c in is_can],
+                    color=[CANADA_COLOR if c else "#c2c9d1" for c in is_can],
+                    line=dict(width=[1.5 if c else 0 for c in is_can], color="white")),
+        customdata=wp[["country_name", "rank"]].values,
+        hovertemplate="<b>%{customdata[0]}</b><br>%{y:,.0f} people<br>Rank %{customdata[1]} of " + str(n) + "<extra></extra>"))
+    # On a log y-axis, annotation y is given as log10(value), not the raw value.
+    fig.add_annotation(x=3, y=math.log10(float(wp["population"].iloc[0])), yshift=16, xanchor="left",
+        text="India, China and<br>the U.S. lead", showarrow=False, font=dict(size=10, color="#888"), align="left")
+    fig.add_annotation(x=can_rank, y=math.log10(float(can["population"])),
+        text=f"<b>Canada — {can_rank}th of {n}</b>", showarrow=True, arrowhead=2,
+        ax=60, ay=-36, font=dict(size=12, color=CANADA_COLOR), arrowcolor=CANADA_COLOR)
+    fig.update_layout(plot_bgcolor="white", height=460, showlegend=False,
+        xaxis=dict(title="Countries ranked by population (1 = most populous)",
+                   gridcolor="#e0e0e0", rangemode="tozero"),
+        yaxis=dict(title="Population", type="log", gridcolor="#e0e0e0",
+                   range=[3.85, 9.42],  # headroom above the 1.4B giants + below the smallest
+                   tickvals=[1e4, 1e5, 1e6, 1e7, 1e8, 1e9],
+                   ticktext=["10K", "100K", "1M", "10M", "100M", "1B"]),
+        margin=dict(t=55, b=95, r=30))
+    fig.add_annotation(text=f"Source: World Bank, SP.POP.TOTL (most recent year per country) | Data as of: {get_data_date(wp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.24, showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("World population data not yet available. Run the data pipeline.")
 ```
 
 ## Canada's population over time
@@ -363,4 +407,5 @@ else:
 - [Net Interprovincial Migration (CSV)](../data/population/statcan_interprovincial_migration.csv) — Statistics Canada Table 17-10-0020-01
 - [Total Fertility Rate, 17 peers (CSV)](../data/population/worldbank_fertility_rate.csv) — World Bank WDI (UN World Population Prospects)
 - [Old-Age Dependency Ratio, 17 peers (CSV)](../data/population/worldbank_old_age_dependency.csv) — World Bank WDI (UN World Population Prospects)
+- [Population of Every Country (CSV)](../data/population/worldbank_population.csv) — World Bank, SP.POP.TOTL
 - [Median Age & Age Mix by Census Tract (CSV)](../data/geo/statcan_ct_age_2021.csv) — 2021 Census of Population

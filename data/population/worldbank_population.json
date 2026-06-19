@@ -1,0 +1,14 @@
+{
+  "dataset_id": "worldbank_population",
+  "source": "World Bank (World Development Indicators)",
+  "source_table": "SP.POP.TOTL",
+  "frequency": "annual",
+  "unit": "people",
+  "retrieved_at": "2026-06-19T16:35:10.277941+00:00",
+  "latest_observation_date": "2024",
+  "transformations": [
+    "all countries (WB aggregates removed), most recent year each"
+  ],
+  "notes": null,
+  "row_count": 217
+}

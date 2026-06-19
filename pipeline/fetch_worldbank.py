@@ -11,13 +11,66 @@ fixed capital formation as % of GDP, and military expenditure as % of GDP
 
 import requests
 import pandas as pd
-from pipeline.config import PEER_CODES, PEER_COUNTRIES
+from pipeline.config import PEER_CODES, PEER_COUNTRIES, DATA_DIR
 from pipeline.metadata import save_metadata
 import logging
 
 logger = logging.getLogger(__name__)
 
 WB_BASE = "https://api.worldbank.org/v2"
+
+
+def fetch_world_population():
+    """Population of every country (World Bank SP.POP.TOTL, most recent year per
+    country) for the "Canada isn't a small country" global-context chart.
+
+    Unlike the peer-only generic fetcher, this keeps ALL countries — but first
+    pulls the WB country metadata to drop the regional/income aggregates (region
+    == 'Aggregates'; e.g. "World", "High income", "Sub-Saharan Africa"), which
+    would otherwise dwarf every real country. `mrnev=1` returns each country's
+    most-recent non-empty value.
+    """
+    logger.info("Fetching World Bank population for all countries...")
+    try:
+        meta = requests.get(f"{WB_BASE}/country",
+                            params={"format": "json", "per_page": "400"},
+                            timeout=60).json()
+        real = {c["id"]: c["name"] for c in meta[1]
+                if c.get("region", {}).get("value") != "Aggregates"}
+        js = requests.get(f"{WB_BASE}/country/all/indicator/SP.POP.TOTL",
+                          params={"format": "json", "per_page": "20000", "mrnev": "1"},
+                          timeout=120).json()
+    except Exception as e:
+        logger.error(f"  Failed World Bank population fetch: {e}")
+        return None
+
+    if not isinstance(js, list) or len(js) < 2 or not js[1]:
+        logger.warning("  World Bank returned no population data")
+        return None
+
+    seen, rows = set(), []
+    for d in js[1]:
+        code = d.get("countryiso3code")
+        if code in real and d.get("value") is not None and code not in seen:
+            seen.add(code)
+            rows.append({"country_code": code, "country_name": real[code],
+                         "year": int(d["date"]), "population": int(d["value"])})
+    df = pd.DataFrame(rows)
+    if df.empty or "CAN" not in set(df["country_code"]):
+        logger.warning("  population data missing Canada or empty")
+        return None
+    df = df.sort_values("population", ascending=False).reset_index(drop=True)
+
+    out_path = DATA_DIR / "population" / "worldbank_population.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="World Bank (World Development Indicators)",
+        source_table="SP.POP.TOTL",
+        frequency="annual", unit="people",
+        transformations=["all countries (WB aggregates removed), most recent year each"])
+    logger.info(f"  saved {len(df)} countries -> {out_path.name}")
+    return df
 
 
 def fetch_worldbank_indicator(ind):

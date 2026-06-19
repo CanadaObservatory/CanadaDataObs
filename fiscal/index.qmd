@@ -186,7 +186,7 @@ if os.path.exists(def_path):
         yaxis_title="% of GDP", show_average=True)
     fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.6)
     fig.update_layout(annotations=[
-        dict(text="NATO 2%-of-GDP guideline", xref="paper", yref="y", x=0.01,
+        dict(text="NATO minimum target", xref="paper", yref="y", x=0.01,
              xanchor="left", y=2, yshift=9, showarrow=False, font=dict(size=10, color="#888")),
         dict(text=f"Source: World Bank (data from SIPRI) | Data as of: {get_data_date(def_path)}",
              xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])

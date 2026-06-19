@@ -189,6 +189,7 @@ The share of electricity generated from non-fossil sources — hydro, nuclear, w
 emix_path = "data/environment/owid_energy_mix.csv"
 if os.path.exists(emix_path):
     df = pd.read_csv(emix_path)
+    df = df[df["low_carbon_share_elec"].notna()]
     fig = peer_comparison_line(df, "year", "low_carbon_share_elec",
         title="", yaxis_title="% of electricity from low-carbon sources",
         show_average=True)

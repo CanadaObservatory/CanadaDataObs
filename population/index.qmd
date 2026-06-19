@@ -123,6 +123,7 @@ fig = single_bar(canada_growth, "date", "pop_yoy_pct", title="",
                  customdata=canada_growth["date"].dt.quarter,
                  hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Growth: %{y:.2f}%<extra></extra>",
                  source_note=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}")
+fig.update_yaxes(range=[0, 5])
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 

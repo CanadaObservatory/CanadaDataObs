@@ -219,10 +219,8 @@ if os.path.exists(vac_path):
     fig = peer_comparison_line(vac, "year", "measles_immunization_pct", "",
         "% of children 12–23 months", show_average=True,
         source_note=f"Source: World Bank (WHO/UNICEF immunization estimates) | Data as of: {get_data_date(vac_path)}")
-    fig.add_hline(y=95, line_dash="dash", line_color="#555", line_width=1,
-                  annotation_text="≈95% needed to stop community spread",
-                  annotation_position="bottom left",
-                  annotation_font=dict(size=10, color="#555"))
+    fig.add_hline(y=95, line_dash="dash", line_color="#555", line_width=1)
+    fig.update_yaxes(range=[50, 101])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Vaccination data not yet available. Run the data pipeline.")

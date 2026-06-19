@@ -633,6 +633,77 @@ def ranked_bar_by_age(df, value_col, age_col, xaxis_title, source_note, *,
     return fig
 
 
+def ranked_bar_select(options, source_note, *, country_col="country_code",
+                      name_col="country_name", year_col="year", ascending=True,
+                      min_countries=10, height=600, default_index=0,
+                      menu_label=None):
+    """Ranked horizontal bar with a dropdown selecting among several measures.
+
+    Like `ranked_bar_by_age`, but the options are separate measures (each its own
+    DataFrame/value column) rather than one long age column — built to merge the
+    gross- and net-debt ranked bars into a single chart. Each option re-ranks on
+    its own latest comparable year (Canada always kept, via the same coverage rule
+    as `ranked_bar`); switching swaps the bars, recolours them (Canada red),
+    re-sorts the y-axis, and rewrites the x-axis title, hover, and footnote year.
+
+    `options` is a list of dicts, each:
+        label          — dropdown label (e.g. "Gross debt")
+        df             — the DataFrame for that measure
+        value_col      — the column to rank on
+        xaxis_title    — x-axis title for that measure
+        hover_template — optional per-option hover (default "%{y}: %{x}<extra></extra>")
+    `menu_label` draws a small caption above the dropdown (e.g. "Measure:")."""
+    def _bar_color(c):
+        return CANADA_COLOR if c == HIGHLIGHT_COUNTRY else COMPARATOR_COLORS.get(c, PEER_COLOR)
+
+    prepared = []
+    for opt in options:
+        d, vc = opt["df"], opt["value_col"]
+        year = _latest_year_with_coverage(d, vc, year_col, min_countries,
+                                          country_col=country_col,
+                                          require_code=HIGHLIGHT_COUNTRY)
+        latest = (d[d[year_col] == year].dropna(subset=[vc])
+                  .sort_values(vc, ascending=ascending))
+        names = (latest[name_col] if name_col in latest.columns
+                 else latest[country_col]).tolist()
+        prepared.append(dict(
+            label=opt["label"], year=int(year),
+            x=latest[vc].tolist(), y=names,
+            colors=[_bar_color(c) for c in latest[country_col]],
+            xaxis_title=opt.get("xaxis_title", ""),
+            hover=opt.get("hover_template", "%{y}: %{x}<extra></extra>")))
+
+    p0 = prepared[default_index]
+    fig = go.Figure(go.Bar(x=p0["x"], y=p0["y"], orientation="h",
+        marker_color=p0["colors"], hovertemplate=p0["hover"]))
+
+    buttons = []
+    for p in prepared:
+        buttons.append(dict(method="update", label=p["label"],
+            args=[{"x": [p["x"]], "y": [p["y"]], "marker.color": [p["colors"]],
+                   "hovertemplate": p["hover"]},
+                  {"yaxis.categoryarray": p["y"], "yaxis.categoryorder": "array",
+                   "xaxis.title.text": p["xaxis_title"],
+                   "annotations[0].text": _ranked_footnote(source_note, p["year"])}]))
+
+    fig.update_layout(
+        xaxis=dict(gridcolor="#e0e0e0", title=p0["xaxis_title"]),
+        yaxis=dict(title="", categoryorder="array", categoryarray=p0["y"]),
+        plot_bgcolor="white", showlegend=False, height=height,
+        margin=dict(t=60, b=120, l=10, r=20),
+        updatemenus=[dict(buttons=buttons, active=default_index,
+            direction="down", showactive=True, x=1, xanchor="right",
+            y=1.06, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1)],
+        annotations=[dict(text=_ranked_footnote(source_note, p0["year"]),
+            xref="paper", yref="paper", x=0, xanchor="left", y=-0.15, showarrow=False,
+            font=dict(size=10, color="#999"))])
+    if menu_label:
+        fig.add_annotation(text=menu_label, xref="paper", yref="paper",
+            x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
+            font=dict(size=11, color="#666"))
+    return fig
+
+
 def ranking_strip(items, source_note=None, year_col="year",
                   country_col="country_code", name_col="country_name",
                   min_countries=8, height=None):

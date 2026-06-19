@@ -627,9 +627,8 @@ def ranked_bar_by_age(df, value_col, age_col, xaxis_title, source_note, *,
         annotations=[dict(text=_ranked_footnote(source_note, d0['year']),
             xref="paper", yref="paper", x=0, xanchor="left", y=-0.15, showarrow=False,
             font=dict(size=10, color="#999"))])
-    fig.add_annotation(text="Age group:", xref="paper", yref="paper",
-        x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
-        font=dict(size=11, color="#666"))
+    # No "Age group:" caption — the dropdown button is self-labelling and the prose
+    # names the menu (matches the caption removal on the by-age line chart, 2df1862).
     return fig
 
 

@@ -217,3 +217,19 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   Trade/Currency/Borrowing split + rent/vacancy-by-city + voter turnout [federal] +
   income-distribution slider), then Phase 4 (4 topic adds), Phase 5 (landing pages, provincial
   fiscal, parks map), then colours. Several Phase-3+ items need a source-confirmation pass first.
+- **2026-06-19 #4 (Phase 3 — structural items + data source-checks):** `2fa99d6` Economy page —
+  surfaced **Trade** as a "## Trade with the world" cluster (current account + US-exposure +
+  US-vs-rest balance as ###), Canadian-dollar (currency) section follows (§146/§148); §140
+  business-investment already its own ## section. `8aeb11e` **Borrowing Costs → its own page**
+  (§214): new economics/borrowing-costs.qmd (prime+mortgage rates + GoC bond yields), moved off
+  the Housing page; Economy dropdown between Cost of Living and Housing; nav + downloads +
+  CLAUDE.md updated. **Phase-3 DATA items source-checked (not yet built — each has a
+  placement/design call for the owner):** (1) **federal voter turnout** — elections.ca historical
+  table (1867–2025) parses cleanly via `pd.read_html` (48 rows; exclude the 3 referendum years
+  1898/1942/1992 for an elections-only line); buildable; PLACEMENT open (People & Society vs a
+  Government "democracy" page); the open.canada.ca GE38–GE45 set adds a by-age turnout-gap chart.
+  (2) **vacancy by city** — 34-10-0127-01 (already used nationally) HAS 37 CMA geographies →
+  upgrade the housing vacancy chart to by-city; rent-by-city ($) would need the CMHC average-rent
+  table (34-10-0133, unverified). (3) **income-distribution slider** — StatCan decile/quintile
+  cube still to confirm. NEXT: owner steer on the data-item placements/forms, then build; then
+  Phase 4 (commute + productivity-decomposition first), Phase 5, colours.

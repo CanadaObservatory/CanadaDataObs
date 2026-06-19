@@ -244,3 +244,14 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   total/after-tax). DESIGN FORK for the owner: a decile year-slider (report's "like the age
   pyramid") vs a simpler top-vs-bottom share-over-time line with a market/after-tax toggle. Then
   Phase 4 (commute + productivity-decomposition first), Phase 5, colours.
+- **2026-06-19 #6 (Phase 3 COMPLETE):** `1ee76b7` **income distribution over time** → Income page
+  (owner chose BOTH forms): a decile **year-slider** (average after-tax income by decile, real
+  2024$, 1976–2024 — the distribution stretches as you slide forward, top tenth $103k→$164k) +
+  a **top-10% vs bottom-40% share** line with a market/after-tax **redistribution toggle** (market
+  gap 29.8/12.9 vs after-tax 23.3/20.8 in 2024). `fetch_income_distribution` off StatCan
+  11-10-0193-01. **PHASES 1–3 of the structure-and-data report are now COMPLETE.** Indicators →114
+  (4 new fetchers this session: minimum_wage, voter_turnout, cma_vacancy, income_distribution, plus
+  the earlier world_population + co2/pm25 global-context). NEXT: **Phase 4** (the 4 confirmed topic
+  adds — commute + productivity-decomposition first), **Phase 5** (per-section landing pages,
+  provincial fiscal, parks map, housing dashboard), then **colours** (owner mulling). Loose end
+  still open: the broad safe-review sweep (air-quality titles, well-being, ecozones hover).

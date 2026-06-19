@@ -175,3 +175,21 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   exit 0. **Owner-decisions + remaining work catalogued in `site-review-session-2026-06-18.md`**
   (colour report, comparator stress-test, G5 y-axis-nav, structure/reorg, new-data builds,
   line-vs-bar calls, G12 currency batch + a "next autonomously" list). Branch 10 ahead, unpushed.
+- **2026-06-19 (structure-and-data report — Phase 1):** implemented the approved
+  `structure-and-data-recommendations.md`. **Done (9 commits, branch tip `c4c4955`):**
+  `e575bd5` gross/net-debt dropdown (new `ranked_bar_select`) + defence sub-section
+  (troops/reservists deferred — WB `MS.MIL.TOTL.P1` frozen at 2020); `13d230d` CO2/GDP
+  intensity (OWID; Canada most-intensive of 17); `62d7a5e` per-capita gov employment toggle
+  (`lines_over_time` measures now switches hover precision; §296 UI-text removed); `9225084`
+  inflation-by-component bar (fetch_cpi side-output `statcan_cpi_components.csv`; `category_bar`);
+  `5cd518d` "Canada in the world" pop chart (all 217 countries log-scale, 37th/top-17%;
+  `fetch_world_population`; log-axis annotation-y gotcha); `0583b01` daytime-high warming option
+  (AHCCD `temp_max`); `958b793` China/India CO2+PM2.5 global-context charts (SEPARATE from the
+  17-peer lines; `fetch_co2_global_context` + `fetch_pm25_global_context`); `e90b261` source-note
+  overflow fix (climate-change ×4 + protected ×1, concise provenance, verified at 525px);
+  `c4c4955` removed leftover "Age group:" caption on `ranked_bar_by_age`. **+4 indicators
+  (106→110.) All verified in rendered Quarto.** STILL OPEN in Phase 1: **Fire & Ice → Wildfire +
+  Ice split** (§488, item 9 — nav + air-quality cross-link). NEXT: Fire/Ice split, then Phases
+  2–5 (Phase 2 = Substance-Use reorg §386-7 + Health split §354/380 + min wage + CREA type
+  dropdown). Colours AFTER. Broad safe-sweep (air-quality titles, well-being, ecozones hover)
+  still partial.

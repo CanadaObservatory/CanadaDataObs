@@ -166,3 +166,12 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   line, no clip). **New rule:** map source notes = provenance only, kept concise.
 - Remaining maps (income/housing/geography/crime/economy) need the same concise-note pass.
 - Next (owner: "(2)"): G1 time-series slider/label overlaps.
+- **2026-06-18 #11 (autonomous batch, owner away):** worked all the SAFE/unambiguous review
+  items in 3 commits — `e528327` lighter line loads (`initial_visible` on the busy peer charts)
+  + per-page prose scrub (the specific lines quoted, not the already-removed generic boilerplate)
+  + title renames; `fd69aef` owner-provided exact rewrites (economy/geography/housing/religion
+  intros); `69fc559` chart-scale tweaks (vaccination 50% floor + drop 95% label, growth-rate
+  y-max 5, NATO "minimum target", low-carbon x-start) + `stacked_area` margin. Full render
+  exit 0. **Owner-decisions + remaining work catalogued in `site-review-session-2026-06-18.md`**
+  (colour report, comparator stress-test, G5 y-axis-nav, structure/reorg, new-data builds,
+  line-vs-bar calls, G12 currency batch + a "next autonomously" list). Branch 10 ahead, unpushed.

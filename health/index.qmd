@@ -17,7 +17,7 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, peer_comparison_line_by_age, single_line
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 
 def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, topical=None,
                    initial_visible=None):
@@ -108,7 +108,7 @@ if os.path.exists(le_path):
 
 ## Population health & risk factors
 
-Life expectancy summarises the overall outcome; the measures here look upstream — at the behaviours and conditions that shape it, and at mental health. They come from the World Bank's compilation of World Health Organization, UN and International Diabetes Federation data, so all 17 peers are reported on a common basis. By default each chart shows Canada, the named comparators and the peer average; use the legend to add the other peers.
+Life expectancy summarises the overall outcome; the measures here look upstream — at the behaviours and conditions that shape it, and at mental health. They come from the World Bank's compilation of World Health Organization, UN and International Diabetes Federation data, so all 17 peers are reported on a common basis. By default each chart shows Canada, the named comparators and the peer average; use the legend to add the other peers. Tobacco, alcohol and cannabis are covered in depth on the [Substance Use](substance-use.qmd) page.
 
 ## Suicide
 
@@ -119,28 +119,6 @@ Deaths by suicide per 100,000 population. Canada sits mid-pack among peers at ro
 show_peer_line("data/health/worldbank_suicide.csv", "suicide_rate",
     "Deaths per 100,000", "World Bank / WHO Global Health Observatory",
     initial_visible=["USA", "GBR"])
-```
-
-## Tobacco & alcohol
-
-Two everyday risk factors on one chart — use the **Substance** menu (top right) to switch between them. Canada has one of the *lowest* tobacco-use rates in the peer group and sits near the middle of the pack on alcohol. The two use different units, so the y-axis rescales when you switch.
-
-```{python}
-#| echo: false
-sm_p, al_p = "data/health/worldbank_smoking.csv", "data/health/worldbank_alcohol.csv"
-if os.path.exists(sm_p) and os.path.exists(al_p):
-    sm = pd.read_csv(sm_p).rename(columns={"smoking_pct": "value"}); sm["substance"] = "Tobacco use"
-    al = pd.read_csv(al_p).rename(columns={"alcohol_lpc": "value"}); al["substance"] = "Alcohol"
-    sub = pd.concat([sm, al], ignore_index=True)
-    fig = peer_comparison_line_by_age(sub, "year", "value", "substance",
-        yaxis_title="% of adults", ages=["Tobacco use", "Alcohol"], default_age="Tobacco use",
-        hover_suffix="", hover_decimals=1, menu_label="Substance:",
-        initial_visible=["USA", "GBR"],
-        option_layouts={"Tobacco use": "% of adults", "Alcohol": "Litres per capita (15+)"},
-        source_note=f"Source: World Bank / WHO Global Health Observatory | Data as of: {get_data_date(sm_p)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Tobacco/alcohol data not yet available. Run the data pipeline.")
 ```
 
 ## Overweight

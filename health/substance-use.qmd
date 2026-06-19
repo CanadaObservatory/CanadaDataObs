@@ -1,6 +1,6 @@
 ---
 title: "Substance Use"
-description: "Canada's opioid-toxicity crisis, and everyday substance use by age"
+description: "Everyday tobacco, alcohol and cannabis use, and Canada's opioid-toxicity crisis"
 ---
 
 ```{python}
@@ -9,7 +9,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import get_data_date
-from pipeline.charts import category_bar, lines_over_time
+from pipeline.charts import category_bar, lines_over_time, peer_comparison_line_by_age
 
 SHOW = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 
@@ -19,9 +19,61 @@ demo_path = "data/health/phac_opioid_demographics.csv"
 supply_path = "data/health/phac_opioid_supply.csv"
 ```
 
-The overdose crisis is among the most severe public-health emergencies in Canada's recent history, and a leading driver of the [recent decline in life expectancy](index.qmd#the-recent-decline). Since national surveillance began in 2016, tens of thousands of people have died from the acute toxicity of opioids — increasingly from an illegal drug supply contaminated with fentanyl and, more recently, mixed with stimulants. This page tracks that toll: how it has grown, where it falls hardest, who it affects, and how the drugs themselves have changed — then steps back to tobacco, alcohol and cannabis use across age groups.
+Substance use spans the legal and the illegal — from the tobacco, alcohol and cannabis that most Canadians encounter, to the contaminated illegal-drug supply behind one of the most severe public-health emergencies in the country's recent history. This page looks at both: everyday use of legal substances, against peer countries and across age groups, and then the opioid-toxicity crisis — how it has grown, where it falls hardest, who it affects, and how the drugs themselves have changed.
 
-## The scale of the crisis
+## Tobacco, alcohol and cannabis
+
+Most substance use involves legal substances. Against peer countries, Canada has one of the **lowest** tobacco-use rates and sits near the middle of the pack on alcohol. Use the **Substance** menu to switch between them; the two use different units, so the y-axis rescales when you switch.
+
+```{python}
+#| echo: false
+sm_p, al_p = "data/health/worldbank_smoking.csv", "data/health/worldbank_alcohol.csv"
+if os.path.exists(sm_p) and os.path.exists(al_p):
+    sm = pd.read_csv(sm_p).rename(columns={"smoking_pct": "value"}); sm["substance"] = "Tobacco use"
+    al = pd.read_csv(al_p).rename(columns={"alcohol_lpc": "value"}); al["substance"] = "Alcohol"
+    sub = pd.concat([sm, al], ignore_index=True)
+    fig = peer_comparison_line_by_age(sub, "year", "value", "substance",
+        yaxis_title="% of adults", ages=["Tobacco use", "Alcohol"], default_age="Tobacco use",
+        hover_suffix="", hover_decimals=1,
+        initial_visible=["USA", "GBR"],
+        option_layouts={"Tobacco use": "% of adults", "Alcohol": "Litres per capita (15+)"},
+        source_note=f"Source: World Bank / WHO Global Health Observatory | Data as of: {get_data_date(sm_p)}")
+    fig.show(config=SHOW)
+else:
+    print("Tobacco/alcohol data not yet available. Run the data pipeline.")
+```
+
+Within Canada, the picture varies sharply by age. This chart shows the share of Canadians who report using each substance, by age group — use the **Substance** menu to switch. Cannabis use and heavy drinking are highest among younger adults and taper off with age, while smoking peaks in middle age. Cannabis was added to the national survey only after legalization in 2018, so its line begins in 2019/2020.
+
+```{python}
+#| echo: false
+su_path = "data/health/statcan_substance_use_by_age.csv"
+if os.path.exists(su_path):
+    su = pd.read_csv(su_path)
+    ages = ["18 to 34 years", "35 to 49 years", "50 to 64 years", "65 years and over"]
+    su = su[su["age_group"].isin(ages)]
+    fig = lines_over_time(su, "period_end", "cannabis_pct", "age_group",
+        yaxis_title="% of adults", yticksuffix="%", hover_decimals=1, rangemode="tozero",
+        group_order=ages,
+        colors={"18 to 34 years": "#4e79a7", "35 to 49 years": "#59a14f",
+                "50 to 64 years": "#f28e2b", "65 years and over": "#b07aa1"},
+        measures=[
+            {"col": "cannabis_pct", "label": "Cannabis (past year)", "yaxis_title": "% reporting cannabis use, past 12 months"},
+            {"col": "smoking_pct", "label": "Tobacco (current smoker)", "yaxis_title": "% current daily or occasional smokers"},
+            {"col": "drinking_pct", "label": "Heavy drinking", "yaxis_title": "% reporting heavy drinking"},
+        ],
+        source_note=f"Source: Statistics Canada, CCHS (table 13-10-0972), two-year pooled estimates, ages 18+ | Data as of: {get_data_date(su_path)}")
+    fig.update_xaxes(tickmode="array", tickvals=sorted(su["period_end"].unique()), tickangle=0)
+    fig.show(config=SHOW)
+else:
+    print("Substance-use-by-age data not yet available. Run: python -m pipeline.build_substance_use")
+```
+
+## The opioid-toxicity crisis
+
+The overdose crisis is among the most severe public-health emergencies in Canada's recent history, and a leading driver of the [recent decline in life expectancy](index.qmd#the-recent-decline). Since national surveillance began in 2016, tens of thousands of people have died from the acute toxicity of opioids — increasingly from an illegal drug supply contaminated with fentanyl and, more recently, mixed with stimulants. The charts below track that toll: how it has grown, where it falls hardest, who it affects, and how the supply has changed.
+
+### The scale of the crisis
 
 Apparent opioid-toxicity deaths rose from about 2,800 in 2016 to a peak of roughly 8,000 in 2023 — close to a death every hour — before easing in 2024. The bars show the number of deaths each year; the line shows the rate per 100,000 people, which removes the effect of a growing population.
 
@@ -55,7 +107,7 @@ else:
     print("Opioid data not yet available. Run: python -m pipeline.run_pipeline")
 ```
 
-## A geography of risk
+### A geography of risk
 
 The crisis is far from evenly spread. British Columbia stands apart, with a death rate more than double the national figure; Alberta, Saskatchewan, Manitoba and Yukon also sit well above average, while Quebec and the Atlantic provinces are far lower. National surveillance is reported only at the province and territory level, so this is the finest geography the data offer. The dashed line marks the Canada-wide rate.
 
@@ -78,7 +130,7 @@ else:
     print("Provincial data not yet available. Run: python -m pipeline.run_pipeline")
 ```
 
-## Who is dying
+### Who is dying
 
 Those most often dying from the opioid crisis are working-age men — about three in four of the deaths are male, concentrated in the years from the 20s through the 50s. The chart shows deaths by age group and sex for the latest complete year.
 
@@ -106,7 +158,7 @@ else:
     print("Demographic data not yet available. Run: python -m pipeline.run_pipeline")
 ```
 
-## A poisoned, volatile supply
+### A poisoned, volatile supply
 
 What makes the recent years so deadly is the drug supply itself. **Fentanyl** — a synthetic opioid roughly 100 times stronger than morphine — was detected in about half of deaths in 2016 but the great majority in recent years. Increasingly, deaths also involve a **stimulant** such as cocaine or methamphetamine, making the supply less predictable still. This uncertainty in the composition of the drug being taken has led to overwhelmingly **accidental** poisonings.
 
@@ -136,7 +188,7 @@ else:
     print("Supply data not yet available. Run: python -m pipeline.run_pipeline")
 ```
 
-## Hospitalizations due to opioids
+### Hospitalizations
 
 Deaths are the sharpest edge of the crisis, but not its full extent. Opioid-poisoning **hospitalizations** add a parallel measure of acute harm. Both are shown here as rates per 100,000 so they sit on the same scale.
 
@@ -162,47 +214,20 @@ if os.path.exists(national_path):
     fig.show(config=SHOW)
 ```
 
-## Tobacco, alcohol & cannabis, by age
-
-Most substance use is of legal substances: tobacco, alcohol, and cannabis. This chart shows the share of Canadians who report each, by age group. Use the **Substance** menu to switch between them. The age patterns differ sharply: cannabis use and heavy drinking are highest among younger adults and taper off with age, while smoking peaks in middle age. Cannabis was added to the national survey only after legalization in 2018, so its line begins in 2019/2020.
-
-```{python}
-#| echo: false
-su_path = "data/health/statcan_substance_use_by_age.csv"
-if os.path.exists(su_path):
-    su = pd.read_csv(su_path)
-    ages = ["18 to 34 years", "35 to 49 years", "50 to 64 years", "65 years and over"]
-    su = su[su["age_group"].isin(ages)]
-    fig = lines_over_time(su, "period_end", "cannabis_pct", "age_group",
-        yaxis_title="% of adults", yticksuffix="%", hover_decimals=1, rangemode="tozero",
-        group_order=ages,
-        colors={"18 to 34 years": "#4e79a7", "35 to 49 years": "#59a14f",
-                "50 to 64 years": "#f28e2b", "65 years and over": "#b07aa1"},
-        measures=[
-            {"col": "cannabis_pct", "label": "Cannabis (past year)", "yaxis_title": "% reporting cannabis use, past 12 months"},
-            {"col": "smoking_pct", "label": "Tobacco (current smoker)", "yaxis_title": "% current daily or occasional smokers"},
-            {"col": "drinking_pct", "label": "Heavy drinking", "yaxis_title": "% reporting heavy drinking"},
-        ],
-        source_note=f"Source: Statistics Canada, CCHS (table 13-10-0972), two-year pooled estimates, ages 18+ | Data as of: {get_data_date(su_path)}")
-    fig.update_xaxes(tickmode="array", tickvals=sorted(su["period_end"].unique()), tickangle=0)
-    fig.show(config=SHOW)
-else:
-    print("Substance-use-by-age data not yet available. Run: python -m pipeline.build_substance_use")
-```
-
 ## About this data
 
-- **What is counted.** "Apparent opioid-toxicity deaths" are deaths caused by the acute toxicity of one or more opioids, as determined by coroners and medical examiners. Because investigations take time, the figures are **dynamic** — the most recent quarters are preliminary and are revised upward as cases are confirmed. A partial year (January–September) is shown only where noted.
-- **Rates are crude**, not age-standardised, and use July population estimates as the denominator.
-- **Hospitalizations exclude Quebec**, which does not report to the national hospitalization dataset on the same basis; the death figures are nationwide.
+- **Everyday-use figures are self-reported.** The tobacco and alcohol peer comparison is from the World Bank / WHO Global Health Observatory. The by-age figures come from Statistics Canada's Canadian Community Health Survey (table 13-10-0972), pooled into two-year periods and covering ages **18 and over** (no 12–17 youth). "Heavy drinking" is the survey threshold (5+ drinks for men / 4+ for women on one occasion, at least monthly); cannabis is any use in the past 12 months.
+- **What the opioid figures count.** "Apparent opioid-toxicity deaths" are deaths caused by the acute toxicity of one or more opioids, as determined by coroners and medical examiners. Because investigations take time, the figures are **dynamic** — the most recent quarters are preliminary and are revised upward as cases are confirmed. A partial year (January–September) is shown only where noted.
+- **Opioid rates are crude**, not age-standardised, and use July population estimates as the denominator. **Hospitalizations exclude Quebec**, which does not report on the same basis; the death figures are nationwide.
 - **Stimulants.** This page focuses on opioids; the same federal dataset also tracks stimulant-toxicity harms, which have risen sharply in parallel.
-- The opioid data are released **quarterly** under the Open Government Licence – Canada, and this page refreshes with them.
-- **The by-age use figures are self-reported, from a different source.** They come from Statistics Canada's Canadian Community Health Survey (table 13-10-0972), pooled into two-year periods and covering ages **18 and over** (no 12–17 youth). "Heavy drinking" is the survey threshold (5+ drinks for men / 4+ for women on one occasion, at least monthly); cannabis is any use in the past 12 months. These self-reported survey rates aren't comparable with the coroner-confirmed opioid-death counts above.
+- The opioid data are released **quarterly** under the Open Government Licence – Canada, and this page refreshes with them. The self-reported survey rates aren't comparable with the coroner-confirmed opioid-death counts.
 
 ## Download data
 
+- [Tobacco use, % of adults (CSV)](../data/health/worldbank_smoking.csv) — World Bank / WHO Global Health Observatory
+- [Alcohol, litres per capita (CSV)](../data/health/worldbank_alcohol.csv) — World Bank / WHO Global Health Observatory
+- [Substance use by age — cannabis, smoking, heavy drinking (CSV)](../data/health/statcan_substance_use_by_age.csv) — Statistics Canada, CCHS (table 13-10-0972)
 - [Opioid toxicity deaths & hospitalizations, national (CSV)](../data/health/phac_opioid_national.csv) — PHAC, Substance-Related Harms
 - [Opioid toxicity death rate by province/territory (CSV)](../data/health/phac_opioid_provincial.csv) — PHAC, Substance-Related Harms
 - [Opioid toxicity deaths by age & sex (CSV)](../data/health/phac_opioid_demographics.csv) — PHAC, Substance-Related Harms
 - [Drug-supply indicators — fentanyl, stimulant, manner of death (CSV)](../data/health/phac_opioid_supply.csv) — PHAC, Substance-Related Harms
-- [Substance use by age — cannabis, smoking, heavy drinking (CSV)](../data/health/statcan_substance_use_by_age.csv) — Statistics Canada, CCHS (table 13-10-0972)

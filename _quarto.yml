@@ -93,8 +93,10 @@ website:
             text: Today's Climate
           - href: environment/climate-change.qmd
             text: Climate Change
-          - href: geography/fire-ice.qmd
-            text: Fire & Ice
+          - href: geography/wildfire.qmd
+            text: Wildfire
+          - href: geography/ice.qmd
+            text: Ice
           - href: environment/air-quality.qmd
             text: Air Quality
           - href: environment/air-quality-cities.qmd

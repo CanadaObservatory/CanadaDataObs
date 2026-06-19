@@ -183,7 +183,7 @@ above all the record 2023 fire season, when the peak exposure index reached near
 three times its 2009 level. Population-weighted smoke depends on *where* fires
 burn relative to where people live, so the link is not exact year to year, but the
 trend is clear: wildfire smoke is increasingly the dominant influence on what
-Canadians breathe on the worst days. See [Geography → Fire & Ice](../geography/fire-ice.qmd)
+Canadians breathe on the worst days. See [Wildfire](../geography/wildfire.qmd)
 for the long-run wildfire record and 2023 fire map.
 
 ```{python}

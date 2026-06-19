@@ -1,6 +1,6 @@
 ---
-title: "Fire & Ice"
-description: "Wildfire, permafrost, and the retreat of Arctic sea ice"
+title: "Ice"
+description: "Permafrost across the North, and the retreat of Arctic sea ice"
 ---
 
 ```{python}
@@ -8,61 +8,16 @@ description: "Wildfire, permafrost, and the retreat of Arctic sea ice"
 import os, json
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_map, choropleth_groups_map, choropleth_categorical, bubble_map
+from pipeline.config import get_data_date
+from pipeline.charts import choropleth_categorical
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
-prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_geography.csv"
 ```
 
-## Fire and ice
+Two of the clearest signs of a warming North are written in ice: the frozen ground beneath much of the country, and the sea ice on the Arctic Ocean. Both are in retreat.
 
-### Wildfire
-
-Wildfire is part of the boreal landscape, but the area burned varies enormously from year to year — and **2023 was, by a wide margin, the worst fire season on record**, with about **17.6 million hectares** burned across Canada (roughly the size of Florida). The chart shows the national total each year since 1959.
-
-```{python}
-#| echo: false
-wf_path = "data/geography/nfdb_wildfire.csv"
-if os.path.exists(wf_path):
-    w = pd.read_csv(wf_path)
-    ca = w[w["geography"] == "Canada"].sort_values("year").copy()
-    ca["mha"] = ca["area_burned_ha"] / 1e6
-    fig = go.Figure(go.Bar(
-        x=ca["year"], y=ca["mha"], marker_color=CANADA_COLOR,
-        hovertemplate="<b>%{x}</b><br>%{y:.1f} million ha burned<extra></extra>"))
-    fig.update_layout(
-        plot_bgcolor="white", height=420,
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
-        yaxis=dict(title="Million hectares burned", gridcolor="#e0e0e0"),
-        margin=dict(t=30, b=120),
-        annotations=[dict(text=f"Source: Natural Resources Canada, Canadian National Fire Database | Data as of: {get_data_date(wf_path)}",
-                          xref="paper", yref="paper", x=0, y=-0.18, showarrow=False,
-                          font=dict(size=10, color="#999"))])
-    fig.show(config={"displaylogo": False, "displayModeBar": False})
-else:
-    print("Wildfire data not yet available — run the data pipeline.")
-```
-
-In that record 2023 season, the burning was concentrated in the boreal forest. The map below plots **every wildfire recorded that year as a single point, sized by the area it burned** — zoom and pan to your region. A handful of enormous fires in Quebec, the Northwest Territories and British Columbia account for most of the 17.6 million hectares, while thousands of smaller fires speckle the rest of the country. (Marker area is proportional to hectares burned, so the giant fires stand out from the many small ones.)
-
-```{python}
-#| echo: false
-fp_path = "data/geo/nfdb_fire_points_2023.csv"
-if os.path.exists(fp_path):
-    fp = pd.read_csv(fp_path)
-    fig = bubble_map(fp, "lat", "lon", "size_ha", color="#e3492a",
-        customdata=fp[["province", "size_ha", "cause"]].to_numpy(),
-        hovertemplate="<b>%{customdata[0]}</b><br>%{customdata[1]:,.0f} ha burned · %{customdata[2]}<extra></extra>",
-        center={"lat": 60, "lon": -100}, zoom=2.3,
-        source_note="Source: NRCan Canadian National Fire Database (NFDB), 2023 fire points; marker area ∝ hectares burned.")
-    fig.show(config=MAP_CONFIG)
-else:
-    print("Wildfire-points data not yet available — run `python -m pipeline.build_geography`.")
-```
-
-### Permafrost
+## Permafrost
 
 Much of the North sits on **permafrost** — ground that stays frozen year-round. It grades from **continuous** permafrost across the High Arctic (frozen almost everywhere) to **isolated patches** near its southern limit. The classic national map below shows those zones; note that it reflects mapping from the mid-1990s, and permafrost extent has been **retreating** as the climate warms, so the southern boundary today sits further north.
 
@@ -85,7 +40,7 @@ else:
     print("Permafrost data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
-### Arctic sea ice
+## Arctic sea ice
 
 The clearest single signal of a warming North is the decline of **Arctic sea ice**. Its extent swings with the seasons — peaking in March, bottoming out in September — but the **September minimum has fallen by roughly 40% since satellite records began in 1979**. Canada's Arctic waters, including the Northwest Passage, are increasingly ice-free at the end of summer.
 
@@ -117,5 +72,4 @@ else:
 
 ## Download data
 
-- [Wildfire area burned, national & by province (CSV)](../data/geography/nfdb_wildfire.csv) — NRCan Canadian National Fire Database
 - [Arctic sea-ice extent, monthly (CSV)](../data/geography/nsidc_sea_ice.csv) — NSIDC Sea Ice Index (G02135)

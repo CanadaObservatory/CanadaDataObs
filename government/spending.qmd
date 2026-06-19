@@ -9,8 +9,8 @@ spent on, and which departments it flows through. It complements the
 *general*-government finances with OECD peers) and the
 [Government Employment](index.qmd) page (the people behind the payroll line).
 
-A recurring theme: most federal spending is not the government
-operating itself — it is **transfers**, money moved to people (benefits like the
+Most federal spending is not the government
+operating itself: it is **transfers**, money moved to people (benefits like the
 Canada Child Benefit and elderly benefits) and to other governments (health and
 social transfers to the provinces).
 

@@ -2004,7 +2004,7 @@ def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
         src_y = -0.40
     else:                            # legend stacked on the right (default)
         legend = dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
-        margin = dict(l=10, r=200, t=30, b=80)
+        margin = dict(l=10, r=200, t=30, b=110)
         src_y = -0.18
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",

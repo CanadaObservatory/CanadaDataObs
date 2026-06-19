@@ -1,6 +1,6 @@
 ---
 title: "Diversity"
-description: "Where Canada’s population groups live (incl. White & Indigenous), and how the country’s diversity has changed (Census)"
+description: "Where Canada’s population groups live, and how the country’s diversity has changed"
 ---
 
 ```{python}

@@ -200,7 +200,7 @@ boundary): AAFC/ECCC National Ecological Framework. Permafrost (~1995 mapping): 
 
 :::
 
-## How high is Canada?
+## Canadian elevation
 
 For all its mountains, Canada is a remarkably **low-lying** country. About **three-quarters of its
 land sits below 500 metres**, and barely **half a percent rises above 2,000 metres** — the high peaks

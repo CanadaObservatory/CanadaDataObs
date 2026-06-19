@@ -6,8 +6,8 @@ description: "Business research and development — Canada and OECD peers"
 Innovation turns research into new products, processes, and growth. A core measure
 is how much businesses themselves invest in R&D — a signal of how research-intensive
 a country's industries are. For the broader research base (total R&D and the
-research workforce) see [Science](../science/); for business investment overall, see
-[Economy](../economics/). This page is a starting point and will grow over time.
+research workforce) see [Science](../science/index.qmd); for business investment
+overall, see [Economy](../economics/index.qmd#business-investment).
 
 ```{python}
 #| echo: false

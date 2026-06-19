@@ -29,7 +29,8 @@ whr_path = "data/wellbeing/whr_happiness.csv"
 if os.path.exists(whr_path):
     df = pd.read_csv(whr_path)
     fig = peer_comparison_line(df, "year", "happiness_score",
-        title="", yaxis_title="Life Evaluation (0–10)", show_average=True)
+        title="", yaxis_title="Life Evaluation (0–10)", show_average=True,
+        initial_visible=["USA", "AUS"])
     fig.update_layout(annotations=[dict(
         text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,

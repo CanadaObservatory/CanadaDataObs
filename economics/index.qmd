@@ -47,7 +47,7 @@ if os.path.exists(gdpg_path):
     df = pd.read_csv(gdpg_path)
     fig = peer_comparison_line(df, "year", "real_gdp_growth",
         title="", yaxis_title="Real GDP growth (annual %)", show_average=True,
-        initial_start=2015)
+        initial_start=2015, initial_visible=["USA"])
     fig.add_hline(y=0, line_dash="dot", line_color="#888", opacity=0.5)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(gdpg_path)}",
@@ -248,7 +248,8 @@ if os.path.exists(unemp_path):
     unemp = pd.read_csv(unemp_path)
     fig = peer_comparison_line_by_age(
         unemp, x_col="year", y_col="unemployment_rate", age_col="age",
-        yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0])
+        yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0],
+        initial_visible=["USA"])
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(unemp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -306,7 +307,8 @@ if os.path.exists(emp_path):
     fig = peer_comparison_line_by_age(
         df, x_col="year", y_col="employment_rate", age_col="age",
         yaxis_title="% of population in age group",
-        ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True)
+        ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True,
+        initial_visible=["USA"])
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(emp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -370,7 +372,7 @@ ca_path = "data/economics/oecd_current_account.csv"
 if os.path.exists(ca_path):
     df = pd.read_csv(ca_path)
     fig = peer_comparison_line(df, "year", "current_account",
-        title="", yaxis_title="% of GDP", show_average=True)
+        title="", yaxis_title="% of GDP", show_average=True, initial_visible=["USA"])
     fig.add_hline(y=0, line_dash="dash", line_color="#888", opacity=0.5)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(ca_path)}",

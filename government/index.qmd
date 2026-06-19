@@ -3,13 +3,6 @@ title: "Government Employment & the Public Service"
 description: "How many Canadians work for government — by level, and inside the federal public service"
 ---
 
-Governments are large employers. This page asks a deceptively simple question —
-**how many people work for government, and doing what** — and answers it from the
-ground up: first across all levels of government, then drilling into the federal
-public service. A companion page covers [federal spending](spending.qmd), and the
-[Public Finances](../fiscal/index.qmd) page compares Canada's government finances
-with OECD peers.
-
 Two definitions matter throughout, because they are easy to conflate:
 
 - **Public administration** — the "core bureaucracy": people administering
@@ -20,6 +13,10 @@ Two definitions matter throughout, because they are easy to conflate:
   health and social-service institutions, school boards, universities and
   colleges, and government business enterprises (Crown corporations). It is
   several times larger than public administration alone.
+
+A companion page covers [federal spending](spending.qmd), and the
+[Public Finances](../fiscal/index.qmd) page compares Canada's government finances
+with OECD peers.
 
 The size of government and how it is staffed are matters of legitimate political
 debate. This page takes no position on whether government is "too big" or "too
@@ -118,17 +115,6 @@ if os.path.exists(comp_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-::: {.callout-note}
-## How "the public sector" is defined here
-This uses the Labour Force Survey's **class of worker**: a public-sector employee is
-anyone whose employer is a government department, a public institution (public
-schools, hospitals, universities), or a government business enterprise (Crown
-corporation). Broken down by **industry**, "public administration" is the
-civil-service bureaucracy of all three levels combined — the federal/provincial/
-local split is the chart above. (This replaces an older institutional-sector table
-that Statistics Canada discontinued in 2011.)
-:::
-
 ## How Canada compares
 
 Across the OECD, the share of total employment that works for **general
@@ -211,7 +197,7 @@ else:
 The public service added roughly **75,000 people between 2010 and 2025**. The
 increase was concentrated in **benefits and service delivery** — Employment and
 Social Development Canada, which runs Service Canada, and the Canada Revenue Agency
-— together with **immigration** (Immigration, Refugees and Citizenship Canada and
+— together with immigration (Immigration, Refugees and Citizenship Canada and
 the Immigration and Refugee Board) and **procurement, border, and security**
 organizations.
 
@@ -270,7 +256,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## The changing shape of the workforce
+## Executives in the federal public service
 
 Over time the federal public service has shifted toward more senior,
 knowledge-intensive work. One measure available as a consistent series is the
@@ -329,7 +315,7 @@ demo_src = f"Source: Treasury Board of Canada Secretariat — Federal public ser
 ```
 
 **Ageing.** Like much of the workforce, the federal public service has a large
-share of employees in their 40s and 50s — a wave of eventual retirements.
+share of employees in their 40s and 50s.
 
 ```{python}
 #| echo: false

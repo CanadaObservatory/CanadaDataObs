@@ -1,12 +1,13 @@
 ---
 title: "Science"
-description: "Research and development and the research workforce — Canada and OECD peers"
+description: "Research and development and the research workforce"
 ---
 
-A country's long-run prospects rest heavily on what it knows and discovers. These
-charts cover overall research and development spending and the people who carry
-that research out, comparing Canada with 17 OECD peers. Business-led R&D has its
-own page: [Innovation](../innovation/).
+Research, and the knowledge it produces, is an engine of a modern economy and
+society — a country's long-run prosperity rests heavily on what it discovers and
+learns to do. These charts cover overall research and development spending and the
+people who carry that research out. Business-led R&D has its own page:
+[Innovation](../innovation/index.qmd).
 
 ```{python}
 #| echo: false
@@ -48,7 +49,8 @@ rd_path = "data/science/oecd_rd_expenditure.csv"
 if os.path.exists(rd_path):
     df = pd.read_csv(rd_path)
     fig = peer_comparison_line(df, "year", "rd_pct_gdp",
-        title="", yaxis_title="R&D expenditure (% of GDP)", show_average=True)
+        title="", yaxis_title="R&D expenditure (% of GDP)", show_average=True,
+        initial_visible=["USA"])
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD MSTI | Data as of: {get_data_date(rd_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,

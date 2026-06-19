@@ -92,7 +92,7 @@ Two patterns stand out. The largest category by far is everyday **theft under
 $5,000** — the bucket that would include things like package or "porch" theft (no
 official statistic isolates parcel theft specifically). And **theft *from* a
 vehicle** has fallen sharply over the decade even as **vehicle theft itself** and
-**fraud** have climbed — which is exactly the divergence the next chart isolates.
+**fraud** have climbed.
 
 ## What's rising, and what's falling?
 
@@ -230,8 +230,7 @@ Jewish and Black Canadians record the most incidents in raw numbers — but **pe
 capita the picture is starker**: relative to population, the Jewish community is
 targeted far more than any other group, roughly five times the next-highest rate.
 Incidents targeting Jewish people more than tripled from 2019, and the 2020–21
-increase fell heaviest on East and Southeast Asian communities — shifts that coincide
-with widely-reported events whose causes lie beyond these counts. (The breakdown is
+increase fell heaviest on East and Southeast Asian communities. (The breakdown is
 from police services covering most, but not all, of Canada, so totals differ slightly
 from the national series above.)
 
@@ -263,9 +262,7 @@ fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "se
 
 Only about **1 in 10 reported vehicle thefts** and a similar share of thefts-from-
 vehicles are cleared, versus more than half of violent crimes — and clearance **rises
-with severity** (aggravated assaults are solved far more often than common ones). This
-is the statistical counterpart to a common lived experience — that everyday property
-crime often goes unresolved.
+with severity** (aggravated assaults are solved far more often than common ones).
 
 ## How metro areas compare
 
@@ -399,8 +396,7 @@ BIKE_REC = f"{int(st[st['label'].astype(str).str.upper() == 'RECOVERED']['count'
 ```
 
 So "more crime in summer" turns out to be largely a **bike-theft story** (and, to a
-lesser degree, assault) — a reminder that some crime is shaped by opportunity and the
-calendar, but most is not. Bike theft also illustrates the low-clearance pattern: of
+lesser degree, assault). Bike theft also illustrates the low-clearance pattern: of
 the nearly 40,000 reported in Toronto since 2014, only about **`{python} BIKE_REC`%**
 are ever recovered.
 

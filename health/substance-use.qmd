@@ -1,6 +1,6 @@
 ---
 title: "Substance Use"
-description: "Canada's opioid-toxicity crisis — deaths, geography and a poisoned supply — and everyday substance use by age"
+description: "Canada's opioid-toxicity crisis, and everyday substance use by age"
 ---
 
 ```{python}
@@ -136,7 +136,7 @@ else:
     print("Supply data not yet available. Run: python -m pipeline.run_pipeline")
 ```
 
-## Beyond deaths: hospitalizations
+## Hospitalizations due to opioids
 
 Deaths are the sharpest edge of the crisis, but not its full extent. Opioid-poisoning **hospitalizations** add a parallel measure of acute harm. Both are shown here as rates per 100,000 so they sit on the same scale.
 

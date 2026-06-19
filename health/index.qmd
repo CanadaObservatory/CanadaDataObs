@@ -19,7 +19,8 @@ from pipeline.config import (
 )
 from pipeline.charts import peer_comparison_line, ranked_bar, peer_comparison_line_by_age, single_line
 
-def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, topical=None):
+def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, topical=None,
+                   initial_visible=None):
     """Standard 17-peer line chart for a World Bank health series.
 
     `topical` (list of country codes) opens those non-comparator peers already
@@ -31,6 +32,7 @@ def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, top
     df = pd.read_csv(path)
     fig = peer_comparison_line(df, "year", value_col, title="", yaxis_title=yaxis_title,
         show_average=True, initial_start=initial_start, topical=topical,
+        initial_visible=initial_visible,
         source_note=f"Source: {source} | Data as of: {get_data_date(path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
@@ -47,7 +49,7 @@ page_snapshot("health").show(config={"displaylogo": False, "modeBarButtonsToRemo
 
 ## Life expectancy at birth
 
-Life expectancy at birth (both sexes) — the average number of years a newborn
+Life expectancy at birth — the average number of years a newborn
 could expect to live if current mortality rates held. It is the most widely used
 summary measure of a population's health.
 
@@ -116,7 +118,7 @@ Deaths by suicide per 100,000 population. Canada sits mid-pack among peers at ro
 #| echo: false
 show_peer_line("data/health/worldbank_suicide.csv", "suicide_rate",
     "Deaths per 100,000", "World Bank / WHO Global Health Observatory",
-    topical=["KOR"])
+    initial_visible=["USA", "GBR"])
 ```
 
 ## Mental health
@@ -144,7 +146,7 @@ else:
 
 ## Tobacco & alcohol
 
-Two everyday risk factors on one chart — use the **Substance** menu (top right) to switch between them. Canada has one of the *lowest* tobacco-use rates in the peer group, around 12% of adults — less than half the heaviest-smoking European peers — and sits near the middle of the pack on alcohol (litres of pure alcohol per person aged 15+). The two use different units, so the y-axis rescales when you switch.
+Two everyday risk factors on one chart — use the **Substance** menu (top right) to switch between them. Canada has one of the *lowest* tobacco-use rates in the peer group and sits near the middle of the pack on alcohol. The two use different units, so the y-axis rescales when you switch.
 
 ```{python}
 #| echo: false
@@ -156,6 +158,7 @@ if os.path.exists(sm_p) and os.path.exists(al_p):
     fig = peer_comparison_line_by_age(sub, "year", "value", "substance",
         yaxis_title="% of adults", ages=["Tobacco use", "Alcohol"], default_age="Tobacco use",
         hover_suffix="", hover_decimals=1, menu_label="Substance:",
+        initial_visible=["USA", "GBR"],
         option_layouts={"Tobacco use": "% of adults", "Alcohol": "Litres per capita (15+)"},
         source_note=f"Source: World Bank / WHO Global Health Observatory | Data as of: {get_data_date(sm_p)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -196,7 +199,8 @@ Maternal deaths per 100,000 live births (modelled estimates on a consistent inte
 ```{python}
 #| echo: false
 show_peer_line("data/health/worldbank_maternal_mortality.csv", "maternal_mortality",
-    "Per 100,000 live births", "World Bank (WHO/UNICEF/UNFPA/World Bank/UNDESA)")
+    "Per 100,000 live births", "World Bank (WHO/UNICEF/UNFPA/World Bank/UNDESA)",
+    initial_visible=["USA", "DEU", "GBR"])
 ```
 
 ## Childhood vaccination

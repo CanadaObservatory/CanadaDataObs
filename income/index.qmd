@@ -3,10 +3,8 @@ title: "Income & Inequality"
 description: "Incomes, wages, and the distribution of income — Canada and OECD peers"
 ---
 
-Aggregate growth is only part of the picture; how income reaches households, and
-how evenly it is shared, is another. These charts track real (inflation-adjusted)
-incomes and wages, the Gini coefficient, and relative poverty — for Canada and a
-broad group of 17 OECD peers.
+These charts track incomes and wages — most in inflation-adjusted ("real")
+terms — along with the Gini coefficient and relative poverty.
 
 ```{python}
 #| echo: false
@@ -93,7 +91,7 @@ else:
     print("Income map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Average annual wage (real)
+## Average annual wage
 
 Average annual wages converted to US dollars at purchasing power parity and held
 in constant prices, so levels can be compared across countries and over time.
@@ -104,7 +102,8 @@ wage_path = "data/income/oecd_avg_wage.csv"
 if os.path.exists(wage_path):
     df = pd.read_csv(wage_path)
     fig = peer_comparison_line(df, "year", "avg_wage",
-        title="", yaxis_title="USD PPP (constant prices)", show_average=True)
+        title="", yaxis_title="USD PPP (constant prices)", show_average=True,
+        initial_visible=["USA"])
     fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
         text=f"Source: OECD Average Annual Wages | Data as of: {get_data_date(wage_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -136,7 +135,8 @@ disp_path = "data/income/oecd_disposable_income.csv"
 if os.path.exists(disp_path):
     df = pd.read_csv(disp_path)
     fig = peer_comparison_line(df, "year", "disposable_income_index",
-        title="", yaxis_title="Index (2007 = 100, real)", show_average=True)
+        title="", yaxis_title="Index (2007 = 100, real)", show_average=True,
+        initial_visible=["USA"])
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Household Dashboard | Data as of: {get_data_date(disp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])

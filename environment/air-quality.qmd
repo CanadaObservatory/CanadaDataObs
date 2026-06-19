@@ -110,8 +110,7 @@ if os.path.exists(pm_path):
     pm = pd.read_csv(pm_path)
     fig = peer_comparison_line(
         pm, x_col="year", y_col="pm25",
-        title="", yaxis_title="PM2.5 (µg/m³, population-weighted)", show_average=True,
-        topical=["FIN", "NOR"])
+        title="", yaxis_title="PM2.5 (µg/m³, population-weighted)", show_average=True)
     fig.add_hline(y=5, line_dash="dot", line_color="#2ca02c", opacity=0.8,
                   annotation_text="WHO 2021 guideline (5 µg/m³)",
                   annotation_position="top left", annotation_font_color="#2ca02c")

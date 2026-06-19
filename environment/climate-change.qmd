@@ -177,20 +177,12 @@ Some Canadian temperature records are remarkably long: Toronto's reaches back to
 **1841**. Use the dropdown to switch cities. Each chart shows two series that are
 deliberately kept **separate, not spliced**: the **homogenized** record (the
 trend-quality series, which the open national dataset currently carries to 2020) and
-a **raw** recent tail computed from current daily observations. They are different
-products, so they don't line up perfectly where they meet — that small offset is
-expected, and joining them into one line would hide exactly the station-change
-effects the homogenized series is built to remove. The dashed line is a
-least-squares trend fitted to each city's homogenized record, with its rate in the
-legend; because records begin in different decades, read each rate on its own
-rather than ranking cities by it (the [regional comparison](#the-north-is-warming-fastest)
-above uses a common 1948–2024 period for that).
+a **raw** recent tail computed from current daily observations.
 
 The Arctic stations tell their own story. **Alert and Eureka begin only in 1948 and
 1951** — there are no earlier instrumental records that far north, because the first
 permanent High Arctic weather stations were not built until the 1947–1950 Joint
-Arctic Weather Stations program. So these are ~75-year records, against Toronto's
-~180.
+Arctic Weather Stations program.
 
 ```{python}
 #| echo: false

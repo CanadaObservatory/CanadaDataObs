@@ -4,7 +4,7 @@
   "source_table": "World Bank / OECD National Accounts",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-06-18T17:20:00.389248+00:00",
+  "retrieved_at": "2026-06-19T16:34:08.530321+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "World Bank indicator NE.GDI.FTOT.ZS, filtered to 17 OECD peers"

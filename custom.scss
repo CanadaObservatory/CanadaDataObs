@@ -217,3 +217,24 @@ $area-card-accents: (
     padding-bottom: 0.15rem;
   }
 }
+
+// Light in-page area accents (step 1 of the area-identity rollout): two quiet
+// touches that carry the area colour through the page body — the active "On this
+// page" TOC item, and a short bar beside each section (##) heading. Both keyed off
+// the per-directory body.area-* class; gold uses the ochre ink. The TOC's own "On
+// this page" h2 lives in <nav>, so #quarto-document-content scopes the bar to body
+// section headings only.
+@each $name, $accent in (
+  "people" $area-people, "economy" $area-economy-ink, "government" $area-government,
+  "health" $area-health, "environment" $area-environment, "education" $area-education
+) {
+  // The active TOC item is marked by recolouring its indicator bar — NOT the text:
+  // the small TOC type would fail AA in the lighter areas (ochre 3.2:1, lake 4.1:1).
+  body.area-#{$name} nav[role="doc-toc"] .nav-link.active {
+    border-left: 2px solid $accent;
+  }
+  body.area-#{$name} #quarto-document-content h2 {
+    border-left: 3px solid $accent;
+    padding-left: 0.55rem;
+  }
+}

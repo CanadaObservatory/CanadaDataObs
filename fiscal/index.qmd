@@ -136,6 +136,50 @@ if os.path.exists(rev_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Tax structure: where the money comes from
+
+Two countries can collect the same total in tax yet raise it very differently. This chart breaks each country's tax take into its main sources — taxes on **income and profits**, **social security** contributions, taxes on **goods and services** (consumption, such as sales tax/VAT), **property**, **payroll**, and **other** — each measured as a share of GDP, so the full bar length is the total tax burden and the segments show the mix. Canada's total sits in the middle of the peer group, but its *mix* is distinctive: it leans heavily on income and property taxes and raises comparatively little through social-security contributions and consumption taxes — the reverse of much of continental Europe, where high social-security and value-added taxes dominate. (This is a descriptive comparison; the balance a country strikes between these sources reflects different policy choices, not a better or worse outcome.)
+
+```{python}
+#| echo: false
+tax_path = "data/fiscal/oecd_tax_structure.csv"
+if os.path.exists(tax_path):
+    t = pd.read_csv(tax_path)
+    TAX_ORDER = ["Income & profits", "Social security", "Goods & services",
+                 "Property", "Payroll", "Other"]
+    TAX_COLORS = {"Income & profits": "#4e79a7", "Social security": "#59a14f",
+                  "Goods & services": "#f28e2b", "Property": "#b07aa1",
+                  "Payroll": "#edc948", "Other": "#bab0ac"}
+    latest = t.sort_values("year").groupby(["country_code", "tax_type"]).tail(1)
+    yr_lo, yr_hi = int(latest["year"].min()), int(latest["year"].max())
+    tot = (latest.groupby(["country_code", "country_name"])["pct_gdp"].sum()
+           .reset_index().sort_values("pct_gdp"))   # ascending → highest at top
+    order = tot["country_name"].tolist()
+    piv = latest.pivot_table(index="country_name", columns="tax_type",
+                             values="pct_gdp").reindex(order)
+    figt = go.Figure()
+    for tt in TAX_ORDER:
+        figt.add_trace(go.Bar(y=order, x=piv[tt], name=tt, orientation="h",
+            marker_color=TAX_COLORS[tt],
+            hovertemplate=f"{tt}: %{{x:.1f}}% of GDP<extra>%{{y}}</extra>"))
+    # Total at the end of each bar; Canada's label in red so it is easy to find.
+    for cn, tv in zip(tot["country_name"], tot["pct_gdp"]):
+        is_ca = cn == "Canada"
+        figt.add_annotation(x=tv, y=cn, text=f"{tv:.0f}%", xanchor="left", xshift=4,
+            showarrow=False, font=dict(size=10, color="#d62728" if is_ca else "#777"))
+    figt.update_layout(barmode="stack", plot_bgcolor="white", height=600,
+        xaxis=dict(title="% of GDP", gridcolor="#e0e0e0", ticksuffix="%"),
+        yaxis=dict(title=""),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(l=10, r=40, t=60, b=70))
+    figt.add_annotation(
+        text=f"Source: OECD Revenue Statistics (general government, latest available {yr_lo}–{yr_hi})",
+        xref="paper", yref="paper", x=0, y=-0.11, showarrow=False, font=dict(size=10, color="#999"))
+    figt.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Tax structure data not yet available. Run the data pipeline.")
+```
+
 ## Government interest costs
 
 Net interest paid by government as a share of GDP — the cost of servicing public debt. Interest is a first charge on revenue: the more that goes to creditors, the less is available for programs or tax relief at a given level of revenue, so lower is less constraining.
@@ -211,5 +255,6 @@ if os.path.exists(def_path):
 - [Government Net Debt (CSV)](../data/fiscal/oecd_net_debt.csv) — OECD Economic Outlook
 - [Government Budget Balance (CSV)](../data/fiscal/oecd_govt_balance.csv) — OECD Economic Outlook
 - [Government Revenue (CSV)](../data/fiscal/oecd_govt_revenue.csv) — OECD Economic Outlook
+- [Tax Structure / Revenue Mix (CSV)](../data/fiscal/oecd_tax_structure.csv) — OECD Revenue Statistics
 - [Government Interest Costs (CSV)](../data/fiscal/oecd_govt_interest.csv) — OECD Economic Outlook
 - [Defence Spending (CSV)](../data/fiscal/worldbank_defence.csv) — World Bank (data from SIPRI)

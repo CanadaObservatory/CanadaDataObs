@@ -442,6 +442,14 @@ INDICATORS = [
               value_col="defence_pct_gdp", chart_recipe="ranked_bar",
               wb_indicator="MS.MIL.XPND.GD.ZS",
               source_table="World Bank (data from SIPRI)"),
+    # Tax structure (revenue mix): the six standard categories as % of GDP, so the
+    # composition shows alongside the total burden. Bespoke OECD fetcher (Revenue
+    # Statistics comparative tables) — tidy long format (country, year, tax_type).
+    Indicator("tax_structure", "fiscal", "custom",
+              "Tax structure (revenue mix)", "% of GDP", "annual",
+              value_col="pct_gdp", chart_recipe="stacked_bar",
+              fetch_fn="fetch_tax_structure", output_subpath="oecd_tax_structure.csv",
+              source_table="OECD Revenue Statistics (DSD_REV_COMP_OECD@DF_RSOECD)"),
 
     # ----- Government (workforce + federal spending) -----
     # Grouped under the "Public Finances" nav dropdown alongside the fiscal

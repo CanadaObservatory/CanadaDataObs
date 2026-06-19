@@ -18,7 +18,8 @@ import sys
 import logging
 
 from pipeline.config import INDICATORS
-from pipeline.fetch_oecd import fetch_oecd_indicator, fetch_labour_by_age
+from pipeline.fetch_oecd import (fetch_oecd_indicator, fetch_labour_by_age,
+                                 fetch_tax_structure)
 from pipeline.fetch_statcan import (
     fetch_statcan_indicator,
     fetch_population_quarterly, fetch_population_components, fetch_cpi,
@@ -76,6 +77,7 @@ CUSTOM_FETCHERS = {
     "fetch_trade_us": fetch_trade_us,
     "fetch_cma_unemployment": fetch_cma_unemployment,
     "fetch_labour_by_age": fetch_labour_by_age,
+    "fetch_tax_structure": fetch_tax_structure,
     "fetch_age_structure": fetch_age_structure,
     "fetch_interprovincial_migration": fetch_interprovincial_migration,
     "fetch_wildfire": fetch_wildfire,

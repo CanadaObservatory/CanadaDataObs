@@ -255,3 +255,15 @@ institution tuition *(§536)* · military world map / Canada-vs-world population
   adds — commute + productivity-decomposition first), **Phase 5** (per-section landing pages,
   provincial fiscal, parks map, housing dashboard), then **colours** (owner mulling). Loose end
   still open: the broad safe-review sweep (air-quality titles, well-being, ecozones hover).
+- **2026-06-19 #7 (Phase 4 begins — owner "push ahead with Phase 4"):** `a419cfd` **Commuting**
+  (first of the 4 confirmed topic adds) → new People & Society page + `build_commute.py` (one-time,
+  chunk-reads the ~500MB 2021-Census journey-to-work cube 98-10-0457-01). Two charts: 100%-stacked
+  mode split by city (car ~84% nat'l; Toronto/Mtl/Van ~15% transit; Victoria high walk+bike) +
+  ranked average commute duration (GTA longest ~30min). Build gotchas: filter the Time-leaving
+  dimension to Total (its buckets re-sum to total → 2× double-count) + drop Ottawa-Gatineau "part"
+  rows. **REMAINING Phase 4:** productivity decomposition (feasible but needs care — derive
+  labour-input-per-capita = GDP/capita ÷ GDP/hour from existing series [consistency caveat], OR an
+  OECD PDB SDMX probe for consistent components), tax structure & redistribution (OECD Revenue
+  Stats + StatCan — source check), household financial stress (debt-service ratio/arrears —
+  StatCan/BoC — source check). Then Phase 5 (incl. the ⭐ owner directive: integrate the brand
+  area-colours into section identity/landing pages — see the memo), then colours.

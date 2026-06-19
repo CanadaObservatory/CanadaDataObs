@@ -46,16 +46,29 @@ administration is roughly a quarter smaller.
 ```{python}
 #| echo: false
 lvl_path = "data/government/statcan_govt_employment_by_level.csv"
+canpop_path = "data/population/statcan_population_quarterly.csv"
 if os.path.exists(lvl_path):
     df = pd.read_csv(lvl_path)
     keep = ["Federal", "Provincial / territorial", "Local & Indigenous"]
+    df = df[df["level"].isin(keep)].copy()
+    measures = None
+    if os.path.exists(canpop_path):                 # add a per-capita view
+        cp = pd.read_csv(canpop_path)
+        cp = cp[cp["geography"] == "Canada"].copy()
+        cp["year"] = pd.to_datetime(cp["date"]).dt.year
+        popyr = cp.groupby("year")["population"].mean()
+        df["per_1000"] = [j / popyr[y] * 1000 if y in popyr.index else None
+                          for j, y in zip(df["jobs"], df["year"])]
+        measures = [dict(col="jobs", label="Total jobs", yaxis_title="Number of jobs"),
+                    dict(col="per_1000", label="Per 1,000 people",
+                         yaxis_title="Jobs per 1,000 people", hover_decimals=1)]
     fig = lines_over_time(
-        df[df["level"].isin(keep)], "year", "jobs", "level",
-        yaxis_title="Number of jobs",
+        df, "year", "jobs", "level",
+        yaxis_title="Number of jobs", measures=measures,
         colors={"Federal": "#d62728", "Provincial / territorial": "#4e79a7",
                 "Local & Indigenous": "#59a14f"},
         group_order=keep,
-        source_note=f"Source: Statistics Canada 36-10-0489-01 (SNA jobs) — public administration (NAICS 91); federal includes the military | Data as of: {get_data_date(lvl_path)}")
+        source_note=f"Source: Statistics Canada 36-10-0489-01 (SNA jobs) — public administration (NAICS 91); federal includes the military; population from StatCan 17-10-0009-01 | Data as of: {get_data_date(lvl_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")
@@ -159,10 +172,7 @@ members, who are reported under their own frameworks.
 
 The federal public service has moved in waves: growth through the late 2000s, a
 contraction after the 2012 budget's spending review, and renewed growth since,
-reaching about 358,000 in 2025. Drag the **slider** to zoom to a period, and use
-the **dropdown** to switch between the total headcount and the number **per 1,000
-people** — which has risen far less, because Canada's population has grown quickly
-over the same years.
+reaching about 358,000 in 2025.
 
 ```{python}
 #| echo: false

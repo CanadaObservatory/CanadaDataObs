@@ -1818,24 +1818,33 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
     `measures`: optional list of {col, label, yaxis_title} — adds a dropdown that
     switches every line between alternative value columns (e.g. nominal vs real),
     re-scaling the y-axis and updating its title. When given, the first measure is
-    shown initially and `value_col` is ignored."""
+    shown initially and `value_col` is ignored. A measure may also carry its own
+    `hover_decimals`/`ytickprefix`/`yticksuffix` (e.g. whole jobs vs. a per-capita
+    rate to one decimal); the dropdown then rewrites the hover format and y-tick
+    affixes too. Defaults fall back to the chart-level values."""
+    def _hover_tmpl(g, dec, pre, suf):
+        return f"{g}: {pre}%{{y:,.{dec}f}}{suf}<extra></extra>"
     groups = group_order or list(df[group_col].drop_duplicates())
     cmap = _series_colors(groups, colors)
     subsets = {g: df[df[group_col] == g].sort_values(x_col) for g in groups}
-    init_col = measures[0]["col"] if measures else value_col
-    init_title = measures[0].get("yaxis_title", yaxis_title) if measures else yaxis_title
+    m0 = measures[0] if measures else {}
+    init_col = m0.get("col", value_col)
+    init_title = m0.get("yaxis_title", yaxis_title)
+    init_dec = m0.get("hover_decimals", hover_decimals)
+    init_pre = m0.get("ytickprefix", ytickprefix)
+    init_suf = m0.get("yticksuffix", yticksuffix)
     fig = go.Figure()
     for g in groups:
         s = subsets[g]
         fig.add_trace(go.Scatter(
             x=s[x_col], y=s[init_col], name=str(g), mode="lines+markers",
             line=dict(color=cmap[g], width=2.5), marker=dict(size=5),
-            hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
+            hovertemplate=_hover_tmpl(g, init_dec, init_pre, init_suf)))
     legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
               if legend_orientation == "v"
               else dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5))
     yaxis = dict(title=init_title, gridcolor="#e0e0e0", rangemode=rangemode,
-                 tickprefix=ytickprefix, ticksuffix=yticksuffix)
+                 tickprefix=init_pre, ticksuffix=init_suf)
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat
     fig.update_layout(
@@ -1844,10 +1853,16 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
         margin=dict(l=10, r=(175 if legend_orientation == "v" else 20),
                     t=(60 if measures else 30), b=100))
     if measures:
-        buttons = [dict(method="update", label=m["label"],
-                        args=[{"y": [subsets[g][m["col"]].tolist() for g in groups]},
-                              {"yaxis.title.text": m.get("yaxis_title", yaxis_title),
-                               "yaxis.autorange": True}])
+        def _btn_args(m):
+            dec = m.get("hover_decimals", hover_decimals)
+            pre = m.get("ytickprefix", ytickprefix)
+            suf = m.get("yticksuffix", yticksuffix)
+            return [{"y": [subsets[g][m["col"]].tolist() for g in groups],
+                     "hovertemplate": [_hover_tmpl(g, dec, pre, suf) for g in groups]},
+                    {"yaxis.title.text": m.get("yaxis_title", yaxis_title),
+                     "yaxis.autorange": True,
+                     "yaxis.tickprefix": pre, "yaxis.ticksuffix": suf}]
+        buttons = [dict(method="update", label=m["label"], args=_btn_args(m))
                    for m in measures]
         fig.update_layout(updatemenus=[dict(buttons=buttons, active=0, x=0,
             xanchor="left", y=1.14, yanchor="top", bgcolor="white",

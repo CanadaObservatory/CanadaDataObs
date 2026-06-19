@@ -55,13 +55,20 @@ colors = [
     "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5",
 ]
 
+# Shorten the two longest legend labels (Newfoundland wraps to two lines so the full
+# name is kept; the hover still shows each geography's full name).
+LEGEND_NAME = {
+    "Northwest Territories including Nunavut": "NWT & Nunavut",
+    "Newfoundland and Labrador": "Newfoundland<br>and Labrador",
+}
+
 fig = go.Figure()
 for i, geo in enumerate(top_provinces):
     subset = provinces[provinces["geography"] == geo]
     fig.add_trace(go.Scatter(
         x=subset["date"],
         y=subset["pop_m"],
-        name=geo,
+        name=LEGEND_NAME.get(geo, geo),
         mode="lines",
         line=dict(color=colors[i % len(colors)], width=2),
         hovertemplate=f"<b>{geo}</b><br>%{{x|%Y}} Q%{{customdata}}: %{{y:.2f}} million<extra></extra>",
@@ -168,8 +175,6 @@ if os.path.exists(components_path):
         updatemenus=[dict(buttons=sel, active=0, x=1, xanchor="right", y=1.14,
                           yanchor="top", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)])
-    figp.add_annotation(text="Show:", xref="paper", yref="paper", x=1, xanchor="right",
-                        y=1.18, yanchor="bottom", showarrow=False, font=dict(size=11, color="#666"))
     figp.add_annotation(text=f"Source: Statistics Canada, Table 17-10-0008-01 | Data as of: {get_data_date(components_path)}",
         xref="paper", yref="paper", x=0, y=-0.30, showarrow=False, font=dict(size=10, color="#999"))
     figp.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

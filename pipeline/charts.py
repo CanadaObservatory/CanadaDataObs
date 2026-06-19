@@ -571,9 +571,6 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
         updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.13, yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1)])
-    fig.add_annotation(text=menu_label, xref="paper", yref="paper",
-        x=1, xanchor="right", y=1.17, yanchor="bottom", showarrow=False,
-        font=dict(size=11, color="#666"))
     return fig
 
 
@@ -1540,9 +1537,6 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
         fig.update_layout(updatemenus=[dict(buttons=mbtns, active=0, x=0.0, y=1.14,
                           xanchor="left", yanchor="top", bgcolor="white",
                           bordercolor="#ccc", borderwidth=1, showactive=True)])
-        fig.add_annotation(text="Show:", xref="paper", yref="paper",
-                           x=0.0, y=1.20, xanchor="left", yanchor="bottom",
-                           showarrow=False, font=dict(size=11, color="#666"))
     if nhs_year in years:
         fig.add_vrect(x0=nhs_year - 0.25, x1=nhs_year + 0.25, line_width=0,
                       fillcolor="#000", opacity=0.05)

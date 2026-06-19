@@ -408,6 +408,43 @@ def fetch_voter_turnout():
     return hist
 
 
+def fetch_cma_vacancy():
+    """Rental vacancy rate by census metropolitan area, latest year (CMHC Rental
+    Market Survey via StatCan 34-10-0127-01) — the by-city spread behind the
+    national average (which the all-Canada line alone hides). One row per CMA for
+    the most recent reported year; the page draws it as a ranked bar.
+    """
+    logger.info("Fetching CMA rental vacancy (34-10-0127-01)...")
+    try:
+        df = _get_table("34-10-0127-01")
+    except Exception as e:
+        logger.error(f"Failed to fetch vacancy table: {e}")
+        return None
+    df = df.rename(columns={"REF_DATE": "year", "GEO": "geo", "VALUE": "vacancy_rate"})
+    df["year"] = pd.to_numeric(df["year"], errors="coerce")
+    df["vacancy_rate"] = pd.to_numeric(df["vacancy_rate"], errors="coerce")
+    # CMA-level rows only ("City, Province"); drop the Ottawa-Gatineau "part" rows
+    df = df[df["geo"].str.contains(",", na=False)
+            & ~df["geo"].str.contains(" part,", na=False)]
+    df = df.dropna(subset=["vacancy_rate", "year"])
+    df["cma"] = df["geo"].str.split(",").str[0].str.strip()
+    latest_year = int(df["year"].max())
+    out = (df[df["year"] == latest_year][["cma", "year", "vacancy_rate"]]
+           .drop_duplicates("cma").sort_values("vacancy_rate").reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "housing" / "statcan_cma_vacancy.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Statistics Canada / CMHC", source_table="34-10-0127-01",
+        frequency="annual", unit="vacancy rate (%)",
+        transformations=[f"CMA-level rows, latest year ({latest_year})"])
+    logger.info(f"  saved {len(out)} CMAs ({latest_year}) -> {out_path.name}")
+    return out
+
+
 PROVINCES = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",
              "New Brunswick", "Quebec", "Ontario", "Manitoba", "Saskatchewan",
              "Alberta", "British Columbia"]

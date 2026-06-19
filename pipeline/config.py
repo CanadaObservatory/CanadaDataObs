@@ -559,6 +559,11 @@ INDICATORS = [
               statcan_table="34-10-0127-01",
               statcan_filters={"GEO": "Census metropolitan areas"},
               source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
+    Indicator("cma_vacancy", "housing", "custom",
+              "Rental vacancy rate by city (latest year)", "% of rental units", "annual",
+              value_col="vacancy_rate", chart_recipe="bar",
+              fetch_fn="fetch_cma_vacancy", output_subpath="statcan_cma_vacancy.csv",
+              source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
 
     # ----- Income & Inequality -----
     Indicator("gini", "income", "oecd",

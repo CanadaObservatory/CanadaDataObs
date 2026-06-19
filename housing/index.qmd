@@ -17,7 +17,7 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, category_bar
 ```
 
 ## Where Canada stands
@@ -311,6 +311,24 @@ else:
     print("Vacancy rate data not yet available. Run the data pipeline.")
 ```
 
+The national average hides wide variation between cities. In the latest survey, vacancy ranged from under 2% in the tightest markets — where rentals are hardest to find and rents rise fastest — to over 6% in the loosest. Canada's largest metros are highlighted.
+
+```{python}
+#| echo: false
+cmavac_path = "data/housing/statcan_cma_vacancy.csv"
+if os.path.exists(cmavac_path):
+    cv = pd.read_csv(cmavac_path)
+    yr = int(cv["year"].iloc[0])
+    fig = category_bar(cv, "cma", "vacancy_rate", xaxis_title="Vacancy rate (%)",
+        value_fmt=".1f", ticksuffix="%",
+        highlight={"Toronto", "Vancouver", "Montréal", "Calgary", "Ottawa-Gatineau", "Edmonton"},
+        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada / CMHC, Table 34-10-0127-01 — {yr}.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CMA vacancy data not yet available. Run the data pipeline.")
+```
+
 ## Household debt
 
 Household debt as a percentage of net disposable income. A value of 180% means
@@ -356,6 +374,7 @@ if os.path.exists(debt_path):
 - [Rent, CPI (CSV)](../data/housing/statcan_rent_cpi.csv) — Statistics Canada Table 18-10-0004-01
 - [Housing Starts (CSV)](../data/housing/statcan_housing_starts.csv) — Statistics Canada / CMHC Table 34-10-0143-01
 - [Rental Vacancy Rate (CSV)](../data/housing/statcan_vacancy_rate.csv) — Statistics Canada / CMHC Table 34-10-0127-01
+- [Rental Vacancy Rate by City (CSV)](../data/housing/statcan_cma_vacancy.csv) — Statistics Canada / CMHC Table 34-10-0127-01
 - [City home value, value-to-income & more (CSV)](../data/geo/statcan_cma_indicators.csv) — 2021 Census (owner-estimated dwelling value)
 - [Home value by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_dwelling_value_2021.csv) — 2021 Census (owner-estimated dwelling value)
 - [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard

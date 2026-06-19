@@ -25,7 +25,7 @@ from pipeline.fetch_statcan import (
     fetch_provincial_electricity, fetch_tuition, fetch_tuition_by_field,
     fetch_trade_us, fetch_cma_unemployment,
     fetch_age_structure, fetch_interprovincial_migration, fetch_minimum_wage,
-    fetch_voter_turnout,
+    fetch_voter_turnout, fetch_cma_vacancy,
 )
 from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
                                   fetch_co2_per_gdp, fetch_co2_global_context)
@@ -59,6 +59,7 @@ CUSTOM_FETCHERS = {
     "fetch_cpi": fetch_cpi,
     "fetch_minimum_wage": fetch_minimum_wage,
     "fetch_voter_turnout": fetch_voter_turnout,
+    "fetch_cma_vacancy": fetch_cma_vacancy,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,
     "fetch_co2_per_gdp": fetch_co2_per_gdp,

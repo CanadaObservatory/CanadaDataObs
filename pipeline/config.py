@@ -620,6 +620,11 @@ INDICATORS = [
                                "Household food security status": "Food insecure",
                                "Statistics": "Percentage of persons"},
               source_table="Statistics Canada 13-10-0835-01"),
+    Indicator("income_distribution", "income", "custom",
+              "Income distribution by decile, over time", "constant dollars / % share", "annual",
+              value_col="avg_income", chart_recipe="line",
+              fetch_fn="fetch_income_distribution", output_subpath="income_deciles_avg.csv",
+              source_table="Statistics Canada 11-10-0193-01"),
 
     # ----- Health -----
     Indicator("life_expectancy", "health", "oecd",

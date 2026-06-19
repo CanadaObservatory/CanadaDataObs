@@ -191,6 +191,73 @@ if os.path.exists(gini_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Income distribution over time
+
+A single inequality number hides how income is actually shared. The chart below shows the **average after-tax income of each tenth (decile)** of Canadians, in constant 2024 dollars — slide through the years to watch real incomes rise, with the top decile pulling furthest ahead.
+
+```{python}
+#| echo: false
+adf_path = "data/income/income_deciles_avg.csv"
+if os.path.exists(adf_path):
+    adf = pd.read_csv(adf_path)
+    DEC_ORDER = ["Lowest decile", "Second decile", "Third decile", "Fourth decile",
+                 "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
+                 "Ninth decile", "Highest decile"]
+    LABELS = ["Lowest", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "Highest"]
+    piv = adf.pivot(index="year", columns="decile", values="avg_income")[DEC_ORDER]
+    years = piv.index.tolist()
+    ymax = float(piv.values.max())
+    steps = [dict(method="restyle", label=str(int(yr)), args=[{"y": [piv.loc[yr].tolist()]}])
+             for yr in years]
+    fig = go.Figure(go.Bar(x=LABELS, y=piv.loc[years[-1]].tolist(), marker_color="#4e79a7",
+        hovertemplate="%{x} decile: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=470,
+        yaxis=dict(title="Average after-tax income (2024 $)", tickprefix="$", tickformat=",",
+                   range=[0, ymax * 1.05], gridcolor="#e0e0e0"),
+        xaxis=dict(title="Income decile (lowest to highest tenth)"),
+        sliders=[dict(active=len(years) - 1, currentvalue=dict(prefix="Year: ", font=dict(size=14)),
+                      pad=dict(t=50), steps=steps)],
+        margin=dict(t=30, b=150),
+        annotations=[dict(text="Source: Statistics Canada, Table 11-10-0193-01 (average after-tax income, constant 2024 $).",
+            xref="paper", yref="paper", x=0, y=-0.42, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Income-distribution data not yet available. Run the data pipeline.")
+```
+
+The next chart shows the **share of all income** held by the top 10% and the bottom 40% of Canadians. Switch between **market income** (before taxes and transfers) and **after-tax income**: the market gap is wide and has widened since the 1970s, while the after-tax gap is far narrower — a direct picture of how the tax-and-transfer system redistributes income.
+
+```{python}
+#| echo: false
+sh_path = "data/income/income_top_bottom_share.csv"
+if os.path.exists(sh_path):
+    sdf = pd.read_csv(sh_path)
+    d0 = sdf[sdf["concept"] == "After-tax income"].sort_values("year")
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(x=d0["year"], y=d0["top10"], name="Top 10%", mode="lines",
+        line=dict(color="#d62728", width=2.5), hovertemplate="Top 10%: %{y:.1f}%<extra></extra>"))
+    fig2.add_trace(go.Scatter(x=d0["year"], y=d0["bottom40"], name="Bottom 40%", mode="lines",
+        line=dict(color="#4e79a7", width=2.5), hovertemplate="Bottom 40%: %{y:.1f}%<extra></extra>"))
+    buttons = []
+    for concept, label in [("After-tax income", "After taxes & transfers"),
+                           ("Market income", "Market (before tax & transfers)")]:
+        t = sdf[sdf["concept"] == concept].sort_values("year")
+        buttons.append(dict(method="update", label=label,
+            args=[{"y": [t["top10"].tolist(), t["bottom40"].tolist()]}]))
+    fig2.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+        yaxis=dict(title="Share of total income (%)", ticksuffix="%", gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        updatemenus=[dict(buttons=buttons, active=0, x=1, xanchor="right", y=1.13, yanchor="top",
+            bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)],
+        margin=dict(t=60, b=90),
+        annotations=[dict(text=f"Source: Statistics Canada, Table 11-10-0193-01 | Data as of: {get_data_date(sh_path)}",
+            xref="paper", yref="paper", x=0, y=-0.2, showarrow=False, font=dict(size=10, color="#999"))])
+    fig2.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Income-share data not yet available. Run the data pipeline.")
+```
+
 ## Relative poverty rate
 
 The relative poverty rate is the share of people living on less than half of the
@@ -258,5 +325,7 @@ else:
 - [Average Annual Wage (CSV)](../data/income/oecd_avg_wage.csv) — OECD Average Annual Wages
 - [Real Household Disposable Income per Capita (CSV)](../data/income/oecd_disposable_income.csv) — OECD Household Dashboard
 - [Gini Coefficient (CSV)](../data/income/oecd_gini.csv) — OECD Income Distribution Database
+- [Average income by decile (CSV)](../data/income/income_deciles_avg.csv) — Statistics Canada Table 11-10-0193-01
+- [Top-10% vs bottom-40% income share (CSV)](../data/income/income_top_bottom_share.csv) — Statistics Canada Table 11-10-0193-01
 - [Relative Poverty Rate (CSV)](../data/income/oecd_poverty.csv) — OECD Income Distribution Database
 - [Low-Income Rate, LIM-AT (CSV)](../data/income/statcan_low_income.csv) — Statistics Canada Table 11-10-0135-01

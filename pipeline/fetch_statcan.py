@@ -445,6 +445,77 @@ def fetch_cma_vacancy():
     return out
 
 
+_INCOME_DECILES = ["Lowest decile", "Second decile", "Third decile", "Fourth decile",
+                   "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
+                   "Ninth decile", "Highest decile"]
+
+
+def fetch_income_distribution():
+    """Income distribution over time (StatCan 11-10-0193-01, Canada, 1976–).
+
+    Emits two tidy CSVs:
+    - income_deciles_avg.csv — average **after-tax** income by decile, in constant
+      dollars (real), per year → the decile year-slider (the distribution stretches
+      as real incomes grow and the top decile pulls away).
+    - income_top_bottom_share.csv — the share of income held by the top 10% (highest
+      decile) and the bottom 40% (four lowest deciles), for both **market** and
+      **after-tax** income → the inequality-over-time line with a redistribution
+      toggle (taxes and transfers narrow the gap).
+    """
+    logger.info("Fetching income distribution by decile (11-10-0193-01)...")
+    try:
+        df = _get_table("11-10-0193-01")
+    except Exception as e:
+        logger.error(f"Failed to fetch income-distribution table: {e}")
+        return None
+    ca = df[df["GEO"] == "Canada"].copy()
+    ca["year"] = pd.to_numeric(ca["REF_DATE"], errors="coerce")
+    ca["VALUE"] = pd.to_numeric(ca["VALUE"], errors="coerce")
+
+    # 1. Average after-tax income by decile (real) — for the slider
+    avg = ca[(ca["Statistics"] == "Average income")
+             & (ca["Income concept"] == "Adjusted after-tax income")
+             & (ca["Income decile"].isin(_INCOME_DECILES))]
+    avg = (avg[["year", "Income decile", "VALUE"]]
+           .rename(columns={"Income decile": "decile", "VALUE": "avg_income"})
+           .dropna(subset=["year", "avg_income"]))
+    avg["year"] = avg["year"].astype(int)
+    if avg.empty:
+        return None
+    avg_path = DATA_DIR / "income" / "income_deciles_avg.csv"
+    avg_path.parent.mkdir(parents=True, exist_ok=True)
+    avg.sort_values(["year", "decile"]).to_csv(avg_path, index=False)
+    save_metadata(avg_path, df=avg, date_column="year",
+        source="Statistics Canada", source_table="11-10-0193-01",
+        frequency="annual", unit="average after-tax income (constant dollars)",
+        transformations=["Canada, average after-tax income by decile, real $"])
+    logger.info(f"  saved {len(avg)} rows -> {avg_path.name}")
+
+    # 2. Top-10% vs bottom-40% income share, market + after-tax — for the share line
+    rows = []
+    for concept, label in [("Adjusted market income", "Market income"),
+                           ("Adjusted after-tax income", "After-tax income")]:
+        sh = ca[(ca["Statistics"] == "Share of income")
+                & (ca["Income concept"] == concept)
+                & (ca["Income decile"].isin(_INCOME_DECILES))]
+        piv = sh.pivot_table(index="year", columns="Income decile", values="VALUE")
+        for y, r in piv.iterrows():
+            top10 = r.get("Highest decile")
+            bottom40 = r.reindex(_INCOME_DECILES[:4]).sum()
+            if pd.notna(top10):
+                rows.append({"year": int(y), "concept": label,
+                             "top10": round(float(top10), 1), "bottom40": round(float(bottom40), 1)})
+    share = pd.DataFrame(rows).sort_values(["concept", "year"]).reset_index(drop=True)
+    share_path = DATA_DIR / "income" / "income_top_bottom_share.csv"
+    share.to_csv(share_path, index=False)
+    save_metadata(share_path, df=share, date_column="year",
+        source="Statistics Canada", source_table="11-10-0193-01",
+        frequency="annual", unit="% share of income",
+        transformations=["Canada; top-10% (highest decile) and bottom-40% (4 lowest) shares; market + after-tax"])
+    logger.info(f"  saved {len(share)} rows -> {share_path.name}")
+    return avg
+
+
 PROVINCES = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",
              "New Brunswick", "Quebec", "Ontario", "Manitoba", "Saskatchewan",
              "Alberta", "British Columbia"]

@@ -175,13 +175,14 @@ if os.path.exists(int_path):
 
 ## Defence spending
 
-Military expenditure as a share of GDP. NATO members have agreed to a guideline of spending at least **2% of GDP** on defence (shown as a dashed line). The measure is shown for all 17 peers — NATO and non-NATO alike — for comparison.
+Military expenditure as a share of GDP. NATO members have agreed to a guideline of spending at least **2% of GDP** on defence (shown as a dashed line). Israel — not a NATO member, and an outlier at several times the peer norm — is omitted here so the rest of the comparison stays readable.
 
 ```{python}
 #| echo: false
 def_path = "data/fiscal/worldbank_defence.csv"
 if os.path.exists(def_path):
     df = pd.read_csv(def_path)
+    df = df[df["country_code"] != "ISR"]  # non-NATO outlier; omitting it keeps the scale readable
     fig = peer_comparison_line(df, "year", "defence_pct_gdp", title="",
         yaxis_title="% of GDP", show_average=True)
     fig.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.6)
@@ -201,6 +202,7 @@ else:
 #| echo: false
 if os.path.exists(def_path):
     df = pd.read_csv(def_path)
+    df = df[df["country_code"] != "ISR"]  # non-NATO outlier; omitting it keeps the scale readable
     fig = ranked_bar(df, "defence_pct_gdp", "% of GDP",
         f"Source: World Bank (data from SIPRI) | Data as of: {get_data_date(def_path)}",
         hover_template="%{y}: %{x:.1f}% of GDP<extra></extra>")

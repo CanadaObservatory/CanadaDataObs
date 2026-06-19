@@ -21,10 +21,10 @@ from pipeline.charts import (
 LABOUR_AGES = ["Total (15–64)", "Youth (15–24)", "Prime-age (25–54)", "Older (55–64)"]
 ```
 
-How fast the economy is growing, how large it is per person, how productive an
-hour of work is, and how many people who want work can find it — these indicators
-place Canada's output and labour market alongside 17 OECD peers. Inflation and the
-cost of living have their own page: [Housing & Cost of Living](../housing/).
+This section explores how fast the economy is growing, how large it is,
+productivity, and employment levels. These indicators are placed alongside 17 OECD
+peers. Inflation and the cost of living have their own page:
+[Housing & Cost of Living](../housing/index.qmd).
 
 ## Where Canada stands
 

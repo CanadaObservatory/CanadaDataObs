@@ -15,13 +15,13 @@ MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 ```
 
-Canada is a country defined by its physical extent. At **9.98 million km²** it is the second-largest country on Earth, with the **longest coastline of any nation** (about 243,000 km) and roughly **a fifth of the world's fresh water**. Yet it is home to only about 40 million people — so most of that vastness is boreal forest, tundra, rock and ice, and most Canadians live in a narrow band along the southern edge. The maps below describe that geography: where people are, what the land is made of, where the water is, and how fire and ice are changing.
+Canada is an expansive country with a diverse physical geography. At **9.98 million km²** it is the second-largest country on Earth, with the longest coastline of any nation and roughly **a fifth of the world's fresh water**. However, most of that vastness is boreal forest, tundra, rock and ice. Most Canadians live in a narrow band within a few hundred kilometres of the southern border. The maps below describe that geography: where people are, what the land is made of, where the water is, and how fire and ice are changing.
 
 *Sources are official: Statistics Canada, Natural Resources Canada, Environment and Climate Change Canada, and the U.S. National Snow and Ice Data Center.*
 
 ## Where Canadians live
 
-Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Most Canadians live in a narrow band along the southern border, and the country empties out to the north. The map below zooms into that pattern at the level of individual cities: density here is people per square kilometre **within** each census metropolitan area or agglomeration — a read on how compactly each city is built. Because the range spans several orders of magnitude it is shaded on a **logarithmic** scale (each step is ten times denser). Pan and zoom to your own region.
+Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Most Canadians live in a narrow band along the southern border, and the country empties out to the north. The map below shows that pattern at the level of individual cities: density here is people per square kilometre **within** each census metropolitan area or agglomeration — a read on how compactly each city is built. Because the range spans several orders of magnitude it is shaded on a **logarithmic** scale (each step is ten times denser). Pan and zoom to your own region.
 
 ```{python}
 #| echo: false

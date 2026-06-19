@@ -3,12 +3,10 @@ title: "Housing"
 description: "House prices, affordability, rent, and household debt — Canada and OECD peers"
 ---
 
-How much it costs to buy or rent a home has become a defining question of the
-decade. The charts below track house prices, the gap between home prices and
-incomes, rent, and how much debt households carry. Consumer-price inflation —
-overall, core, and food — has its own page:
-[Cost of Living](../economics/cost-of-living.qmd). International comparisons use a
-broad group of 17 OECD peers so Canada's position can be read in context.
+How much it costs to rent or buy a home is a defining question for most Canadians.
+The charts below track house prices, the gap between home prices and incomes, rent,
+and how much debt households carry. Inflation has its own page:
+[Cost of Living](../economics/cost-of-living.qmd).
 
 ```{python}
 #| echo: false

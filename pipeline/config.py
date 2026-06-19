@@ -564,6 +564,12 @@ INDICATORS = [
               value_col="vacancy_rate", chart_recipe="bar",
               fetch_fn="fetch_cma_vacancy", output_subpath="statcan_cma_vacancy.csv",
               source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
+    Indicator("debt_service_ratio", "housing", "custom",
+              "Household debt service ratio", "% of disposable income", "quarterly",
+              value_col="dsr_total", chart_recipe="line",
+              fetch_fn="fetch_debt_service_ratio",
+              output_subpath="statcan_debt_service_ratio.csv",
+              source_table="Statistics Canada 11-10-0065-01"),
 
     # ----- Income & Inequality -----
     Indicator("gini", "income", "oecd",

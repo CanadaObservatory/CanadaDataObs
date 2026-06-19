@@ -445,6 +445,51 @@ def fetch_cma_vacancy():
     return out
 
 
+def fetch_debt_service_ratio():
+    """Household debt service ratio — the share of disposable income absorbed by
+    obligated debt payments (interest *and* principal) — from StatCan 11-10-0065-01
+    (National Balance Sheet Accounts, seasonally adjusted, quarterly since 1990).
+
+    This is the payment-burden measure that the debt-to-income *level* (the OECD
+    household-debt chart on the same page) misses: the DSR climbs when interest
+    rates rise even if the debt stock is flat, so it captures the renewal stress of
+    the 2022–24 rate cycle. Split into mortgage vs non-mortgage (which sum exactly
+    to the total) so the larger, more rate-sensitive mortgage component is visible.
+    """
+    logger.info("Fetching household debt service ratio (11-10-0065-01)...")
+    try:
+        df = _get_table("11-10-0065-01")
+    except Exception as e:
+        logger.error(f"  Failed to fetch DSR table: {e}")
+        return None
+    df = df[(df["Seasonal adjustment"] == "Seasonally adjusted at annual rates")
+            & (df["UOM"] == "Ratio")]
+    wanted = {"Debt service ratio": "dsr_total",
+              "Mortgage debt service ratio": "dsr_mortgage",
+              "Non-mortgage debt service ratio": "dsr_nonmortgage",
+              "Debt service ratio, interest only": "dsr_interest_only"}
+    df = df[df["Estimates"].isin(wanted)].copy()
+    df["value"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df["date"] = pd.to_datetime(df["REF_DATE"], format="%Y-%m", errors="coerce")
+    wide = (df.pivot_table(index="date", columns="Estimates", values="value")
+              .rename(columns=wanted).reset_index().sort_values("date"))
+    wide = wide.dropna(subset=["dsr_total"])
+    if wide.empty:
+        return None
+    cols = ["date"] + [c for c in ("dsr_total", "dsr_mortgage", "dsr_nonmortgage",
+                                   "dsr_interest_only") if c in wide.columns]
+    out_path = DATA_DIR / "housing" / "statcan_debt_service_ratio.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wide[cols].to_csv(out_path, index=False)
+    save_metadata(out_path, df=wide, date_column="date",
+        source="Statistics Canada", source_table="11-10-0065-01",
+        frequency="quarterly", unit="% of disposable income (seasonally adjusted)",
+        transformations=["Seasonally adjusted at annual rates",
+                         "total / mortgage / non-mortgage debt service ratio"])
+    logger.info(f"  saved {len(wide)} quarters -> {out_path.name}")
+    return wide[cols]
+
+
 _INCOME_DECILES = ["Lowest decile", "Second decile", "Third decile", "Fourth decile",
                    "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
                    "Ninth decile", "Highest decile"]

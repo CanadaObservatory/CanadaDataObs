@@ -366,6 +366,51 @@ if os.path.exists(debt_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Household debt payments
+
+The debt level above measures how much households *owe*; the **debt service ratio** measures how much they *pay* — the share of disposable income that goes to obligated debt payments (interest **and** principal) each quarter. It is the more direct gauge of financial stress, because it rises when interest rates climb even if the amount owed stays flat. The ratio fell sharply in 2020, when policy-rate cuts and mortgage-payment deferrals eased payments, then climbed back to around its historical high as households renewed mortgages at higher rates. Mortgage payments are the larger and more interest-rate-sensitive of the two components.
+
+```{python}
+#| echo: false
+dsr_path = "data/housing/statcan_debt_service_ratio.csv"
+if os.path.exists(dsr_path):
+    d = pd.read_csv(dsr_path, parse_dates=["date"]).sort_values("date")
+    figd = go.Figure()
+    # Stacked area: mortgage + non-mortgage payments sum exactly to the total DSR,
+    # so the stack height is the headline ratio and the split shows what drives it.
+    # customdata carries the raw (un-stacked) component value for the hover.
+    figd.add_trace(go.Scatter(x=d["date"], y=d["dsr_mortgage"], name="Mortgage",
+        mode="lines", line=dict(width=0.5, color="#1f77b4"), stackgroup="dsr",
+        customdata=d["dsr_mortgage"],
+        hovertemplate="Mortgage: %{customdata:.1f}%<extra></extra>"))
+    figd.add_trace(go.Scatter(x=d["date"], y=d["dsr_nonmortgage"], name="Non-mortgage (consumer)",
+        mode="lines", line=dict(width=0.5, color="#f4a259"), stackgroup="dsr",
+        customdata=d["dsr_nonmortgage"],
+        hovertemplate="Non-mortgage: %{customdata:.1f}%<extra></extra>"))
+    figd.add_trace(go.Scatter(x=d["date"], y=d["dsr_total"], name="Total",
+        mode="lines", line=dict(width=2, color="#333333"),
+        hovertemplate="Total: %{y:.1f}%<extra></extra>"))
+    _xmax = d["date"].max()
+    figd.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="% of disposable income", gridcolor="#e0e0e0",
+                   ticksuffix="%", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+            range=[pd.Timestamp("2006-01-01"), _xmax],
+            rangeselector=dict(buttons=[
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(t=40, b=120, r=20))
+    figd.add_annotation(
+        text=f"Source: Statistics Canada 11-10-0065-01 (seasonally adjusted) | Data as of: {get_data_date(dsr_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    figd.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Debt service ratio data not yet available. Run the data pipeline.")
+```
+
 ## Download data
 
 - [Real House Price Index (CSV)](../data/housing/oecd_house_price_real.csv) — OECD Analytical House Prices
@@ -378,5 +423,6 @@ if os.path.exists(debt_path):
 - [City home value, value-to-income & more (CSV)](../data/geo/statcan_cma_indicators.csv) — 2021 Census (owner-estimated dwelling value)
 - [Home value by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_dwelling_value_2021.csv) — 2021 Census (owner-estimated dwelling value)
 - [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard
+- [Household Debt Service Ratio (CSV)](../data/housing/statcan_debt_service_ratio.csv) — Statistics Canada Table 11-10-0065-01
 
 Mortgage and bond-yield data are on [Borrowing Costs](../economics/borrowing-costs.qmd).

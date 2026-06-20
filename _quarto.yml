@@ -70,6 +70,8 @@ website:
             text: Overview
           - href: fiscal/index.qmd
             text: Government Finances
+          - href: fiscal/provincial.qmd
+            text: Provincial Finances
           - href: government/index.qmd
             text: Government Employment
           - href: government/spending.qmd

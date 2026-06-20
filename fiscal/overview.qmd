@@ -25,9 +25,9 @@ general-government finances against 17 OECD peers.
 :::{.column .area-card .area-government width="32%"}
 ![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
 
-### [Government Employment](../government/index.qmd)
-Who works for government — employment by level, the whole public-sector
-workforce, the federal public service, and an OECD peer comparison.
+### [Provincial Finances](provincial.qmd)
+What each province raises, spends, and owes, compared on a common basis — net
+debt, government size, and balances by province.
 :::
 
 :::{.column width="2%"}
@@ -36,9 +36,27 @@ workforce, the federal public service, and an OECD peer comparison.
 :::{.column .area-card .area-government width="32%"}
 ![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
 
+### [Government Employment](../government/index.qmd)
+Who works for government — employment by level, the whole public-sector
+workforce, the federal public service, and an OECD peer comparison.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-government width="32%"}
+![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
+
 ### [Federal Spending](../government/spending.qmd)
 Federal revenue and spending back to 1961 — by economic type, standard object,
 department, and function.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
 :::
 
 ::::

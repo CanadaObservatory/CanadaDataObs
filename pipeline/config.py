@@ -598,6 +598,12 @@ INDICATORS = [
               fetch_fn="fetch_debt_service_ratio",
               output_subpath="statcan_debt_service_ratio.csv",
               source_table="Statistics Canada 11-10-0065-01"),
+    Indicator("provincial_finance", "government", "custom",
+              "Provincial government finances (CGFS, % of GDP)", "% of provincial GDP",
+              "annual", value_col="net_debt_pct_gdp", chart_recipe="bar",
+              fetch_fn="fetch_provincial_finance",
+              output_subpath="statcan_provincial_finance.csv",
+              source_table="Statistics Canada 10-10-0017-01 + 36-10-0222-01"),
 
     # ----- Income & Inequality -----
     Indicator("gini", "income", "oecd",

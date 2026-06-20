@@ -23,7 +23,8 @@ agency_files = ["data/geo/parks_federal.geojson", "data/geo/parks_on.geojson",
                 "data/geo/parks_ab.geojson", "data/geo/parks_bc.geojson",
                 "data/geo/parks_qc.geojson", "data/geo/parks_mb.geojson",
                 "data/geo/parks_sk.geojson", "data/geo/parks_nb.geojson",
-                "data/geo/parks_ns.geojson", "data/geo/parks_yt.geojson"]
+                "data/geo/parks_ns.geojson", "data/geo/parks_yt.geojson",
+                "data/geo/parks_ncc.geojson"]
 if os.path.exists(geo_path):
     gj = json.load(open(geo_path))
     df = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in gj["features"]])
@@ -69,4 +70,5 @@ else:
 - [New Brunswick provincial park boundaries (GeoJSON)](../data/geo/parks_nb.geojson) — GeoNB, Provincial Parks
 - [Nova Scotia provincial park boundaries (GeoJSON)](../data/geo/parks_ns.geojson) — Nova Scotia Environment and Climate Change
 - [Yukon territorial park boundaries (GeoJSON)](../data/geo/parks_yt.geojson) — Government of Yukon (Geomatics Yukon)
+- [Gatineau Park boundary (GeoJSON)](../data/geo/parks_ncc.geojson) — National Capital Commission, Gatineau Park land-use designations
 - [Parks layer sources (CSV)](../data/geo/parks_sources.csv) — provenance for the agency boundary layers

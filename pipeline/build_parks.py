@@ -438,6 +438,39 @@ def build_yukon_parks(simplify_tol=0.0012, server_offset=0.0008):
     _write_layer(g, f"{GEO_DIR}/parks_yt.geojson")
 
 
+# --- National Capital Commission: Gatineau Park ---------------------------
+NCC_URL = ("https://services2.arcgis.com/WLyMuW006nKOfa5Z/ArcGIS/rest/services/"
+           "Gatineau_Park_Land_Designation_2021_view2/FeatureServer/0/query")
+NCC_DATASET = "NCC Gatineau Park Land Use Designations 2021"
+
+
+def build_ncc_parks(simplify_tol=0.0006, server_offset=0.0004):
+    """Gatineau Park (federal, National Capital Commission) → data/geo/parks_ncc.geojson.
+    Gatineau is administered by the NCC — neither a national park (CLSS) nor a Québec
+    parc national — so it falls outside both agency datasets. Its boundary here is the
+    dissolve of the NCC's 2021 land-use-designation zones (≈363 km²)."""
+    print("Building Gatineau Park (NCC) ...")
+    g = _fetch_arcgis_geojson(NCC_URL, "1=1", "GPMP_LABEL_EN", server_offset)
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    g["geometry"] = g.geometry.buffer(0)      # repair zones before the union
+    g = g.dissolve().reset_index(drop=True)   # land-use zones → one park boundary
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "NCC-gatineau"
+    g["name"] = "Gatineau Park"
+    g["name_fr"] = "Parc de la Gatineau"
+    g["park_type"] = "Conservation Park"
+    g["province"] = "Québec"
+    g["jurisdiction"] = "Canada"
+    g["admin_level"] = "federal"
+    g["admin_agency"] = "National Capital Commission"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "National Capital Commission (NCC)"
+    g["source_dataset"] = NCC_DATASET
+    g["geometry_quality"] = "official boundary (land-use plan extent)"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_ncc.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -486,6 +519,10 @@ _SOURCES = {
         source_agency="Government of Yukon (Geomatics Yukon)", source_dataset=YUKON_DATASET,
         source_url="https://mapservices.gov.yk.ca/", licence="Open Government Licence – Yukon",
         boundary_type="official (1:1M)"),
+    "Gatineau Park (NCC)": dict(admin_level="federal",
+        source_agency="National Capital Commission (NCC)", source_dataset=NCC_DATASET,
+        source_url="https://open.canada.ca/data/en/dataset/706bf577-0603-4bef-85da-d5c3736081a0",
+        licence="Open Government Licence – Canada", boundary_type="official (land-use plan extent)"),
 }
 
 # Jurisdictions with NO usable authoritative open boundary (documented gaps; these
@@ -518,4 +555,5 @@ if __name__ == "__main__":
     build_nb_parks()
     build_ns_parks()
     build_yukon_parks()
+    build_ncc_parks()
     write_sources()

@@ -380,12 +380,13 @@ CPCAD_URL = "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/Map
 # urban/recreation/nature/historic/marine designations and non-park conservation areas.
 _PARK_TYPES = ["National Park", "National Park Reserve", "National Urban Park",
                "Provincial Park", "Wildland Provincial Park", "Wilderness Park",
-               "Territorial Park", "Quebec's national park", "Quebec's national park reserve"]
+               "Territorial Park", "Quebec's national park", "Quebec's national park reserve",
+               "Conservation Park"]   # Conservation Park = Gatineau Park only (NCC, federal)
 _PARK_JUR = {"National Park": "Federal", "National Park Reserve": "Federal",
              "National Urban Park": "Federal", "Territorial Park": "Territorial",
              "Provincial Park": "Provincial", "Wildland Provincial Park": "Provincial",
              "Wilderness Park": "Provincial", "Quebec's national park": "Provincial",
-             "Quebec's national park reserve": "Provincial"}
+             "Quebec's national park reserve": "Provincial", "Conservation Park": "Federal"}
 
 
 def build_parks_detailed():

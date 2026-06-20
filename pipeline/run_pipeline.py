@@ -33,7 +33,8 @@ from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
                                   fetch_co2_per_gdp, fetch_co2_global_context)
 from pipeline.fetch_whr import fetch_happiness
 from pipeline.fetch_worldbank import (fetch_worldbank_indicator, fetch_world_population,
-                                       fetch_pm25_global_context, fetch_world_gdp)
+                                       fetch_pm25_global_context, fetch_world_gdp,
+                                       fetch_world_land_area)
 from pipeline.fetch_boc import fetch_boc_indicator
 from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
 from pipeline.fetch_environment import fetch_ghg, fetch_ghg_by_sector
@@ -70,6 +71,7 @@ CUSTOM_FETCHERS = {
     "fetch_co2_global_context": fetch_co2_global_context,
     "fetch_world_population": fetch_world_population,
     "fetch_world_gdp": fetch_world_gdp,
+    "fetch_world_land_area": fetch_world_land_area,
     "fetch_pm25_global_context": fetch_pm25_global_context,
     "fetch_happiness": fetch_happiness,
     "fetch_provincial_electricity": fetch_provincial_electricity,

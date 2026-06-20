@@ -126,6 +126,59 @@ def fetch_world_gdp():
     return df
 
 
+def fetch_world_land_area():
+    """Land area of every country (World Bank AG.LND.TOTL.K2, sq km, most recent
+    year per country) for the "Canada in the world" land chart on the Land &
+    Environment page — Canada is the 4th-largest country by LAND area (and 2nd by
+    total area once its vast fresh water is counted). We use *land* area, not the
+    WB "surface area" series, because the latter carries a known bad value for
+    Canada (~15.6M km², vs the true ~10M total); land area is consistent across
+    countries. Same all-countries / drop-aggregates / mrnev=1 pattern as the GDP
+    and population fetchers; per_page=400 (≈216 country rows).
+    """
+    logger.info("Fetching World Bank land area for all countries...")
+    try:
+        meta = requests.get(f"{WB_BASE}/country",
+                            params={"format": "json", "per_page": "400"},
+                            timeout=60).json()
+        real = {c["id"]: c["name"] for c in meta[1]
+                if c.get("region", {}).get("value") != "Aggregates"}
+        js = requests.get(f"{WB_BASE}/country/all/indicator/AG.LND.TOTL.K2",
+                          params={"format": "json", "per_page": "400", "mrnev": "1"},
+                          timeout=120).json()
+    except Exception as e:
+        logger.error(f"  Failed World Bank land-area fetch: {e}")
+        return None
+
+    if not isinstance(js, list) or len(js) < 2 or not js[1]:
+        logger.warning("  World Bank returned no land-area data")
+        return None
+
+    seen, rows = set(), []
+    for d in js[1]:
+        code = d.get("countryiso3code")
+        if code in real and d.get("value") is not None and code not in seen:
+            seen.add(code)
+            rows.append({"country_code": code, "country_name": real[code],
+                         "year": int(d["date"]), "land_area": float(d["value"])})
+    df = pd.DataFrame(rows)
+    if df.empty or "CAN" not in set(df["country_code"]):
+        logger.warning("  land-area data missing Canada or empty")
+        return None
+    df = df.sort_values("land_area", ascending=False).reset_index(drop=True)
+
+    out_path = DATA_DIR / "geography" / "worldbank_land_area.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="World Bank (World Development Indicators)",
+        source_table="AG.LND.TOTL.K2",
+        frequency="annual", unit="sq km (land area)",
+        transformations=["all countries (WB aggregates removed), most recent year each"])
+    logger.info(f"  saved {len(df)} countries -> {out_path.name}")
+    return df
+
+
 def fetch_pm25_global_context():
     """Mean population exposure to PM2.5 (World Bank EN.ATM.PM25.MC.M3, µg/m³) for
     a curated global-context set — Canada, the US, China, India. The deliberate

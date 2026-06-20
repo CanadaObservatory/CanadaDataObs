@@ -4,7 +4,7 @@
   "source_table": "ECCC AHCCD monthly (homogenized), via GeoMet",
   "frequency": "monthly",
   "unit": "\u00b0C monthly mean temperature (homogenized)",
-  "retrieved_at": "2026-06-12T16:52:12.560935+00:00",
+  "retrieved_at": "2026-06-20T15:51:32.287826+00:00",
   "latest_observation_date": "2020",
   "transformations": [
     "homogenized monthly mean per city/year/month \u2014 input for the climate spiral"

@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 36-10-0477-01, 36-10-0222-01",
   "frequency": "annual",
   "unit": "$ millions / % of GDP",
-  "retrieved_at": "2026-06-17T16:58:31.835818+00:00",
+  "retrieved_at": "2026-06-20T15:48:41.851394+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "Federal general government, unadjusted quarterly flows summed to annual; % of GDP vs current-prices GDP at market prices (1981\u2013)"

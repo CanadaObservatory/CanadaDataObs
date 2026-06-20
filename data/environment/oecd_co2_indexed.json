@@ -4,7 +4,7 @@
   "source_table": "OECD Green Growth Indicators",
   "frequency": "annual",
   "unit": "index (2000=100)",
-  "retrieved_at": "2026-06-12T16:51:25.714603+00:00",
+  "retrieved_at": "2026-06-20T15:50:41.525258+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to CO2 emissions (indexed, 2000=100) for OECD peer group"

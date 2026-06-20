@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 18-10-0256-01",
   "frequency": "monthly",
   "unit": "% (year-over-year)",
-  "retrieved_at": "2026-06-19T16:34:17.692529+00:00",
+  "retrieved_at": "2026-06-20T15:47:45.324428+00:00",
   "latest_observation_date": "2026-04-01",
   "transformations": [
     "filtered to {'GEO': 'Canada', 'Alternative measures': 'Measure of core inflation based on a trimmed mean approach, CPI-trim (year-over-year percent change)'}"

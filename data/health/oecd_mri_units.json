@@ -4,7 +4,7 @@
   "source_table": "OECD Health Statistics",
   "frequency": "annual",
   "unit": "per million population",
-  "retrieved_at": "2026-06-17T16:59:39.064415+00:00",
+  "retrieved_at": "2026-06-20T15:49:53.482238+00:00",
   "latest_observation_date": "2024",
   "transformations": [
     "filtered to MRI units for OECD peer group"

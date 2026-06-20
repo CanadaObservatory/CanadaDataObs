@@ -4,7 +4,7 @@
   "source_table": "World Bank / WHO Global Health Observatory",
   "frequency": "annual",
   "unit": "% of adults",
-  "retrieved_at": "2026-06-17T16:59:45.793708+00:00",
+  "retrieved_at": "2026-06-20T15:50:00.232487+00:00",
   "latest_observation_date": "2022",
   "transformations": [
     "World Bank indicator SH.PRV.SMOK, filtered to 17 OECD peers"

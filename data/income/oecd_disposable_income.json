@@ -4,7 +4,7 @@
   "source_table": "OECD Household Dashboard",
   "frequency": "annual",
   "unit": "index (real, per capita)",
-  "retrieved_at": "2026-06-17T16:59:07.907779+00:00",
+  "retrieved_at": "2026-06-20T15:49:20.537613+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "filtered to Real household disposable income per capita for OECD peer group"

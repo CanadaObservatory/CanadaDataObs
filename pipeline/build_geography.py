@@ -332,6 +332,45 @@ def build_wildfire_points(year=WILDFIRE_YEAR):
           f"total area {out['size_ha'].sum() / 1e6:.1f} Mha")
 
 
+# Parks Canada "Places administered by Parks Canada" ArcGIS FeatureServer (OGL-Canada).
+NATIONAL_PARKS_URL = ("https://services2.arcgis.com/wCOMu5IS7YdSyPNx/arcgis/rest/"
+                      "services/vw_Places_Public_lieux_public_APCA/FeatureServer/0/query")
+
+
+def build_national_parks():
+    """Canada's national parks & park reserves as points (centroid + real area) for
+    a proportional-symbol map, from the Parks Canada 'Places administered by Parks
+    Canada' service (OGL-Canada). The ~46 National Park + National Park Reserve
+    polygons are far too heavy to inline (~15 MB even server-simplified, because of
+    the complex northern coastlines), and at national zoom their outlines read as
+    dots anyway — so we keep only the centroid and the area (computed in an
+    equal-area projection), and the page draws a bubble map sized by area. Marine
+    conservation areas (which dwarf the land parks) and national historic sites (a
+    different story) are excluded. One-time build, like the other static assets."""
+    print("Building national parks (Parks Canada) ...")
+    params = {"where": "PLACE_TYPE_E IN ('National Park','National Park Reserve')",
+              "outFields": "PLACE_TYPE_E,DESC_EN", "returnGeometry": "true",
+              "maxAllowableOffset": "0.02", "outSR": "4326", "f": "geojson"}
+    r = requests.get(NATIONAL_PARKS_URL, params=params, timeout=180)
+    r.raise_for_status()
+    with open("/tmp/national_parks.geojson", "wb") as f:
+        f.write(r.content)
+    g = gpd.read_file("/tmp/national_parks.geojson")
+    eq = g.to_crs("ESRI:102001")               # Canada Albers equal-area
+    g["area_km2"] = (eq.area / 1e6).round(0)
+    cent = eq.centroid.to_crs(epsg=4326)
+    out = pd.DataFrame({
+        "name": g["DESC_EN"].str.replace(" of Canada", "", regex=False),
+        "type": g["PLACE_TYPE_E"],
+        "lat": cent.y.round(4), "lon": cent.x.round(4),
+        "area_km2": g["area_km2"].astype("Int64"),
+    }).dropna(subset=["lat", "lon"]).sort_values("area_km2").reset_index(drop=True)
+    path = f"{GEO_DIR}/national_parks.csv"
+    out.to_csv(path, index=False)
+    print(f"  wrote {path}: {len(out)} parks; largest {int(out['area_km2'].max()):,} km² "
+          f"({round(os.path.getsize(path) / 1e3, 1)} KB)")
+
+
 # ---------------------------------------------------------------------------
 # E. Major lakes — NRCan Atlas of Canada 1:1,000,000 waterbodies (OGL-Canada)
 #    Canada has more lake area than any country; this highlights the largest named

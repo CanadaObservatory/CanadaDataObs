@@ -7,7 +7,7 @@ description: "How much of Canada's land and water is protected, and where"
 #| echo: false
 import os, json
 import pandas as pd
-from pipeline.charts import choropleth_map, lines_over_time
+from pipeline.charts import choropleth_map, lines_over_time, bubble_map
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -37,6 +37,25 @@ else:
     print("Protected-areas data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
+## Canada's national parks
+
+Beyond the headline percentages, Parks Canada looks after more than 40 **national parks and park reserves**. Each circle below is a park, placed at its centre and sized by area — **zoom and pan to explore.** A handful of vast northern parks anchor the system (**Wood Buffalo**, larger than Switzerland, is the biggest), alongside small, heavily-visited southern parks like **Point Pelee** and the **Thousand Islands**.
+
+```{python}
+#| echo: false
+parks_csv = "data/geo/national_parks.csv"
+if os.path.exists(parks_csv):
+    p = pd.read_csv(parks_csv)
+    fig = bubble_map(p, "lat", "lon", "area_km2", color="#2e7d32", opacity=0.6, max_px=44,
+        customdata=p[["name", "type", "area_km2"]].values,
+        hovertemplate="<b>%{customdata[0]}</b><br>%{customdata[1]}<br>%{customdata[2]:,} km²<extra></extra>",
+        center={"lat": 62, "lon": -96}, zoom=2.2,
+        source_note="Source: Parks Canada, Places administered by Parks Canada (national parks & park reserves); area computed from the official boundaries. Non-legal boundaries.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("National parks data not yet available — run `python -m pipeline.build_geography`.")
+```
+
 ## Progress toward "30 by 30"
 
 The conserved share of Canada has roughly **tripled since 1990** — from about 4% of the land
@@ -62,3 +81,4 @@ if os.path.exists(nat_csv):
 
 - [Conserved area by province (CSV)](../data/geo/protected_areas_by_prov.csv) — ECCC CESI, 2024
 - [Conserved area, Canada, 1990– (CSV)](../data/geo/protected_areas_national.csv) — ECCC CESI
+- [National parks & park reserves (CSV)](../data/geo/national_parks.csv) — Parks Canada (centroid + area)

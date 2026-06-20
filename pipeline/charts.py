@@ -938,6 +938,35 @@ def add_line_features(fig, geojson, *, name_key="name", color="#0d2b5e", width=1
     return fig
 
 
+def add_polygon_overlay(fig, geojson, df, location_col, *, legend_name, line_color,
+                        customdata, hovertemplate, fill_opacity=0.10, line_width=1.3,
+                        legendgroup="overlay", visible=True):
+    """Overlay a reference polygon layer (e.g. legal park boundaries) ON TOP of an
+    existing map as a subdued OUTLINE + very light interior wash, with its own hover
+    and a single legend entry that toggles the whole layer.
+
+    Drawn as a low-opacity Choroplethmapbox (so the whole polygon is a hover target
+    and carries the faint wash) with a coloured `marker.line` as the principal cue,
+    plus a line-swatch Scattermapbox legend proxy sharing `legendgroup` — clicking the
+    legend entry toggles both (Plotly toggles a whole legendgroup together). Geometry
+    must be VALID (Mapbox GL silently blanks on self-intersections). `customdata`/
+    `hovertemplate` are passed through so the caller controls the hover wording (kept
+    distinct from any underlying layer's attributes). Reusable as more jurisdictions
+    are added; returns the figure."""
+    fig.add_trace(go.Choroplethmapbox(
+        geojson=geojson, locations=df[location_col], z=[0] * len(df),
+        zmin=0, zmax=1, featureidkey="id", showscale=False,
+        colorscale=[[0, line_color], [1, line_color]],
+        marker=dict(line=dict(width=line_width, color=line_color), opacity=fill_opacity),
+        customdata=customdata, hovertemplate=hovertemplate,
+        legendgroup=legendgroup, showlegend=False, name=legend_name, visible=visible))
+    fig.add_trace(go.Scattermapbox(
+        lat=[None], lon=[None], mode="lines", line=dict(color=line_color, width=2.6),
+        name=legend_name, legendgroup=legendgroup, showlegend=True,
+        hoverinfo="skip", visible=visible))
+    return fig
+
+
 def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color="#8a8f96",
                boundary_width=0.5, source_note=None, center=None, zoom=2.3, height=660):
     """Raster-image overlay map: places a pre-rendered **Web-Mercator** image (e.g. the

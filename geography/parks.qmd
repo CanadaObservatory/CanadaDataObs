@@ -3,7 +3,9 @@ title: "Canada's Parks, Mapped"
 description: "The boundaries of every national, provincial and territorial park in Canada"
 ---
 
-This map shows the **boundaries** of Canada's national, provincial, and territorial parks — more than 700 of them — coloured by which level of government manages them. **Zoom and pan to explore**, and hover any park for its name. The southern provinces hold hundreds of smaller parks; the largest are in the North and the mountain West. (Only terrestrial *parks* are shown: the far larger marine conservation areas, and smaller municipal, regional, and conservation designations, are left out. Boundaries are for illustration, not legal definition.)
+This map shows the **boundaries** of Canada's national, provincial, and territorial parks — more than 700 of them — coloured by which level of government manages them. **Zoom and pan to explore**, and hover any park for its name. The southern provinces hold hundreds of smaller parks; the largest are in the North and the mountain West.
+
+A few notes on what's shown. Only terrestrial *parks* are included — the far larger marine conservation areas, and smaller municipal, regional, and conservation designations, are left out. The boundaries come from the national conservation database and map the formally **protected** land, which for some parks is only part of the whole: a number of large parks — **notably some in Ontario, such as Algonquin** — are zoned, and only their protected core is recorded here, so they can look smaller or more fragmented than the full park on a road or canoe map. Boundaries are for illustration, not legal definition.
 
 This is a detailed, heavier map kept on its own page so the [Protected & Conserved Areas](protected.qmd) overview stays light.
 

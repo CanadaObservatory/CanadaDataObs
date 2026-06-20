@@ -7,7 +7,7 @@ This map shows the **boundaries** of Canada's national, provincial, and territor
 
 The coloured fills are **reported park boundaries** from the **Canadian Protected and Conserved Areas Database** (CPCAD), compiled from federal, provincial, and territorial submissions. Two limits are worth keeping in mind. First, the picture is **not exhaustive** — coverage varies by jurisdiction and some smaller parks are absent. Second, CPCAD maps the formally **protected** land, which for a zoned park is only its protected core: a few large parks — **notably some in Ontario, such as Algonquin** — can therefore look smaller or more fragmented than the full park on a road or canoe map. The fills cover terrestrial parks, and are illustrative, not legal.
 
-Over the national parks and Ontario's provincial parks, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated for Ontario's. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is; **Rouge** shows the contrast between scattered protected parcels and the legislated urban-park boundary.
+Over the national parks and the provincial parks of Ontario and Alberta, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated or set by Order-in-Council for the provincial ones. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is; **Rouge** shows the contrast between scattered protected parcels and the legislated urban-park boundary.
 
 This is a detailed, heavier map kept on its own page so the [Protected & Conserved Areas](protected.qmd) overview stays light.
 
@@ -58,4 +58,5 @@ else:
 - [National, provincial & territorial park boundaries (GeoJSON)](../data/geo/parks_detailed.geojson) — ECCC, Canadian Protected and Conserved Areas Database (reported, illustrative)
 - [Federal park legal boundaries (GeoJSON)](../data/geo/parks_federal.geojson) — NRCan / Canada Lands Survey System, National Parks Legislative Boundaries
 - [Ontario provincial park boundaries (GeoJSON)](../data/geo/parks_on.geojson) — Land Information Ontario, Provincial Park Regulated
+- [Alberta provincial park boundaries (GeoJSON)](../data/geo/parks_ab.geojson) — Alberta Environment and Protected Areas, Parks and Protected Areas
 - [Parks layer sources (CSV)](../data/geo/parks_sources.csv) — provenance for the agency boundary layers

@@ -178,6 +178,42 @@ def build_ontario_parks(simplify_tol=0.0009, server_offset=0.0006):
     _write_layer(g, f"{GEO_DIR}/parks_on.geojson")
 
 
+# --- Alberta: Environment and Protected Areas -----------------------------
+ALBERTA_URL = ("https://geospatial.alberta.ca/titan/rest/services/boundary/"
+               "parks_protected_areas_alberta/FeatureServer/0/query")
+ALBERTA_DATASET = "Parks and Protected Areas of Alberta"
+# The recognisable PARK designations only. Excludes Provincial Recreation Areas
+# (193 mostly-tiny day-use sites), Natural Areas, Ecological Reserves, Heritage
+# Rangelands, and the 5 National Parks (already in the federal layer).
+_AB_TYPE = {"PP": "Provincial Park", "WPP": "Wildland Provincial Park",
+            "WA": "Wilderness Area", "WP": "Wilderness Park"}
+
+
+def build_alberta_parks(simplify_tol=0.0009, server_offset=0.0006):
+    """Alberta provincial parks → data/geo/parks_ab.geojson (~116). Boundaries
+    interpreted from the legal descriptions in Orders-in-Council."""
+    print("Building Alberta parks (AB Parks & Protected Areas) ...")
+    where = "TYPE IN ('PP','WPP','WA','WP')"
+    g = _fetch_arcgis_geojson(ALBERTA_URL, where, "PASITES_ID,NAME,OC_NAME,TYPE", server_offset)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = ["AB-" + (str(int(i)) if pd.notna(i) else n)
+                    for i, n in zip(g["PASITES_ID"], g["NAME"].astype(str))]
+    g["name"] = [(_title(s) if (s or "").isupper() else (s or "").strip()) or _title(nm)
+                 for s, nm in zip(g["OC_NAME"], g["NAME"].astype(str))]
+    g["name_fr"] = ""
+    g["park_type"] = g["TYPE"].map(_AB_TYPE).fillna("Provincial Park")
+    g["province"] = "Alberta"
+    g["jurisdiction"] = "Alberta"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "Alberta Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "Alberta Environment and Protected Areas"
+    g["source_dataset"] = ALBERTA_DATASET
+    g["geometry_quality"] = "official boundary (Order-in-Council)"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_ab.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -190,6 +226,11 @@ _SOURCES = {
         source_dataset=ONTARIO_DATASET,
         source_url="https://geohub.lio.gov.on.ca/datasets/lio::provincial-park-regulated",
         licence="Open Government Licence – Ontario", boundary_type="regulated (official)"),
+    "Alberta": dict(admin_level="provincial",
+        source_agency="Alberta Environment and Protected Areas",
+        source_dataset=ALBERTA_DATASET,
+        source_url="https://open.alberta.ca/opendata/gda-6b96341f-2e19-4885-98af-66d12ed4f8dd",
+        licence="Open Government Licence – Alberta", boundary_type="official (Order-in-Council)"),
 }
 
 
@@ -203,4 +244,5 @@ def write_sources():
 if __name__ == "__main__":
     build_federal_parks()
     build_ontario_parks()
+    build_alberta_parks()
     write_sources()

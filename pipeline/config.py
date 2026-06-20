@@ -265,6 +265,11 @@ INDICATORS = [
               value_col="population", chart_recipe="bar",
               fetch_fn="fetch_world_population", output_subpath="worldbank_population.csv",
               source_table="World Bank (SP.POP.TOTL)"),
+    Indicator("world_gdp", "economics", "custom",
+              "GDP of every country (global context)", "current US$", "annual",
+              value_col="gdp", chart_recipe="bar",
+              fetch_fn="fetch_world_gdp", output_subpath="worldbank_gdp.csv",
+              source_table="World Bank (NY.GDP.MKTP.CD)"),
     Indicator("voter_turnout", "population", "custom",
               "Federal voter turnout", "% of electors", "per election",
               value_col="turnout", chart_recipe="line",
@@ -283,6 +288,16 @@ INDICATORS = [
               value_col="gdp_per_hour", chart_recipe="ranked_bar",
               dataflow="OECD.SDD.TPS,DSD_PDB@DF_PDB_LV,1.0",
               key=f"{_C}.A.GDPHRS._T.USD_PPP_H.Q._Z._Z._Z",
+              source_table="OECD Productivity Database (PDB_LV)"),
+    # Labour utilisation = hours worked per head of population. The other half of
+    # the GDP-per-capita identity: GDP/capita (GDPPOP) = GDP/hour (GDPHRS) ×
+    # hours/capita (HRSPOP), all from the same PDB_LV table so the decomposition is
+    # exact. Unit H_PS (hours per person) is a physical count → PRICE_BASE=_Z.
+    Indicator("labour_utilisation", "economics", "oecd",
+              "Labour utilisation (hours worked per capita)", "Hours per person", "annual",
+              value_col="hours_per_capita", chart_recipe="line",
+              dataflow="OECD.SDD.TPS,DSD_PDB@DF_PDB_LV,1.0",
+              key=f"{_C}.A.HRSPOP._T.H_PS._Z._Z._Z._Z",
               source_table="OECD Productivity Database (PDB_LV)"),
     Indicator("unemployment", "economics", "oecd",
               "Unemployment rate", "% of labour force", "annual",

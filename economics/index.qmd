@@ -24,7 +24,50 @@ LABOUR_AGES = ["Total (15–64)", "Youth (15–24)", "Prime-age (25–54)", "Old
 This section explores how fast the economy is growing, how large it is,
 productivity, and employment levels. These indicators are placed alongside 17 OECD
 peers. Inflation and the cost of living have their own page:
-[Housing & Cost of Living](../housing/index.qmd).
+[Cost of Living](cost-of-living.qmd).
+
+## Canada in the world
+
+Canada is often called a small economy. By total output, it isn't: with a GDP of about **US$2.2 trillion** it is the world's **9th-largest economy** — behind the United States and China by a wide margin, but ahead of fast-growing giants like Brazil and Russia. Each dot below is a country, sorted by GDP on a ratio (logarithmic) scale; Canada is in red.
+
+```{python}
+#| echo: false
+import math
+gdp_world_path = "data/economics/worldbank_gdp.csv"
+if os.path.exists(gdp_world_path):
+    gw = pd.read_csv(gdp_world_path).sort_values("gdp", ascending=False).reset_index(drop=True)
+    gw["rank"] = gw.index + 1
+    n = len(gw)
+    can = gw[gw["country_code"] == "CAN"].iloc[0]
+    can_rank = int(can["rank"])
+    is_can = (gw["country_code"] == "CAN").tolist()
+
+    fig = go.Figure(go.Scatter(
+        x=gw["rank"], y=gw["gdp"], mode="markers",
+        marker=dict(size=[12 if c else 5 for c in is_can],
+                    color=[CANADA_COLOR if c else "#c2c9d1" for c in is_can],
+                    line=dict(width=[1.5 if c else 0 for c in is_can], color="white")),
+        customdata=gw[["country_name", "rank"]].values,
+        hovertemplate="<b>%{customdata[0]}</b><br>US$%{y:,.0f}<br>Rank %{customdata[1]} of " + str(n) + "<extra></extra>"))
+    # On a log y-axis, annotation y is given as log10(value), not the raw value.
+    fig.add_annotation(x=3, y=math.log10(float(gw["gdp"].iloc[0])), yshift=16, xanchor="left",
+        text="The U.S. and China<br>lead", showarrow=False, font=dict(size=10, color="#888"), align="left")
+    fig.add_annotation(x=can_rank, y=math.log10(float(can["gdp"])),
+        text=f"<b>Canada — {can_rank}th of {n}</b>", showarrow=True, arrowhead=2,
+        ax=62, ay=-36, font=dict(size=12, color=CANADA_COLOR), arrowcolor=CANADA_COLOR)
+    fig.update_layout(plot_bgcolor="white", height=460, showlegend=False,
+        xaxis=dict(title="Countries ranked by GDP (1 = largest economy)",
+                   gridcolor="#e0e0e0", rangemode="tozero"),
+        yaxis=dict(title="GDP (current US$)", type="log", gridcolor="#e0e0e0",
+                   tickvals=[1e8, 1e9, 1e10, 1e11, 1e12, 1e13],
+                   ticktext=["$100M", "$1B", "$10B", "$100B", "$1T", "$10T"]),
+        margin=dict(t=55, b=95, r=30))
+    fig.add_annotation(text=f"Source: World Bank, NY.GDP.MKTP.CD (most recent year per country) | Data as of: {get_data_date(gdp_world_path)}",
+        xref="paper", yref="paper", x=0, y=-0.24, showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("World GDP data not yet available. Run the data pipeline.")
+```
 
 ## Where Canada stands
 
@@ -235,6 +278,49 @@ if os.path.exists(prod_path):
         f"Source: OECD Productivity Database | Data as of: {get_data_date(prod_path)}",
         tickformat="$,.0f", hover_template="%{y}: $%{x:.1f}/hr<extra></extra>")
     fig.show(config={"displaylogo": False})
+```
+
+## What drives GDP per capita: productivity or hours worked?
+
+GDP per capita — the broadest measure of material living standards — can rise for two very different reasons: each hour of work can produce more (**labour productivity**), or more hours can be worked per person in the population (**labour utilisation**, which rises when a larger share of people work or they work longer). The two multiply together to give GDP per capita exactly, so indexing all three to a common base year separates their contributions. The distinction matters because the two have very different ceilings: hours per capita can climb only so far — through higher employment or longer weeks — whereas productivity growth, driven by investment, skills and innovation, can compound indefinitely. This is why Canada's productivity record draws such concern.
+
+```{python}
+#| echo: false
+util_path = "data/economics/oecd_labour_utilisation.csv"
+if os.path.exists(prod_path) and os.path.exists(util_path):
+    p = pd.read_csv(prod_path)
+    u = pd.read_csv(util_path)
+    d = (p[p["country_code"] == "CAN"][["year", "gdp_per_hour"]]
+         .merge(u[u["country_code"] == "CAN"][["year", "hours_per_capita"]], on="year")
+         .sort_values("year"))
+    # GDP per capita is the exact product of the two PDB series (same price basis),
+    # so deriving it keeps the decomposition internally consistent and avoids mixing
+    # in the current-price national-accounts series shown earlier on this page.
+    d["gdp_per_capita"] = d["gdp_per_hour"] * d["hours_per_capita"]
+    base_year = int(d["year"].min())
+    base = d[d["year"] == base_year].iloc[0]
+    series = [
+        ("gdp_per_capita", "GDP per capita", "#d62728", 3),
+        ("gdp_per_hour", "Labour productivity (GDP per hour)", "#1f77b4", 2),
+        ("hours_per_capita", "Labour utilisation (hours per capita)", "#f28e2b", 2),
+    ]
+    figd = go.Figure()
+    for col, name, clr, w in series:
+        figd.add_trace(go.Scatter(x=d["year"], y=100 * d[col] / base[col], name=name,
+            mode="lines", line=dict(color=clr, width=w),
+            hovertemplate=f"{name}: %{{y:.1f}}<extra></extra>"))
+    figd.add_hline(y=100, line_dash="dot", line_color="#999", opacity=0.6)
+    figd.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title=f"Index ({base_year} = 100)", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(t=60, b=80))
+    figd.add_annotation(
+        text=f"Source: OECD Productivity Database (GDP per capita derived as productivity × hours per capita) | Data as of: {get_data_date(util_path)}",
+        xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999"))
+    figd.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Productivity-decomposition data not yet available. Run the data pipeline.")
 ```
 
 ## Unemployment rate
@@ -487,9 +573,11 @@ else:
 
 ## Download data
 
+- [GDP of Every Country (CSV)](../data/economics/worldbank_gdp.csv) — World Bank, NY.GDP.MKTP.CD
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
 - [GDP per Capita (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts, PPP current USD
 - [Labour Productivity (CSV)](../data/economics/oecd_labour_productivity.csv) — OECD Productivity Database
+- [Labour Utilisation — hours per capita (CSV)](../data/economics/oecd_labour_utilisation.csv) — OECD Productivity Database
 - [Unemployment Rate by age (CSV)](../data/economics/oecd_unemployment_by_age.csv) — OECD Labour Force Statistics
 - [Employment Rate by age (CSV)](../data/economics/oecd_employment_by_age.csv) — OECD Labour Force Statistics
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts

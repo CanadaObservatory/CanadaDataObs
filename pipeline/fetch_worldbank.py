@@ -73,6 +73,59 @@ def fetch_world_population():
     return df
 
 
+def fetch_world_gdp():
+    """GDP of every country (World Bank NY.GDP.MKTP.CD, current US$, most recent
+    year per country) for the economy-size "Canada in the world" chart — the
+    counterpart to the population one on the People page. Drops the WB regional/
+    income aggregates the same way; `mrnev=1` returns each country's most recent
+    non-empty value.
+    """
+    logger.info("Fetching World Bank GDP for all countries...")
+    try:
+        meta = requests.get(f"{WB_BASE}/country",
+                            params={"format": "json", "per_page": "400"},
+                            timeout=60).json()
+        real = {c["id"]: c["name"] for c in meta[1]
+                if c.get("region", {}).get("value") != "Aggregates"}
+        # per_page=400 (not the 20000 the population fetcher uses): the WB API
+        # rejects per_page=20000 + mrnev=1 for this indicator with a 400. mrnev=1
+        # returns one row per country (~217), so 400 captures them all on page 1.
+        js = requests.get(f"{WB_BASE}/country/all/indicator/NY.GDP.MKTP.CD",
+                          params={"format": "json", "per_page": "400", "mrnev": "1"},
+                          timeout=120).json()
+    except Exception as e:
+        logger.error(f"  Failed World Bank GDP fetch: {e}")
+        return None
+
+    if not isinstance(js, list) or len(js) < 2 or not js[1]:
+        logger.warning("  World Bank returned no GDP data")
+        return None
+
+    seen, rows = set(), []
+    for d in js[1]:
+        code = d.get("countryiso3code")
+        if code in real and d.get("value") is not None and code not in seen:
+            seen.add(code)
+            rows.append({"country_code": code, "country_name": real[code],
+                         "year": int(d["date"]), "gdp": float(d["value"])})
+    df = pd.DataFrame(rows)
+    if df.empty or "CAN" not in set(df["country_code"]):
+        logger.warning("  GDP data missing Canada or empty")
+        return None
+    df = df.sort_values("gdp", ascending=False).reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "worldbank_gdp.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="year",
+        source="World Bank (World Development Indicators)",
+        source_table="NY.GDP.MKTP.CD",
+        frequency="annual", unit="current US$",
+        transformations=["all countries (WB aggregates removed), most recent year each"])
+    logger.info(f"  saved {len(df)} countries -> {out_path.name}")
+    return df
+
+
 def fetch_pm25_global_context():
     """Mean population exposure to PM2.5 (World Bank EN.ATM.PM25.MC.M3, µg/m³) for
     a curated global-context set — Canada, the US, China, India. The deliberate

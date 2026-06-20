@@ -371,6 +371,61 @@ def build_national_parks():
           f"({round(os.path.getsize(path) / 1e3, 1)} KB)")
 
 
+# CPCAD (Canadian Protected and Conserved Areas Database, ECCC) — the comprehensive
+# national/provincial/territorial protected-areas layer. Used only for the detailed
+# park-boundaries page (the headline %-conserved figures come from CESI).
+CPCAD_URL = "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/0"
+# The recognisable park designations only — national + provincial + territorial parks
+# (and Québec's "parcs nationaux", which are provincial). Excludes municipal/regional/
+# urban/recreation/nature/historic/marine designations and non-park conservation areas.
+_PARK_TYPES = ["National Park", "National Park Reserve", "National Urban Park",
+               "Provincial Park", "Wildland Provincial Park", "Wilderness Park",
+               "Territorial Park", "Quebec's national park", "Quebec's national park reserve"]
+_PARK_JUR = {"National Park": "Federal", "National Park Reserve": "Federal",
+             "National Urban Park": "Federal", "Territorial Park": "Territorial",
+             "Provincial Park": "Provincial", "Wildland Provincial Park": "Provincial",
+             "Wilderness Park": "Provincial", "Quebec's national park": "Provincial",
+             "Quebec's national park reserve": "Provincial"}
+
+
+def build_parks_detailed():
+    """The actual SHAPES of Canada's national, provincial and territorial parks
+    (terrestrial only) from CPCAD — for the dedicated, heavier park-boundaries page
+    (linked from Protected Areas, the same light-index / heavy-detail split the
+    census tract maps use). ~750 park polygons, server-simplified and coordinate-
+    rounded to ~1.3 MB, each tagged with its jurisdiction (the page colours by it).
+    Marine areas (which dwarf the land parks) and non-park designations are excluded.
+    One-time build, like the other static geo assets."""
+    print("Building detailed park boundaries (CPCAD terrestrial parks) ...")
+    inlist = ",".join("'" + t.replace("'", "''") + "'" for t in _PARK_TYPES)
+    where = f"PA_BIOME LIKE 'Terrestrial%' AND TYPE_E IN ({inlist})"
+    params = {"where": where, "outFields": "NAME_E,TYPE_E,O_AREA_HA",
+              "returnGeometry": "true", "maxAllowableOffset": "0.02",
+              "outSR": "4326", "f": "geojson"}
+    gj = requests.get(CPCAD_URL + "/query", params=params, timeout=300).json()
+    feats = [f for f in gj.get("features", []) if f.get("geometry")]
+    out = []
+    for i, ft in enumerate(feats):
+        p = ft.get("properties", {})
+        t = p.get("TYPE_E")
+        ft["id"] = str(i)
+        ft["properties"] = {
+            "name": (p.get("NAME_E") or "").strip(),
+            "type": t,
+            "jurisdiction": _PARK_JUR.get(t, "Provincial"),
+            "area_km2": int(round((p.get("O_AREA_HA") or 0) / 100)),
+        }
+        ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
+        out.append(ft)
+    gj["features"] = out
+    os.makedirs(GEO_DIR, exist_ok=True)
+    _write_geojson(gj, f"{GEO_DIR}/parks_detailed.geojson")
+    from collections import Counter
+    jc = Counter(f["properties"]["jurisdiction"] for f in out)
+    print(f"  wrote parks_detailed.geojson: {len(out)} parks {dict(jc)}, "
+          f"{round(os.path.getsize(GEO_DIR + '/parks_detailed.geojson') / 1e6, 2)} MB")
+
+
 # ---------------------------------------------------------------------------
 # E. Major lakes — NRCan Atlas of Canada 1:1,000,000 waterbodies (OGL-Canada)
 #    Canada has more lake area than any country; this highlights the largest named

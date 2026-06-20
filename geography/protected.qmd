@@ -56,6 +56,8 @@ else:
     print("National parks data not yet available — run `python -m pipeline.build_geography`.")
 ```
 
+➜ **[See every park's actual boundary](parks.qmd)** — a detailed map of more than 700 national, **provincial**, and territorial park *shapes*, coloured by who manages them.
+
 ## Progress toward "30 by 30"
 
 The conserved share of Canada has roughly **tripled since 1990** — from about 4% of the land

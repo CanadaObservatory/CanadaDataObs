@@ -93,10 +93,10 @@ if os.path.exists(whr_path):
         plot_bgcolor="white",
         xaxis=dict(gridcolor="#e0e0e0"),
         legend=dict(orientation="h", yanchor="top", y=-0.08, xanchor="center", x=0.5),
-        height=650, margin=dict(b=120, t=20),
+        height=680, margin=dict(b=170, t=20),
         annotations=[dict(
             text=f"Source: World Happiness Report ({latest_year}) | Data as of: {get_data_date(whr_path)}",
-            xref="paper", yref="paper", x=0, y=-0.22,
+            xref="paper", yref="paper", x=0, y=-0.30,
             showarrow=False, font=dict(size=10, color="#999"))],
     )
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

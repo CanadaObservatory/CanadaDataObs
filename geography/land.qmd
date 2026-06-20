@@ -1,6 +1,6 @@
 ---
 title: "The Land"
-description: "Canada’s terrestrial ecozones and what the land is covered by"
+description: "Canada’s terrestrial ecozones and what the land is covered by."
 ---
 
 ```{python}
@@ -18,7 +18,7 @@ prov_geo_path, prov_csv = "data/geo/prov_2021.geojson", "data/geo/statcan_prov_g
 
 ## The lay of the land
 
-Canada spans **15 terrestrial ecozones** — broad regions defined by their climate, landforms, soils and vegetation. They range from the **Arctic Cordillera**'s ice-capped mountains to the **Prairies**' grasslands and the **Mixedwood Plains** that hold most of the population around the lower Great Lakes and St. Lawrence. The single largest is the **Boreal Shield**, the rock-and-conifer heart of the country.
+Canada spans **15 terrestrial ecozones** — broad regions defined by their climate, landforms, soils and vegetation. They range from the **Arctic Cordillera**'s ice-capped mountains to the **Prairies**' grasslands and the **Mixedwood Plains** that hold most of the population around the lower Great Lakes and St. Lawrence. The single largest is the **Boreal Shield**, the rock-and-conifer heart of the country. Each ecozone — its landforms, climate, soils and vegetation — is described in detail in Agriculture and Agri-Food Canada's [National Ecological Framework for Canada](https://sis.agr.gc.ca/cansis/nsdb/ecostrat/index.html).
 
 ```{python}
 #| echo: false
@@ -55,7 +55,7 @@ if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
     groups = [("treed", "Forest / treed"), ("cropland", "Cropland"), ("water", "Inland water"),
               ("wetland", "Wetland (non-treed)"), ("grass_shrub", "Grassland & shrubland"),
               ("barren", "Barren land"), ("sparse_veg", "Sparsely vegetated"),
-              ("snow_ice", "Snow & ice"), ("built_up", "Built-up"),
+              ("snow_ice", "Snow & ice"), ("built_up", "Urban / built-up"),
               ("treed_disturb", "Recent treed disturbance")]
     fig = choropleth_groups_map(ez_geo, ez, "fid", groups, name_col="ecozone", breakdown=False, colorscale="YlGn",
         center={"lat": 63, "lon": -96}, zoom=2.2,

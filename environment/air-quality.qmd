@@ -24,12 +24,10 @@ decades — and, increasingly, an exception. Emissions of the classic industrial
 pollutants have fallen sharply since 1990, and the concentrations Canadians
 actually breathe have followed for most pollutants. The conspicuous exception is
 fine particulate matter (PM2.5), which has risen as wildfire smoke reaches
-populated areas more often. All concentration measures here are
-**population-weighted** — they reflect the air where people live, not remote
-monitoring sites — and are drawn from Environment and Climate Change Canada's
-national monitoring and inventory programs.
+populated areas more often. The figures on this page come from Environment and
+Climate Change Canada's national air-monitoring and emissions-inventory programs.
 
-## Emissions of the main air pollutants have fallen since 1990
+## Emissions of the main air pollutants
 
 Canada's [Air Pollutant Emissions Inventory](https://www.canada.ca/en/environment-climate-change/services/pollutants/air-emissions-inventory-overview.html)
 tracks how much of each pollutant is released nationally. The declines are large:
@@ -60,7 +58,7 @@ else:
     print("APEI emissions data not yet available. Run the data pipeline.")
 ```
 
-## What Canadians breathe: concentrations since 2009
+## What Canadians breathe
 
 Emissions are what we release; concentrations are what we actually breathe. This
 indicator, built on the [National Air Pollution Surveillance (NAPS)](https://www.canada.ca/en/environment-climate-change/services/air-pollution/monitoring-networks-data/national-air-pollution-program.html)
@@ -68,8 +66,8 @@ network, tracks the population-weighted concentration of each pollutant (indexed
 to 2009 = 100). Sulphur dioxide, nitrogen dioxide, and volatile organic compounds
 have all declined; ground-level ozone — a secondary pollutant that forms in the
 atmosphere — has been roughly flat. **Fine particulate matter (PM2.5) is the
-exception: it has risen, not fallen** — the signature of wildfire smoke, which the
-final chart isolates. These are national figures; to pick an individual city and
+exception: it has risen, not fallen.** One of the largest current drivers of PM2.5
+is wildfire smoke, which the final chart isolates. These are national figures; to pick an individual city and
 see its pollutants month by month back to the 1970s, see
 **[Air Quality by City](air-quality-cities.qmd)**.
 
@@ -101,7 +99,9 @@ severe recent smoke years.) The dotted line marks the [World Health
 Organization's 2021 guideline](https://www.who.int/publications/i/item/9789240034228)
 of 5 µg/m³; that guideline is strict enough that most Canadians still live above
 it — roughly four-fifths of the population — even though Canada's air is cleaner
-than almost every peer's.
+than almost every peer's. Occasional news headlines reporting very high PM2.5 in
+Canadian cities almost always reflect short-lived wildfire-smoke episodes rather
+than the year-round air this annual average measures.
 
 ```{python}
 #| echo: false
@@ -181,9 +181,12 @@ why. This chart pairs the area burned by wildfire each year (bars) with the
 daily values, indexed to 2009 = 100). The worst smoke years stand out — 2018, and
 above all the record 2023 fire season, when the peak exposure index reached nearly
 three times its 2009 level. Population-weighted smoke depends on *where* fires
-burn relative to where people live, so the link is not exact year to year, but the
-trend is clear: wildfire smoke is increasingly the dominant influence on what
-Canadians breathe on the worst days. See [Wildfire](../geography/wildfire.qmd)
+burn relative to where people live, so the link is not exact year to year: 2018
+burned far less area than 2023 yet drove a large exposure spike because its fires
+were centred in British Columbia, whose smoke settled over the province's
+populated southern valleys for weeks. The trend is nonetheless clear: wildfire
+smoke is increasingly the dominant influence on what Canadians breathe on the
+worst days. See [Wildfire](../geography/wildfire.qmd)
 for the long-run wildfire record and 2023 fire map.
 
 ```{python}

@@ -188,7 +188,7 @@ def _wrap(text, width=88):
     return "<br>".join(out)
 
 
-def _map_source_note(fig, source_note, y=-0.03):
+def _map_source_note(fig, source_note, y=-0.045):
     """Add a wrapped, left-anchored source note below a map that grows DOWNWARD
     (yanchor='top') so a long census source line never clips at the right edge or
     rides up into the map. Map builders pair this with a bottom margin (b≈80) sized
@@ -886,12 +886,15 @@ def add_city_markers(fig, cities=MAJOR_CITIES, textposition="top center"):
     """Overlay major cities (small dark dots + labels) to orient the physical-geography
     maps (ecozones, land cover, wildfire), where the data carries no city names. Drawn
     above the choropleth fill and kept out of the legend."""
+    # The dot is hoverable so it shows ITS OWN name ("Toronto"), not the ecozone
+    # polygon behind it — `hoverinfo="skip"` was transparent to hover, so hovering a
+    # city dot surfaced the underlying region's tooltip (a confusing mismatch).
     fig.add_trace(go.Scattermapbox(
         lat=[c[1] for c in cities], lon=[c[2] for c in cities],
         mode="markers+text", text=[c[0] for c in cities],
         textposition=textposition, textfont=dict(size=9, color="#222"),
-        marker=dict(size=6, color="#111"), hoverinfo="skip", showlegend=False,
-        name="cities"))
+        marker=dict(size=6, color="#111"), showlegend=False, name="cities",
+        hovertemplate="<b>%{text}</b><extra></extra>"))
     return fig
 
 

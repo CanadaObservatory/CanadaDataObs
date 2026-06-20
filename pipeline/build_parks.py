@@ -26,6 +26,7 @@ coordinates after the repair.
 """
 import io
 import os
+import re
 import json
 from collections import Counter
 
@@ -78,8 +79,20 @@ def _repair(g, simplify_tol):
     return g[~g.geometry.is_empty & g.geometry.notna()].copy()
 
 
+def _slug(s):
+    """Normalised key from a park name (for jurisdictions with no stable id)."""
+    return re.sub(r"[^a-z0-9]+", "-", (s or "").lower()).strip("-")
+
+
 def _write_layer(g, out_path):
-    """Validate + write the harmonised display GeoJSON, with a report line."""
+    """Validate + write the harmonised display GeoJSON, with a report line.
+
+    Records sharing a `park_id` are dissolved into one (multi)polygon — so a park
+    stored as several parcels (e.g. NS Blomidon) gets ONE shared hover identity,
+    its non-contiguous parts preserved as a MultiPolygon (no forced contiguity)."""
+    if g["park_id"].duplicated().any():
+        g = g.dissolve(by="park_id", aggfunc="first", as_index=False)
+        g["geometry"] = g.geometry.buffer(0)
     g = g.sort_values("name").reset_index(drop=True)
     gj = json.loads(g[HARMONISED_COLS].to_json())
     for ft in gj["features"]:
@@ -280,6 +293,121 @@ def build_quebec_parks(simplify_tol=0.0009, server_offset=0.0006):
     _write_layer(g, f"{GEO_DIR}/parks_qc.geojson")
 
 
+# --- Manitoba: Manitoba Parks ---------------------------------------------
+MANITOBA_URL = ("https://services.arcgis.com/mMUesHYPkXjaFGfS/arcgis/rest/services/"
+                "Manitoba_Parks/FeatureServer/0/query")
+MANITOBA_DATASET = "Manitoba Parks"
+
+
+def build_manitoba_parks(simplify_tol=0.0009, server_offset=0.0006):
+    """Manitoba provincial parks → data/geo/parks_mb.geojson (~93)."""
+    print("Building Manitoba parks ...")
+    g = _fetch_arcgis_geojson(MANITOBA_URL, "TYPE_E IN ('Provincial Park','Park Reserve')",
+                              "NAME_E,NOM_F,TYPE_E", server_offset)
+    g = _repair(g, simplify_tol)
+    g["name"] = [_title(n) if (n or "").isupper() else (n or "").strip() for n in g["NAME_E"]]
+    g["park_id"] = "MB-" + g["name"].map(_slug)
+    g["name_fr"] = g["NOM_F"].astype(str).str.strip()
+    g["park_type"] = g["TYPE_E"].fillna("Provincial Park")
+    g["province"] = "Manitoba"
+    g["jurisdiction"] = "Manitoba"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "Manitoba Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "Manitoba Parks (Manitoba Government)"
+    g["source_dataset"] = MANITOBA_DATASET
+    g["geometry_quality"] = "official boundary"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_mb.geojson")
+
+
+# --- Saskatchewan: Ministry of Parks, Culture and Sport -------------------
+SASK_URL = ("https://gis.saskatchewan.ca/arcgis/rest/services/ParksAsLegislated/"
+            "FeatureServer/0/query")
+SASK_DATASET = "Saskatchewan Provincial Parks (as legislated)"
+
+
+def build_saskatchewan_parks(simplify_tol=0.0009, server_offset=0.0006):
+    """Saskatchewan provincial parks → data/geo/parks_sk.geojson (~36). Layer 0
+    is pre-isolated to provincial parks (excludes recreation/historic sites)."""
+    print("Building Saskatchewan parks ...")
+    g = _fetch_arcgis_geojson(SASK_URL, "1=1", "PARKNM,PARKTYPE,PPID", server_offset)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "SK-" + g["PPID"].astype(str)
+    g["name"] = [_title(n) if (n or "").isupper() else (n or "").strip() for n in g["PARKNM"]]
+    g["name_fr"] = ""
+    g["park_type"] = "Provincial Park"
+    g["province"] = "Saskatchewan"
+    g["jurisdiction"] = "Saskatchewan"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "Saskatchewan Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "Saskatchewan Ministry of Parks, Culture and Sport"
+    g["source_dataset"] = SASK_DATASET
+    g["geometry_quality"] = "official boundary (as legislated)"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_sk.geojson")
+
+
+# --- New Brunswick: GeoNB --------------------------------------------------
+NB_URL = ("https://geonb.snb.ca/arcgis/rest/services/GeoNB_DNR_ProvincialParks/"
+          "MapServer/0/query")
+NB_DATASET = "GeoNB — Provincial Parks"
+
+
+def build_nb_parks(simplify_tol=0.0006, server_offset=0.0004):
+    """New Brunswick provincial parks → data/geo/parks_nb.geojson (~24). Single-
+    purpose provincial-parks layer (includes a few provincial historic sites
+    administered as parks)."""
+    print("Building New Brunswick parks ...")
+    g = _fetch_arcgis_geojson(NB_URL, "1=1", "NAME,Nom", server_offset)
+    g = _repair(g, simplify_tol)
+    g["name"] = [_title(n) if (n or "").isupper() else (n or "").strip() for n in g["NAME"]]
+    g["park_id"] = "NB-" + g["name"].map(_slug)
+    g["name_fr"] = g["Nom"].astype(str).str.strip()
+    g["park_type"] = "Provincial Park"
+    g["province"] = "New Brunswick"
+    g["jurisdiction"] = "New Brunswick"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "NB Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "GeoNB / NB Department of Natural Resources and Energy Development"
+    g["source_dataset"] = NB_DATASET
+    g["geometry_quality"] = "official boundary"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_nb.geojson")
+
+
+# --- Nova Scotia: NS Protected Areas System -------------------------------
+NS_URL = ("https://nsgiwa.novascotia.ca/arcgis/rest/services/ENV/"
+          "ENV_NS_Prot_Area_Sys_UT83/MapServer/0/query")
+NS_DATASET = "Nova Scotia Protected Areas System"
+
+
+def build_ns_parks(simplify_tol=0.0006, server_offset=0.0004):
+    """Nova Scotia provincial parks → data/geo/parks_ns.geojson (~24). Filtered to
+    the Provincial Park designation (the system also holds wilderness areas /
+    nature reserves / land trusts, which are not parks)."""
+    print("Building Nova Scotia parks ...")
+    g = _fetch_arcgis_geojson(NS_URL, "Protect1='Provincial Park'",
+                              "Pro_Name,Protect1", server_offset)
+    g = _repair(g, simplify_tol)
+    g["name"] = [_title(n) if (n or "").isupper() else (n or "").strip() for n in g["Pro_Name"]]
+    g["park_id"] = "NS-" + g["name"].map(_slug)
+    g["name_fr"] = ""
+    g["park_type"] = "Provincial Park"
+    g["province"] = "Nova Scotia"
+    g["jurisdiction"] = "Nova Scotia"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "Nova Scotia Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "Nova Scotia Environment and Climate Change"
+    g["source_dataset"] = NS_DATASET
+    g["geometry_quality"] = "official boundary"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_ns.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -307,6 +435,23 @@ _SOURCES = {
         source_dataset=QUEBEC_DATASET,
         source_url="https://www.donneesquebec.ca/recherche/dataset/aires-protegees-au-quebec",
         licence="Creative Commons Attribution 4.0 (CC-BY) – Québec", boundary_type="official"),
+    "Manitoba": dict(admin_level="provincial",
+        source_agency="Manitoba Parks (Manitoba Government)", source_dataset=MANITOBA_DATASET,
+        source_url="https://geoportal.gov.mb.ca/",
+        licence="Manitoba Open Data Licence", boundary_type="official"),
+    "Saskatchewan": dict(admin_level="provincial",
+        source_agency="Saskatchewan Ministry of Parks, Culture and Sport", source_dataset=SASK_DATASET,
+        source_url="https://gis.saskatchewan.ca/",
+        licence="Government of Saskatchewan Standard Unrestricted Use Data License v2.0",
+        boundary_type="official (as legislated)"),
+    "New Brunswick": dict(admin_level="provincial",
+        source_agency="GeoNB / NB Department of Natural Resources and Energy Development",
+        source_dataset=NB_DATASET, source_url="https://geonb.snb.ca/",
+        licence="Open Government Licence – New Brunswick", boundary_type="official"),
+    "Nova Scotia": dict(admin_level="provincial",
+        source_agency="Nova Scotia Environment and Climate Change", source_dataset=NS_DATASET,
+        source_url="https://data.novascotia.ca/", licence="Open Government Licence – Nova Scotia",
+        boundary_type="official"),
 }
 
 

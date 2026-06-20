@@ -64,4 +64,8 @@ else:
 - [Alberta provincial park boundaries (GeoJSON)](../data/geo/parks_ab.geojson) — Alberta Environment and Protected Areas, Parks and Protected Areas
 - [British Columbia provincial park boundaries (GeoJSON)](../data/geo/parks_bc.geojson) — BC Parks / DataBC, BC Parks, Ecological Reserves, and Protected Areas
 - [Québec parcs nationaux boundaries (GeoJSON)](../data/geo/parks_qc.geojson) — MELCCFP, Registre des aires protégées (CC-BY 4.0 Québec)
+- [Manitoba provincial park boundaries (GeoJSON)](../data/geo/parks_mb.geojson) — Manitoba Parks (Manitoba Government)
+- [Saskatchewan provincial park boundaries (GeoJSON)](../data/geo/parks_sk.geojson) — Saskatchewan Parks, Culture and Sport
+- [New Brunswick provincial park boundaries (GeoJSON)](../data/geo/parks_nb.geojson) — GeoNB, Provincial Parks
+- [Nova Scotia provincial park boundaries (GeoJSON)](../data/geo/parks_ns.geojson) — Nova Scotia Environment and Climate Change
 - [Parks layer sources (CSV)](../data/geo/parks_sources.csv) — provenance for the agency boundary layers

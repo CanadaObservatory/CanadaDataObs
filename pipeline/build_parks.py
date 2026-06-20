@@ -408,6 +408,36 @@ def build_ns_parks(simplify_tol=0.0006, server_offset=0.0004):
     _write_layer(g, f"{GEO_DIR}/parks_ns.geojson")
 
 
+# --- Yukon: Geomatics Yukon ------------------------------------------------
+YUKON_URL = ("https://mapservices.gov.yk.ca/arcgis/rest/services/GeoYukon/"
+             "GY_ParksProtectedAreas/MapServer/4/query")
+YUKON_DATASET = "GeoYukon — Parks and Protected Areas"
+
+
+def build_yukon_parks(simplify_tol=0.0012, server_offset=0.0008):
+    """Yukon territorial parks → data/geo/parks_yt.geojson (4: Herschel Island/
+    Qikiqtaruk, Tombstone, Kusawa, Chasàn Chùa). Excludes national parks (federal)
+    and the non-park protected-area designations."""
+    print("Building Yukon parks ...")
+    g = _fetch_arcgis_geojson(YUKON_URL, "PARK_TYPE='Territorial Park'",
+                              "PARK_NAME,PARK_TYPE,PARK1M_ID", server_offset)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "YT-" + g["PARK1M_ID"].astype("Int64").astype(str)
+    g["name"] = [_title(n) if (n or "").isupper() else (n or "").strip() for n in g["PARK_NAME"]]
+    g["name_fr"] = ""
+    g["park_type"] = "Territorial Park"
+    g["province"] = "Yukon"
+    g["jurisdiction"] = "Yukon"
+    g["admin_level"] = "territorial"
+    g["admin_agency"] = "Yukon Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "Government of Yukon (Geomatics Yukon)"
+    g["source_dataset"] = YUKON_DATASET
+    g["geometry_quality"] = "official boundary (1:1M)"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_yt.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -452,7 +482,22 @@ _SOURCES = {
         source_agency="Nova Scotia Environment and Climate Change", source_dataset=NS_DATASET,
         source_url="https://data.novascotia.ca/", licence="Open Government Licence – Nova Scotia",
         boundary_type="official"),
+    "Yukon": dict(admin_level="territorial",
+        source_agency="Government of Yukon (Geomatics Yukon)", source_dataset=YUKON_DATASET,
+        source_url="https://mapservices.gov.yk.ca/", licence="Open Government Licence – Yukon",
+        boundary_type="official (1:1M)"),
 }
+
+# Jurisdictions with NO usable authoritative open boundary (documented gaps; these
+# parks show only as the reported CPCAD fill on the map):
+#   Prince Edward Island — provincial-parks GIS exists but under a custom licence
+#     that forbids redistribution (not on the open hub).
+#   Newfoundland & Labrador — shapefile exists but its licence prohibits
+#     redistribution; would need CREA-style written permission.
+#   Northwest Territories — territorial parks are published only as POINTS, no
+#     open polygon boundaries.
+#   Nunavut — no GN open GIS; only the federal CPCAD carries the 9 territorial
+#     parks (already our base layer, so no independent comparison to add).
 
 
 def write_sources():
@@ -467,4 +512,10 @@ if __name__ == "__main__":
     build_ontario_parks()
     build_alberta_parks()
     build_bc_parks()
+    build_quebec_parks()
+    build_manitoba_parks()
+    build_saskatchewan_parks()
+    build_nb_parks()
+    build_ns_parks()
+    build_yukon_parks()
     write_sources()

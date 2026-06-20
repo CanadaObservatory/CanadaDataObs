@@ -68,4 +68,5 @@ else:
 - [Saskatchewan provincial park boundaries (GeoJSON)](../data/geo/parks_sk.geojson) — Saskatchewan Parks, Culture and Sport
 - [New Brunswick provincial park boundaries (GeoJSON)](../data/geo/parks_nb.geojson) — GeoNB, Provincial Parks
 - [Nova Scotia provincial park boundaries (GeoJSON)](../data/geo/parks_ns.geojson) — Nova Scotia Environment and Climate Change
+- [Yukon territorial park boundaries (GeoJSON)](../data/geo/parks_yt.geojson) — Government of Yukon (Geomatics Yukon)
 - [Parks layer sources (CSV)](../data/geo/parks_sources.csv) — provenance for the agency boundary layers

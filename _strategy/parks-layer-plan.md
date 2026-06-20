@@ -128,3 +128,42 @@ All avoid: a second strong green fill, heavy black outlines, saturation, clutter
 2. `parks.qmd` integration (overlay trace + legend toggle + hover + copy + source note).
 3. Validation pass (Rouge, Banff, Jasper, Fundy, Pacific Rim, Gros Morne, a small/coastal park)
    + provenance doc + the implementation report (records in/out, sizes pre/post, Rouge finding).
+
+---
+
+## Jurisdiction coverage (built 2026-06-20)
+
+One unified "Parks — official boundary" navy overlay. Each layer = `build_<jur>_parks()` in
+`pipeline/build_parks.py` → `data/geo/parks_<jur>.geojson`; all merged in `parks.qmd`. Provenance
+per jurisdiction in `data/geo/parks_sources.csv`.
+
+**Included (federal + 8 provinces + 1 territory = 1,498 parks):** Federal 46 (NRCan/CLSS, legal) ·
+Ontario 347 (LIO) · Alberta 116 (AB EPA — PP/WPP/WA/WP) · BC 782 (DataBC — Provincial Park/Protected
+Area/Recreation Area, excl. Ecological Reserves) · Québec 34 (MELCCFP parcs nationaux, CC-BY) ·
+Manitoba 93 · Saskatchewan 36 (Parks-as-Legislated layer 0) · New Brunswick 24 (GeoNB) · Nova Scotia
+16 (Protected-Areas-System, Provincial Park designation) · Yukon 4 territorial parks (Geomatics
+Yukon). All open-licence, ArcGIS-REST GeoJSON, 0 invalid geometry. Page ~7 MB (heavy detail page).
+
+**Documented GAPS (show only as CPCAD fill; page carries a generic caveat):**
+- **Prince Edward Island** — provincial-parks GIS exists but under a custom licence forbidding
+  redistribution; not on the open hub. (Federal PEI National Park is still shown.)
+- **Newfoundland & Labrador** — shapefile exists but its licence prohibits redistribution → would
+  need CREA-style written permission. ~31 provincial parks.
+- **Northwest Territories** — territorial parks published only as POINTS (GNWT layer 204); no open
+  polygon boundaries exist.
+- **Nunavut** — no GN open GIS; only federal CPCAD carries the 9 territorial parks (already our base
+  layer, so no independent comparison to overlay).
+Future paths for the gaps: written permission (PEI/NL, like CREA) or point markers (NWT).
+
+## Rouge boundary — legislative vs operational (owner Q, 2026-06-20)
+
+Owner noted our navy Rouge boundary stops ~3 km short of Lake Ontario vs. the Parks Canada visitor
+map. **Verified NOT a simplification artifact** — raw CLSS == our output (both south extent
+43.8227°N). The CLSS **legislative** Rouge is **60.5 km²** vs the **~79 km² operational** park: the
+southern lakefront lands (Rouge Beach / river mouth) are *managed* by Parks Canada but not yet in the
+**gazetted legal boundary schedule** (Rouge is still legally assembling land). Parks Canada's
+operational GIS service (`vw_Places_Public…`) does **not** include Rouge at all; no separate open
+operational-boundary dataset found. NB: our **CPCAD base layer DOES reach the lake** (43.7969°N), so
+the fuller Rouge is already visible as the green fill — the navy legal boundary is correctly the
+smaller gazetted subset. Decision pending owner: keep legal boundary (authoritative, recommended) ±
+a small note / pursue an operational source.

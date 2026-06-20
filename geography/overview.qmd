@@ -5,6 +5,8 @@ title-block-banner-color: "#F7F4EE"
 body-classes: area-environment
 ---
 
+![](../visual_assets/brand/botanical/solid/leaf-display-boreal.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Land & Environment colour"}
+
 The physical country — its land, water, and ecosystems — and the atmosphere above it: climate change, air quality, and the emissions and energy behind them.
 
 ## The Land

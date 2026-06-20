@@ -5,6 +5,8 @@ title-block-banner-color: "#17324D"
 body-classes: area-economy
 ---
 
+![](../visual_assets/brand/botanical/solid/leaf-display-gold.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Economy & Affordability colour"}
+
 How fast the economy is growing, what it costs to live and borrow, and whether incomes are keeping up — Canada measured against a broad group of 17 OECD peers.
 
 ::::{.columns}

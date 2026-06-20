@@ -5,6 +5,8 @@ title-block-banner-color: "#F7F4EE"
 body-classes: area-people
 ---
 
+![](../visual_assets/brand/botanical/solid/leaf-display-maroon.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the People & Society colour"}
+
 How many people live in Canada and why that's changing, who they are, and how safe their communities feel — with maps that reach down to the neighbourhood level.
 
 ::::{.columns}

@@ -5,6 +5,8 @@ title-block-banner-color: "#F7F4EE"
 body-classes: area-government
 ---
 
+![](../visual_assets/brand/botanical/solid/leaf-display-navy.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Government & Public Finances colour"}
+
 What governments owe and spend, who works for them, and how Canada's public finances compare with a broad group of OECD peers. Three views:
 
 ::::{.columns}

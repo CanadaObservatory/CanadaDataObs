@@ -5,6 +5,8 @@ title-block-banner-color: "#F7F4EE"
 body-classes: area-education
 ---
 
+![](../visual_assets/brand/botanical/solid/leaf-display-slate.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Education, Science & Innovation colour"}
+
 What Canadians pay to learn, what the country spends on research, and how much of that becomes business innovation — set against peer countries.
 
 ::::{.columns}

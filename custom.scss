@@ -177,6 +177,19 @@ $font-family-sans-serif: "Radio Canada", -apple-system, BlinkMacSystemFont,
 .area-card h3 { margin-top: 0; }
 .area-card p:last-child { margin-bottom: 0; }   // trim the sources line
 
+// Section-landing-page leaf: a variant of the logo in the section's own colour
+// (solid/leaf-display-<area>.svg), floated beside the intro like the home hero.
+.overview-leaf {
+  float: right;
+  width: 116px;
+  margin: 0.1rem 0 0.6rem 1.5rem;
+}
+@media (max-width: 575.98px) {
+  .overview-leaf { width: 80px; margin: 0 0 0.4rem 0.9rem; }
+}
+// Card rows (and any group heading) clear the floated leaf so they start fresh.
+.columns:has(> .area-card) { clear: both; }
+
 // Per-area card identity: the section title takes its area accent colour (the
 // text-safe ink for gold) and the card lifts with an area-coloured ring on hover
 // — echoing the six colour cells of the brand leaf. Each value is (title-ink,

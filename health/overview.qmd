@@ -5,6 +5,8 @@ title-block-banner-color: "#F7F4EE"
 body-classes: area-health
 ---
 
+![](../visual_assets/brand/botanical/solid/leaf-display-lake.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Health & Well-being colour"}
+
 How long and how well Canadians live, how their health-care system performs, and how satisfied they are with life — against a broad group of OECD peers.
 
 ::::{.columns}

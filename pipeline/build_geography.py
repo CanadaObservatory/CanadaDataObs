@@ -406,9 +406,11 @@ def build_parks_detailed():
     protected core, fragmented — that's the data, caveated on the page, not a bug."""
     print("Building detailed park boundaries (CPCAD terrestrial parks) ...")
     inlist = ",".join("'" + t.replace("'", "''") + "'" for t in _PARK_TYPES)
-    where = f"PA_BIOME LIKE 'Terrestrial%' AND TYPE_E IN ({inlist})"
+    # Exclude only MARINE biomes (not "filter to terrestrial") — the latter also drops
+    # parks coded "Not included in statistics", which are real land parks.
+    where = f"PA_BIOME NOT LIKE 'Marine%' AND TYPE_E IN ({inlist})"
     params = {"where": where, "outFields": "NAME_E,TYPE_E,O_AREA_HA",
-              "returnGeometry": "true", "maxAllowableOffset": "0.005",
+              "returnGeometry": "true", "maxAllowableOffset": "0.002",
               "outSR": "4326", "f": "geojson"}
     import io
     from collections import Counter
@@ -421,7 +423,7 @@ def build_parks_detailed():
     # use TOPOLOGY-PRESERVING simplification instead: buffer(0) to repair, then
     # simplify (which never introduces self-intersections), then buffer(0) again.
     g["geometry"] = g.geometry.buffer(0)
-    g["geometry"] = g.geometry.simplify(0.004, preserve_topology=True).buffer(0)
+    g["geometry"] = g.geometry.simplify(0.0015, preserve_topology=True).buffer(0)
     g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
     g["name"] = g["NAME_E"].fillna("").str.strip()
     g["type"] = g["TYPE_E"]

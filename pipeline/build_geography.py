@@ -392,37 +392,49 @@ def build_parks_detailed():
     """The actual SHAPES of Canada's national, provincial and territorial parks
     (terrestrial only) from CPCAD — for the dedicated, heavier park-boundaries page
     (linked from Protected Areas, the same light-index / heavy-detail split the
-    census tract maps use). ~750 park polygons, server-simplified and coordinate-
-    rounded to ~1.3 MB, each tagged with its jurisdiction (the page colours by it).
-    Marine areas (which dwarf the land parks) and non-park designations are excluded.
-    One-time build, like the other static geo assets."""
+    census tract maps use). ~736 park polygons, server-simplified then repaired and
+    grid-snapped to ~0.6 MB of VALID geometry, each tagged with its jurisdiction (the
+    page colours by it). Marine areas (which dwarf the land parks) and non-park
+    designations are excluded. One-time build, like the other static geo assets.
+
+    NOTE: the geometry MUST be valid — Mapbox GL silently fails to draw a layer with
+    self-intersecting polygons (blank map), and naive coordinate rounding introduces
+    them, so we buffer(0) then snap with shapely set_precision rather than rounding."""
     print("Building detailed park boundaries (CPCAD terrestrial parks) ...")
     inlist = ",".join("'" + t.replace("'", "''") + "'" for t in _PARK_TYPES)
     where = f"PA_BIOME LIKE 'Terrestrial%' AND TYPE_E IN ({inlist})"
     params = {"where": where, "outFields": "NAME_E,TYPE_E,O_AREA_HA",
               "returnGeometry": "true", "maxAllowableOffset": "0.02",
               "outSR": "4326", "f": "geojson"}
-    gj = requests.get(CPCAD_URL + "/query", params=params, timeout=300).json()
-    feats = [f for f in gj.get("features", []) if f.get("geometry")]
-    out = []
-    for i, ft in enumerate(feats):
-        p = ft.get("properties", {})
-        t = p.get("TYPE_E")
-        ft["id"] = str(i)
-        ft["properties"] = {
-            "name": (p.get("NAME_E") or "").strip(),
-            "type": t,
-            "jurisdiction": _PARK_JUR.get(t, "Provincial"),
-            "area_km2": int(round((p.get("O_AREA_HA") or 0) / 100)),
-        }
-        ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
-        out.append(ft)
-    gj["features"] = out
+    import io
+    from collections import Counter
+    from shapely import set_precision
+    r = requests.get(CPCAD_URL + "/query", params=params, timeout=300)
+    g = gpd.read_file(io.BytesIO(r.content))
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    # The ArcGIS output carries self-intersections; naive coordinate rounding makes
+    # them worse, and Mapbox GL then SILENTLY fails to draw the whole layer (the map
+    # comes up blank). So repair first (buffer(0)), then snap to a ~110 m grid with
+    # set_precision — which returns valid, polygon-typed geometry AND trims the size.
+    g["geometry"] = g.geometry.buffer(0)
+    g["geometry"] = set_precision(g.geometry.values, grid_size=0.001)
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    g["name"] = g["NAME_E"].fillna("").str.strip()
+    g["type"] = g["TYPE_E"]
+    g["jurisdiction"] = g["TYPE_E"].map(_PARK_JUR).fillna("Provincial")
+    g["area_km2"] = (pd.to_numeric(g["O_AREA_HA"], errors="coerce").fillna(0) / 100).round().astype(int)
+    g = g.sort_values("area_km2").reset_index(drop=True)
+    g["fid"] = g.index.astype(str)
+    gj = json.loads(g[["fid", "name", "type", "jurisdiction", "area_km2", "geometry"]].to_json())
+    for ft in gj["features"]:
+        ft["id"] = ft["properties"].pop("fid")
+        ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])  # values already on the 0.001 grid
     os.makedirs(GEO_DIR, exist_ok=True)
     _write_geojson(gj, f"{GEO_DIR}/parks_detailed.geojson")
-    from collections import Counter
-    jc = Counter(f["properties"]["jurisdiction"] for f in out)
-    print(f"  wrote parks_detailed.geojson: {len(out)} parks {dict(jc)}, "
+    chk = gpd.read_file(f"{GEO_DIR}/parks_detailed.geojson")
+    jc = Counter(f["properties"]["jurisdiction"] for f in gj["features"])
+    print(f"  wrote parks_detailed.geojson: {len(gj['features'])} parks {dict(jc)}, "
+          f"invalid={int((~chk.is_valid).sum())}, "
           f"{round(os.path.getsize(GEO_DIR + '/parks_detailed.geojson') / 1e6, 2)} MB")
 
 

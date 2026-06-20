@@ -214,6 +214,40 @@ def build_alberta_parks(simplify_tol=0.0009, server_offset=0.0006):
     _write_layer(g, f"{GEO_DIR}/parks_ab.geojson")
 
 
+# --- British Columbia: BC Parks / DataBC ----------------------------------
+BC_URL = ("https://delivery.maps.gov.bc.ca/arcgis/rest/services/mpcm/bcgwpub/"
+          "MapServer/512/query")
+BC_DATASET = "BC Parks, Ecological Reserves, and Protected Areas"
+_BC_TYPE = {"PROVINCIAL PARK": "Provincial Park", "PROTECTED AREA": "Protected Area",
+            "RECREATION AREA": "Recreation Area"}
+
+
+def build_bc_parks(simplify_tol=0.0015, server_offset=0.001):
+    """BC provincial parks → data/geo/parks_bc.geojson (~782). The biggest layer
+    (huge coastal parks), so simplified more aggressively. Excludes the 148
+    Ecological Reserves (research-only, not visited parks)."""
+    print("Building BC parks (DataBC BC Parks/Protected Areas) ...")
+    where = "PROTECTED_LANDS_DESIGNATION IN ('PROVINCIAL PARK','PROTECTED AREA','RECREATION AREA')"
+    g = _fetch_arcgis_geojson(
+        BC_URL, where, "ADMIN_AREA_SID,PROTECTED_LANDS_NAME,PROTECTED_LANDS_DESIGNATION",
+        server_offset)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "BC-" + g["ADMIN_AREA_SID"].astype("Int64").astype(str)
+    g["name"] = [_title(n) for n in g["PROTECTED_LANDS_NAME"]]
+    g["name_fr"] = ""
+    g["park_type"] = g["PROTECTED_LANDS_DESIGNATION"].map(_BC_TYPE).fillna("Provincial Park")
+    g["province"] = "British Columbia"
+    g["jurisdiction"] = "British Columbia"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "BC Parks"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "BC Parks / DataBC"
+    g["source_dataset"] = BC_DATASET
+    g["geometry_quality"] = "official boundary"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_bc.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -231,6 +265,11 @@ _SOURCES = {
         source_dataset=ALBERTA_DATASET,
         source_url="https://open.alberta.ca/opendata/gda-6b96341f-2e19-4885-98af-66d12ed4f8dd",
         licence="Open Government Licence – Alberta", boundary_type="official (Order-in-Council)"),
+    "British Columbia": dict(admin_level="provincial",
+        source_agency="BC Parks / DataBC",
+        source_dataset=BC_DATASET,
+        source_url="https://catalogue.data.gov.bc.ca/dataset/1130248f-f1a3-4956-8b2e-38d29d3e4af7",
+        licence="Open Government Licence – British Columbia", boundary_type="official"),
 }
 
 
@@ -245,4 +284,5 @@ if __name__ == "__main__":
     build_federal_parks()
     build_ontario_parks()
     build_alberta_parks()
+    build_bc_parks()
     write_sources()

@@ -7,7 +7,7 @@ This map shows the **boundaries** of Canada's national, provincial, and territor
 
 The coloured fills are **reported park boundaries** from the **Canadian Protected and Conserved Areas Database** (CPCAD), compiled from federal, provincial, and territorial submissions. Two limits are worth keeping in mind. First, the picture is **not exhaustive** — coverage varies by jurisdiction and some smaller parks are absent. Second, CPCAD maps the formally **protected** land, which for a zoned park is only its protected core: a few large parks — **notably some in Ontario, such as Algonquin** — can therefore look smaller or more fragmented than the full park on a road or canoe map. The fills cover terrestrial parks, and are illustrative, not legal.
 
-Over the federal parks, a second layer traces the **legal boundary** set in legislation — the authoritative outline of every national park and national park reserve, the Rouge National Urban Park, and the Saguenay–St. Lawrence Marine Park. **Use the legend to turn this legal-boundary layer on or off.** Where it differs from the reported fill — **Rouge** is the clearest example — the gap is the difference between the protected area on record and the park as the responsible agency defines it.
+Over the national parks and Ontario's provincial parks, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated for Ontario's. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is; **Rouge** shows the contrast between scattered protected parcels and the legislated urban-park boundary.
 
 This is a detailed, heavier map kept on its own page so the [Protected & Conserved Areas](protected.qmd) overview stays light.
 
@@ -18,7 +18,9 @@ import pandas as pd
 from pipeline.charts import choropleth_categorical, add_polygon_overlay
 
 geo_path = "data/geo/parks_detailed.geojson"
-fed_path = "data/geo/parks_federal.geojson"
+# Agency official-boundary layers (national + provinces), merged into ONE overlay.
+agency_files = ["data/geo/parks_federal.geojson", "data/geo/parks_on.geojson",
+                "data/geo/parks_ab.geojson", "data/geo/parks_bc.geojson"]
 if os.path.exists(geo_path):
     gj = json.load(open(geo_path))
     df = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in gj["features"]])
@@ -26,18 +28,25 @@ if os.path.exists(geo_path):
     fig = choropleth_categorical(gj, df, "id", "jurisdiction", name_col="name",
         color_map=JUR_COLORS, ordered=["Federal", "Provincial", "Territorial"],
         legend_title="Reported boundary (CPCAD)", center={"lat": 59, "lon": -96}, zoom=2.3, height=680,
-        source_note="Sources: ECCC, Canadian Protected and Conserved Areas Database (coloured fills, illustrative); NRCan / Canada Lands Survey System — National Parks and National Park Reserves Legislative Boundaries (federal legal outline).")
-    # Federal legal-boundary overlay (Deep Navy outline + faint wash; legend-toggleable).
-    if os.path.exists(fed_path):
-        fgj = json.load(open(fed_path))
-        fdf = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in fgj["features"]])
-        hover = ("<b>%{customdata[0]}</b><br>%{customdata[1]} · legal boundary<br>"
-                 "Administered by Parks Canada<br>"
-                 "Source: NRCan / CLSS Legislative Boundaries<extra></extra>")
-        add_polygon_overlay(fig, fgj, fdf, "id",
-            legend_name="Federal parks — legal boundary", line_color="#17324D",
-            customdata=fdf[["name", "park_type"]].to_numpy(), hovertemplate=hover,
-            fill_opacity=0.12, line_width=2.2)
+        source_note="Sources: ECCC, Canadian Protected and Conserved Areas Database (coloured fills, illustrative); agency park boundaries — NRCan/CLSS (federal), Land Information Ontario, Alberta Environment and Protected Areas, BC Parks (official outlines).")
+    # Merge whatever agency layers exist into one official-boundary overlay (Deep
+    # Navy outline + faint wash; one legend entry toggles the whole layer). Re-index
+    # ids so the merged features stay unique across source files.
+    feats, rows = [], []
+    for path in agency_files:
+        if os.path.exists(path):
+            for f in json.load(open(path))["features"]:
+                f["id"] = str(len(feats))
+                feats.append(f)
+                rows.append({"id": f["id"], **f["properties"]})
+    if feats:
+        cdf = pd.DataFrame(rows)
+        hover = ("<b>%{customdata[0]}</b><br>%{customdata[1]} · %{customdata[3]}<br>"
+                 "Administered by %{customdata[2]}<extra></extra>")
+        add_polygon_overlay(fig, {"type": "FeatureCollection", "features": feats}, cdf, "id",
+            legend_name="Parks — official boundary", line_color="#17324D",
+            customdata=cdf[["name", "park_type", "admin_agency", "boundary_kind"]].to_numpy(),
+            hovertemplate=hover, fill_opacity=0.12, line_width=2.0)
     fig.show(config={"displaylogo": False, "scrollZoom": True,
                      "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -48,4 +57,5 @@ else:
 
 - [National, provincial & territorial park boundaries (GeoJSON)](../data/geo/parks_detailed.geojson) — ECCC, Canadian Protected and Conserved Areas Database (reported, illustrative)
 - [Federal park legal boundaries (GeoJSON)](../data/geo/parks_federal.geojson) — NRCan / Canada Lands Survey System, National Parks Legislative Boundaries
+- [Ontario provincial park boundaries (GeoJSON)](../data/geo/parks_on.geojson) — Land Information Ontario, Provincial Park Regulated
 - [Parks layer sources (CSV)](../data/geo/parks_sources.csv) — provenance for the agency boundary layers

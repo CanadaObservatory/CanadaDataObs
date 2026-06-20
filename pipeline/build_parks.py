@@ -248,6 +248,38 @@ def build_bc_parks(simplify_tol=0.0015, server_offset=0.001):
     _write_layer(g, f"{GEO_DIR}/parks_bc.geojson")
 
 
+# --- Québec: MELCCFP Registre des aires protégées -------------------------
+QUEBEC_URL = ("https://geo.environnement.gouv.qc.ca/donnees/rest/services/"
+              "Biodiversite/Aires_protegees/MapServer/4/query")
+QUEBEC_DATASET = "Registre des aires protégées et des AMCE au Québec"
+# Layer 4 is pre-isolated to the parcs nationaux (no réserves écologiques/fauniques).
+_QC_TYPE = {"Parc national": "Provincial park (Québec)",
+            "Réserve de parc national du Québec": "Provincial park reserve (Québec)"}
+
+
+def build_quebec_parks(simplify_tol=0.0009, server_offset=0.0006):
+    """Québec parcs nationaux → data/geo/parks_qc.geojson (~34). Québec calls its
+    PROVINCIAL parks "parcs nationaux"; layer 4 of the MELCCFP registry already
+    isolates them (no réserves écologiques/fauniques). French toponyms."""
+    print("Building Québec parks (MELCCFP parcs nationaux) ...")
+    g = _fetch_arcgis_geojson(QUEBEC_URL, "1=1", "MACODE,TOPONYME,DESIGNOM", server_offset)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "QC-" + g["MACODE"].astype("Int64").astype(str)
+    g["name"] = g["TOPONYME"].astype(str).str.strip()
+    g["name_fr"] = g["name"]
+    g["park_type"] = g["DESIGNOM"].map(_QC_TYPE).fillna("Provincial park (Québec)")
+    g["province"] = "Québec"
+    g["jurisdiction"] = "Québec"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "Québec / SÉPAQ"
+    g["boundary_kind"] = "official boundary"
+    g["source_agency"] = "MELCCFP (Registre des aires protégées)"
+    g["source_dataset"] = QUEBEC_DATASET
+    g["geometry_quality"] = "official boundary"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/parks_qc.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -270,6 +302,11 @@ _SOURCES = {
         source_dataset=BC_DATASET,
         source_url="https://catalogue.data.gov.bc.ca/dataset/1130248f-f1a3-4956-8b2e-38d29d3e4af7",
         licence="Open Government Licence – British Columbia", boundary_type="official"),
+    "Québec": dict(admin_level="provincial",
+        source_agency="Ministère de l'Environnement, de la Lutte contre les changements climatiques, de la Faune et des Parcs (MELCCFP)",
+        source_dataset=QUEBEC_DATASET,
+        source_url="https://www.donneesquebec.ca/recherche/dataset/aires-protegees-au-quebec",
+        licence="Creative Commons Attribution 4.0 (CC-BY) – Québec", boundary_type="official"),
 }
 
 

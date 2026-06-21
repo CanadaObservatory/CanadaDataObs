@@ -28,7 +28,7 @@ peers. Inflation and the cost of living have their own page:
 
 ## Canada in the world
 
-Canada is often called a small economy. By total output, it isn't: with a GDP of about **US$2.2 trillion** it is the world's **9th-largest economy** — behind the United States and China by a wide margin, but ahead of fast-growing giants like Brazil and Russia. Each dot below is a country, sorted by GDP on a ratio (logarithmic) scale; Canada is in red.
+With a GDP of about **US$2.2 trillion**, Canada is the world's **9th-largest economy** — behind the United States and China by a wide margin, but ahead of fast-growing giants like Brazil and Russia. Each dot below is a country, sorted by GDP on a ratio (logarithmic) scale; Canada is in red.
 
 ```{python}
 #| echo: false

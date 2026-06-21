@@ -100,7 +100,7 @@ if os.path.exists(comp_path):
              "Public administration (the bureaucracy)", OTHER]
     fig = stacked_area(area, "year", "employment", "bucket",
         yaxis_title="Public-sector employees (thousands)", value_scale=1000, hover_decimals=0,
-        group_order=order, height=560, rangeslider=True,
+        group_order=order, height=620, rangeslider=True, legend_orientation="h",
         colors={"Educational services": "#4e79a7", "Health care & social assistance": "#59a14f",
                 "Public administration (the bureaucracy)": "#f28e2b", OTHER: "#bab0ac"},
         source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey, public-sector employees by industry) | Data as of: {get_data_date(comp_path)}")

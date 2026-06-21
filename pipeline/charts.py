@@ -2387,13 +2387,18 @@ def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
             x=xs, y=[s.get(x) for x in xs], name=str(g), mode="lines",
             stackgroup="one", line=dict(width=0.5, color=cmap[g]), fillcolor=cmap[g],
             hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
-    # A range slider needs the bottom free → force the right-hand legend when it's on.
     if legend_orientation == "h" and not rangeslider:
         # Legend ABOVE the plot → the x-axis uses full width AND the bottom stays free for
         # the source note (a bottom h-legend with many bands wraps and collides with it).
         legend = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0)
         margin = dict(l=10, r=20, t=90, b=90)
         src_y = -0.16
+    elif legend_orientation == "h" and rangeslider:
+        # Legend BELOW the range slider (full width) → frees the plot of a wide right-hand
+        # legend with long entries; the source note sits below the legend.
+        legend = dict(orientation="h", yanchor="top", y=-0.30, xanchor="left", x=0)
+        margin = dict(l=10, r=20, t=30, b=215)
+        src_y = -0.54
     else:                            # legend stacked on the right (default)
         legend = dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
         margin = dict(l=10, r=200, t=30, b=(150 if rangeslider else 110))

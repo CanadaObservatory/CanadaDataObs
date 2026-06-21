@@ -17,7 +17,7 @@ from pipeline.charts import (single_line, single_bar, peer_comparison_line,
 
 ## Canada in the world
 
-Canada is often called a small country. By population, it isn't. With about 41 million people it sits in the **top fifth** of the world: more populous than the great majority of countries, even if it is dwarfed by giants like India, China, and the United States. Each dot below is a country, sorted by population on a ratio (logarithmic) scale; Canada is in red.
+With about **41 million people**, Canada is the world's **37th-most-populous country** — in the top fifth of all nations, more populous than the great majority, though far behind giants like India, China, and the United States. Each dot below is a country, sorted by population on a ratio (logarithmic) scale; Canada is in red.
 
 ```{python}
 #| echo: false

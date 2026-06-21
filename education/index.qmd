@@ -42,15 +42,16 @@ Average undergraduate tuition for Canadian students, for Canada and the three pr
 if tu is not None:
     ug = tu[(tu["level"] == "Canadian undergraduate")
             & (tu["geography"].isin(["Canada", "Ontario", "Quebec", "British Columbia",
-                                     "Alberta", "Nova Scotia", "Newfoundland and Labrador"]))].dropna(subset=["real"])
+                                     "Alberta", "Nova Scotia", "Newfoundland and Labrador"]))].dropna(subset=["real"]).copy()
+    ug["geography"] = ug["geography"].replace({"Newfoundland and Labrador": "Newfoundland<br>and Labrador"})
     fig = lines_over_time(ug, "year", "real", "geography",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
         colors={"Canada": CANADA_COLOR, "Ontario": "#4e79a7", "Quebec": "#59a14f",
                 "British Columbia": "#b07aa1", "Alberta": "#e15759",
-                "Nova Scotia": "#76b7b2", "Newfoundland and Labrador": "#edc948"},
+                "Nova Scotia": "#76b7b2", "Newfoundland<br>and Labrador": "#edc948"},
         group_order=["Canada", "Ontario", "Quebec", "British Columbia",
-                     "Alberta", "Nova Scotia", "Newfoundland and Labrador"],
-        legendonly_groups=["Alberta", "Nova Scotia", "Newfoundland and Labrador"], x_pad=True,
+                     "Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"],
+        legendonly_groups=["Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
                   {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")

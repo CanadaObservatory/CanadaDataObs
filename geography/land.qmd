@@ -34,9 +34,11 @@ ECOZONE_COLORS = {
 if os.path.exists(ez_geo_path) and os.path.exists(ez_csv):
     ez_geo = json.load(open(ez_geo_path))
     ez = pd.read_csv(ez_csv, dtype={"fid": str})
-    fig = choropleth_categorical_clean(ez_geo, ez, "fid", "ecozone",
+    fig = choropleth_categorical(ez_geo, ez, "fid", "ecozone",
         color_map=ECOZONE_COLORS, ordered=list(ECOZONE_COLORS.keys()),
+        center={"lat": 63, "lon": -96}, zoom=2.2,
         source_note="Source: National Ecological Framework for Canada (Agriculture and Agri-Food Canada / ECCC).")
+    add_city_markers(fig)
     fig.show(config=MAP_CONFIG)
 else:
     print("Ecozones not yet available — run `python -m pipeline.build_geography`.")

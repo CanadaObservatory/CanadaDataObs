@@ -325,7 +325,7 @@ else:
 if os.path.exists(dep_path):
     fig = ranked_bar(dep, "old_age_dependency", "People 65+ per 100 aged 15–64",
         f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(dep_path)}",
-        hover_template="%{y}: %{x:.1f}<extra></extra>")
+        hover_template="%{y}: %{x:.1f}<extra></extra>", xtitle_top=True)
     fig.show(config={"displaylogo": False})
 ```
 
@@ -359,7 +359,7 @@ else:
 if os.path.exists(fert_path):
     fig = ranked_bar(fert, "fertility_rate", "Births per woman",
         f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(fert_path)}",
-        hover_template="%{y}: %{x:.2f}<extra></extra>")
+        hover_template="%{y}: %{x:.2f}<extra></extra>", xtitle_top=True)
     fig.show(config={"displaylogo": False})
 ```
 

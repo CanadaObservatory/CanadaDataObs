@@ -67,7 +67,7 @@ if os.path.exists(lvl_path):
         yaxis_title="Number of jobs", measures=measures,
         colors={"Federal": "#d62728", "Provincial / territorial": "#4e79a7",
                 "Local & Indigenous": "#59a14f"},
-        group_order=keep,
+        group_order=keep, rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0489-01 (SNA jobs) — public administration (NAICS 91); federal includes the military; population from StatCan 17-10-0009-01 | Data as of: {get_data_date(lvl_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -100,7 +100,7 @@ if os.path.exists(comp_path):
              "Public administration (the bureaucracy)", OTHER]
     fig = stacked_area(area, "year", "employment", "bucket",
         yaxis_title="Public-sector employees (thousands)", value_scale=1000, hover_decimals=0,
-        group_order=order, legend_orientation="h", height=560,
+        group_order=order, height=560, rangeslider=True,
         colors={"Educational services": "#4e79a7", "Health care & social assistance": "#59a14f",
                 "Public administration (the bureaucracy)": "#f28e2b", OTHER: "#bab0ac"},
         source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey, public-sector employees by industry) | Data as of: {get_data_date(comp_path)}")
@@ -335,7 +335,7 @@ if demo is not None:
     age = demo[(demo["dimension"] == "Age band") & (demo["category"] != "Unknown")]
     fig = stacked_area(age, "year", "employees", "category",
         yaxis_title="Employees (thousands)", value_scale=1000, group_order=order,
-        source_note=demo_src)
+        legend_orientation="h", source_note=demo_src)
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
@@ -347,7 +347,7 @@ casuals, and students make up a smaller, more variable share.
 if demo is not None:
     ten = demo[(demo["dimension"] == "Tenure") & (demo["category"] != "Unknown")]
     fig = stacked_area(ten, "year", "employees", "category",
-        yaxis_title="Employees (thousands)", value_scale=1000,
+        yaxis_title="Employees (thousands)", value_scale=1000, legend_orientation="h",
         group_order=["Indeterminate", "Term", "Casual", "Student"], source_note=demo_src)
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
@@ -375,7 +375,7 @@ if demo is not None:
     sx = demo[(demo["dimension"] == "Sex") & (demo["category"] != "Unknown")]
     fig = lines_over_time(sx, "year", "employees", "category", yaxis_title="Employees",
         colors={"Women": "#b07aa1", "Men": "#4e79a7"}, group_order=["Women", "Men"],
-        source_note=demo_src)
+        legend_orientation="h", source_note=demo_src)
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 

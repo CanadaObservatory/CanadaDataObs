@@ -44,7 +44,7 @@ if os.path.exists(fin_path):
     fig = lines_over_time(m, "year", "pct", "metric", yaxis_title="% of GDP",
         yticksuffix="%", hover_decimals=1,
         colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
-        group_order=["Total spending", "Revenue"], legend_orientation="h",
+        group_order=["Total spending", "Revenue"], rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -66,7 +66,7 @@ if os.path.exists(fin_path):
     fig = lines_over_time(m, "year", "valb", "metric", yaxis_title="$ billions (nominal)",
         ytickprefix="$", hover_decimals=1,
         colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
-        group_order=["Total spending", "Revenue"], legend_orientation="h",
+        group_order=["Total spending", "Revenue"], rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0477-01 (federal general government, nominal dollars) | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
@@ -103,14 +103,15 @@ if os.path.exists(fin_path):
         figb.add_annotation(x=(start - 0.5 + end - 0.5) / 2, y=1.0, yref="paper",
             yanchor="bottom", text=name, showarrow=False, font=dict(size=9, color="#888"))
     figb.add_hline(y=0, line_color="#888", line_width=1)
-    figb.update_layout(plot_bgcolor="white", height=460, bargap=0.15, showlegend=False,
+    figb.update_layout(plot_bgcolor="white", height=500, bargap=0.15, showlegend=False,
         yaxis=dict(title="Budget balance (% of GDP)", gridcolor="#e0e0e0",
                    ticksuffix="%", zeroline=False),
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
-        margin=dict(t=50, b=90, r=20))
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+                   rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        margin=dict(t=50, b=150, r=20))
     figb.add_annotation(
         text=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}",
-        xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))
+        xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False, font=dict(size=10, color="#999"))
     figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
@@ -137,7 +138,7 @@ if os.path.exists(exp_path):
     d = df[df["category"].isin(EXP_COLORS)]
     fig = stacked_area(d, "year", "value_millions", "category",
         yaxis_title="$ billions", value_scale=1000.0, ytickprefix="$", hover_decimals=1,
-        colors=EXP_COLORS, group_order=list(EXP_COLORS.keys()),
+        colors=EXP_COLORS, group_order=list(EXP_COLORS.keys()), rangeslider=True,
         source_note=f"Source: Statistics Canada 10-10-0016-01 (federal government, statement of operations) | Data as of: {get_data_date(exp_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -207,7 +208,8 @@ if os.path.exists(depts_path):
     # departments (e.g. the Nuclear Safety Commission, ~0.04%) don't read as 0.0%
     df["share_label"] = df["share"].map(lambda s: f"{s:.1f}%" if s >= 1 else f"{s:.2f}%")
     grp = lambda names: df[df["department"].isin(names)]
-    views = [("Top 25 departments", df.nlargest(25, "value")),
+    views = [("Top 10 departments", df.nlargest(10, "value")),
+             ("Top 25 departments", df.nlargest(25, "value")),
              ("Top 50 departments", df.nlargest(50, "value")),
              ("Science, research & environment", grp(SCIENCE)),
              ("Public safety & security", grp(SAFETY)),

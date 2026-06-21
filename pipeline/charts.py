@@ -404,7 +404,7 @@ def _ranked_footnote(source_note, year):
 def ranked_bar(df, value_col, xaxis_title, source_note,
                country_col="country_code", name_col="country_name",
                year_col="year", ascending=True, min_countries=10,
-               tickformat=None, hover_template=None, height=600):
+               tickformat=None, hover_template=None, height=600, xtitle_top=False):
     """
     Horizontal ranked bar of the latest comparable year — Canada red, peers grey.
 
@@ -438,6 +438,10 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
     xaxis = dict(gridcolor="#e0e0e0", title=xaxis_title)
     if tickformat:
         xaxis["tickformat"] = tickformat
+    # `xtitle_top` moves the value axis (ticks + title) to the TOP, so the title doubles
+    # as a chart heading and the blank gap below the bars closes (owner, §51/§54).
+    if xtitle_top:
+        xaxis["side"] = "top"
 
     fig.update_layout(
         xaxis=xaxis,
@@ -445,7 +449,7 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
         plot_bgcolor="white",
         showlegend=False,
         height=height,
-        margin=dict(t=30, b=120, l=10, r=20),
+        margin=dict(t=(58 if xtitle_top else 30), b=120, l=10, r=20),
         annotations=[dict(
             text=_ranked_footnote(source_note, year),
             xref="paper", yref="paper", x=0, xanchor="left", y=-0.15,
@@ -1906,7 +1910,7 @@ def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
     # wrapped line count (+1 for the brand line the show() interceptor appends) so it
     # clears the x-axis title and never clips.
     if source_note:
-        src_wrapped = _wrap(source_note, 110)
+        src_wrapped = _wrap(source_note, 82)
         b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
     else:
         b_margin = 70
@@ -1947,7 +1951,7 @@ def composition_bars(df, *, group_colors, year, geographies=None, value_col="sha
     # plot (yanchor=top), with the bottom margin sized to its line count (+1 for the
     # brand line the show() interceptor appends).
     if source_note:
-        src_wrapped = _wrap(source_note, 95)
+        src_wrapped = _wrap(source_note, 82)
         b_margin = 44 + (src_wrapped.count("<br>") + 2) * 16 + 12
     else:
         b_margin = 70
@@ -2053,13 +2057,16 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
     fig.update_layout(
         xaxis=xaxis, yaxis=yaxis, plot_bgcolor="white",
         hovermode="x", showlegend=False,
-        margin=dict(t=40, b=(140 if rangeslider else 80)),
+        margin=dict(t=40, b=(140 if rangeslider else 130)),
     )
     if source_note:
+        # Hang the note from yanchor=top below the slider / x-axis labels, with enough
+        # bottom margin for the wrapped note + the brand line the show() interceptor adds
+        # (some GC InfoBase notes are long because their "data as of" is a phrase).
         fig.add_annotation(
-            text=source_note, xref="paper", yref="paper",
-            x=0, y=(-0.34 if rangeslider else -0.18),
-            showarrow=False, font=dict(size=10, color="#999"))
+            text=_wrap(source_note, 88), xref="paper", yref="paper",
+            x=0, xanchor="left", y=(-0.34 if rangeslider else -0.16), yanchor="top",
+            align="left", showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -2083,7 +2090,8 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
                     colors=None, group_order=None, source_note=None, height=460,
                     yaxis_tickformat=None, ytickprefix="", yticksuffix="",
                     hover_decimals=0, legend_orientation="v", rangemode="tozero",
-                    measures=None):
+                    measures=None, rangeslider=False, initial_start=None,
+                    legendonly_groups=(), x_pad=False):
     """Plain multi-line time series for annual data — integer-year safe (no
     date-axis range buttons, unlike the OECD peer charts). `df` is long:
     (x_col, group_col, value_col). Used for government employment by level and
@@ -2107,25 +2115,46 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
     init_dec = m0.get("hover_decimals", hover_decimals)
     init_pre = m0.get("ytickprefix", ytickprefix)
     init_suf = m0.get("yticksuffix", yticksuffix)
+    legendonly = {str(g) for g in legendonly_groups}
     fig = go.Figure()
     for g in groups:
         s = subsets[g]
         fig.add_trace(go.Scatter(
             x=s[x_col], y=s[init_col], name=str(g), mode="lines+markers",
+            visible=("legendonly" if str(g) in legendonly else True),
             line=dict(color=cmap[g], width=2.5), marker=dict(size=5),
             hovertemplate=_hover_tmpl(g, init_dec, init_pre, init_suf)))
+    # A range slider needs the bottom free, so it forces the legend to the right and
+    # pushes the source note + bottom margin below the slider.
+    use_v = legend_orientation == "v" or rangeslider
     legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
-              if legend_orientation == "v"
+              if use_v
               else dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5))
     yaxis = dict(title=init_title, gridcolor="#e0e0e0", rangemode=rangemode,
                  tickprefix=init_pre, ticksuffix=init_suf)
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat
+    xaxis = dict(title="", gridcolor="#e0e0e0")
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
+    # Optional x-range padding so the first/last point isn't flush against the axis —
+    # also separates the first x-tick label from the y-axis "0" tick (owner-flagged on
+    # the tuition charts). `initial_start` opens on a recent window; the data/slider
+    # still span everything.
+    if initial_start is not None or x_pad:
+        import pandas as pd
+        xv = pd.concat([subsets[g][x_col] for g in groups])
+        xmin, xmax = xv.min(), xv.max()
+        lo = initial_start if initial_start is not None else xmin
+        pad = (xmax - lo) * 0.02 if x_pad else 0
+        xaxis["range"] = [lo - (0.5 if x_pad else 0), xmax + max(pad, 0.5 if x_pad else 0)]
+    b = 150 if rangeslider else 100
+    src_y = -0.34 if rangeslider else -0.18
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
-        xaxis=dict(title="", gridcolor="#e0e0e0"), yaxis=yaxis, legend=legend,
-        margin=dict(l=10, r=(175 if legend_orientation == "v" else 20),
-                    t=(60 if measures else 30), b=100))
+        xaxis=xaxis, yaxis=yaxis, legend=legend,
+        margin=dict(l=10, r=(175 if use_v else 20),
+                    t=(60 if measures else 30), b=b))
     if measures:
         def _btn_args(m):
             dec = m.get("hover_decimals", hover_decimals)
@@ -2143,7 +2172,7 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
             bordercolor="#ccc", borderwidth=1, showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.18, showarrow=False,
+                           xanchor="left", y=src_y, showarrow=False,
                            font=dict(size=10, color="#999"))
     return fig
 
@@ -2332,7 +2361,7 @@ def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=Tru
 def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
                  group_order=None, source_note=None, height=480,
                  ytickprefix="", yticksuffix="", hover_decimals=0, value_scale=1.0,
-                 legend_orientation="v"):
+                 legend_orientation="v", rangeslider=False):
     """Stacked area over time — the composition of a total by category
     (public-sector sectors, federal expense by type, government spending by
     function). `df` is long: (x_col, group_col, value_col). `value_scale` divides
@@ -2352,17 +2381,23 @@ def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
             x=xs, y=[s.get(x) for x in xs], name=str(g), mode="lines",
             stackgroup="one", line=dict(width=0.5, color=cmap[g]), fillcolor=cmap[g],
             hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
-    if legend_orientation == "h":   # legend below the plot → x-axis uses full width
-        legend = dict(orientation="h", yanchor="top", y=-0.07, xanchor="left", x=0)
-        margin = dict(l=10, r=20, t=30, b=130)
-        src_y = -0.40
+    # A range slider needs the bottom free → force the right-hand legend when it's on.
+    if legend_orientation == "h" and not rangeslider:
+        # Legend ABOVE the plot → the x-axis uses full width AND the bottom stays free for
+        # the source note (a bottom h-legend with many bands wraps and collides with it).
+        legend = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0)
+        margin = dict(l=10, r=20, t=90, b=90)
+        src_y = -0.16
     else:                            # legend stacked on the right (default)
         legend = dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
-        margin = dict(l=10, r=200, t=30, b=110)
-        src_y = -0.18
+        margin = dict(l=10, r=200, t=30, b=(150 if rangeslider else 110))
+        src_y = -0.34 if rangeslider else -0.18
+    xaxis = dict(title="", gridcolor="#e0e0e0")
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0",
                    tickprefix=ytickprefix, ticksuffix=yticksuffix),
         legend=legend, margin=margin)
@@ -2403,7 +2438,7 @@ def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
     # wrapped line count (+1 for the brand line the show() interceptor appends) and leave
     # a clear gap below the x-axis title (owner: source notes need breathing room).
     if source_note:
-        src_wrapped = _wrap(source_note, 110)
+        src_wrapped = _wrap(source_note, 82)
         n_src = src_wrapped.count("<br>") + 2
         b_margin = 58 + n_src * 16 + 12
     else:
@@ -2438,7 +2473,7 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
         s = sub.copy()
         s["_v"] = pd.to_numeric(s[value_col], errors="coerce") / value_scale
         s = s.dropna(subset=["_v"]).sort_values("_v")     # ascending → largest on top
-        y = s[label_col].astype(str).tolist()
+        y = [_wrap(str(v), 32) for v in s[label_col]]      # wrap long category names to 2 lines
         t = ([text_fmt.format(v) for v in s[text_col]]
              if text_col and text_col in s.columns else None)
         return s["_v"].tolist(), y, t
@@ -2447,6 +2482,14 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
     x0, y0, t0 = prepped[0][1]
     def height(n):
         return base_px + bar_px * n
+    h0 = height(len(y0))
+    # Match category_bar's self-sizing source note (wrap to fit, hang from yanchor=top,
+    # bottom margin sized to the line count incl. the brand line) so it never clips.
+    if source_note:
+        src_wrapped = _wrap(source_note, 82)
+        b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
+    else:
+        b_margin = 70
     fig = go.Figure(go.Bar(
         x=x0, y=y0, orientation="h", marker_color=color,
         text=t0, textposition="auto", cliponaxis=False,
@@ -2457,16 +2500,17 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
                            "yaxis.categoryorder": "array", "xaxis.autorange": True}])
                for lab, (x, y, t) in prepped]
     fig.update_layout(
-        plot_bgcolor="white", showlegend=False, height=height(len(y0)),
+        plot_bgcolor="white", showlegend=False, height=h0,
         xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",
                    tickprefix=tickprefix, ticksuffix=ticksuffix),
         yaxis=dict(title="", categoryorder="array", categoryarray=y0),
-        margin=dict(l=10, r=70, t=52, b=70),
+        margin=dict(l=10, r=70, t=52, b=b_margin),
         updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.0,
                           yanchor="bottom", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)])
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.06, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        src_y = -58 / (h0 - 52 - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=src_y, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig

@@ -41,12 +41,16 @@ Average undergraduate tuition for Canadian students, for Canada and the three pr
 #| echo: false
 if tu is not None:
     ug = tu[(tu["level"] == "Canadian undergraduate")
-            & (tu["geography"].isin(["Canada", "Ontario", "Quebec", "British Columbia"]))].dropna(subset=["real"])
+            & (tu["geography"].isin(["Canada", "Ontario", "Quebec", "British Columbia",
+                                     "Alberta", "Nova Scotia", "Newfoundland and Labrador"]))].dropna(subset=["real"])
     fig = lines_over_time(ug, "year", "real", "geography",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
         colors={"Canada": CANADA_COLOR, "Ontario": "#4e79a7", "Quebec": "#59a14f",
-                "British Columbia": "#b07aa1"},
-        group_order=["Canada", "Ontario", "Quebec", "British Columbia"],
+                "British Columbia": "#b07aa1", "Alberta": "#e15759",
+                "Nova Scotia": "#76b7b2", "Newfoundland and Labrador": "#edc948"},
+        group_order=["Canada", "Ontario", "Quebec", "British Columbia",
+                     "Alberta", "Nova Scotia", "Newfoundland and Labrador"],
+        legendonly_groups=["Alberta", "Nova Scotia", "Newfoundland and Labrador"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
                   {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
@@ -62,13 +66,14 @@ International students pay several times what domestic students do, and that gap
 ```{python}
 #| echo: false
 if tu is not None:
-    ca = tu[tu["geography"] == "Canada"].dropna(subset=["real"])
+    ca = tu[tu["geography"] == "Canada"].dropna(subset=["real"]).copy()
+    ca["level"] = ca["level"].str.replace(" ", "<br>", regex=False)   # two-line legend entries
     fig = lines_over_time(ca, "year", "real", "level",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
-        colors={"International undergraduate": "#e15759", "International graduate": "#f28e2b",
-                "Canadian undergraduate": "#4e79a7", "Canadian graduate": "#76b7b2"},
-        group_order=["International undergraduate", "International graduate",
-                     "Canadian undergraduate", "Canadian graduate"],
+        colors={"International<br>undergraduate": "#e15759", "International<br>graduate": "#f28e2b",
+                "Canadian<br>undergraduate": "#4e79a7", "Canadian<br>graduate": "#76b7b2"},
+        group_order=["International<br>undergraduate", "International<br>graduate",
+                     "Canadian<br>undergraduate", "Canadian<br>graduate"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
                   {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")

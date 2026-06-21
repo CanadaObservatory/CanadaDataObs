@@ -1154,6 +1154,98 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
     return fig
 
 
+# Short forms + small (lon,lat°) nudges into the surrounding water for the small
+# Atlantic provinces, whose value labels would otherwise collide on a whole-Canada
+# choropleth (keyed by PRUID). The abbreviation keeps each identifiable once nudged.
+CANADA_SMALL_PROV_ABBREV = {"11": "PEI", "12": "NS", "13": "NB"}
+CANADA_SMALL_PROV_OFFSET = {"11": (2.6, 1.6), "12": (3.0, -2.2), "13": (-3.6, 1.0)}
+
+
+def _ring_area_centroid(ring):
+    """Shoelace area + area-weighted centroid of a single ring (lon/lat list)."""
+    a = cx = cy = 0.0
+    for i in range(len(ring) - 1):
+        x0, y0 = ring[i][0], ring[i][1]
+        x1, y1 = ring[i + 1][0], ring[i + 1][1]
+        cr = x0 * y1 - x1 * y0
+        a += cr; cx += (x0 + x1) * cr; cy += (y0 + y1) * cr
+    if a == 0:
+        return (sum(p[0] for p in ring) / len(ring),
+                sum(p[1] for p in ring) / len(ring), 0.0)
+    return (cx / (3 * a), cy / (3 * a), abs(a) / 2)
+
+
+def _largest_ring_centroid(geom):
+    """Label point for a (multi)polygon: the true area-centroid of its largest
+    outer ring (so a province's number sits in its body, not averaged into the sea)."""
+    t, coords = geom.get("type"), geom.get("coordinates")
+    rings = [coords[0]] if t == "Polygon" else (
+        [poly[0] for poly in coords] if t == "MultiPolygon" else [])
+    if not rings:
+        return None
+    best = max((_ring_area_centroid(r) for r in rings), key=lambda c: c[2])
+    return (best[0], best[1])
+
+
+def choropleth_clean(geojson, df, location_col, value_col, *, name_col=None,
+                     colorbar_title="", colorscale="Greens", reversescale=False,
+                     value_prefix="", value_suffix="", value_fmt=".0f", zmin=None,
+                     zmax=None, source_note=None, labels=True, height=560,
+                     parallels=(49, 77), center_lon=-96, label_abbrev=None,
+                     label_offset=None):
+    """CLEAN static-style choropleth — vector boundaries, NO basemap, a conic Canada
+    projection (the 'Datawrapper look'). For province/region-level maps that don't
+    need zoom/pan: crisp white borders on a transparent background, optional value
+    labels at centroids. The geojson features carry a top-level `id` == df[location_col].
+    Hover stays (a light touch), but there is no tiled basemap, pan, or zoom clutter."""
+    import pandas as pd
+    vals = pd.to_numeric(df[value_col], errors="coerce")
+    cd = df[[name_col]].to_numpy() if name_col else None
+    fig = go.Figure(go.Choropleth(
+        geojson=geojson, locations=df[location_col].astype(str), z=vals,
+        featureidkey="id", colorscale=colorscale, reversescale=reversescale,
+        zmin=zmin, zmax=zmax, marker_line_color="white", marker_line_width=0.8,
+        customdata=cd,
+        hovertemplate=(("<b>%{customdata[0]}</b><br>" if name_col else "")
+                       + f"{value_prefix}%{{z:{value_fmt}}}{value_suffix}<extra></extra>"),
+        colorbar=dict(title=dict(text=colorbar_title, side="top"), thickness=12,
+                      len=0.55, lenmode="fraction", x=0.02, xanchor="left", y=0.5,
+                      ticksuffix=value_suffix, tickprefix=value_prefix, outlinewidth=0),
+    ))
+    if labels:
+        label_abbrev = label_abbrev or {}      # id → short form (e.g. {"11": "PEI"})
+        label_offset = label_offset or {}      # id → (dlon, dlat) nudge for tight clusters
+        cents = {str(f.get("id")): _largest_ring_centroid(f.get("geometry") or {})
+                 for f in geojson.get("features", [])}
+        lons, lats, texts = [], [], []
+        for loc, v in zip(df[location_col], vals):
+            c = cents.get(str(loc))
+            if not c or pd.isna(v):
+                continue
+            dlon, dlat = label_offset.get(str(loc), (0, 0))
+            txt = f"{value_prefix}{v:{value_fmt}}{value_suffix}"
+            ab = label_abbrev.get(str(loc))
+            lons.append(c[0] + dlon); lats.append(c[1] + dlat)
+            texts.append(f"{ab} {txt}" if ab else txt)
+        if lons:
+            fig.add_trace(go.Scattergeo(
+                lon=lons, lat=lats, mode="text", text=texts,
+                textfont=dict(size=11, color="#222"), hoverinfo="skip", showlegend=False))
+    fig.update_geos(visible=False, showframe=False, showcoastlines=False,
+                    showland=False, showcountries=False, showlakes=False,
+                    fitbounds="locations", projection_type="conic conformal",
+                    projection_parallels=list(parallels),
+                    projection_rotation=dict(lon=center_lon),
+                    bgcolor="rgba(0,0,0,0)")
+    fig.update_layout(height=height, margin=dict(l=0, r=0, t=10, b=46),
+                      paper_bgcolor="white", dragmode=False)
+    if source_note:
+        fig.add_annotation(text=_wrap(source_note), xref="paper", yref="paper",
+                           x=0, xanchor="left", y=-0.02, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
 def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
                    colorbar_title="", colorscale="Viridis", reversescale=False,
                    value_prefix="", value_suffix="", value_fmt=",.0f", source_note=None,

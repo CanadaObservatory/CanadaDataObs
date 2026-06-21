@@ -33,10 +33,14 @@ DATASET = "Aboriginal Lands of Canada Legislative Boundaries"
 # lands (Cree and Naskapi, Gwich'in, Inuit Owned, Inuvialuit, Sahtu, Sechelt, Tlicho,
 # Yukon First Nations Settlement, Salt River) are modern comprehensive land-claim /
 # self-government settlement lands; "Indian Land" is a small separate legal category.
-RESERVE = "Indian reserve"
+RESERVE = "First Nations reserve"
 SETTLEMENT = "Land-claim settlement land"
-OTHER = "Other Indian land"
+OTHER = "First Nations land"
 _CATEGORY = {"Indian Reserve": RESERVE, "Indian Land": OTHER}
+# The source distributionType uses the Indian Act's legal term "Indian"; relabel the
+# DISPLAY type to the modern "First Nations" form (the named settlement-land types are
+# already current terms, so they pass through unchanged).
+_FULL_TYPE = {"Indian Reserve": "First Nations reserve", "Indian Land": "First Nations land"}
 CATEGORY_ORDER = [RESERVE, SETTLEMENT, OTHER]
 
 
@@ -51,7 +55,7 @@ def build_indigenous_lands(simplify_tol=0.0015, server_offset=0.001):
     g = _repair(g, simplify_tol)
     dt = g["distributionTypeEng"].fillna("")
     g["category"] = [_CATEGORY.get(d, SETTLEMENT) for d in dt]
-    g["full_type"] = dt
+    g["full_type"] = [_FULL_TYPE.get(d, d) for d in dt]
     g["name"] = [_title(n) for n in g["adminAreaNameEng"].fillna("")]
     g["province"] = g["jurisdictionEng"].fillna("")
     g["land_id"] = g["adminAreaId"].astype(str)

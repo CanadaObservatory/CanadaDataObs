@@ -105,11 +105,6 @@ if os.path.exists(res_path):
     fig.show(config={"displaylogo": False})
 ```
 
-
-::: {.callout-note}
-Comparable cross-country measures of educational attainment and PISA test scores are not charted here: the underlying OECD series mix different national survey methodologies, so they are not directly comparable without careful harmonisation.
-:::
-
 ## Download data
 
 - [R&D Expenditure, GERD (CSV)](../data/science/oecd_rd_expenditure.csv) — OECD MSTI

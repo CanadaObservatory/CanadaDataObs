@@ -1,6 +1,6 @@
 ---
 title: "Elevation"
-description: "How high Canada is — an interactive relief map of the terrain, where the named peaks lie, and the distribution of land by elevation"
+description: "An interactive relief map of the terrain, where the named peaks lie, and the distribution of land by elevation"
 toc: false
 resources:
   - vendor/**
@@ -216,12 +216,12 @@ if os.path.exists(dist_csv):
         text=[f"{p:.0f}%" for p in d["pct"]], textposition="auto",
         hovertemplate="%{y}: %{x:.1f}% of land area<extra></extra>"))
     fig.update_layout(
-        plot_bgcolor="white", height=380, margin=dict(l=10, r=10, t=10, b=44),
+        plot_bgcolor="white", height=400, margin=dict(l=10, r=10, t=10, b=140),
         xaxis=dict(title="Share of Canada's land area", ticksuffix="%", gridcolor="#e0e0e0"),
         yaxis=dict(autorange="reversed"))
     fig.add_annotation(text="Source: Natural Resources Canada — Medium-Resolution Digital Elevation Model (MRDEM-30, CanElevation), coarse national read. Land area within province/territory boundaries.",
-        xref="paper", yref="paper", x=0, xanchor="left", y=-0.18, showarrow=False,
-        font=dict(size=10, color="#999"))
+        xref="paper", yref="paper", x=0, xanchor="left", y=-0.28, yanchor="top",
+        align="left", showarrow=False, font=dict(size=10, color="#999"))
     fig.show(config={"displaylogo": False})
 else:
     print("Elevation data not yet available — run `python -m pipeline.build_geography`.")

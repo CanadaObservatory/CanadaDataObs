@@ -1734,14 +1734,25 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                  tickmode="array", tickvals=years)
     if rangeslider:   # draggable time window for the deep (1871–) long-run series
         xaxis["rangeslider"] = dict(visible=True, thickness=0.07, bgcolor="#f5f5f5")
-    b_margin = 120 if rangeslider else 90
-    src_y = -0.30 if rangeslider else -0.18
+    t_margin = 70 if (dropdown or measures) else 40
+    # The source note hangs DOWN from its anchor (yanchor=top). Wrap it to fit the plot
+    # (narrowed by the right-hand legend) so it never clips at the right edge, size the
+    # bottom margin to the wrapped line count (+1 for the brand line the show()
+    # interceptor appends), and leave a gap below the x-axis labels (or the range
+    # slider, when present) so the note clears them. One place → all history_lines charts.
+    if source_note:
+        src_wrapped = _wrap(source_note, 100)
+        n_src = src_wrapped.count("<br>") + 2
+        src_gap = 96 if rangeslider else 46
+        b_margin = src_gap + n_src * 16 + 14
+    else:
+        b_margin = 120 if rangeslider else 90
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=xaxis,
         yaxis=dict(title=init.get("ytitle", yaxis_title), gridcolor="#e0e0e0", rangemode="tozero"),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
-        margin=dict(l=10, r=180, t=70 if (dropdown or measures) else 40, b=b_margin),
+        margin=dict(l=10, r=180, t=t_margin, b=b_margin),
     )
     if dropdown:
         buttons = [dict(method="restyle", label=geo,
@@ -1767,8 +1778,9 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                            text=nhs_label, showarrow=False,
                            font=dict(size=9, color="#999"))
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper",
-                           x=0, xanchor="left", y=src_y, showarrow=False,
+        src_y = -src_gap / (height - t_margin - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=src_y, yanchor="top", showarrow=False,
                            align="left", font=dict(size=10, color="#999"))
     return fig
 
@@ -2276,15 +2288,26 @@ def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
         text=text, textposition="auto", cliponaxis=False,
         hovertemplate=hovertemplate or
         f"%{{y}}: {tickprefix}%{{x:{value_fmt}}}{ticksuffix}<extra></extra>"))
+    height_val = height or (150 + 26 * len(d))
+    # The source note hangs below the plot (yanchor=top); size the bottom margin to the
+    # wrapped line count (+1 for the brand line the show() interceptor appends) and leave
+    # a clear gap below the x-axis title (owner: source notes need breathing room).
+    if source_note:
+        src_wrapped = _wrap(source_note, 110)
+        n_src = src_wrapped.count("<br>") + 2
+        b_margin = 58 + n_src * 16 + 12
+    else:
+        b_margin = 70
     fig.update_layout(
-        plot_bgcolor="white", showlegend=False, height=height or (150 + 26 * len(d)),
+        plot_bgcolor="white", showlegend=False, height=height_val,
         xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",
                    tickprefix=tickprefix, ticksuffix=ticksuffix),
-        yaxis=dict(title=""), margin=dict(l=10, r=(70 if text else 20), t=20, b=70))
+        yaxis=dict(title=""), margin=dict(l=10, r=(70 if text else 20), t=20, b=b_margin))
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.12, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        src_y = -58 / (height_val - 20 - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=src_y, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 

@@ -92,7 +92,10 @@ if os.path.exists(field_path):
         "Social and behavioural sciences, and legal studies": "Social sciences",
         "Mathematics, computer and information sciences": "Math and computer sciences",
         "Physical and life sciences and technologies": "Physical & life sciences",
-        "Visual and performing arts": "Visual & performing arts",
+        "Visual and performing arts, and communications technologies": "Visual & performing arts",
+        "Agriculture, natural resources and conservation": "Agriculture & natural resources",
+        "Personal, protective and transportation services": "Personal & protective services",
+        "Other health, parks, recreation and fitness": "Health, parks & recreation",
     })
     fig = category_bar(bf, "field", "tuition",
         xaxis_title=f"Average undergraduate tuition, {latest}/{latest + 1} ($)",

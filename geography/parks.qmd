@@ -7,7 +7,7 @@ This map shows the **boundaries** of Canada's national, provincial, and territor
 
 The coloured fills are **reported park boundaries** from the **Canadian Protected and Conserved Areas Database** (CPCAD), compiled from federal, provincial, and territorial submissions. Two limits are worth keeping in mind. First, the picture is **not exhaustive** — coverage varies by jurisdiction and some smaller parks are absent. Second, CPCAD maps the formally **protected** land, which for a zoned park is only its protected core: a few large parks — **notably some in Ontario, such as Algonquin** — can therefore look smaller or more fragmented than the full park on a road or canoe map. The fills cover terrestrial parks, and are illustrative, not legal.
 
-Over the national parks and the provincial and territorial parks of most jurisdictions, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated or set by Order-in-Council for the provincial ones. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is — the official boundary *larger* than the reported fill. **Rouge** diverges the other way: still legally assembling its land, its gazetted boundary stops short of Lake Ontario, so the southern lands down to the shore — managed by Parks Canada but not yet in the legal schedule — appear only in the reported fill beneath. A few jurisdictions do not publish open boundary data, so their parks appear only as the reported CPCAD fill.
+Over the national parks and the provincial and territorial parks of most jurisdictions, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated or set by Order-in-Council for the provincial ones. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is — the official boundary *larger* than the reported fill. **Rouge** diverges the other way: still legally assembling its land, its gazetted boundary stops short of Lake Ontario, so the southern lands down to the shore — managed by Parks Canada but not yet in the legal schedule — appear only in the reported fill beneath. A few jurisdictions do not publish open boundary data, so their parks appear only as the reported CPCAD fill. The **Ottawa Greenbelt** — the National Capital Commission's band of conservation land and farmland around the capital — is drawn as its own layer, since it is protected greenspace rather than a park.
 
 This is a detailed, heavier map kept on its own page so the [Protected & Conserved Areas](protected.qmd) overview stays light.
 
@@ -51,6 +51,17 @@ if os.path.exists(geo_path):
             legend_name="Parks — official boundary", line_color="#17324D",
             customdata=cdf[["name", "park_type", "admin_agency", "boundary_kind"]].to_numpy(),
             hovertemplate=hover, fill_opacity=0.12, line_width=2.0)
+    # The Ottawa Greenbelt — NCC conservation + farmland, NOT a park — as its own
+    # distinct (olive) layer with a separate legend entry/toggle.
+    gb_path = "data/geo/greenbelt_ncc.geojson"
+    if os.path.exists(gb_path):
+        gbj = json.load(open(gb_path))
+        gbdf = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in gbj["features"]])
+        add_polygon_overlay(fig, gbj, gbdf, "id",
+            legend_name="Ottawa Greenbelt (NCC)", line_color="#6f7d3a",
+            customdata=gbdf[["name"]].to_numpy(),
+            hovertemplate="<b>Ottawa Greenbelt</b><br>Conservation &amp; agricultural land<br>National Capital Commission<extra></extra>",
+            fill_opacity=0.10, line_width=2.0, legendgroup="greenbelt")
     fig.show(config={"displaylogo": False, "scrollZoom": True,
                      "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -71,4 +82,5 @@ else:
 - [Nova Scotia provincial park boundaries (GeoJSON)](../data/geo/parks_ns.geojson) — Nova Scotia Environment and Climate Change
 - [Yukon territorial park boundaries (GeoJSON)](../data/geo/parks_yt.geojson) — Government of Yukon (Geomatics Yukon)
 - [Gatineau Park boundary (GeoJSON)](../data/geo/parks_ncc.geojson) — National Capital Commission, Gatineau Park land-use designations
+- [Ottawa Greenbelt boundary (GeoJSON)](../data/geo/greenbelt_ncc.geojson) — National Capital Commission, Greenbelt land-use designations
 - [Parks layer sources (CSV)](../data/geo/parks_sources.csv) — provenance for the agency boundary layers

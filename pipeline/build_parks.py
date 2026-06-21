@@ -471,6 +471,39 @@ def build_ncc_parks(simplify_tol=0.0006, server_offset=0.0004):
     _write_layer(g, f"{GEO_DIR}/parks_ncc.geojson")
 
 
+# --- National Capital Commission: Ottawa Greenbelt ------------------------
+GREENBELT_URL = ("https://services2.arcgis.com/WLyMuW006nKOfa5Z/ArcGIS/rest/services/"
+                 "Greenbelt_Land_Designations_2013/FeatureServer/0/query")
+GREENBELT_DATASET = "NCC Greenbelt Land Use Designations 2013"
+
+
+def build_greenbelt(simplify_tol=0.0006, server_offset=0.0004):
+    """Ottawa Greenbelt (NCC) → data/geo/greenbelt_ncc.geojson. NOT a park — a band
+    of NCC conservation land, forest, wetland and farmland around Ottawa; the page
+    draws it as a SEPARATE overlay from the parks. Boundary = dissolve of the NCC's
+    2013 land-use designations (~224 km²)."""
+    print("Building Ottawa Greenbelt (NCC) ...")
+    g = _fetch_arcgis_geojson(GREENBELT_URL, "1=1", "DESGTN_EN", server_offset)
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    g["geometry"] = g.geometry.buffer(0)      # repair zones before the union
+    g = g.dissolve().reset_index(drop=True)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "NCC-greenbelt"
+    g["name"] = "Ottawa Greenbelt"
+    g["name_fr"] = "Ceinture de verdure de la capitale"
+    g["park_type"] = "Greenbelt (conservation land)"
+    g["province"] = "Ontario"
+    g["jurisdiction"] = "Canada"
+    g["admin_level"] = "federal"
+    g["admin_agency"] = "National Capital Commission"
+    g["boundary_kind"] = "conservation land"
+    g["source_agency"] = "National Capital Commission (NCC)"
+    g["source_dataset"] = GREENBELT_DATASET
+    g["geometry_quality"] = "official boundary (land-use plan extent)"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/greenbelt_ncc.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -523,6 +556,10 @@ _SOURCES = {
         source_agency="National Capital Commission (NCC)", source_dataset=NCC_DATASET,
         source_url="https://open.canada.ca/data/en/dataset/706bf577-0603-4bef-85da-d5c3736081a0",
         licence="Open Government Licence – Canada", boundary_type="official (land-use plan extent)"),
+    "Ottawa Greenbelt (NCC)": dict(admin_level="federal",
+        source_agency="National Capital Commission (NCC)", source_dataset=GREENBELT_DATASET,
+        source_url="https://open.canada.ca/data/en/dataset/420259e4-304f-4b46-a7f8-ffc76a66c2fa",
+        licence="Open Government Licence – Canada", boundary_type="conservation land (not a park)"),
 }
 
 # Jurisdictions with NO usable authoritative open boundary (documented gaps; these
@@ -556,4 +593,5 @@ if __name__ == "__main__":
     build_ns_parks()
     build_yukon_parks()
     build_ncc_parks()
+    build_greenbelt()
     write_sources()

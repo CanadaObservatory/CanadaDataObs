@@ -4,7 +4,7 @@
   "source_table": "17-10-0020-01",
   "frequency": "annual",
   "unit": "persons (net)",
-  "retrieved_at": "2026-06-20T15:47:12.956371+00:00",
+  "retrieved_at": "2026-06-21T15:57:45.818961+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "net = in-migrants \u2212 out-migrants",

@@ -136,8 +136,8 @@ if os.path.exists(gdpq_path):
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
         font=dict(size=10, color="#999"))
     if (q["growth"].abs() > 5).any():
-        figq.add_annotation(x="2020-07-01", y=_yhi, yanchor="top",
-            text="2020 pandemic<br>quarters (off-scale)",
+        figq.add_annotation(x="2020-07-01", y=1.0, yref="paper", yanchor="bottom",
+            text="2020 pandemic quarters (off-scale)",
             showarrow=False, align="center", font=dict(size=9, color="#999"))
     figq.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -383,7 +383,7 @@ else:
 
 ## Employment rate
 
-The share of an age group that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work. **Use the dropdown to switch age bracket:** older-worker (55–64) employment, in particular, has trended up across most peers.
+The share of an age group that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work. **Use the dropdown to switch age bracket.**
 
 ```{python}
 #| echo: false

@@ -5,7 +5,8 @@ subtitle: "Interactive metrics for informed civic conversation"
 
 ![](visual_assets/brand/botanical/leaf-botanical-cells.svg){.hero-leaf fig-alt="The Canada Observatory mark: a sugar-maple leaf divided into six colour cells"}
 
-Canada Observatory provides interactive, regularly updated
+Canada Observatory exists to support informed conversations about Canada with
+relevant, timely and reliable data. It provides interactive, regularly updated
 charts and downloadable data on the state of the country, organized around six themes —
 **people & society**, **economy & affordability**, **government & public
 finances**, **health & well-being**, **land & environment**, and **education,
@@ -15,19 +16,20 @@ science & innovation**. All data comes from official sources — primarily
 automatically each week.
 
 Where possible, Canada is shown alongside a broad set of 17 OECD peer countries
-(not just the G7) to provide meaningful international context. Where the data
-allows, maps reach all the way down to the neighbourhood level.
+(not just the G7) to provide meaningful international context.
 
-This is an open, non-partisan project. It presents data without policy advocacy.
-Data files are freely downloadable for anyone to use — students, journalists,
-researchers, and anyone who wants accessible Canadian data.
+Where the data allows, maps reach all the way down to the neighbourhood level.
+
+Data files are freely downloadable in easy-to-use formats — for students,
+journalists, researchers, and anyone who wants accessible Canadian data.
 
 ---
 
 ## Start with these questions
 
-New here? These are some of the big questions this data can help you explore —
-each links to the section behind it:
+We want to help you explore and better understand your own questions about Canada.
+To get started, here are a few of the big topics on people's minds right now — each
+links to the section behind it:
 
 - [**Is Canada becoming less affordable?**](housing/) — inflation, house prices, rents, and household debt
 - [**Are incomes keeping up?**](income/) — wages, real incomes, and poverty
@@ -135,3 +137,8 @@ research workforce, compared with peers.
   [one deliberate exception](about/open-data.qmd): we advocate for the creation,
   use, and open availability of public data itself — without it, nothing on
   this site exists.
+
+---
+
+Follow along on [Instagram](https://www.instagram.com/canadaobservatory/) and
+[X](https://x.com/canobservatory).

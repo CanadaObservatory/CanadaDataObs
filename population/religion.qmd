@@ -11,7 +11,9 @@ import pandas as pd
 
 ## Religion by neighbourhood
 
-The religious make-up of Canada down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. Religion is self-reported, and the census asks it only once a decade. **"No religion / secular"** is now the second-largest group nationally and is included; the many Christian denominations are rolled into a single "Christian" total. This is a separate concept from ethnicity and from Indigenous identity.
+The religious make-up of Canada's neighbourhoods (census tracts), for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area.
+
+Religion is self-reported, and the census asks it only once a decade. The many Christian denominations are rolled into a single "Christian" total.
 
 For an even finer view — Statistics Canada's smallest standard areas (**dissemination areas**, ~400–700 people each) — open a metro's dedicated map (each on its own page for load speed):
 

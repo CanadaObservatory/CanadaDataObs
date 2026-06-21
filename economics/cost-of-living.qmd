@@ -3,11 +3,9 @@ title: "Cost of Living"
 description: "Inflation — overall, core, and food — against the Bank of Canada target"
 ---
 
-The cost of living is consistently the issue Canadians name as their top concern.
 This page tracks consumer-price inflation: the headline **all-items** rate, the
 Bank of Canada's preferred **core** measure (CPI-trim), and **food** — the
-component households feel most. Related cost pressures have their own pages:
-[Housing](../housing/) and [Income & Inequality](../income/).
+component households feel most.
 
 ```{python}
 #| echo: false
@@ -114,7 +112,8 @@ try:
     latest = ai["date"].max()
     figc.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
         meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
-        yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%"),
+        yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%",
+                   range=[-3, 13]),
         xaxis=dict(title="", gridcolor="#e0e0e0", range=[pd.Timestamp("2015-01-01"), latest],
             rangeselector=dict(buttons=[
                 dict(count=5, label="5Y", step="year", stepmode="backward"),

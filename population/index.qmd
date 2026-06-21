@@ -60,7 +60,7 @@ else:
 
 ## Canada's population over time
 
-Canada's population has grown steadily since the mid-20th century. This chart shows quarterly population estimates for Canada as a whole.
+Canada's population has grown since the mid-20th century. This chart shows quarterly population estimates for Canada.
 
 ```{python}
 #| echo: false
@@ -253,8 +253,6 @@ How old is Canada? The pyramid below shows the full age distribution — every s
 year of age, men to the left, women to the right. **Drag the slider** to watch half a
 century of change: the wide base of the early 1970s (the tail of the baby boom)
 narrows as births decline, and the boomer bulge climbs the pyramid into retirement.
-Recent years add a new feature — a visible widening through the 20s and 30s as
-immigration and non-permanent residents, who arrive young, fill in the working ages.
 The white line traces the **net difference between women and men** at each age.
 
 ```{python}
@@ -392,7 +390,7 @@ if os.path.exists(mig_path):
     mig = pd.read_csv(mig_path)
     fig = single_bar(mig, "year", "net_migration", title="",
         yaxis_title="Net interprovincial migration (persons)",
-        select_col="geography", default_option="Alberta", height=480,
+        select_col="geography", default_option="Alberta", height=480, rangeslider=True,
         source_note=f"Source: Statistics Canada, Table 17-10-0020-01; July–June years labelled by ending year | Data as of: {get_data_date(mig_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

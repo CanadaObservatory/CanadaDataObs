@@ -148,41 +148,37 @@ def build_provinces():
     _write_geojson(gj, f"{GEO_DIR}/prov_2021.geojson")
 
 
-# StatCan CARTOGRAPHIC Boundary File (clipped to the coastline — islands are real
-# islands), vs PROV_BND_URL's DIGITAL file (administrative limits drawn over water,
-# so the Arctic is one pole-reaching blob and islands fuse to the mainland).
-PROV_CBF_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/"
-                "boundary-limites/files-fichiers/lpr_000b21a_e.zip")
+# Natural Earth 1:50m provinces/states — the standard lightweight, generalised
+# (smooth-coastline, islands-as-islands) source for this kind of national choropleth.
+# Public domain; 2.3 MB for the whole world vs StatCan's 133 MB cartographic file.
+NE_PROV_URL = ("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/"
+               "master/geojson/ne_50m_admin_1_states_provinces.geojson")
+_NE_POSTAL_TO_PRUID = {"NL": "10", "PE": "11", "NS": "12", "NB": "13", "QC": "24",
+                       "ON": "35", "MB": "46", "SK": "47", "AB": "48", "BC": "59",
+                       "YT": "60", "NT": "61", "NU": "62"}
 
 
-def build_prov_landmass(tol=0.012, min_area_km2=150):
-    """Province/territory LANDMASS boundaries for the CLEAN static maps — the classic
-    Canada shape with the Arctic archipelago, Newfoundland, Vancouver Island etc. as
-    REAL islands. Built from StatCan's Cartographic Boundary File (coastline-clipped):
-    explode to individual polygons, keep those above ~min_area_km2 (drop the ~175k
-    tiny islets → a couple hundred recognisable landmasses), dissolve back per
-    province, simplify. The interactive mapbox maps keep the generalised
-    prov_2021.geojson (under a basemap the over-water digital boundary is invisible)."""
-    import glob
-    bz = zipfile.ZipFile(_download_cache(PROV_CBF_URL, "/tmp/lpr_000b21a_e.zip",
-                                         "province cartographic boundaries"))
-    bz.extractall("/tmp/prov_cbf")
-    shp = glob.glob("/tmp/prov_cbf/*.shp")[0]
-    g = gpd.read_file(shp).to_crs(epsg=4326)
-    uid = [c for c in g.columns if c.upper() == "PRUID"][0]
-    g["pruid"] = g[uid].astype(str)
-    ge = g[["pruid", "geometry"]].explode(index_parts=False).reset_index(drop=True)
-    ge["area_km2"] = ge.to_crs("ESRI:102001").area / 1e6
-    ge = ge[ge["area_km2"] >= min_area_km2]
-    g2 = ge.dissolve(by="pruid").reset_index()
-    g2["geometry"] = g2.geometry.simplify(tol, preserve_topology=True)
-    gj = json.loads(g2[["pruid", "geometry"]].to_json())
+def build_canada_provinces():
+    """Canada province/territory boundaries for the CLEAN static maps — the classic
+    Canada shape (Arctic archipelago, Newfoundland, Vancouver Island as real islands;
+    bays as water). From **Natural Earth 1:50m** (public domain): pre-generalised, so
+    coastlines are smooth (not feathered), and only ~0.25 MB. Keyed by PRUID so the
+    StatCan/ECCC indicators join straight on. The interactive mapbox maps keep the
+    generalised prov_2021.geojson (their tiled basemap hides the over-water boundary)."""
+    import io
+    r = requests.get(NE_PROV_URL, timeout=120)
+    r.raise_for_status()
+    g = gpd.read_file(io.BytesIO(r.content))
+    g = g[g["iso_a2"] == "CA"].copy()
+    g["pruid"] = g["postal"].map(_NE_POSTAL_TO_PRUID)
+    g = g.dropna(subset=["pruid"])
+    gj = json.loads(g[["pruid", "geometry"]].to_json())
     for ft in gj["features"]:
         ft["id"] = ft["properties"]["pruid"]
         ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
-    _write_geojson(gj, f"{GEO_DIR}/prov_2021_landmass.geojson")
-    print(f"  wrote prov_2021_landmass.geojson: {len(gj['features'])} provinces, "
-          f"{round(os.path.getsize(GEO_DIR + '/prov_2021_landmass.geojson') / 1e6, 2)} MB")
+    _write_geojson(gj, f"{GEO_DIR}/canada_provinces.geojson")
+    print(f"  wrote canada_provinces.geojson: {len(gj['features'])} provinces, "
+          f"{round(os.path.getsize(GEO_DIR + '/canada_provinces.geojson') / 1e3)} KB")
 
 
 COMP_CMA_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/"

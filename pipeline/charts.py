@@ -1810,17 +1810,26 @@ def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
         text=[f"{dl:+.1f} pp" for dl in deltas], textposition="auto",
         cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
     pad = max(abs(min(deltas)), abs(max(deltas))) * 0.15
+    # Source note hangs below the plot (yanchor=top); size the bottom margin to the
+    # wrapped line count (+1 for the brand line the show() interceptor appends) so it
+    # clears the x-axis title and never clips.
+    if source_note:
+        src_wrapped = _wrap(source_note, 110)
+        b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
+    else:
+        b_margin = 70
     fig.update_layout(
         plot_bgcolor="white", height=height, showlegend=False,
         xaxis=dict(title=f"Change in share, {year_start}→{year_end} (percentage points)",
                    gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5,
                    range=[min(deltas) - pad, max(deltas) + pad]),
         yaxis=dict(gridcolor="white"),
-        margin=dict(l=160, r=40, t=20, b=70),
+        margin=dict(l=160, r=40, t=20, b=b_margin),
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.2, showarrow=False, font=dict(size=10, color="#999"))
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-58 / (height - 20 - b_margin), yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1842,16 +1851,25 @@ def composition_bars(df, *, group_colors, year, geographies=None, value_col="sha
             x=[float(piv.loc[geo, g]) if (geo in piv.index and g in piv.columns
                and pd.notna(piv.loc[geo, g])) else 0 for geo in geos],
             hovertemplate=f"{g}: %{{x:.1f}}%<extra></extra>"))
+    # Source note wraps (so a long note never clips at the right) and hangs below the
+    # plot (yanchor=top), with the bottom margin sized to its line count (+1 for the
+    # brand line the show() interceptor appends).
+    if source_note:
+        src_wrapped = _wrap(source_note, 95)
+        b_margin = 44 + (src_wrapped.count("<br>") + 2) * 16 + 12
+    else:
+        b_margin = 70
     fig.update_layout(
         barmode="stack", plot_bgcolor="white", height=height, hovermode="y unified",
         xaxis=dict(title=None, gridcolor="#e0e0e0", ticksuffix="%", range=[0, 100]),
         yaxis=dict(autorange="reversed"),         # first geography at top
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        margin=dict(l=110, r=20, t=70, b=70),
+        margin=dict(l=110, r=20, t=70, b=b_margin),
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.16, showarrow=False, font=dict(size=10, color="#999"))
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-44 / (height - 70 - b_margin), yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 

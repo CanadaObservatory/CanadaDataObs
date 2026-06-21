@@ -46,8 +46,8 @@ else:
 ## How wet, how dry
 
 Precipitation is just as uneven. The **Pacific coast** is among the wettest places in the
-country — parts of coastal British Columbia exceed **3,000 mm** a year — while the southern
-**Prairies** and the **High Arctic** are genuinely dry, closer to **300 mm** or less. The
+country — parts of coastal British Columbia exceed **300 cm** a year — while the southern
+**Prairies** and the **High Arctic** are genuinely dry, closer to **30 cm** or less. The
 map shows annual total precipitation (rain plus the water equivalent of snow) at the same
 stations.
 
@@ -55,9 +55,10 @@ stations.
 #| echo: false
 if os.path.exists(norm):
     dp = pd.read_csv(norm).dropna(subset=["annual_precip"])
+    dp["annual_precip_cm"] = dp["annual_precip"] / 10.0   # show cm to keep the colourbar narrow
     fig = point_value_map(dp, "lat", "lon",
-        groups=[("annual_precip", "Annual precipitation")],
-        colorscale="Blues", cmin=0, cbar_title="Precip", value_suffix=" mm",
+        groups=[("annual_precip_cm", "Annual precipitation")],
+        colorscale="Blues", cmin=0, cbar_title="Precip", value_suffix=" cm",
         value_fmt=",.0f", name_col="station", zoom=2.3,
         source_note="Source: ECCC, Canadian Climate Normals 1981–2010 (station data).")
     fig.show(config=MAP_CONFIG)

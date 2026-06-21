@@ -193,7 +193,7 @@ if os.path.exists(city_path):
     cities = ["Toronto", "Vancouver", "Winnipeg", "Calgary", "Alert", "Eureka"]
     cities = [c for c in cities if c in set(ct["city"])]
     fig = go.Figure()
-    trace_city = []   # 3 traces per city: homogenized, raw tail, trend
+    trace_city = []   # 2 traces per city: homogenized, raw tail
     for city in cities:
         homog = ct[(ct["city"] == city) & (ct["series"] == "Homogenized (AHCCD)")].sort_values("year")
         raw = ct[(ct["city"] == city) & (ct["series"] == "Recent (raw)")].sort_values("year")
@@ -208,21 +208,6 @@ if os.path.exists(city_path):
             mode="lines+markers", line=dict(color="#ff7f0e", width=2, dash="dot"),
             marker=dict(size=5), visible=vis,
             hovertemplate="%{x}: %{y:.1f} °C<extra>Recent (raw)</extra>"))
-        trace_city.append(city)
-        # Least-squares trend over the homogenized record only (°C per century).
-        hx = homog["year"].to_numpy(dtype=float)
-        hy = homog["temp"].to_numpy(dtype=float)
-        if len(hx) >= 10:
-            slope, intercept = np.polyfit(hx, hy, 1)
-            tx = np.array([hx.min(), hx.max()])
-            fig.add_trace(go.Scatter(
-                x=tx, y=slope * tx + intercept,
-                name=f"Linear trend ({slope * 100:+.1f} °C / century)",
-                mode="lines", line=dict(color="#333333", width=1.5, dash="dash"),
-                visible=vis, hoverinfo="skip"))
-        else:
-            fig.add_trace(go.Scatter(x=[], y=[], name="Linear trend",
-                                     visible=vis, showlegend=False))
         trace_city.append(city)
     buttons = [dict(method="update", label=city,
                     args=[{"visible": [tc == city for tc in trace_city]},

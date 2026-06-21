@@ -14,14 +14,14 @@ Two definitions matter throughout, because they are easy to conflate:
   colleges, and government business enterprises (Crown corporations). It is
   several times larger than public administration alone.
 
-A companion page covers [federal spending](spending.qmd), and the
-[Public Finances](../fiscal/index.qmd) page compares Canada's government finances
-with OECD peers.
-
 The size of government and how it is staffed are matters of legitimate political
 debate. This page takes no position on whether government is "too big" or "too
 small": it reports counts, shares, peer benchmarks, and official definitions, and
 lets the reader judge.
+
+A companion page covers [federal spending](spending.qmd), and the
+[Public Finances](../fiscal/index.qmd) page compares Canada's government finances
+with OECD peers.
 
 ```{python}
 #| echo: false
@@ -74,7 +74,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## The bureaucracy vs. the whole public sector
+## The public sector
 
 "Government workers" are far more than the bureaucracy. The Labour Force Survey
 counts everyone whose employer is a government, a public institution, or a
@@ -123,6 +123,7 @@ if os.path.exists(comp_path):
         {"Health care and social assistance": "Health care & social assistance"})
     fig = category_bar(latest, "sector", "employment", top_n=10,
         xaxis_title=f"Public-sector employees (thousands, {yr})", value_scale=1000, value_fmt=",.0f",
+        hovertemplate="%{y}: %{x:,.0f} thousand employees<extra></extra>",
         highlight={"Public administration"}, highlight_color="#f28e2b",
         source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey) | Data as of: {get_data_date(comp_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -131,9 +132,11 @@ if os.path.exists(comp_path):
 ## How Canada compares
 
 Across the OECD, the share of total employment that works for **general
-government** (all levels combined, including public health and education staff)
-varies widely — from around 5% in Japan and South Korea to nearly 30% in the
-Nordic countries. Canada sits a little above the middle of its peer group.
+government** — the OECD's term for the public sector across all levels, including
+public health and education staff — varies widely, from around 5% in Japan and
+South Korea to nearly 30% in the Nordic countries. Canada sits a little above the
+middle of its peer group. Not every peer reports this measure to the OECD, so some
+countries are absent.
 
 ```{python}
 #| echo: false
@@ -149,6 +152,8 @@ if os.path.exists(emp_path):
 else:
     print("Run the data pipeline to generate this chart.")
 ```
+
+### Latest year, ranked
 
 ```{python}
 #| echo: false
@@ -204,7 +209,7 @@ else:
 
 ## Which parts of the public service grew
 
-The public service added roughly **75,000 people between 2010 and 2025**. The
+The public service grew by roughly **100,000 people between 2015 and 2025**. The
 increase was concentrated in **benefits and service delivery** — Employment and
 Social Development Canada, which runs Service Canada, and the Canada Revenue Agency
 — together with immigration (Immigration, Refugees and Citizenship Canada and
@@ -216,7 +221,7 @@ organizations.
 dgrow_path = "data/government/tbs_fps_by_department.csv"
 if os.path.exists(dgrow_path):
     dep = pd.read_csv(dgrow_path)
-    y0, y1 = int(dep["year"].min()), int(dep["year"].max())
+    y0, y1 = 2015, int(dep["year"].max())   # a decade, from the 2015 change in government
     a = dep[dep["year"] == y0].set_index("department")["employees"]
     b = dep[dep["year"] == y1].set_index("department")["employees"]
     common = a.index.intersection(b.index)
@@ -314,7 +319,7 @@ executive workforce grew **56%** over that period — consistent with the trend 
 the chart above.
 :::
 
-## Who the public service is
+## Who works in the public service
 
 ```{python}
 #| echo: false

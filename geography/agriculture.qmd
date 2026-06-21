@@ -15,6 +15,26 @@ geo = "data/geo/car_2021.geojson"
 csv = "data/geo/statcan_car_agriculture.csv"
 ```
 
+## How much of the land is cropland
+
+This map shows **land in crops as a share of each region's total land area**. It peaks in
+the southern Prairies and parts of southern Ontario and Quebec — where well over half the
+land is cropped — and falls away quickly toward the Shield, the mountains, and the North,
+where farmland is a thin ribbon in a vast landscape.
+
+```{python}
+#| echo: false
+if os.path.exists(geo) and os.path.exists(csv):
+    g = json.load(open(geo))
+    d = pd.read_csv(csv, dtype={"caruid": str})
+    fig = choropleth_map(g, d, "caruid", "cropland_share", name_col="name",
+        colorbar_title="Cropland", colorscale="YlGn", value_suffix="%", value_fmt=".0f",
+        zoom=2.5, source_note="Source: Statistics Canada, 2021 Census of Agriculture (Table 32-10-0249-01); cropland ÷ land area.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Agriculture data not yet available — run `python -m pipeline.build_geography`.")
+```
+
 ## What is farmed where
 
 Canadian agriculture is strongly regional. The map below shows the **most common type of
@@ -57,25 +77,6 @@ if os.path.exists(geo) and os.path.exists(csv):
     fig.show(config=MAP_CONFIG)
 else:
     print("Agriculture data not yet available — run `python -m pipeline.build_geography`.")
-```
-
-## How much of the land is cropland
-
-The type of farming is one thing; how much of a region is actually under crops is another.
-This map shows **land in crops as a share of each region's total land area**. It peaks in
-the southern Prairies and parts of southern Ontario and Quebec — where well over half the
-land is cropped — and falls away quickly toward the Shield, the mountains, and the North,
-where farmland is a thin ribbon in a vast landscape.
-
-```{python}
-#| echo: false
-if os.path.exists(geo) and os.path.exists(csv):
-    g = json.load(open(geo))
-    d = pd.read_csv(csv, dtype={"caruid": str})
-    fig = choropleth_map(g, d, "caruid", "cropland_share", name_col="name",
-        colorbar_title="Cropland", colorscale="YlGn", value_suffix="%", value_fmt=".0f",
-        zoom=2.5, source_note="Source: Statistics Canada, 2021 Census of Agriculture (Table 32-10-0249-01); cropland ÷ land area.")
-    fig.show(config=MAP_CONFIG)
 ```
 
 ## Download data

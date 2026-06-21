@@ -211,6 +211,8 @@ if os.path.exists(int_path):
     fig.show(config={"displaylogo": False})
 ```
 
+A few countries show a *negative* figure: they earn more interest on their financial assets (such as public pension reserves) than they pay on their debt, so net interest is income rather than a cost.
+
 ## Defence spending
 
 Beyond the overall balance sheet, how much a country devotes to defence is a distinct spending choice — and the one that draws the most international scrutiny. Military expenditure as a share of GDP is the standard comparison. NATO members have agreed to a guideline of spending at least **2% of GDP** on defence (shown as a dashed line). Israel — not a NATO member, and an outlier at several times the peer norm — is omitted here so the rest of the comparison stays readable.
@@ -244,6 +246,7 @@ if os.path.exists(def_path):
     fig = ranked_bar(df, "defence_pct_gdp", "% of GDP",
         f"Source: World Bank (data from SIPRI) | Data as of: {get_data_date(def_path)}",
         hover_template="%{y}: %{x:.1f}% of GDP<extra></extra>")
+    fig.update_xaxes(range=[0, 5])   # fixed 0–5% scale; keeps the 2% guideline meaningful
     fig.add_vline(x=2, line_dash="dash", line_color="#888", opacity=0.6,
                   annotation_text="2%", annotation_position="top")
     fig.show(config={"displaylogo": False})

@@ -27,9 +27,8 @@ from pipeline.charts import (single_line, lines_over_time, stacked_area,
 
 Measured against the size of the economy, federal revenue and spending have been
 relatively stable for decades — typically in the mid-to-high teens as a share of
-GDP — punctuated by sharp, temporary jumps in spending during recessions, most
-dramatically the COVID-19 response in 2020. The gap between the two lines is the
-budget surplus (revenue above spending) or deficit (spending above revenue).
+GDP — with sharp, temporary jumps during recessions. The gap between the two lines
+is the budget surplus (revenue above spending) or deficit (spending above revenue).
 
 ```{python}
 #| echo: false
@@ -120,7 +119,7 @@ if os.path.exists(fin_path):
 The federal government's own statement of operations splits spending by economic
 type. **Transfers dominate**: grants (largely to other governments and
 organizations) plus social benefits (to individuals) are well over half of all
-spending. The cost of the federal **workforce** — compensation of employees, shown
+spending. The cost of the federal **workforce** — salaries and benefits, shown
 in red — is a comparatively modest share, smaller than the interest paid on the
 public debt in recent years.
 
@@ -129,12 +128,13 @@ public debt in recent years.
 exp_path = "data/government/statcan_federal_expense_by_type.csv"
 EXP_COLORS = {
     "Grants": "#f28e2b", "Social benefits": "#4e79a7",
-    "Compensation of employees": "#d62728", "Interest on debt": "#59a14f",
+    "Salaries": "#d62728", "Interest on debt": "#59a14f",
     "Other expense": "#b07aa1", "Goods & services": "#76b7b2",
     "Capital consumption": "#edc948", "Subsidies": "#9c755f",
 }
 if os.path.exists(exp_path):
     df = pd.read_csv(exp_path)
+    df["category"] = df["category"].replace({"Compensation of employees": "Salaries"})
     d = df[df["category"].isin(EXP_COLORS)]
     fig = stacked_area(d, "year", "value_millions", "category",
         yaxis_title="$ billions", value_scale=1000.0, ytickprefix="$", hover_decimals=1,

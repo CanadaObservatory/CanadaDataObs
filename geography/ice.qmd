@@ -24,6 +24,7 @@ Much of the North sits on **permafrost** — ground that stays frozen year-round
 ```{python}
 #| echo: false
 pf_geo_path, pf_csv = "data/geo/permafrost_zones.geojson", "data/geo/permafrost_zones.csv"
+prov_geo_path = "data/geo/canada_provinces.geojson"   # faint full-Canada base for orientation
 PF_COLORS = {
     "Continuous (90–100%)": "#08519c", "Extensive discontinuous (50–90%)": "#3182bd",
     "Sporadic discontinuous (10–50%)": "#6baed6", "Isolated patches (0–10%)": "#bdd7e7",
@@ -31,9 +32,10 @@ PF_COLORS = {
 if os.path.exists(pf_geo_path) and os.path.exists(pf_csv):
     pf_geo = json.load(open(pf_geo_path))
     pf = pd.read_csv(pf_csv, dtype={"fid": str})
+    base = json.load(open(prov_geo_path)) if os.path.exists(prov_geo_path) else None
     fig = choropleth_categorical_clean(pf_geo, pf, "fid", "zone",
-        color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_frac=0.34,
-        source_note="Source: NRCan, Atlas of Canada 5th ed. — permafrost (~1995; extent has since declined).")
+        color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_frac=0.34, base_geojson=base,
+        source_note="Source: NRCan, Atlas of Canada 5th ed. — permafrost (~1995; extent has since declined). Provincial outlines: Natural Earth.")
     fig.show(config=MAP_CONFIG)
 else:
     print("Permafrost data not yet available — run `python -m pipeline.build_geography`.")

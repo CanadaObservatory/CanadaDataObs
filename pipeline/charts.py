@@ -1562,7 +1562,8 @@ def choropleth_categorical_clean(geojson, df, location_col, cat_col, *, name_col
                                  color_map=None, ordered=None, detail_col=None,
                                  source_note=None, height=560, legend_orientation="v",
                                  legend_frac=0.24, legend_title=None,
-                                 parallels=(49, 77), center_lon=-96, projection="albers"):
+                                 parallels=(49, 77), center_lon=-96, projection="albers",
+                                 base_geojson=None, base_fill="#e9ecef"):
     """CLEAN static categorical choropleth — the `choropleth_clean` look (vector
     borders, NO tiled basemap, a conic Albers Canada projection) for *category*
     region maps that don't need zoom/pan (ecozones, permafrost). One `go.Choropleth`
@@ -1596,7 +1597,19 @@ def choropleth_categorical_clean(geojson, df, location_col, cat_col, *, name_col
     htmpl = f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>"
     hcols = [name_col, hover_col] if name_col else [hover_col]
 
-    fig = go.Figure(go.Choropleth(
+    fig = go.Figure()
+    # Optional faint full-country base layer drawn UNDER the categories — for maps whose
+    # data covers only part of Canada (e.g. permafrost is northern), so the rest of the
+    # landmass + borders still show for orientation. fitbounds then frames the whole
+    # country (the base is the widest trace) rather than just the data extent.
+    if base_geojson is not None:
+        base_ids = [str(f.get("id")) for f in base_geojson.get("features", [])]
+        fig.add_trace(go.Choropleth(
+            geojson=base_geojson, locations=base_ids, z=[0] * len(base_ids),
+            featureidkey="id", colorscale=[[0, base_fill], [1, base_fill]],
+            showscale=False, marker_line_color="#c2c8cf", marker_line_width=0.8,
+            hoverinfo="skip", showlegend=False))
+    fig.add_trace(go.Choropleth(
         geojson=geojson, locations=df[location_col].astype(str),
         z=[code.get(v) for v in df[cat_col]],
         zmin=-0.5, zmax=n - 0.5, featureidkey="id",

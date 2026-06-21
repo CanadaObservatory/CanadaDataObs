@@ -58,10 +58,10 @@ if os.path.exists(geo_path):
         gbj = json.load(open(gb_path))
         gbdf = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in gbj["features"]])
         add_polygon_overlay(fig, gbj, gbdf, "id",
-            legend_name="Ottawa Greenbelt (NCC)", line_color="#6f7d3a",
+            legend_name="Ottawa Greenbelt (NCC)", line_color="#d9534f",
             customdata=gbdf[["name"]].to_numpy(),
             hovertemplate="<b>Ottawa Greenbelt</b><br>Conservation &amp; agricultural land<br>National Capital Commission<extra></extra>",
-            fill_opacity=0.10, line_width=2.0, legendgroup="greenbelt")
+            fill_opacity=0.12, line_width=2.2, legendgroup="greenbelt")
     fig.show(config={"displaylogo": False, "scrollZoom": True,
                      "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

@@ -2011,7 +2011,8 @@ def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
 
 def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
                 rangeslider=False, source_note=None, hovertemplate=None,
-                yaxis_tickformat=None, customdata=None, initial_full=False):
+                yaxis_tickformat=None, customdata=None, initial_full=False,
+                initial_start=None):
     """Single Canada-only time series.
 
     Set rangeslider=True for long series (more than a decade or two) to add a
@@ -2047,7 +2048,12 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
         # initial_full=True opens on the whole record instead.
         import pandas as pd
         xmin, xmax = df[x_col].min(), df[x_col].max()
-        _start = xmin if initial_full else max(xmin, pd.Timestamp("1999-01-01"))
+        if initial_full:
+            _start = xmin
+        elif initial_start is not None:
+            _start = max(xmin, pd.Timestamp(f"{int(initial_start)}-01-01"))
+        else:
+            _start = max(xmin, pd.Timestamp("1999-01-01"))
         # Small right buffer (~2% of the visible span) so the latest point isn't flush
         # against the edge, which reads as "clipped".
         xaxis["range"] = [_start, xmax + (xmax - _start) * 0.02]
@@ -2347,14 +2353,14 @@ def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=Tru
     fig.update_layout(
         xaxis=xaxis, yaxis=dict(title=options[0]["yaxis_title"], gridcolor="#e0e0e0"),
         plot_bgcolor="white", hovermode="x", showlegend=False, height=height,
-        margin=dict(t=60, b=(140 if rangeslider else 80)),
+        margin=dict(t=60, r=30, b=(140 if rangeslider else 80)),
         updatemenus=[dict(buttons=buttons, active=0, x=1, xanchor="right", y=1.13,
                           yanchor="top", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           y=(-0.34 if rangeslider else -0.18), showarrow=False,
-                           font=dict(size=10, color="#999"))
+                           xanchor="left", y=(-0.34 if rangeslider else -0.18), yanchor="top",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 

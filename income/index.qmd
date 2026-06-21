@@ -47,7 +47,7 @@ if os.path.exists(mi_path):
                       yaxis_title="Median after-tax income (2024 constant $)",
                       rangeslider=True, yaxis_tickformat="$,.0f",
                       source_note=(f"Source: Statistics Canada, Table 11-10-0190-01 — economic families & "
-                                   f"unattached individuals, 2024 constant dollars. "
+                                   f"unattached individuals, 2024 constant dollars.<br>"
                                    f"Latest year {latest_year}; accessed {get_retrieved_date(mi_path)}."))
     # interpret the 2020 bump directly on the chart
     v2020 = df[df["date"].dt.year == 2020]["median_income"]

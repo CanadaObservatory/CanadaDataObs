@@ -16,7 +16,7 @@ What it costs to borrow in Canada — the rates households and the government pa
 
 ## Prime and mortgage rates
 
-What households pay to borrow. The **prime rate** moves with the Bank of Canada's policy rate and underpins variable-rate mortgages and lines of credit; the **conventional 5-year mortgage rate** is the benchmark for the most common fixed term (and tracks the 5-year government bond yield below).
+What households pay to borrow. The **prime rate** moves with the Bank of Canada's policy rate and underpins variable-rate mortgages and lines of credit; the **conventional 5-year mortgage rate** is the posted benchmark for the most common fixed term — lenders typically negotiate discounts off it — and tracks the 5-year government bond yield below.
 
 ```{python}
 #| echo: false
@@ -49,7 +49,7 @@ else:
 
 ## Government bond yields
 
-What investors charge to lend to the Government of Canada at each term — the benchmark the fixed borrowing costs above are priced from. The 2-, 3- and 5-year yields map onto the common fixed-mortgage terms (the **5-year** especially drives 5-year fixed mortgage rates), while the 10-year and long-term reflect longer-horizon expectations.
+What investors charge to lend to the Government of Canada at each term — the benchmark the fixed borrowing costs above are priced from. The 2-, 3- and 5-year yields map onto the common fixed-mortgage terms; the 10-year and long-term reflect longer-horizon expectations. **Use the dropdown to switch term.**
 
 ```{python}
 #| echo: false

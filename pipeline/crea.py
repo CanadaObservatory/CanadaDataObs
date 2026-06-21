@@ -26,10 +26,10 @@ _HDR = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
 
 # (CREA workbook sheet name, display label)
 MARKETS = [
-    ("GREATER_VANCOUVER", "Greater Vancouver"),
-    ("GREATER_TORONTO",   "Greater Toronto"),
+    ("GREATER_VANCOUVER", "Vancouver"),
+    ("GREATER_TORONTO",   "Toronto"),
     ("OTTAWA",            "Ottawa"),
-    ("MONTREAL_CMA",      "Montreal CMA"),
+    ("MONTREAL_CMA",      "Montréal"),
     ("CALGARY",           "Calgary"),
     ("EDMONTON",          "Edmonton"),
     ("WINNIPEG",          "Winnipeg"),
@@ -84,8 +84,10 @@ def load_crea(root="."):
 
 
 def _src(fig, note, y=-0.18):
-    fig.add_annotation(text=note, xref="paper", yref="paper", x=0, xanchor="left",
-                       y=y, showarrow=False, font=dict(size=10, color="#999"))
+    from pipeline.charts import _wrap     # word-wrap so the long CREA attribution fits the column
+    fig.add_annotation(text=_wrap(note, 82), xref="paper", yref="paper", x=0,
+                       xanchor="left", y=y, yanchor="top", align="left",
+                       showarrow=False, font=dict(size=10, color="#999"))
 
 
 def fig_price_by_type(sheets, month):
@@ -101,9 +103,9 @@ def fig_price_by_type(sheets, month):
                              hovertemplate=f"{name}: $%{{y:,.0f}}<extra>%{{x}}</extra>"))
     fig.update_layout(barmode="group", plot_bgcolor="white",
         yaxis=dict(title="Benchmark price", tickprefix="$", tickformat=",", gridcolor="#e0e0e0"),
-        xaxis=dict(title=""), height=520, margin=dict(b=110, t=30),
+        xaxis=dict(title=""), height=520, margin=dict(b=150, t=30),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0))
-    _src(fig, f"{ATTRIB} Benchmark (seasonally adjusted), {month}.", y=-0.22)
+    _src(fig, f"{ATTRIB} Benchmark (seasonally adjusted), {month}.", y=-0.20)
     return fig
 
 
@@ -135,7 +137,7 @@ def fig_price_time_series(sheets):
                    tickprefix="$", tickformat=",", gridcolor="#e0e0e0"),
         xaxis=dict(title="", gridcolor="#e0e0e0",
                    rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
-        height=560, margin=dict(b=120, t=54, r=160),
+        height=560, margin=dict(b=165, t=54, r=160),
         legend=dict(orientation="v", x=1.02, y=1),
         updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.07,
             yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)])
@@ -167,7 +169,7 @@ def fig_price_to_income(agg, root="."):
                                hovertemplate="%{y:.1f}× income<extra>%{x}</extra>"))
     fig.update_layout(plot_bgcolor="white",
         yaxis=dict(title="Years of median after-tax income", gridcolor="#e0e0e0", rangemode="tozero"),
-        xaxis=dict(title="", gridcolor="#e0e0e0"), height=480, margin=dict(b=90, t=30),
+        xaxis=dict(title="", gridcolor="#e0e0e0"), height=480, margin=dict(b=155, t=30),
         showlegend=False)
     _src(fig, f"{ATTRIB} Benchmark deflated to 2024 $ via CPI; income: StatCan 11-10-0190-01.", y=-0.16)
     return fig

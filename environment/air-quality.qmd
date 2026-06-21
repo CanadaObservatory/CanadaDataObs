@@ -50,7 +50,7 @@ if os.path.exists(apei_path):
     fig = lines_over_time(
         ap, "year", "index", "pollutant",
         yaxis_title="Emissions (1990 = 100)", colors=AQ_COLORS,
-        group_order=keep, hover_decimals=0,
+        group_order=keep, hover_decimals=0, legend_orientation="h",
         source_note=f"Source: Environment and Climate Change Canada, Air Pollutant Emissions Inventory | Data as of: {get_data_date(apei_path)}")
     fig.add_hline(y=100, line_dash="dash", line_color="#bbb", opacity=0.6)
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -95,7 +95,9 @@ Against OECD peers, Canada's baseline air is among the cleanest: by mean
 population exposure to PM2.5, Canada ranks **4th of the 16 peers with data** —
 behind only Finland, Sweden, and Norway. (This OECD series, derived from
 satellite and ground measurements, currently runs to 2020 — before the most
-severe recent smoke years.) The dotted line marks the [World Health
+severe recent smoke years; before 2000 it is reported only at five-year intervals
+and varies little between countries, reflecting the coarser modelled estimates
+available for those earlier years.) The dotted line marks the [World Health
 Organization's 2021 guideline](https://www.who.int/publications/i/item/9789240034228)
 of 5 µg/m³; that guideline is strict enough that most Canadians still live above
 it — roughly four-fifths of the population — even though Canada's air is cleaner

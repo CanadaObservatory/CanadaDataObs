@@ -59,7 +59,7 @@ le_path = "data/health/oecd_life_expectancy.csv"
 if os.path.exists(le_path):
     df = pd.read_csv(le_path)
     fig = peer_comparison_line(df, "year", "life_expectancy",
-        title="", yaxis_title="Years", show_average=True)
+        title="", yaxis_title="Years", show_average=True, initial_visible=["USA", "AUS", "DEU"])
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Health Statistics | Data as of: {get_data_date(le_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -134,7 +134,7 @@ show_peer_line("data/health/worldbank_overweight.csv", "overweight_pct",
 
 ## Diabetes
 
-Estimated diabetes prevalence among adults aged 20–79. The International Diabetes Federation publishes these at intervals rather than annually, so this is the latest available estimate, shown as a ranked comparison rather than a trend.
+Diabetes is one of the most common chronic diseases and a major contributor to heart disease, kidney failure and other serious complications. This shows estimated prevalence among adults aged 20–79. The International Diabetes Federation publishes these at intervals rather than annually, so this is the latest available estimate, shown as a ranked comparison rather than a trend.
 
 ```{python}
 #| echo: false

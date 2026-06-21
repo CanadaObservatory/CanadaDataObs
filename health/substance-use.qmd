@@ -93,14 +93,15 @@ if os.path.exists(national_path):
     note = "Source: Public Health Agency of Canada, Substance-Related Harms"
     note += f" | Data as of: {get_data_date(national_path)}"
     if partial:
-        note += ". Lighter bar = partial year (January–September); excluded from the rate line."
+        note += ".<br>Lighter bar = partial year (January–September); excluded from the rate line."
     fig.update_layout(plot_bgcolor="white", hovermode="x unified",
         legend=dict(orientation="h", y=1.1, x=0),
         yaxis=dict(title="Deaths", gridcolor="#e0e0e0", rangemode="tozero"),
         yaxis2=dict(title="Per 100,000", overlaying="y", side="right",
                     showgrid=False, rangemode="tozero"),
-        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=120),
-        annotations=[dict(text=note, xref="paper", yref="paper", x=0, y=-0.16,
+        xaxis=dict(title="", dtick=1), margin=dict(t=50, b=140),
+        annotations=[dict(text=note, xref="paper", yref="paper", x=0, xanchor="left",
+                          y=-0.18, yanchor="top", align="left",
                           showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config=SHOW)
 else:
@@ -188,7 +189,7 @@ else:
     print("Supply data not yet available. Run: python -m pipeline.run_pipeline")
 ```
 
-### Hospitalizations
+### Hospitalizations due to opioids
 
 Deaths are the sharpest edge of the crisis, but not its full extent. Opioid-poisoning **hospitalizations** add a parallel measure of acute harm. Both are shown here as rates per 100,000 so they sit on the same scale.
 

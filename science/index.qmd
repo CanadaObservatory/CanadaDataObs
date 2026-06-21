@@ -39,8 +39,8 @@ government, business, and academia.
 
 ::: {.callout-note}
 **Data lag:** R&D statistics are reported to the OECD with a delay of typically
-2–3 years, and countries report at different speeds, so the most recent year may
-not yet have full coverage.
+2–3 years, and countries report at different speeds — Canada often a year or two
+ahead of most peers — so the most recent years may not yet have full peer coverage.
 :::
 
 ```{python}
@@ -74,8 +74,10 @@ if os.path.exists(rd_path):
 
 ## Researchers per 1,000 employed
 
-The number of researchers (full-time equivalent) per 1,000 people employed — a
-measure of how much of the workforce is engaged in research.
+The number of researchers (full-time equivalent) per 1,000 people employed. This
+measures research *intensity* — the share of the workforce engaged in research —
+not research output or quality, which is why countries with smaller workforces and
+strong public research (the Nordics, Korea) rank highest.
 
 ```{python}
 #| echo: false

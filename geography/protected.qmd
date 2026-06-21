@@ -12,7 +12,7 @@ from pipeline.charts import (choropleth_map, choropleth_clean, lines_over_time, 
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
-prov_geo = "data/geo/prov_2021_hires.geojson"   # crisp coastlines for the clean map
+prov_geo = "data/geo/prov_2021_landmass.geojson"   # coastline-clipped: real islands
 prov_csv = "data/geo/protected_areas_by_prov.csv"
 nat_csv = "data/geo/protected_areas_national.csv"
 ```

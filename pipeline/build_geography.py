@@ -148,28 +148,41 @@ def build_provinces():
     _write_geojson(gj, f"{GEO_DIR}/prov_2021.geojson")
 
 
-def build_prov_hires(tol=0.003):
-    """Higher-resolution province/territory boundaries for the CLEAN static maps
-    (charts.choropleth_clean — vector borders, no basemap). The regular
-    prov_2021.geojson is generalised to ~2 km for the interactive mapbox maps,
-    which is too coarse for crisp clean-map coastlines; this keeps ~110 m vertices
-    at a ~0.3 km tolerance (≈0.6 MB)."""
+# StatCan CARTOGRAPHIC Boundary File (clipped to the coastline — islands are real
+# islands), vs PROV_BND_URL's DIGITAL file (administrative limits drawn over water,
+# so the Arctic is one pole-reaching blob and islands fuse to the mainland).
+PROV_CBF_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/geo/sip-pis/"
+                "boundary-limites/files-fichiers/lpr_000b21a_e.zip")
+
+
+def build_prov_landmass(tol=0.012, min_area_km2=150):
+    """Province/territory LANDMASS boundaries for the CLEAN static maps — the classic
+    Canada shape with the Arctic archipelago, Newfoundland, Vancouver Island etc. as
+    REAL islands. Built from StatCan's Cartographic Boundary File (coastline-clipped):
+    explode to individual polygons, keep those above ~min_area_km2 (drop the ~175k
+    tiny islets → a couple hundred recognisable landmasses), dissolve back per
+    province, simplify. The interactive mapbox maps keep the generalised
+    prov_2021.geojson (under a basemap the over-water digital boundary is invisible)."""
     import glob
-    bz = zipfile.ZipFile(_download_cache(PROV_BND_URL, "/tmp/lpr_000a21a_e.zip",
-                                         "province boundaries"))
-    bz.extractall("/tmp/prov_bnd")
-    shp = glob.glob("/tmp/prov_bnd/*.shp")[0]
+    bz = zipfile.ZipFile(_download_cache(PROV_CBF_URL, "/tmp/lpr_000b21a_e.zip",
+                                         "province cartographic boundaries"))
+    bz.extractall("/tmp/prov_cbf")
+    shp = glob.glob("/tmp/prov_cbf/*.shp")[0]
     g = gpd.read_file(shp).to_crs(epsg=4326)
     uid = [c for c in g.columns if c.upper() == "PRUID"][0]
     g["pruid"] = g[uid].astype(str)
-    g["geometry"] = g["geometry"].simplify(tol, preserve_topology=True)
-    gj = json.loads(g[["pruid", "geometry"]].to_json())
+    ge = g[["pruid", "geometry"]].explode(index_parts=False).reset_index(drop=True)
+    ge["area_km2"] = ge.to_crs("ESRI:102001").area / 1e6
+    ge = ge[ge["area_km2"] >= min_area_km2]
+    g2 = ge.dissolve(by="pruid").reset_index()
+    g2["geometry"] = g2.geometry.simplify(tol, preserve_topology=True)
+    gj = json.loads(g2[["pruid", "geometry"]].to_json())
     for ft in gj["features"]:
         ft["id"] = ft["properties"]["pruid"]
         ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
-    _write_geojson(gj, f"{GEO_DIR}/prov_2021_hires.geojson")
-    print(f"  wrote prov_2021_hires.geojson: "
-          f"{round(os.path.getsize(GEO_DIR + '/prov_2021_hires.geojson') / 1e6, 2)} MB")
+    _write_geojson(gj, f"{GEO_DIR}/prov_2021_landmass.geojson")
+    print(f"  wrote prov_2021_landmass.geojson: {len(gj['features'])} provinces, "
+          f"{round(os.path.getsize(GEO_DIR + '/prov_2021_landmass.geojson') / 1e6, 2)} MB")
 
 
 COMP_CMA_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/"

@@ -88,7 +88,11 @@ rates, and city and neighbourhood maps.
 :::{.column width="2%"}
 :::
 
-:::{.column width="32%"}
+:::{.column .area-card .area-people width="32%"}
+![](../visual_assets/brand/motifs/banner-people.svg){.area-banner}
+
+### [Indigenous Lands](indigenous-lands.qmd)
+Indian reserves and modern land-claim settlement lands — the official legal boundaries.
 :::
 
 ::::

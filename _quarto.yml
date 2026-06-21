@@ -46,6 +46,8 @@ website:
             text: Languages
           - href: population/citizenship.qmd
             text: Citizenship
+          - href: population/indigenous-lands.qmd
+            text: Indigenous Lands
           - href: population/commuting.qmd
             text: Commuting
           - href: wellbeing/crime-safety.qmd

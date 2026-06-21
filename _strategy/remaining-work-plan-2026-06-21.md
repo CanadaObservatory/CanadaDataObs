@@ -5,6 +5,14 @@
 This supersedes the day-by-day batch log in `site-review-action-plan.md` for planning purposes.
 `§N` = the canonical item number in `review-extract.md`.*
 
+> **Progress update (2026-06-21, branch tip `1c6a9c4`): Tier 1 and Tier 2 below are now BUILT**
+> (shared-builder fixes + ~45 prose/param items, all sections). Also since the audit: the ecozones
+> clean map was reverted to mapbox, permafrost kept the clean style with a faint full-Canada base
+> layer, and a new **People › Indigenous Lands** page was added (NRCan/CLSS reserves + settlement
+> lands). **Remaining = Tiers 3–5 + Owner decisions + Data-blocked below.** A few small items were
+> consciously deferred (noted in their commits): §356 scorecard-to-legend gap, §504 a national
+> air-quality currency note, §238 avg-wage base year, and §198-style polish where data-blocked.
+
 ## Status at a glance
 
 The large majority of the review is **done**. Globals G1–G4, G8, G9 are complete; G2 (defensive

@@ -177,6 +177,13 @@ A single sweep could clear most of these. Grouped by page.
 - §468 / §471 **Reanalysis climate maps** — continuous temp/precip with a through-the-year slider (ERA5-class).
 - §9 / §10 First-time-home-buyer age + family-formation age. §8 a "missing-middle / millennial stress" topic.
 - §193 Map condo vs detached values (data-gated at CT/CMA).
+- **Indigenous lands** (owner question, 2026-06-21) — official high-quality data EXISTS for **Indian
+  reserves + land-claim settlement lands**: NRCan/CLSS *"Aboriginal Lands of Canada Legislative
+  Boundaries"* (OGL-Canada; ESRI REST / WMS / GML; the same CLSS family as the federal-parks legal
+  boundaries), mappable as a parks-style overlay. **Traditional territories: NO authoritative official
+  source** (contested/overlapping; Native-Land.ca explicitly disclaims legal authority) → decline.
+  Historic numbered-treaty areas have official CIRNAC representations if a careful treaty layer is ever
+  wanted. **Owner decision** — sensitive topic; build only on an explicit go-ahead.
 
 ---
 

@@ -1554,6 +1554,98 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     return fig
 
 
+def choropleth_categorical_clean(geojson, df, location_col, cat_col, *, name_col=None,
+                                 color_map=None, ordered=None, detail_col=None,
+                                 source_note=None, height=560, legend_orientation="v",
+                                 legend_frac=0.24, legend_title=None,
+                                 parallels=(49, 77), center_lon=-96, projection="albers"):
+    """CLEAN static categorical choropleth — the `choropleth_clean` look (vector
+    borders, NO tiled basemap, a conic Albers Canada projection) for *category*
+    region maps that don't need zoom/pan (ecozones, permafrost). One `go.Choropleth`
+    holds every polygon over a hard-stepped discrete colourscale (value i centred in
+    band i via zmin=-0.5/zmax=n-0.5, the same trick `choropleth_categorical` uses for
+    mapbox); the colourbar is hidden and a real legend is drawn with off-canvas
+    `Scattergeo` proxies, one per category. Colours are preserved from the existing
+    maps via `color_map`; pass `ordered` to fix the legend (and ordinal colour) order,
+    `detail_col` for a custom hover string, `name_col` for a per-feature hover label.
+
+    A vertical legend (default) reserves the right `legend_frac` of the figure via the
+    geo subplot's `domain`, so the legend never overlaps the map; pass
+    `legend_orientation="h"` for a bottom legend (few categories) instead. The geojson
+    features must carry a top-level `id` == df[location_col]; like the clean province
+    map this uses coastline-following terrestrial geometry (no basemap to hide
+    over-water artefacts), so the source geometry must be land-clipped."""
+    import pandas as pd
+    cats = list(ordered) if ordered else sorted(df[cat_col].dropna().unique())
+    if color_map is None:
+        color_map = {c: CATEGORICAL_PALETTE[i % len(CATEGORICAL_PALETTE)]
+                     for i, c in enumerate(cats)}
+    code = {c: i for i, c in enumerate(cats)}
+    n = len(cats)
+    colorscale = []
+    for i, c in enumerate(cats):
+        colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
+
+    hover_col = detail_col or cat_col
+    name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    cat_idx = 1 if name_col else 0
+    htmpl = f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>"
+    hcols = [name_col, hover_col] if name_col else [hover_col]
+
+    fig = go.Figure(go.Choropleth(
+        geojson=geojson, locations=df[location_col].astype(str),
+        z=[code.get(v) for v in df[cat_col]],
+        zmin=-0.5, zmax=n - 0.5, featureidkey="id",
+        colorscale=colorscale, showscale=False,
+        marker_line_color="white", marker_line_width=0.5,
+        customdata=df[hcols].to_numpy(), hovertemplate=htmpl,
+    ))
+    # category swatches as off-canvas Scattergeo proxies (legend only; nothing on map)
+    for c in cats:
+        fig.add_trace(go.Scattergeo(
+            lon=[None], lat=[None], mode="markers",
+            marker=dict(size=11, color=color_map[c], symbol="square",
+                        line=dict(width=0.5, color="#999")),
+            name=c, showlegend=True, hoverinfo="skip"))
+
+    vertical = legend_orientation == "v"
+    # A vertical legend sits to the right; reserve that strip via the geo domain so the
+    # map never draws under it, and the source note stays bottom-left, clear of it. A
+    # horizontal legend hangs below the (full-width) map, so the source note drops below
+    # the legend and the bottom margin grows to fit both.
+    geo_domain = dict(x=[0.0, 1.0 - legend_frac if vertical else 1.0], y=[0.0, 1.0])
+    if vertical:
+        legend = dict(orientation="v", yanchor="middle", y=0.5,
+                      xanchor="left", x=1.0 - legend_frac + 0.01)
+        gap = 14                       # px below the map to the source note's top
+    else:
+        legend = dict(orientation="h", yanchor="top", y=-0.01, xanchor="center", x=0.5)
+        gap = 70                       # clear the bottom legend before the source note
+    if legend_title:
+        legend["title"] = dict(text=legend_title)
+    # Size the bottom margin to the wrapped source-note line count (+1 for the brand
+    # line the show() interceptor appends) so it never clips; the note hangs from
+    # yanchor=top a fixed pixel gap below the map.
+    src_wrapped = _wrap(source_note) if source_note else None
+    n_src = (src_wrapped.count("<br>") + 2) if source_note else 0
+    b_margin = (gap + n_src * 16 + 12) if source_note else (gap + 12)
+    fig.update_geos(visible=False, showframe=False, showcoastlines=False,
+                    showland=False, showcountries=False, showlakes=False,
+                    fitbounds="locations", projection_type=projection,
+                    projection_parallels=list(parallels),
+                    projection_rotation=dict(lon=center_lon),
+                    domain=geo_domain, bgcolor="rgba(0,0,0,0)")
+    fig.update_layout(height=height, margin=dict(l=0, r=0, t=10, b=b_margin),
+                      paper_bgcolor="white", dragmode=False,
+                      legend=legend, showlegend=True)
+    if source_note:
+        src_y = -gap / (height - 10 - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=src_y, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
+    return fig
+
+
 def bubble_map(df, lat_col, lon_col, size_col, *, color="#e3492a", opacity=0.5,
                max_px=42, customdata=None, hovertemplate=None, source_note=None,
                center=None, zoom=2.3, height=640):

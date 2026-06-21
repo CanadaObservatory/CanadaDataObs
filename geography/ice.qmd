@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import get_data_date
-from pipeline.charts import choropleth_categorical
+from pipeline.charts import choropleth_categorical_clean
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -31,9 +31,8 @@ PF_COLORS = {
 if os.path.exists(pf_geo_path) and os.path.exists(pf_csv):
     pf_geo = json.load(open(pf_geo_path))
     pf = pd.read_csv(pf_csv, dtype={"fid": str})
-    fig = choropleth_categorical(pf_geo, pf, "fid", "zone",
-        color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_orientation="h",
-        center={"lat": 64, "lon": -96}, zoom=2.2,
+    fig = choropleth_categorical_clean(pf_geo, pf, "fid", "zone",
+        color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_frac=0.34,
         source_note="Source: NRCan, Atlas of Canada 5th ed. — permafrost (~1995; extent has since declined).")
     fig.show(config=MAP_CONFIG)
 else:

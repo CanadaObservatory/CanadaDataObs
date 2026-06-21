@@ -5,12 +5,6 @@ description: "The boundaries of every national, provincial and territorial park 
 
 This map shows the **boundaries** of Canada's national, provincial, and territorial parks — more than 700 of them — coloured by which level of government manages them. **Zoom and pan to explore**, and hover any park for its name. The southern provinces hold hundreds of smaller parks; the largest are in the North and the mountain West.
 
-The coloured fills are **reported park boundaries** from the **Canadian Protected and Conserved Areas Database** (CPCAD), compiled from federal, provincial, and territorial submissions. Two limits are worth keeping in mind. First, the picture is **not exhaustive** — coverage varies by jurisdiction and some smaller parks are absent. Second, CPCAD maps the formally **protected** land, which for a zoned park is only its protected core: a few large parks — **notably some in Ontario, such as Algonquin** — can therefore look smaller or more fragmented than the full park on a road or canoe map. The fills cover terrestrial parks, and are illustrative, not legal.
-
-Over the national parks and the provincial and territorial parks of most jurisdictions, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated or set by Order-in-Council for the provincial ones. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is — the official boundary *larger* than the reported fill. **Rouge** diverges the other way: still legally assembling its land, its gazetted boundary stops short of Lake Ontario, so the southern lands down to the shore — managed by Parks Canada but not yet in the legal schedule — appear only in the reported fill beneath. A few jurisdictions do not publish open boundary data, so their parks appear only as the reported CPCAD fill. The **Ottawa Greenbelt** — the National Capital Commission's band of conservation land and farmland around the capital — is drawn as its own layer, since it is protected greenspace rather than a park.
-
-This is a detailed, heavier map kept on its own page so the [Protected & Conserved Areas](protected.qmd) overview stays light.
-
 ```{python}
 #| echo: false
 import os, json
@@ -67,6 +61,12 @@ if os.path.exists(geo_path):
 else:
     print("Detailed parks data not yet available — run `python -m pipeline.build_geography`.")
 ```
+
+The coloured fills are **reported park boundaries** from the **Canadian Protected and Conserved Areas Database** (CPCAD), compiled from federal, provincial, and territorial submissions. Two limits are worth keeping in mind. First, the picture is **not exhaustive** — coverage varies by jurisdiction and some smaller parks are absent. Second, CPCAD maps the formally **protected** land, which for a zoned park is only its protected core: a few large parks — **notably some in Ontario, such as Algonquin** — can therefore look smaller or more fragmented than the full park on a road or canoe map. The fills cover terrestrial parks, and are illustrative, not legal.
+
+Over the national parks and the provincial and territorial parks of most jurisdictions, a second layer traces the **official boundary** defined by the responsible agency — legislated for the national parks (including the Rouge National Urban Park and the Saguenay–St. Lawrence Marine Park), regulated or set by Order-in-Council for the provincial ones. **Use the legend to turn this layer on or off.** It often matches the reported fill, but where the two diverge the gap is informative: **Algonquin**, recorded in CPCAD as only its protected core, appears here as the single regulated park it legally is — the official boundary *larger* than the reported fill. **Rouge** diverges the other way: still legally assembling its land, its gazetted boundary stops short of Lake Ontario, so the southern lands down to the shore — managed by Parks Canada but not yet in the legal schedule — appear only in the reported fill beneath. A few jurisdictions do not publish open boundary data, so their parks appear only as the reported CPCAD fill. The **Ottawa Greenbelt** — the National Capital Commission's band of conservation land and farmland around the capital — is drawn as its own layer, since it is protected greenspace rather than a park.
+
+This is a detailed, heavier map kept on its own page so the [Protected & Conserved Areas](protected.qmd) overview stays light.
 
 ## Download data
 

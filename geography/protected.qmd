@@ -8,11 +8,11 @@ description: "How much of Canada's land and water is protected, and where"
 import os, json
 import pandas as pd
 from pipeline.charts import (choropleth_map, choropleth_clean, lines_over_time, bubble_map,
-                             CANADA_SMALL_PROV_ABBREV, CANADA_SMALL_PROV_OFFSET)
+                             CANADA_SMALL_PROV_OFFSET)
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
-prov_geo = "data/geo/prov_2021.geojson"
+prov_geo = "data/geo/prov_2021_hires.geojson"   # crisp coastlines for the clean map
 prov_csv = "data/geo/protected_areas_by_prov.csv"
 nat_csv = "data/geo/protected_areas_national.csv"
 ```
@@ -32,7 +32,7 @@ if os.path.exists(prov_geo) and os.path.exists(prov_csv):
     d = pd.read_csv(prov_csv, dtype={"pruid": str})
     fig = choropleth_clean(g, d, "pruid", "pct_conserved", name_col="name",
         colorbar_title="% conserved", colorscale="Greens", value_suffix="%", value_fmt=".0f",
-        label_abbrev=CANADA_SMALL_PROV_ABBREV, label_offset=CANADA_SMALL_PROV_OFFSET,
+        label_offset=CANADA_SMALL_PROV_OFFSET,
         source_note="Source: ECCC, Canadian Environmental Sustainability Indicators — conserved areas (2024).")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

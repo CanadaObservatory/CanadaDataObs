@@ -148,6 +148,30 @@ def build_provinces():
     _write_geojson(gj, f"{GEO_DIR}/prov_2021.geojson")
 
 
+def build_prov_hires(tol=0.003):
+    """Higher-resolution province/territory boundaries for the CLEAN static maps
+    (charts.choropleth_clean — vector borders, no basemap). The regular
+    prov_2021.geojson is generalised to ~2 km for the interactive mapbox maps,
+    which is too coarse for crisp clean-map coastlines; this keeps ~110 m vertices
+    at a ~0.3 km tolerance (≈0.6 MB)."""
+    import glob
+    bz = zipfile.ZipFile(_download_cache(PROV_BND_URL, "/tmp/lpr_000a21a_e.zip",
+                                         "province boundaries"))
+    bz.extractall("/tmp/prov_bnd")
+    shp = glob.glob("/tmp/prov_bnd/*.shp")[0]
+    g = gpd.read_file(shp).to_crs(epsg=4326)
+    uid = [c for c in g.columns if c.upper() == "PRUID"][0]
+    g["pruid"] = g[uid].astype(str)
+    g["geometry"] = g["geometry"].simplify(tol, preserve_topology=True)
+    gj = json.loads(g[["pruid", "geometry"]].to_json())
+    for ft in gj["features"]:
+        ft["id"] = ft["properties"]["pruid"]
+        ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/prov_2021_hires.geojson")
+    print(f"  wrote prov_2021_hires.geojson: "
+          f"{round(os.path.getsize(GEO_DIR + '/prov_2021_hires.geojson') / 1e6, 2)} MB")
+
+
 COMP_CMA_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/"
                 "download-telecharger/comp/GetFile.cfm?Lang=E&FILETYPE=CSV&GEONO=002")
 

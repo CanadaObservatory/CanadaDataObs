@@ -1158,7 +1158,7 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
 # Atlantic provinces, whose value labels would otherwise collide on a whole-Canada
 # choropleth (keyed by PRUID). The abbreviation keeps each identifiable once nudged.
 CANADA_SMALL_PROV_ABBREV = {"11": "PEI", "12": "NS", "13": "NB"}
-CANADA_SMALL_PROV_OFFSET = {"11": (2.6, 1.6), "12": (3.0, -2.2), "13": (-3.6, 1.0)}
+CANADA_SMALL_PROV_OFFSET = {"11": (1.6, 1.1), "12": (2.1, -1.4), "13": (-2.2, 0.4)}
 
 
 def _ring_area_centroid(ring):
@@ -1191,8 +1191,8 @@ def choropleth_clean(geojson, df, location_col, value_col, *, name_col=None,
                      colorbar_title="", colorscale="Greens", reversescale=False,
                      value_prefix="", value_suffix="", value_fmt=".0f", zmin=None,
                      zmax=None, source_note=None, labels=True, height=560,
-                     parallels=(49, 77), center_lon=-96, label_abbrev=None,
-                     label_offset=None):
+                     parallels=(49, 77), center_lon=-96, projection="albers",
+                     label_abbrev=None, label_offset=None):
     """CLEAN static-style choropleth — vector boundaries, NO basemap, a conic Canada
     projection (the 'Datawrapper look'). For province/region-level maps that don't
     need zoom/pan: crisp white borders on a transparent background, optional value
@@ -1233,7 +1233,7 @@ def choropleth_clean(geojson, df, location_col, value_col, *, name_col=None,
                 textfont=dict(size=11, color="#222"), hoverinfo="skip", showlegend=False))
     fig.update_geos(visible=False, showframe=False, showcoastlines=False,
                     showland=False, showcountries=False, showlakes=False,
-                    fitbounds="locations", projection_type="conic conformal",
+                    fitbounds="locations", projection_type=projection,
                     projection_parallels=list(parallels),
                     projection_rotation=dict(lon=center_lon),
                     bgcolor="rgba(0,0,0,0)")

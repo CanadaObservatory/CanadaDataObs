@@ -1463,7 +1463,7 @@ CATEGORICAL_PALETTE = [
 def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
                            color_map=None, ordered=None, source_note=None,
                            center=None, zoom=2.4, height=660, legend_title=None,
-                           legend_orientation="v", detail_col=None):
+                           legend_orientation="v", detail_col=None, split_legend=False):
     """Categorical choropleth — each polygon coloured by a *discrete* category
     rather than a continuous value (used for ecozones and permafrost zones).
 
@@ -1489,26 +1489,55 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
         colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
 
     hover_col = detail_col or cat_col   # detail_col (e.g. a composition breakdown) shows in
-    custom = (df[[name_col, hover_col]].to_numpy() if name_col   # the hover instead of the
-              else df[[hover_col]].to_numpy())                    # bare category
     name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
     cat_idx = 1 if name_col else 0
-    fig = go.Figure(go.Choroplethmapbox(
-        geojson=geojson, locations=df[location_col],
-        z=[code.get(v) for v in df[cat_col]],
-        zmin=-0.5, zmax=n - 0.5, featureidkey="id",
-        colorscale=colorscale, showscale=False,
-        marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
-        customdata=custom,
-        hovertemplate=f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>",
-    ))
-    # Choroplethmapbox shows no legend entry, so draw category swatches as
-    # zero-point Scattermapbox proxies (nothing rendered on the map; legend only).
-    for c in cats:
-        fig.add_trace(go.Scattermapbox(
-            lat=[None], lon=[None], mode="markers",
-            marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
+    htmpl = f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>"
+    hcols = [name_col, hover_col] if name_col else [hover_col]
+
+    if split_legend:
+        # One CHOROPLETH PER CATEGORY (single colour) so a legend click actually
+        # shows/hides that category's polygons. Each is paired with a swatch proxy
+        # sharing its legendgroup — clicking the proxy toggles the whole group
+        # (Choroplethmapbox itself draws no legend entry). Used by the parks map so
+        # Federal/Provincial/Territorial filter the CPCAD fills.
+        fig = go.Figure()
+        feat_by_id = {str(f.get("id")): f for f in geojson.get("features", [])}
+        for c in cats:
+            sub = df[df[cat_col] == c]
+            if not len(sub):
+                continue
+            # subset the geojson to THIS category's features so the geometry isn't
+            # embedded N times (which tripled the page weight when first tried)
+            sub_geo = {"type": "FeatureCollection", "features":
+                       [feat_by_id[i] for i in (str(x) for x in sub[location_col]) if i in feat_by_id]}
+            fig.add_trace(go.Choroplethmapbox(
+                geojson=sub_geo, locations=sub[location_col], z=[0] * len(sub),
+                zmin=0, zmax=1, featureidkey="id", showscale=False,
+                colorscale=[[0, color_map[c]], [1, color_map[c]]],
+                marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
+                customdata=sub[hcols].to_numpy(), hovertemplate=htmpl,
+                name=c, legendgroup=c, showlegend=False))
+            fig.add_trace(go.Scattermapbox(
+                lat=[None], lon=[None], mode="markers",
+                marker=dict(size=12, color=color_map[c]), name=c, legendgroup=c,
+                showlegend=True, hoverinfo="skip"))
+    else:
+        fig = go.Figure(go.Choroplethmapbox(
+            geojson=geojson, locations=df[location_col],
+            z=[code.get(v) for v in df[cat_col]],
+            zmin=-0.5, zmax=n - 0.5, featureidkey="id",
+            colorscale=colorscale, showscale=False,
+            marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
+            customdata=df[hcols].to_numpy(),
+            hovertemplate=htmpl,
         ))
+        # Choroplethmapbox shows no legend entry, so draw category swatches as
+        # zero-point Scattermapbox proxies (nothing rendered on the map; legend only).
+        for c in cats:
+            fig.add_trace(go.Scattermapbox(
+                lat=[None], lon=[None], mode="markers",
+                marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
+            ))
     legend = (dict(orientation="v", yanchor="top", y=0.93, xanchor="left", x=1.01)
               if legend_orientation == "v"
               else dict(orientation="h", yanchor="top", y=-0.02, xanchor="center", x=0.5))

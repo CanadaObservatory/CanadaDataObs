@@ -30,7 +30,7 @@ if os.path.exists(geo_path):
     df = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in gj["features"]])
     JUR_COLORS = {"Federal": "#2e7d32", "Provincial": "#4477aa", "Territorial": "#cc8844"}
     fig = choropleth_categorical(gj, df, "id", "jurisdiction", name_col="name",
-        color_map=JUR_COLORS, ordered=["Federal", "Provincial", "Territorial"],
+        color_map=JUR_COLORS, ordered=["Federal", "Provincial", "Territorial"], split_legend=True,
         legend_title="Reported boundary (CPCAD)", center={"lat": 59, "lon": -96}, zoom=2.3, height=680,
         source_note="Sources: ECCC, Canadian Protected and Conserved Areas Database (coloured fills, illustrative); official agency park boundaries — federal, provincial and territorial (navy outline). Full source list under Download data.")
     # Merge whatever agency layers exist into one official-boundary overlay (Deep
@@ -50,7 +50,7 @@ if os.path.exists(geo_path):
         add_polygon_overlay(fig, {"type": "FeatureCollection", "features": feats}, cdf, "id",
             legend_name="Parks — official boundary", line_color="#17324D",
             customdata=cdf[["name", "park_type", "admin_agency", "boundary_kind"]].to_numpy(),
-            hovertemplate=hover, fill_opacity=0.12, line_width=2.0)
+            hovertemplate=hover, fill_opacity=0.20, line_width=2.8)
     # The Ottawa Greenbelt — NCC conservation + farmland, NOT a park — as its own
     # distinct (olive) layer with a separate legend entry/toggle.
     gb_path = "data/geo/greenbelt_ncc.geojson"

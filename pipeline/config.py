@@ -252,6 +252,10 @@ class Indicator:
     statcan_table: Optional[str] = None
     statcan_filters: dict = field(default_factory=dict)  # column -> exact value
     date_format: Optional[str] = None  # REF_DATE parse format, e.g. "%Y-%m" / "%Y"
+    # --- StatCan release calendar (optional) ---
+    release_key: Optional[str] = None  # key into release_schedule.SCHEDULE_TITLES
+    #   ("cpi"/"lfs"/"gdp"…): the generic StatCan fetcher records this series' NEXT
+    #   scheduled release date in the sidecar so a page can show "Next update: <date>".
     # --- bespoke fetchers (population, cpi, energy, happiness) ---
     fetch_fn: Optional[str] = None     # function name resolved in run_pipeline
     # --- optional post-clean hook: df -> df (e.g. cap EO projection years) ---
@@ -410,7 +414,7 @@ INDICATORS = [
                                "Estimates": "Gross domestic product at market prices",
                                "Prices": "Chained (2017) dollars",
                                "Seasonal adjustment": "Seasonally adjusted at annual rates"},
-              output_subpath="statcan_gdp_quarterly.csv",
+              output_subpath="statcan_gdp_quarterly.csv", release_key="gdp",
               source_table="Statistics Canada 36-10-0104-01"),
     # Food CPI (the most-felt cost-of-living component) as its own series, like
     # rent_cpi — kept separate from statcan_cpi.csv so the all-items deflator used

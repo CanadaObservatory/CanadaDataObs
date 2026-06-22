@@ -77,7 +77,9 @@ def fetch_statcan_indicator(ind):
     out_path = ind.out_path
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
-    save_metadata(out_path, df=df, date_column="date",
+    next_rel = (next_release_date(SCHEDULE_TITLES[ind.release_key])
+                if ind.release_key else None)
+    save_metadata(out_path, df=df, date_column="date", next_release_date=next_rel,
         source="Statistics Canada",
         source_table=ind.source_table,
         frequency=ind.frequency,
@@ -858,6 +860,7 @@ def fetch_cma_unemployment():
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(out_path, index=False)
     save_metadata(out_path, df=out, source="Statistics Canada",
+        next_release_date=next_release_date(SCHEDULE_TITLES["lfs"]),
         source_table="Statistics Canada 14-10-0459-01 (Labour Force Survey)",
         frequency="monthly", unit="unemployment rate (%), 3-month moving average, SA",
         transformations=["LFS unemployment rate by CMA, latest 3-month moving average; "

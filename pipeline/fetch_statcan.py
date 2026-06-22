@@ -257,6 +257,34 @@ def fetch_cpi():
         transformations=["filtered to the 8 major CPI components + All-items, Canada only"])
     logger.info(f"Saved {len(comp)} rows to {comp_path}")
 
+    # Side output: the major FOOD sub-components (Canada) — the grocery categories +
+    # restaurants under "Food" — for the food-breakdown figure (review §160). Monthly
+    # index; the price change over various windows is computed at render time.
+    food_sub = {
+        "Meat": "Meat",
+        "Fish, seafood and other marine products": "Fish & seafood",
+        "Dairy products and eggs": "Dairy & eggs",
+        "Bakery and cereal products (excluding baby food)": "Bakery & cereals",
+        "Fruit, fruit preparations and nuts": "Fruit & nuts",
+        "Vegetables and vegetable preparations": "Vegetables",
+        "Other food products and non-alcoholic beverages": "Other foods & beverages",
+        "Food purchased from restaurants": "Restaurant meals",
+    }
+    food = df_all[(df_all["geography"] == "Canada")
+                  & (df_all["product_group"].isin(food_sub))].copy()
+    food["food_group"] = food["product_group"].map(food_sub)
+    food["date"] = pd.to_datetime(food["date"])
+    food["cpi_value"] = pd.to_numeric(food["cpi_value"], errors="coerce")
+    food = (food.dropna(subset=["cpi_value"])[["date", "food_group", "cpi_value"]]
+            .sort_values(["food_group", "date"]).reset_index(drop=True))
+    food_path = DATA_DIR / "economics" / "statcan_cpi_food_components.csv"
+    food.to_csv(food_path, index=False)
+    save_metadata(food_path, df=food, date_column="date",
+        source="Statistics Canada", source_table="18-10-0004-01",
+        frequency="monthly", unit="index (2002=100)",
+        transformations=["Canada; major food sub-components (grocery categories + restaurants)"])
+    logger.info(f"Saved {len(food)} rows to {food_path}")
+
     return df
 
 

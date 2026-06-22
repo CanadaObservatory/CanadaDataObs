@@ -6,6 +6,7 @@ Uses the stats_can library for simplified API access.
 import pandas as pd
 from pipeline.config import DATA_DIR, STATCAN_TABLES
 from pipeline.metadata import save_metadata, validate_columns, SchemaError
+from pipeline.release_schedule import next_release_date, SCHEDULE_TITLES
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -224,6 +225,7 @@ def fetch_cpi():
         source_table="18-10-0004-01",
         frequency="monthly",
         unit="index (2002=100)",
+        next_release_date=next_release_date(SCHEDULE_TITLES["cpi"]),
         transformations=[
             "filtered to All-items CPI, Canada only",
             "computed year-over-year inflation rate (12-month pct_change)",

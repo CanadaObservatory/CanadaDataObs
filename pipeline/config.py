@@ -44,6 +44,33 @@ def get_retrieved_date(csv_path):
             return str(ra)[:10]
     return DATA_DATE
 
+
+def get_next_release(csv_path, *, on=None):
+    """Human-formatted next scheduled release date for a dataset, e.g.
+    "July 20, 2026", or "" if none is recorded or it has already passed.
+
+    The date is read from the metadata sidecar's `next_release_date`, which the
+    pipeline sources (non-hardcoded) from Statistics Canada's release calendar at
+    fetch time — see pipeline/release_schedule.py. A past date is suppressed (it
+    means the pipeline hasn't refreshed yet) so we never show a stale "Next
+    update". Returns "" when absent, so callers can append it conditionally."""
+    import json
+    from datetime import date, datetime
+    meta_path = Path(csv_path).with_suffix(".json")
+    if not meta_path.exists():
+        return ""
+    with open(meta_path) as f:
+        nr = json.load(f).get("next_release_date")
+    if not nr:
+        return ""
+    try:
+        dt = datetime.strptime(str(nr)[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return ""
+    if dt < (on or date.today()):
+        return ""
+    return f"{dt:%B} {dt.day}, {dt.year}"
+
 # --- OECD Peer Group ---
 # Broader than G7: includes all comparable advanced economies
 

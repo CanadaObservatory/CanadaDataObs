@@ -14,7 +14,7 @@ import math
 from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.config import CANADA_COLOR, get_data_date, get_next_release
 from pipeline.charts import category_bar, lines_over_time, province_colors
 ```
 
@@ -57,6 +57,12 @@ try:
     y_min = 0 if y_min_val >= 0 else math.floor(y_min_val * 2) / 2 - 0.5
     y_max = math.ceil(max(y_max_val, 3.5) * 2) / 2 + 1.0
 
+    _src = (f"Source: Statistics Canada, Table 18-10-0004-01 | "
+            f"Data as of: {get_data_date('data/economics/statcan_cpi.csv')}")
+    _next = get_next_release('data/economics/statcan_cpi.csv')
+    if _next:
+        _src += f" | Next update: {_next}"
+
     fig.update_layout(
         xaxis_title="", yaxis_title="Inflation (%)", plot_bgcolor="white",
         meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
@@ -76,7 +82,7 @@ try:
                  xanchor="left", showarrow=False, font=dict(size=11, color="#888")),
             dict(text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
                  xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False, font=dict(size=10, color="#999")),
-            dict(text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
+            dict(text=_src,
                  xref="paper", yref="paper", x=0, y=-0.42, yanchor="top", showarrow=False, font=dict(size=10, color="#999")),
         ])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

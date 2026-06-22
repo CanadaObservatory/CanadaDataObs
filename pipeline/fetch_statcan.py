@@ -202,6 +202,7 @@ def fetch_cpi():
         "VALUE": "cpi_value",
     })
     df = df[["date", "geography", "product_group", "cpi_value"]].copy()
+    df_all = df.copy()   # keep every product group before narrowing to All-items
 
     # Keep only All-items CPI for Canada
     df = df[df["product_group"] == "All-items"]
@@ -230,7 +231,399 @@ def fetch_cpi():
     )
     logger.info(f"Saved {len(df)} rows to {out_path}")
 
+    # Side output: the major-component sub-indices (Canada) for the
+    # "where inflation is coming from" breakdown — the 8 standard CPI components
+    # plus All-items, monthly index. YoY is computed per component at render time.
+    majors = ["All-items", "Food", "Shelter",
+              "Household operations, furnishings and equipment",
+              "Clothing and footwear", "Transportation", "Health and personal care",
+              "Recreation, education and reading",
+              "Alcoholic beverages, tobacco products and recreational cannabis"]
+    comp = df_all[(df_all["geography"] == "Canada")
+                  & (df_all["product_group"].isin(majors))].copy()
+    comp["date"] = pd.to_datetime(comp["date"])
+    comp["cpi_value"] = pd.to_numeric(comp["cpi_value"], errors="coerce")
+    comp = (comp.dropna(subset=["cpi_value"])
+            .sort_values(["product_group", "date"]).reset_index(drop=True))
+    comp_path = DATA_DIR / "economics" / "statcan_cpi_components.csv"
+    comp.to_csv(comp_path, index=False)
+    save_metadata(comp_path, df=comp,
+        source="Statistics Canada", source_table="18-10-0004-01",
+        frequency="monthly", unit="index (2002=100)",
+        transformations=["filtered to the 8 major CPI components + All-items, Canada only"])
+    logger.info(f"Saved {len(comp)} rows to {comp_path}")
+
     return df
+
+
+MINWAGE_URL = ("https://open.canada.ca/data/dataset/390ee890-59bb-4f34-a37c-9732781ef8a0/"
+               "resource/2ddfbfd4-8347-467d-b6d5-797c5421f4fb/download/"
+               "general-historical-minimum-wage.csv")
+
+_MINWAGE_NAMES = {
+    "FJ": "Federal", "AB": "Alberta", "BC": "British Columbia", "MB": "Manitoba",
+    "NB": "New Brunswick", "NL": "Newfoundland and Labrador", "NS": "Nova Scotia",
+    "NWT": "Northwest Territories", "NU": "Nunavut", "ON": "Ontario",
+    "PEI": "Prince Edward Island", "QC": "Quebec", "SK": "Saskatchewan", "YT": "Yukon",
+}
+
+
+def fetch_minimum_wage():
+    """General adult minimum wage by jurisdiction, as an annual panel.
+
+    Source: ESDC "Historical Minimum Wage Rates in Canada" (open.canada.ca, OGL-
+    Canada). The file lists each rate *change* (jurisdiction, effective date, rate);
+    we forward-fill to the rate in effect at year-end for every year, for the 13
+    provinces/territories plus the federal jurisdiction. Nominal dollars; the page
+    deflates to real using the CPI already fetched. The real-vs-nominal gap is the
+    cost-of-living story.
+
+    Gotchas handled: the effective date is `DD-Mon-YY`, so pandas mis-parses the
+    1960s rows to 20xx — any parsed year far in the future is shifted back a century.
+    The rate is a `$`-prefixed string.
+    """
+    import requests, io, datetime
+    logger.info("Fetching ESDC historical minimum wage...")
+    try:
+        r = requests.get(MINWAGE_URL, timeout=60)
+        r.raise_for_status()
+        df = pd.read_csv(io.StringIO(r.text))
+    except Exception as e:
+        logger.error(f"  Failed minimum-wage fetch: {e}")
+        return None
+
+    validate_columns(df, ["Jurisdiction", "Effective Date", "Minimum Wage"], "minimum_wage")
+    df = df.rename(columns={"Jurisdiction": "code", "Effective Date": "eff",
+                            "Minimum Wage": "wage_raw"})
+    df["date"] = pd.to_datetime(df["eff"], format="%d-%b-%y", errors="coerce")
+    # 2-digit years pivot at 1969, so pre-1969 rows land a century too late.
+    too_late = df["date"].dt.year > 2040
+    df.loc[too_late, "date"] = df.loc[too_late, "date"] - pd.DateOffset(years=100)
+    df["wage"] = pd.to_numeric(
+        df["wage_raw"].astype(str).str.replace(r"[\$,]", "", regex=True), errors="coerce")
+    df["jurisdiction"] = df["code"].map(_MINWAGE_NAMES)
+    df = (df.dropna(subset=["date", "wage", "jurisdiction"])
+            .drop_duplicates(subset=["code", "date"], keep="last")
+            .sort_values(["code", "date"]))
+    if df.empty:
+        return None
+
+    cur_year = datetime.date.today().year
+    rows = []
+    for code, g in df.groupby("code"):
+        name = g["jurisdiction"].iloc[0]
+        for y in range(int(g["date"].dt.year.min()), cur_year + 1):
+            asof = pd.Timestamp(year=y, month=12, day=31)
+            in_effect = g[g["date"] <= asof]
+            if len(in_effect):
+                rows.append({"code": code, "jurisdiction": name, "year": y,
+                             "min_wage": round(float(in_effect["wage"].iloc[-1]), 2)})
+    out = pd.DataFrame(rows).sort_values(["jurisdiction", "year"]).reset_index(drop=True)
+
+    out_path = DATA_DIR / "economics" / "esdc_minimum_wage.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Employment and Social Development Canada (Historical Minimum Wage Rates in Canada)",
+        source_table="open.canada.ca 390ee890",
+        frequency="annual", unit="nominal CAD per hour",
+        transformations=["rate in effect at year-end, forward-filled per jurisdiction; 14 jurisdictions"])
+    logger.info(f"  saved {len(out)} rows ({out.jurisdiction.nunique()} jurisdictions) -> {out_path.name}")
+    return out
+
+
+TURNOUT_URL = "https://www.elections.ca/content.aspx?section=ele&dir=turn&document=index&lang=e"
+TURNOUT_AGE_URL = ("https://open.canada.ca/data/dataset/b545fe25-5cf5-4488-9923-b5c2ebeeb8cc/"
+                   "resource/73586e35-290d-431c-94ba-5cf8a97c4ae5/download/"
+                   "turnout_by_age_gender_and_province_ge38_ge45.csv")
+_REFERENDUM_YEARS = {1898, 1942, 1992}   # the only non-election rows in the historical table
+_TURNOUT_AGES = ["18 to 24 years", "25 to 34 years", "35 to 44 years", "45 to 54 years",
+                 "55 to 64 years", "65 to 74 years", "75 years and over"]
+
+
+def fetch_voter_turnout():
+    """Federal voter turnout: the long historical series (Elections Canada, 1867–)
+    and turnout by age group (Elections Canada open data, 2004–).
+
+    The historical series is the turnout table on elections.ca, read with
+    pandas.read_html; the three referendum years (1898/1942/1992) are dropped so
+    the line is general-elections only. The by-age file is national, all-genders
+    turnout for the seven standard age groups — the persistent young-vs-old gap.
+    Emits two CSVs (the by-age one as a side output).
+    """
+    import io, requests
+    logger.info("Fetching federal voter turnout (Elections Canada)...")
+
+    # 1. Historical turnout, 1867– (HTML table)
+    try:
+        tables = pd.read_html(TURNOUT_URL)
+    except Exception as e:
+        logger.error(f"  Failed historical-turnout fetch: {e}")
+        return None
+    t = max(tables, key=len).copy()       # the turnout table is the largest on the page
+    t.columns = ["date", "population", "electors", "ballots", "turnout"][:len(t.columns)]
+    t["year"] = pd.to_numeric(t["date"].astype(str).str.extract(r"(\d{4})")[0], errors="coerce")
+    t["turnout"] = pd.to_numeric(
+        t["turnout"].astype(str).str.extract(r"([\d.]+)")[0], errors="coerce")
+    hist = (t.dropna(subset=["year", "turnout"])
+            .astype({"year": int})
+            .query("year not in @_REFERENDUM_YEARS")[["year", "turnout"]]
+            .drop_duplicates("year").sort_values("year").reset_index(drop=True))
+    if hist.empty:
+        return None
+    out_path = DATA_DIR / "population" / "voter_turnout.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    hist.to_csv(out_path, index=False)
+    save_metadata(out_path, df=hist, date_column="year",
+        source="Elections Canada (Voter Turnout at Federal Elections and Referendums)",
+        source_table="elections.ca turnout table",
+        frequency="per election", unit="% of registered electors",
+        transformations=["general elections only (1898/1942/1992 referendums dropped)"])
+    logger.info(f"  saved {len(hist)} elections -> {out_path.name}")
+
+    # 2. Turnout by age group, national, 2004– (open.canada.ca)
+    try:
+        r = requests.get(TURNOUT_AGE_URL, timeout=60)
+        r.raise_for_status()
+        a = pd.read_csv(io.BytesIO(r.content), encoding="utf-8-sig")  # file has a UTF-8 BOM
+        a = a[(a["PROVINCE_E"] == "Canada") & (a["GENDER_E"] == "All genders")
+              & (a["AGE_GROUP_E"].isin(_TURNOUT_AGES))].copy()
+        a = a.rename(columns={"YEAR": "year", "AGE_GROUP_E": "age_group",
+                              "TURNOUT_ELIGIBLE_ELECTOR": "turnout"})
+        # the open-data turnout is a 0–1 fraction; express as % to match the historical series
+        a["turnout"] = pd.to_numeric(a["turnout"], errors="coerce") * 100
+        a = (a.dropna(subset=["turnout"])[["year", "age_group", "turnout"]]
+             .sort_values(["year", "age_group"]).reset_index(drop=True))
+        age_path = DATA_DIR / "population" / "voter_turnout_by_age.csv"
+        a.to_csv(age_path, index=False)
+        save_metadata(age_path, df=a, date_column="year",
+            source="Elections Canada (Turnout by Age, Gender and Province)",
+            source_table="open.canada.ca b545fe25",
+            frequency="per election", unit="% of eligible electors",
+            transformations=["Canada, all genders, 7 standard age groups, 2004–"])
+        logger.info(f"  saved {len(a)} by-age rows -> {age_path.name}")
+    except Exception as e:
+        logger.warning(f"  by-age turnout unavailable (historical series still saved): {e}")
+
+    return hist
+
+
+def fetch_cma_vacancy():
+    """Rental vacancy rate by census metropolitan area, latest year (CMHC Rental
+    Market Survey via StatCan 34-10-0127-01) — the by-city spread behind the
+    national average (which the all-Canada line alone hides). One row per CMA for
+    the most recent reported year; the page draws it as a ranked bar.
+    """
+    logger.info("Fetching CMA rental vacancy (34-10-0127-01)...")
+    try:
+        df = _get_table("34-10-0127-01")
+    except Exception as e:
+        logger.error(f"Failed to fetch vacancy table: {e}")
+        return None
+    df = df.rename(columns={"REF_DATE": "year", "GEO": "geo", "VALUE": "vacancy_rate"})
+    df["year"] = pd.to_numeric(df["year"], errors="coerce")
+    df["vacancy_rate"] = pd.to_numeric(df["vacancy_rate"], errors="coerce")
+    # CMA-level rows only ("City, Province"); drop the Ottawa-Gatineau "part" rows
+    df = df[df["geo"].str.contains(",", na=False)
+            & ~df["geo"].str.contains(" part,", na=False)]
+    df = df.dropna(subset=["vacancy_rate", "year"])
+    df["cma"] = df["geo"].str.split(",").str[0].str.strip()
+    latest_year = int(df["year"].max())
+    out = (df[df["year"] == latest_year][["cma", "year", "vacancy_rate"]]
+           .drop_duplicates("cma").sort_values("vacancy_rate").reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "housing" / "statcan_cma_vacancy.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Statistics Canada / CMHC", source_table="34-10-0127-01",
+        frequency="annual", unit="vacancy rate (%)",
+        transformations=[f"CMA-level rows, latest year ({latest_year})"])
+    logger.info(f"  saved {len(out)} CMAs ({latest_year}) -> {out_path.name}")
+    return out
+
+
+def fetch_debt_service_ratio():
+    """Household debt service ratio — the share of disposable income absorbed by
+    obligated debt payments (interest *and* principal) — from StatCan 11-10-0065-01
+    (National Balance Sheet Accounts, seasonally adjusted, quarterly since 1990).
+
+    This is the payment-burden measure that the debt-to-income *level* (the OECD
+    household-debt chart on the same page) misses: the DSR climbs when interest
+    rates rise even if the debt stock is flat, so it captures the renewal stress of
+    the 2022–24 rate cycle. Split into mortgage vs non-mortgage (which sum exactly
+    to the total) so the larger, more rate-sensitive mortgage component is visible.
+    """
+    logger.info("Fetching household debt service ratio (11-10-0065-01)...")
+    try:
+        df = _get_table("11-10-0065-01")
+    except Exception as e:
+        logger.error(f"  Failed to fetch DSR table: {e}")
+        return None
+    df = df[(df["Seasonal adjustment"] == "Seasonally adjusted at annual rates")
+            & (df["UOM"] == "Ratio")]
+    wanted = {"Debt service ratio": "dsr_total",
+              "Mortgage debt service ratio": "dsr_mortgage",
+              "Non-mortgage debt service ratio": "dsr_nonmortgage",
+              "Debt service ratio, interest only": "dsr_interest_only"}
+    df = df[df["Estimates"].isin(wanted)].copy()
+    df["value"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df["date"] = pd.to_datetime(df["REF_DATE"], format="%Y-%m", errors="coerce")
+    wide = (df.pivot_table(index="date", columns="Estimates", values="value")
+              .rename(columns=wanted).reset_index().sort_values("date"))
+    wide = wide.dropna(subset=["dsr_total"])
+    if wide.empty:
+        return None
+    cols = ["date"] + [c for c in ("dsr_total", "dsr_mortgage", "dsr_nonmortgage",
+                                   "dsr_interest_only") if c in wide.columns]
+    out_path = DATA_DIR / "housing" / "statcan_debt_service_ratio.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wide[cols].to_csv(out_path, index=False)
+    save_metadata(out_path, df=wide, date_column="date",
+        source="Statistics Canada", source_table="11-10-0065-01",
+        frequency="quarterly", unit="% of disposable income (seasonally adjusted)",
+        transformations=["Seasonally adjusted at annual rates",
+                         "total / mortgage / non-mortgage debt service ratio"])
+    logger.info(f"  saved {len(wide)} quarters -> {out_path.name}")
+    return wide[cols]
+
+
+def fetch_provincial_finance():
+    """Provincial government finances on the comparable StatCan CGFS basis
+    (Canadian Government Finance Statistics, table 10-10-0017-01), normalised by
+    provincial GDP (36-10-0222-01, current prices).
+
+    The CGFS basis is consistent ACROSS provinces — unlike each province's own
+    Public Accounts, which use differing conventions — so it's the right source
+    for a cross-province comparison (the figures will not match a province's own
+    budget documents). Flows (revenue, expense, net operating balance) are the
+    'Transactions and other economic flows' display; the balance-sheet position
+    (net financial worth) is the 'Stocks' display. Net debt = − net financial
+    worth. Ten provinces only — the territories are tiny and largely federally
+    funded, which would distort a %-of-GDP comparison.
+    """
+    logger.info("Fetching provincial government finances (10-10-0017-01 + GDP)...")
+    PROV = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",
+            "New Brunswick", "Quebec", "Ontario", "Manitoba", "Saskatchewan",
+            "Alberta", "British Columbia"]
+    try:
+        cg = _get_table("10-10-0017-01")
+        gd = _get_table("36-10-0222-01")
+    except Exception as e:
+        logger.error(f"  Failed provincial-finance fetch: {e}")
+        return None
+    SOB = "Statement of operations and balance sheet"
+    cg = cg[(cg["Public sector components"] == "Provincial and territorial governments")
+            & (cg["GEO"].isin(PROV))].copy()
+    cg["VALUE"] = pd.to_numeric(cg["VALUE"], errors="coerce")
+    cg["year"] = pd.to_numeric(cg["REF_DATE"], errors="coerce")
+    flows = {"Revenue [1]": "revenue", "Expense [2]": "expense",
+             "Net operating balance": "net_op_balance"}
+    fl = (cg[(cg[SOB].isin(flows)) & (cg["Display value"] == "Transactions and other economic flows")]
+          .assign(item=lambda d: d[SOB].map(flows))
+          .pivot_table(index=["GEO", "year"], columns="item", values="VALUE"))
+    st = (cg[(cg[SOB] == "Net financial worth") & (cg["Display value"] == "Stocks")]
+          .groupby(["GEO", "year"])["VALUE"].first().rename("net_fin_worth"))
+    fin = fl.join(st).reset_index()
+    g = gd[(gd["Prices"] == "Current prices")
+           & (gd["Estimates"] == "Gross domestic product at market prices")
+           & (gd["GEO"].isin(PROV))].copy()
+    g["gdp"] = pd.to_numeric(g["VALUE"], errors="coerce")
+    g["year"] = pd.to_numeric(g["REF_DATE"], errors="coerce")
+    out = fin.merge(g[["GEO", "year", "gdp"]], on=["GEO", "year"], how="inner").dropna(subset=["gdp"])
+    out["revenue_pct_gdp"] = out["revenue"] / out["gdp"] * 100
+    out["expense_pct_gdp"] = out["expense"] / out["gdp"] * 100
+    out["balance_pct_gdp"] = out["net_op_balance"] / out["gdp"] * 100
+    out["net_debt_pct_gdp"] = -out["net_fin_worth"] / out["gdp"] * 100
+    out = (out.rename(columns={"GEO": "province"})
+           .sort_values(["province", "year"]).reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "government" / "statcan_provincial_finance.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Statistics Canada", source_table="10-10-0017-01; 36-10-0222-01",
+        frequency="annual", unit="$ millions and % of provincial GDP (CGFS basis)",
+        transformations=["CGFS provincial-territorial governments, 10 provinces; "
+                         "flows=Transactions, net financial worth=Stocks; "
+                         "normalised by current-price provincial GDP"])
+    logger.info(f"  saved {len(out)} rows ({out.province.nunique()} provinces) -> {out_path.name}")
+    return out
+
+
+_INCOME_DECILES = ["Lowest decile", "Second decile", "Third decile", "Fourth decile",
+                   "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
+                   "Ninth decile", "Highest decile"]
+
+
+def fetch_income_distribution():
+    """Income distribution over time (StatCan 11-10-0193-01, Canada, 1976–).
+
+    Emits two tidy CSVs:
+    - income_deciles_avg.csv — average **after-tax** income by decile, in constant
+      dollars (real), per year → the decile year-slider (the distribution stretches
+      as real incomes grow and the top decile pulls away).
+    - income_top_bottom_share.csv — the share of income held by the top 10% (highest
+      decile) and the bottom 40% (four lowest deciles), for both **market** and
+      **after-tax** income → the inequality-over-time line with a redistribution
+      toggle (taxes and transfers narrow the gap).
+    """
+    logger.info("Fetching income distribution by decile (11-10-0193-01)...")
+    try:
+        df = _get_table("11-10-0193-01")
+    except Exception as e:
+        logger.error(f"Failed to fetch income-distribution table: {e}")
+        return None
+    ca = df[df["GEO"] == "Canada"].copy()
+    ca["year"] = pd.to_numeric(ca["REF_DATE"], errors="coerce")
+    ca["VALUE"] = pd.to_numeric(ca["VALUE"], errors="coerce")
+
+    # 1. Average after-tax income by decile (real) — for the slider
+    avg = ca[(ca["Statistics"] == "Average income")
+             & (ca["Income concept"] == "Adjusted after-tax income")
+             & (ca["Income decile"].isin(_INCOME_DECILES))]
+    avg = (avg[["year", "Income decile", "VALUE"]]
+           .rename(columns={"Income decile": "decile", "VALUE": "avg_income"})
+           .dropna(subset=["year", "avg_income"]))
+    avg["year"] = avg["year"].astype(int)
+    if avg.empty:
+        return None
+    avg_path = DATA_DIR / "income" / "income_deciles_avg.csv"
+    avg_path.parent.mkdir(parents=True, exist_ok=True)
+    avg.sort_values(["year", "decile"]).to_csv(avg_path, index=False)
+    save_metadata(avg_path, df=avg, date_column="year",
+        source="Statistics Canada", source_table="11-10-0193-01",
+        frequency="annual", unit="average after-tax income (constant dollars)",
+        transformations=["Canada, average after-tax income by decile, real $"])
+    logger.info(f"  saved {len(avg)} rows -> {avg_path.name}")
+
+    # 2. Top-10% vs bottom-40% income share, market + after-tax — for the share line
+    rows = []
+    for concept, label in [("Adjusted market income", "Market income"),
+                           ("Adjusted after-tax income", "After-tax income")]:
+        sh = ca[(ca["Statistics"] == "Share of income")
+                & (ca["Income concept"] == concept)
+                & (ca["Income decile"].isin(_INCOME_DECILES))]
+        piv = sh.pivot_table(index="year", columns="Income decile", values="VALUE")
+        for y, r in piv.iterrows():
+            top10 = r.get("Highest decile")
+            bottom40 = r.reindex(_INCOME_DECILES[:4]).sum()
+            if pd.notna(top10):
+                rows.append({"year": int(y), "concept": label,
+                             "top10": round(float(top10), 1), "bottom40": round(float(bottom40), 1)})
+    share = pd.DataFrame(rows).sort_values(["concept", "year"]).reset_index(drop=True)
+    share_path = DATA_DIR / "income" / "income_top_bottom_share.csv"
+    share.to_csv(share_path, index=False)
+    save_metadata(share_path, df=share, date_column="year",
+        source="Statistics Canada", source_table="11-10-0193-01",
+        frequency="annual", unit="% share of income",
+        transformations=["Canada; top-10% (highest decile) and bottom-40% (4 lowest) shares; market + after-tax"])
+    logger.info(f"  saved {len(share)} rows -> {share_path.name}")
+    return avg
 
 
 PROVINCES = ["Newfoundland and Labrador", "Prince Edward Island", "Nova Scotia",

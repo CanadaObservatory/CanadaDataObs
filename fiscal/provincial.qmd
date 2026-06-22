@@ -1,0 +1,95 @@
+---
+title: "Provincial Finances"
+description: "What the provinces raise, spend, and owe — on a comparable basis"
+body-classes: area-government
+---
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date
+from pipeline.charts import category_bar, lines_over_time, province_colors
+
+SHOW = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+prov_path = "data/government/statcan_provincial_finance.csv"
+# West-to-east order, each province a fixed colour for the over-time chart.
+PROV_ORDER = ["British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario",
+              "Quebec", "New Brunswick", "Nova Scotia", "Prince Edward Island",
+              "Newfoundland and Labrador"]
+PROV_COLORS = province_colors(PROV_ORDER)  # locked identities (config PROVINCE_COLORS)
+```
+
+The federal government is only half of Canada's public finances: the provinces deliver health care, education, and most social services, and they raise and borrow accordingly. This page compares the ten provinces on a **consistent basis** — Statistics Canada's Canadian Government Finance Statistics (CGFS) — rather than each province's own public accounts, which use differing conventions. **Because of that, the figures here will not match a province's own budget documents**; they are built for comparison, not for a province's bottom line. Everything is shown as a share of each province's GDP. (The three territories are left out: they are small and largely federally funded, which would distort a share-of-GDP comparison.)
+
+## How much each province owes
+
+Net debt — what a government owes after subtracting its financial assets — is the broadest measure of a province's accumulated fiscal position. As a share of GDP it varies widely: resource-rich **Alberta** carries almost none, while **Ontario**, **Manitoba**, and **Newfoundland and Labrador** carry the most.
+
+```{python}
+#| echo: false
+if os.path.exists(prov_path):
+    pf = pd.read_csv(prov_path)
+    latest = pf[pf["year"] == pf["year"].max()].copy()
+    yr = int(pf["year"].max())
+    fig = category_bar(latest, "province", "net_debt_pct_gdp",
+        xaxis_title="Net debt (% of provincial GDP)", value_fmt=".1f", ticksuffix="%",
+        color="#17324D", hovertemplate="%{y}: %{x:.1f}% of GDP<extra></extra>",
+        source_note=f"Source: Statistics Canada CGFS 10-10-0017-01 + GDP 36-10-0222-01 (net financial worth basis) | {yr}")
+    fig.show(config=SHOW)
+else:
+    print("Provincial finance data not yet available. Run the data pipeline.")
+```
+
+## What provinces raise and spend
+
+How big is each provincial government, and is it running a surplus or a deficit? Each row below runs from **revenue** to **expense** as a share of GDP. Where the bar reaches further right, the province is spending more than it takes in (a deficit); where revenue is to the right of expense, it is in surplus. The smaller provinces run larger governments relative to their economies — partly because federal transfers top up their revenue.
+
+```{python}
+#| echo: false
+if os.path.exists(prov_path):
+    pf = pd.read_csv(prov_path)
+    d = pf[pf["year"] == pf["year"].max()].copy()
+    yr = int(pf["year"].max())
+    d = d.sort_values("expense_pct_gdp")
+    order = d["province"].tolist()
+    figd = go.Figure()
+    for _, r in d.iterrows():
+        figd.add_trace(go.Scatter(x=[r["revenue_pct_gdp"], r["expense_pct_gdp"]],
+            y=[r["province"]] * 2, mode="lines",
+            line=dict(color="#cfcfcf", width=3), showlegend=False, hoverinfo="skip"))
+    figd.add_trace(go.Scatter(x=d["revenue_pct_gdp"], y=d["province"], mode="markers",
+        name="Revenue", marker=dict(color="#59a14f", size=10),
+        hovertemplate="Revenue: %{x:.1f}% of GDP<extra>%{y}</extra>"))
+    figd.add_trace(go.Scatter(x=d["expense_pct_gdp"], y=d["province"], mode="markers",
+        name="Expense", marker=dict(color="#e15759", size=10),
+        hovertemplate="Expense: %{x:.1f}% of GDP<extra>%{y}</extra>"))
+    figd.update_layout(plot_bgcolor="white", height=460,
+        xaxis=dict(title="% of provincial GDP", gridcolor="#e0e0e0", ticksuffix="%"),
+        yaxis=dict(title="", categoryorder="array", categoryarray=order),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(l=10, r=20, t=50, b=70))
+    figd.add_annotation(text=f"Source: Statistics Canada CGFS 10-10-0017-01 + GDP 36-10-0222-01 | {yr}",
+        xref="paper", yref="paper", x=0, y=-0.13, showarrow=False, font=dict(size=10, color="#999"))
+    figd.show(config=SHOW)
+```
+
+## Net debt over time
+
+Provincial debt burdens have moved apart over the years. Alberta swung from net *assets* to modest debt as resource revenue fell; Newfoundland and Labrador's burden rose sharply; most others have been comparatively steady. (Use the legend to isolate a province.)
+
+```{python}
+#| echo: false
+if os.path.exists(prov_path):
+    pf = pd.read_csv(prov_path)
+    fig = lines_over_time(pf, "year", "net_debt_pct_gdp", "province",
+        yaxis_title="Net debt (% of provincial GDP)", colors=PROV_COLORS,
+        group_order=PROV_ORDER, yticksuffix="%", hover_decimals=1, rangemode="normal",
+        source_note=f"Source: Statistics Canada CGFS 10-10-0017-01 + GDP 36-10-0222-01 | Data as of: {get_data_date(prov_path)}")
+    fig.show(config=SHOW)
+```
+
+## Download data
+
+- [Provincial government finances, CGFS basis (CSV)](../data/government/statcan_provincial_finance.csv) — Statistics Canada 10-10-0017-01 + 36-10-0222-01

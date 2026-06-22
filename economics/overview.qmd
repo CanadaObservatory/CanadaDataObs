@@ -1,0 +1,73 @@
+---
+title: "Economy & Affordability"
+title-block-banner: "#C2972F"
+title-block-banner-color: "#17324D"
+body-classes: area-economy
+---
+
+![](../visual_assets/brand/botanical/solid/leaf-display-gold.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Economy & Affordability colour"}
+
+How fast the economy is growing, what it costs to live and borrow, and whether incomes are keeping up — Canada measured against a broad group of 17 OECD peers.
+
+::::{.columns}
+
+:::{.column .area-card .area-economy width="32%"}
+![](../visual_assets/brand/motifs/banner-economy.svg){.area-banner}
+
+### [Growth & Jobs](index.qmd)
+GDP and GDP per capita, productivity, employment and unemployment, business
+investment, trade, and the dollar.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-economy width="32%"}
+![](../visual_assets/brand/motifs/banner-economy.svg){.area-banner}
+
+### [Cost of Living](cost-of-living.qmd)
+Inflation against the Bank of Canada's target, what's driving it, and the
+minimum wage in nominal and real terms.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-economy width="32%"}
+![](../visual_assets/brand/motifs/banner-economy.svg){.area-banner}
+
+### [Borrowing Costs](borrowing-costs.qmd)
+The policy rate over the long run, mortgage rates, and government bond yields by
+term.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-economy width="32%"}
+![](../visual_assets/brand/motifs/banner-economy.svg){.area-banner}
+
+### [Housing](../housing/index.qmd)
+House prices, the gap between prices and incomes, rent, starts and vacancy, and
+household debt — with affordability mapped by city and neighbourhood.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-economy width="32%"}
+![](../visual_assets/brand/motifs/banner-economy.svg){.area-banner}
+
+### [Income & Inequality](../income/index.qmd)
+Wages and incomes, the Gini coefficient and redistribution, poverty, and the
+income distribution over time.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+:::
+
+::::

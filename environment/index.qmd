@@ -17,7 +17,7 @@ from pipeline.charts import peer_comparison_line, ranked_bar
 
 How much carbon Canada emits, how that has changed over time, and how its energy is sourced — shown against OECD peers. Production-based measures count emissions where they physically occur.
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -27,45 +27,31 @@ from pipeline.charts import page_snapshot
 page_snapshot("environment").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Greenhouse Gas Emissions and the 2030 Target
+## Greenhouse gas emissions
 
-Canada's total greenhouse gas emissions — all gases, on the National Inventory Report basis (the official series). Canada has pledged to cut emissions **40–45% below the 2005 level by 2030**; the green marker shows that target band, and the dotted line is the decline still required from the latest year. Emissions have drifted down from their mid-2000s peak but remain well above the 2030 path.
+Canada's total greenhouse gas emissions — all gases, on the National Inventory Report basis (the official series). Emissions have drifted down from their mid-2000s peak. Successive federal governments have committed to reducing emissions, though progress has remained challenging.
 
 ```{python}
 #| echo: false
 ghg_path = "data/environment/eccc_ghg.csv"
 if os.path.exists(ghg_path):
     g = pd.read_csv(ghg_path)
-    v2005 = g.loc[g["year"] == 2005, "ghg_mt"].iloc[0]
-    t_lo, t_hi = v2005 * 0.55, v2005 * 0.60      # 45% and 40% below 2005
-    t_mid = (t_lo + t_hi) / 2
-    last_year = int(g["year"].max()); last_val = g.loc[g["year"] == last_year, "ghg_mt"].iloc[0]
     figg = go.Figure()
     figg.add_trace(go.Scatter(x=g["year"], y=g["ghg_mt"], mode="lines", name="Emissions",
         line=dict(color=CANADA_COLOR, width=3), hovertemplate="%{x}: %{y:.0f} Mt<extra></extra>"))
-    figg.add_trace(go.Scatter(x=[last_year, 2030], y=[last_val, t_mid], mode="lines",
-        name="Decline required to hit target", line=dict(color="#888888", width=2, dash="dot"),
-        hovertemplate="%{x}: %{y:.0f} Mt<extra></extra>"))
-    figg.add_trace(go.Scatter(x=[2030], y=[t_mid], mode="markers",
-        name="2030 target (40–45% below 2005)",
-        marker=dict(color="#2ca02c", size=10, symbol="diamond"),
-        error_y=dict(type="data", symmetric=False, array=[t_hi - t_mid], arrayminus=[t_mid - t_lo],
-                     color="#2ca02c", thickness=2, width=8),
-        hovertemplate="2030 target: %{y:.0f} Mt (40–45% below 2005)<extra></extra>"))
     figg.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
         yaxis=dict(title="GHG emissions (Mt CO2e)", gridcolor="#e0e0e0", rangemode="tozero", ticksuffix=" Mt"),
         xaxis=dict(title="", gridcolor="#e0e0e0", dtick=5),
-        legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="left", x=0),
-        margin=dict(t=30, b=120, r=20))
+        margin=dict(t=30, b=115, r=20))
     figg.add_annotation(
         text=f"Source: Environment and Climate Change Canada, National Inventory Report (CESI) | Data as of: {get_data_date(ghg_path)}",
-        xref="paper", yref="paper", x=0, y=-0.30, showarrow=False, font=dict(size=10, color="#999"))
+        xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))
     figg.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("GHG data not yet available. Run the data pipeline.")
 ```
 
-## Greenhouse Gas Emissions by Economic Sector
+## Greenhouse gas emissions by economic sector
 
 Where the emissions come from. Oil and gas and transport are the two largest sources; electricity has fallen as provinces phased out coal.
 
@@ -83,7 +69,7 @@ else:
     print("GHG-by-sector data not yet available. Run the data pipeline.")
 ```
 
-## CO2 Emissions per Capita
+## CO2 emissions per capita
 
 Production-based CO2 emissions per person, in tonnes of CO2. This is the most directly comparable measure of a country's carbon footprint, controlling for population size.
 
@@ -109,7 +95,7 @@ else:
     print("CO2 per capita data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest CO2 per Capita: Ranked
+## Latest CO2 per capita: ranked
 
 ```{python}
 #| echo: false
@@ -121,7 +107,40 @@ if os.path.exists(co2cap_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## CO2 Emissions Trend (Indexed, 2000 = 100)
+## CO2 per capita in global context
+
+The comparison above is among wealthy countries, where Canada sits at the high end. Widening the lens to the whole world changes the picture. Canada and the United States are among the highest per-capita emitters anywhere; China's emissions per person have climbed steeply since 2000 to around the world's upper-middle, while India's remain low. The world average (dashed) sits well below all of them — high per-capita emissions are a feature of rich, energy-intensive economies. (China and India are shown here for global context; they are not part of the OECD peer group used elsewhere.)
+
+```{python}
+#| echo: false
+co2glob_path = "data/environment/owid_co2_global_context.csv"
+if os.path.exists(co2glob_path):
+    g = pd.read_csv(co2glob_path)
+    STYLE = {"CAN": (CANADA_COLOR, 3, "solid"), "USA": ("#1f77b4", 2, "solid"),
+             "CHN": ("#ff7f0e", 2, "solid"), "IND": ("#2ca02c", 2, "solid"),
+             "WLD": ("#888888", 2, "dot")}
+    ORDER = [("CAN", "Canada"), ("USA", "United States"), ("CHN", "China"),
+             ("IND", "India"), ("WLD", "World average")]
+    fig = go.Figure()
+    for code, label in ORDER:
+        s = g[g["country_code"] == code].sort_values("year")
+        col, w, dash = STYLE[code]
+        fig.add_trace(go.Scatter(x=s["year"], y=s["co2_per_capita"], name=label,
+            mode="lines", line=dict(color=col, width=w, dash=dash),
+            hovertemplate=f"{label}: %{{y:.1f}} t<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title="Tonnes CO2 per capita", gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        margin=dict(t=30, b=90, r=160),
+        annotations=[dict(text=f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(co2glob_path)}",
+            xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Global-context CO2 data not yet available. Run the data pipeline.")
+```
+
+## CO2 emissions trend (indexed, 2000 = 100)
 
 How each country's CO2 emissions have changed relative to 2000 levels. Values below 100 indicate reductions since 2000; above 100 indicate growth.
 
@@ -149,7 +168,7 @@ else:
     print("CO2 indexed data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Consumption-Based CO2 per Capita
+## Consumption-based CO2 per capita
 
 The per-capita measure above counts emissions where they physically occur (production-based). This consumption-based measure instead assigns emissions to where goods are finally consumed, so the carbon embodied in imported goods counts against the importer rather than the exporter. Comparing the two shows whether trade flatters or worsens a country's footprint — relevant for a trading economy like Canada's.
 
@@ -168,7 +187,7 @@ else:
     print("Consumption-based CO2 data not yet available. Run the data pipeline.")
 ```
 
-## Latest Consumption-Based CO2: Ranked
+## Latest consumption-based CO2: ranked
 
 ```{python}
 #| echo: false
@@ -180,7 +199,39 @@ if os.path.exists(cco2_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Low-Carbon Electricity
+## CO2 emissions intensity
+
+Emissions per dollar of economic output — how much CO2 the economy releases to produce a given amount of GDP. It is one gauge of how carbon-heavy growth is, and most peers have brought it down steadily while their economies grew. Canada runs among the highest in the group: a cold climate, long transport distances, and an energy- and resource-heavy economy all raise the carbon released per dollar of output.
+
+```{python}
+#| echo: false
+co2gdp_path = "data/environment/owid_co2_per_gdp.csv"
+if os.path.exists(co2gdp_path):
+    df = pd.read_csv(co2gdp_path)
+    df = df[df["year"] >= 1990]
+    fig = peer_comparison_line(df, "year", "co2_per_gdp",
+        title="", yaxis_title="kg CO2 per $ of GDP", show_average=True)
+    fig.update_layout(annotations=[dict(
+        text=f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(co2gdp_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CO2 intensity data not yet available. Run the data pipeline.")
+```
+
+## Latest CO2 emissions intensity: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(co2gdp_path):
+    df = pd.read_csv(co2gdp_path)
+    fig = ranked_bar(df, "co2_per_gdp", "kg CO2 per $ of GDP",
+        f"Source: Our World in Data (Global Carbon Project) | Data as of: {get_data_date(co2gdp_path)}",
+        hover_template="%{y}: %{x:.2f} kg per $<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## Low-carbon electricity
 
 The share of electricity generated from non-fossil sources — hydro, nuclear, wind, and solar combined. This is the measure most relevant to decarbonising the grid: it counts nuclear (which "renewables" alone leaves out), and unlike total energy it isn't dominated by the oil and gas still burned for transport and heating.
 
@@ -189,6 +240,7 @@ The share of electricity generated from non-fossil sources — hydro, nuclear, w
 emix_path = "data/environment/owid_energy_mix.csv"
 if os.path.exists(emix_path):
     df = pd.read_csv(emix_path)
+    df = df[df["low_carbon_share_elec"].notna()]
     fig = peer_comparison_line(df, "year", "low_carbon_share_elec",
         title="", yaxis_title="% of electricity from low-carbon sources",
         show_average=True)
@@ -201,7 +253,7 @@ else:
     print("Electricity data not yet available. Run the data pipeline.")
 ```
 
-## Latest Low-Carbon Electricity: Ranked
+## Latest low-carbon electricity: ranked
 
 ```{python}
 #| echo: false
@@ -213,7 +265,7 @@ if os.path.exists(emix_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Electricity Mix by Country
+## Electricity mix by country
 
 How each country generates electricity, by source (latest available year). Fossil fuels (coal, oil, gas) versus nuclear and renewables (which include hydro). Countries are sorted cleanest-first.
 
@@ -247,14 +299,14 @@ if os.path.exists(emix_path):
         height=680, margin=dict(b=180, t=20),
         annotations=[dict(
             text=f"Source: Our World in Data (Energy Institute, Ember) | Data as of: {get_data_date(emix_path)}",
-            xref="paper", yref="paper", x=0, y=-0.34,
+            xref="paper", yref="paper", x=0, y=-0.26,
             showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Electricity mix data not yet available. Run the data pipeline.")
 ```
 
-## Canada's Electricity Mix Over Time
+## Canada's electricity mix over time
 
 How Canada generates electricity has shifted over the decades — coal phasing down, with hydro and nuclear supplying most of the grid.
 
@@ -286,7 +338,7 @@ else:
     print("Electricity mix data not yet available. Run the data pipeline.")
 ```
 
-## Electricity Mix by Province
+## Electricity mix by province
 
 Canada has no single national grid — electricity is a provincial responsibility, and the mix varies enormously from one province to the next. Quebec, Manitoba, British Columbia, and Newfoundland & Labrador run almost entirely on hydro; Ontario leans heavily on nuclear. Among the provinces that still burn fossil fuels, the *type* matters: coal emits roughly twice the CO2 of natural gas per unit of electricity, so it is shown separately. Nova Scotia and Saskatchewan still lean on coal, while Alberta has largely switched from coal to gas. This is generation (actual output), not installed capacity.
 
@@ -324,7 +376,7 @@ if os.path.exists(prov_elec_path):
         plot_bgcolor="white", xaxis=dict(gridcolor="#e0e0e0", range=[0, 100]),
         yaxis=dict(tickfont=dict(size=11)),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
-        height=560, margin=dict(b=80, t=90, l=140),
+        height=560, margin=dict(b=120, t=90, l=140),
         annotations=[dict(
             text=f"Source: Statistics Canada 25-10-0015-01 & 25-10-0084-01 | as of {get_data_date(prov_elec_path)}",
             xref="paper", yref="paper", x=0, y=-0.18, xanchor="left",
@@ -334,7 +386,7 @@ else:
     print("Provincial electricity data not yet available. Run the data pipeline.")
 ```
 
-## Total Energy Mix in Canada
+## Total energy mix in Canada
 
 Electricity is only part of the picture. This shows Canada's **total primary energy** — including the oil and gas burned for transport and heating, not just electricity — which is why fossil fuels still dominate even though the grid is mostly low-carbon.
 
@@ -373,12 +425,14 @@ else:
     print("Energy mix data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [GHG Emissions, national total (CSV)](../data/environment/eccc_ghg.csv) — ECCC National Inventory Report (CESI)
 - [GHG Emissions by Economic Sector (CSV)](../data/environment/eccc_ghg_by_sector.csv) — ECCC (CESI)
 - [CO2 per Capita (CSV)](../data/environment/oecd_co2_per_capita.csv) — OECD Green Growth Indicators
 - [CO2 Emissions Indexed (CSV)](../data/environment/oecd_co2_indexed.csv) — OECD Green Growth Indicators
 - [Consumption-Based CO2 per Capita (CSV)](../data/environment/owid_consumption_co2.csv) — Our World in Data (Global Carbon Project)
+- [CO2 Emissions Intensity per GDP (CSV)](../data/environment/owid_co2_per_gdp.csv) — Our World in Data (Global Carbon Project)
+- [CO2 per Capita — Global Context (CSV)](../data/environment/owid_co2_global_context.csv) — Our World in Data (Global Carbon Project)
 - [Energy Mix — electricity & primary (CSV)](../data/environment/owid_energy_mix.csv) — Our World in Data (Energy Institute, Ember)
 - [Provincial Electricity Generation (CSV)](../data/environment/statcan_provincial_electricity.csv) — Statistics Canada 25-10-0015-01

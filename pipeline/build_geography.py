@@ -148,6 +148,39 @@ def build_provinces():
     _write_geojson(gj, f"{GEO_DIR}/prov_2021.geojson")
 
 
+# Natural Earth 1:50m provinces/states — the standard lightweight, generalised
+# (smooth-coastline, islands-as-islands) source for this kind of national choropleth.
+# Public domain; 2.3 MB for the whole world vs StatCan's 133 MB cartographic file.
+NE_PROV_URL = ("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/"
+               "master/geojson/ne_50m_admin_1_states_provinces.geojson")
+_NE_POSTAL_TO_PRUID = {"NL": "10", "PE": "11", "NS": "12", "NB": "13", "QC": "24",
+                       "ON": "35", "MB": "46", "SK": "47", "AB": "48", "BC": "59",
+                       "YT": "60", "NT": "61", "NU": "62"}
+
+
+def build_canada_provinces():
+    """Canada province/territory boundaries for the CLEAN static maps — the classic
+    Canada shape (Arctic archipelago, Newfoundland, Vancouver Island as real islands;
+    bays as water). From **Natural Earth 1:50m** (public domain): pre-generalised, so
+    coastlines are smooth (not feathered), and only ~0.25 MB. Keyed by PRUID so the
+    StatCan/ECCC indicators join straight on. The interactive mapbox maps keep the
+    generalised prov_2021.geojson (their tiled basemap hides the over-water boundary)."""
+    import io
+    r = requests.get(NE_PROV_URL, timeout=120)
+    r.raise_for_status()
+    g = gpd.read_file(io.BytesIO(r.content))
+    g = g[g["iso_a2"] == "CA"].copy()
+    g["pruid"] = g["postal"].map(_NE_POSTAL_TO_PRUID)
+    g = g.dropna(subset=["pruid"])
+    gj = json.loads(g[["pruid", "geometry"]].to_json())
+    for ft in gj["features"]:
+        ft["id"] = ft["properties"]["pruid"]
+        ft["geometry"]["coordinates"] = _rnd(ft["geometry"]["coordinates"])
+    _write_geojson(gj, f"{GEO_DIR}/canada_provinces.geojson")
+    print(f"  wrote canada_provinces.geojson: {len(gj['features'])} provinces, "
+          f"{round(os.path.getsize(GEO_DIR + '/canada_provinces.geojson') / 1e3)} KB")
+
+
 COMP_CMA_URL = ("https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/"
                 "download-telecharger/comp/GetFile.cfm?Lang=E&FILETYPE=CSV&GEONO=002")
 
@@ -330,6 +363,121 @@ def build_wildfire_points(year=WILDFIRE_YEAR):
     out.to_csv(path, index=False)
     print(f"  wrote {path}: {len(out)} fires, {round(os.path.getsize(path) / 1e6, 2)} MB; "
           f"total area {out['size_ha'].sum() / 1e6:.1f} Mha")
+
+
+# Parks Canada "Places administered by Parks Canada" ArcGIS FeatureServer (OGL-Canada).
+NATIONAL_PARKS_URL = ("https://services2.arcgis.com/wCOMu5IS7YdSyPNx/arcgis/rest/"
+                      "services/vw_Places_Public_lieux_public_APCA/FeatureServer/0/query")
+
+
+def build_national_parks():
+    """Canada's national parks & park reserves as points (centroid + real area) for
+    a proportional-symbol map, from the Parks Canada 'Places administered by Parks
+    Canada' service (OGL-Canada). The ~46 National Park + National Park Reserve
+    polygons are far too heavy to inline (~15 MB even server-simplified, because of
+    the complex northern coastlines), and at national zoom their outlines read as
+    dots anyway — so we keep only the centroid and the area (computed in an
+    equal-area projection), and the page draws a bubble map sized by area. Marine
+    conservation areas (which dwarf the land parks) and national historic sites (a
+    different story) are excluded. One-time build, like the other static assets."""
+    print("Building national parks (Parks Canada) ...")
+    params = {"where": "PLACE_TYPE_E IN ('National Park','National Park Reserve')",
+              "outFields": "PLACE_TYPE_E,DESC_EN", "returnGeometry": "true",
+              "maxAllowableOffset": "0.02", "outSR": "4326", "f": "geojson"}
+    r = requests.get(NATIONAL_PARKS_URL, params=params, timeout=180)
+    r.raise_for_status()
+    with open("/tmp/national_parks.geojson", "wb") as f:
+        f.write(r.content)
+    g = gpd.read_file("/tmp/national_parks.geojson")
+    eq = g.to_crs("ESRI:102001")               # Canada Albers equal-area
+    g["area_km2"] = (eq.area / 1e6).round(0)
+    cent = eq.centroid.to_crs(epsg=4326)
+    out = pd.DataFrame({
+        "name": g["DESC_EN"].str.replace(" of Canada", "", regex=False),
+        "type": g["PLACE_TYPE_E"],
+        "lat": cent.y.round(4), "lon": cent.x.round(4),
+        "area_km2": g["area_km2"].astype("Int64"),
+    }).dropna(subset=["lat", "lon"]).sort_values("area_km2").reset_index(drop=True)
+    path = f"{GEO_DIR}/national_parks.csv"
+    out.to_csv(path, index=False)
+    print(f"  wrote {path}: {len(out)} parks; largest {int(out['area_km2'].max()):,} km² "
+          f"({round(os.path.getsize(path) / 1e3, 1)} KB)")
+
+
+# CPCAD (Canadian Protected and Conserved Areas Database, ECCC) — the comprehensive
+# national/provincial/territorial protected-areas layer. Used only for the detailed
+# park-boundaries page (the headline %-conserved figures come from CESI).
+CPCAD_URL = "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/0"
+# The recognisable park designations only — national + provincial + territorial parks
+# (and Québec's "parcs nationaux", which are provincial). Excludes municipal/regional/
+# urban/recreation/nature/historic/marine designations and non-park conservation areas.
+_PARK_TYPES = ["National Park", "National Park Reserve", "National Urban Park",
+               "Provincial Park", "Wildland Provincial Park", "Wilderness Park",
+               "Territorial Park", "Quebec's national park", "Quebec's national park reserve",
+               "Conservation Park"]   # Conservation Park = Gatineau Park only (NCC, federal)
+_PARK_JUR = {"National Park": "Federal", "National Park Reserve": "Federal",
+             "National Urban Park": "Federal", "Territorial Park": "Territorial",
+             "Provincial Park": "Provincial", "Wildland Provincial Park": "Provincial",
+             "Wilderness Park": "Provincial", "Quebec's national park": "Provincial",
+             "Quebec's national park reserve": "Provincial", "Conservation Park": "Federal"}
+
+
+def build_parks_detailed():
+    """The actual SHAPES of Canada's national, provincial and territorial parks
+    (terrestrial only) from CPCAD — for the dedicated, heavier park-boundaries page
+    (linked from Protected Areas, the same light-index / heavy-detail split the
+    census tract maps use). ~743 park polygons, server-simplified then repaired to
+    ~1.1 MB of VALID geometry, each tagged with its jurisdiction (the page colours by
+    it). Marine areas (which dwarf the land parks) and non-park designations are
+    excluded. One-time build, like the other static geo assets.
+
+    NOTE: the geometry MUST be valid — Mapbox GL silently fails to draw a layer that
+    contains self-intersecting polygons (the map comes up blank). Two traps: (1)
+    naive coordinate rounding introduces self-intersections — so we do NOT round; (2)
+    grid-snapping (shapely set_precision) repairs validity but shatters the fragmented
+    zoned parks into spiky shards — so we use TOPOLOGY-PRESERVING simplify instead.
+    CPCAD maps protected ZONES, so some parks (e.g. Algonquin) are only their
+    protected core, fragmented — that's the data, caveated on the page, not a bug."""
+    print("Building detailed park boundaries (CPCAD terrestrial parks) ...")
+    inlist = ",".join("'" + t.replace("'", "''") + "'" for t in _PARK_TYPES)
+    # Exclude only MARINE biomes (not "filter to terrestrial") — the latter also drops
+    # parks coded "Not included in statistics", which are real land parks.
+    where = f"PA_BIOME NOT LIKE 'Marine%' AND TYPE_E IN ({inlist})"
+    params = {"where": where, "outFields": "NAME_E,TYPE_E,O_AREA_HA",
+              "returnGeometry": "true", "maxAllowableOffset": "0.002",
+              "outSR": "4326", "f": "geojson"}
+    import io
+    from collections import Counter
+    r = requests.get(CPCAD_URL + "/query", params=params, timeout=300)
+    g = gpd.read_file(io.BytesIO(r.content))
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    # The ArcGIS output carries self-intersections, and Mapbox GL SILENTLY fails to
+    # draw a layer with invalid polygons (blank map). Grid-snapping (set_precision)
+    # repairs validity but shatters the fragmented zoned parks into spiky shards, so
+    # use TOPOLOGY-PRESERVING simplification instead: buffer(0) to repair, then
+    # simplify (which never introduces self-intersections), then buffer(0) again.
+    g["geometry"] = g.geometry.buffer(0)
+    g["geometry"] = g.geometry.simplify(0.0015, preserve_topology=True).buffer(0)
+    g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
+    g["name"] = g["NAME_E"].fillna("").str.strip()
+    g["type"] = g["TYPE_E"]
+    g["jurisdiction"] = g["TYPE_E"].map(_PARK_JUR).fillna("Provincial")
+    g["area_km2"] = (pd.to_numeric(g["O_AREA_HA"], errors="coerce").fillna(0) / 100).round().astype(int)
+    g = g.sort_values("area_km2").reset_index(drop=True)
+    g["fid"] = g.index.astype(str)
+    gj = json.loads(g[["fid", "name", "type", "jurisdiction", "area_km2", "geometry"]].to_json())
+    for ft in gj["features"]:
+        ft["id"] = ft["properties"].pop("fid")
+        # NB: do NOT round coordinates here — rounding after the repair re-introduces
+        # self-intersections (and a blank Mapbox layer). The simplify(0.004) above
+        # already controls vertex count / file size; buffer(0) must stay the last op.
+    os.makedirs(GEO_DIR, exist_ok=True)
+    _write_geojson(gj, f"{GEO_DIR}/parks_detailed.geojson")
+    chk = gpd.read_file(f"{GEO_DIR}/parks_detailed.geojson")
+    jc = Counter(f["properties"]["jurisdiction"] for f in gj["features"])
+    print(f"  wrote parks_detailed.geojson: {len(gj['features'])} parks {dict(jc)}, "
+          f"invalid={int((~chk.is_valid).sum())}, "
+          f"{round(os.path.getsize(GEO_DIR + '/parks_detailed.geojson') / 1e6, 2)} MB")
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,43 @@
+---
+title: "Education, Science & Innovation"
+title-block-banner: "#6B7280"
+title-block-banner-color: "#F7F4EE"
+body-classes: area-education
+---
+
+![](../visual_assets/brand/botanical/solid/leaf-display-slate.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Education, Science & Innovation colour"}
+
+What Canadians pay to learn, what the country spends on research, and how much of that becomes business innovation — set against peer countries.
+
+::::{.columns}
+
+:::{.column .area-card .area-education width="32%"}
+![](../visual_assets/brand/motifs/banner-education.svg){.area-banner}
+
+### [Education](index.qmd)
+University tuition over time, by province, by field, and domestic versus
+international.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-education width="32%"}
+![](../visual_assets/brand/motifs/banner-education.svg){.area-banner}
+
+### [Science](../science/index.qmd)
+Research and development spending (GERD) and the size of Canada's research
+workforce, against peers.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-education width="32%"}
+![](../visual_assets/brand/motifs/banner-education.svg){.area-banner}
+
+### [Innovation](../innovation/index.qmd)
+Business expenditure on research and development (BERD), against peers.
+:::
+
+::::

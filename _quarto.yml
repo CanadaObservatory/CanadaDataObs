@@ -34,6 +34,8 @@ website:
     left:
       - text: People
         menu:
+          - href: population/overview.qmd
+            text: Overview
           - href: population/index.qmd
             text: Population & Growth
           - href: population/diversity.qmd
@@ -44,36 +46,54 @@ website:
             text: Languages
           - href: population/citizenship.qmd
             text: Citizenship
+          - href: population/indigenous-lands.qmd
+            text: Indigenous Lands
+          - href: population/commuting.qmd
+            text: Commuting
           - href: wellbeing/crime-safety.qmd
             text: Crime & Safety
       - text: Economy
         menu:
+          - href: economics/overview.qmd
+            text: Overview
           - href: economics/index.qmd
             text: Growth & Jobs
           - href: economics/cost-of-living.qmd
             text: Cost of Living
+          - href: economics/borrowing-costs.qmd
+            text: Borrowing Costs
           - href: housing/index.qmd
             text: Housing
           - href: income/index.qmd
             text: Income & Inequality
       - text: Government
         menu:
+          - href: fiscal/overview.qmd
+            text: Overview
           - href: fiscal/index.qmd
             text: Government Finances
+          - href: fiscal/provincial.qmd
+            text: Provincial Finances
           - href: government/index.qmd
             text: Government Employment
           - href: government/spending.qmd
             text: Federal Spending
       - text: Health
         menu:
+          - href: health/overview.qmd
+            text: Overview
           - href: health/index.qmd
-            text: Health & Health Care
+            text: Health of Canadians
+          - href: health/health-care-system.qmd
+            text: The Health-Care System
           - href: health/substance-use.qmd
             text: Substance Use
           - href: wellbeing/index.qmd
             text: Well-being
       - text: Environment
         menu:
+          - href: geography/overview.qmd
+            text: Overview
           - text: "The Land"
           - href: geography/index.qmd
             text: Where People Live
@@ -93,8 +113,10 @@ website:
             text: Today's Climate
           - href: environment/climate-change.qmd
             text: Climate Change
-          - href: geography/fire-ice.qmd
-            text: Fire & Ice
+          - href: geography/wildfire.qmd
+            text: Wildfire
+          - href: geography/ice.qmd
+            text: Ice
           - href: environment/air-quality.qmd
             text: Air Quality
           - href: environment/air-quality-cities.qmd
@@ -103,6 +125,8 @@ website:
             text: Emissions & Energy
       - text: Education & Science
         menu:
+          - href: education/overview.qmd
+            text: Overview
           - href: education/index.qmd
             text: Education
           - href: science/index.qmd
@@ -140,3 +164,4 @@ format:
     include-after-body:
       - _includes/share-charts.html
       - _includes/peer-legend-colours.html
+      - _includes/yaxis-autoscale.html

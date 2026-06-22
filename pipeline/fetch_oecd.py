@@ -177,3 +177,62 @@ def fetch_labour_by_age():
         logger.info(f"  saved {len(sub)} rows -> {out_path.name}")
         written.append(sub)
     return written if written else None
+
+
+# OECD Revenue Statistics standard tax categories (codes T_x000 sum to total taxation).
+TAX_CATEGORY_LABELS = {
+    "T_1000": "Income & profits",
+    "T_2000": "Social security",
+    "T_3000": "Payroll",
+    "T_4000": "Property",
+    "T_5000": "Goods & services",
+    "T_6000": "Other",
+}
+
+
+def fetch_tax_structure():
+    """Tax structure (the revenue mix) for the peer group — each main category of
+    tax as a share of GDP, from the OECD Revenue Statistics comparative tables
+    (DSD_REV_COMP_OECD@DF_RSOECD). General government (S13); the six standard
+    categories sum to total taxation: income & profits, social security
+    contributions, payroll, property, goods & services, and other taxes.
+
+    The total burden (the sum) is already discussed elsewhere; the *mix* is the
+    story here — e.g. Canada leans on income and property taxes and raises less
+    through social-security contributions and consumption taxes than most European
+    peers. Annual since 2010 for all 17 peers; the page draws the latest year as a
+    stacked bar so both the total (bar height) and the composition (segments) read.
+    """
+    logger.info("OECD: tax structure / revenue mix (Revenue Statistics)...")
+    peers = "+".join(PEER_CODES)
+    cats = "+".join(TAX_CATEGORY_LABELS)   # T_1000+...+T_6000
+    # dims: REF_AREA.MEASURE.SECTOR.STANDARD_REVENUE.CTRY_SPECIFIC.UNIT_MEASURE.FREQ
+    key = f"{peers}.TAX_REV.S13.{cats}._T.PT_B1GQ.A"
+    df = _fetch_oecd_csv("OECD.CTP.TPS,DSD_REV_COMP_OECD@DF_RSOECD,2.0", key, start_period=2010)
+    if df is None or df.empty:
+        return None
+    validate_columns(df, ["REF_AREA", "STANDARD_REVENUE", "TIME_PERIOD", "OBS_VALUE"],
+                     "tax_structure")
+    df["year"] = pd.to_numeric(df["TIME_PERIOD"], errors="coerce").astype("Int64")
+    df["pct_gdp"] = pd.to_numeric(df["OBS_VALUE"], errors="coerce")
+    df["tax_type"] = df["STANDARD_REVENUE"].map(TAX_CATEGORY_LABELS)
+    df["country_name"] = df["REF_AREA"].map(PEER_COUNTRIES)
+    out = (df.dropna(subset=["year", "pct_gdp", "tax_type"])
+             [["REF_AREA", "country_name", "year", "tax_type", "pct_gdp"]]
+             .rename(columns={"REF_AREA": "country_code"})
+             .drop_duplicates(["country_code", "year", "tax_type"], keep="last")
+             .sort_values(["country_code", "year", "tax_type"]).reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "fiscal" / "oecd_tax_structure.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="OECD",
+        source_table="OECD Revenue Statistics (DSD_REV_COMP_OECD@DF_RSOECD)",
+        frequency="annual", unit="% of GDP (general government, by tax category)",
+        transformations=["six standard tax categories (income / social security / "
+                         "payroll / property / goods & services / other) as % of GDP, "
+                         "general government, OECD peer group"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out

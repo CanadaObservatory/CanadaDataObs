@@ -1,0 +1,76 @@
+---
+title: "Ice"
+description: "Permafrost across the North, and the retreat of Arctic sea ice"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date
+from pipeline.charts import choropleth_categorical_clean
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+```
+
+Two of the clearest signs of a warming North are written in ice: the frozen ground beneath much of the country, and the sea ice on the Arctic Ocean. Both are in retreat.
+
+## Permafrost
+
+Much of the North sits on **permafrost** — ground that stays frozen year-round. It grades from **continuous** permafrost across the High Arctic (frozen almost everywhere) to **isolated patches** near its southern limit. The classic national map below shows those zones; note that it reflects mapping from the mid-1990s, and permafrost extent has been **retreating** as the climate warms, so the southern boundary today sits further north.
+
+```{python}
+#| echo: false
+pf_geo_path, pf_csv = "data/geo/permafrost_zones.geojson", "data/geo/permafrost_zones.csv"
+prov_geo_path = "data/geo/canada_provinces.geojson"   # faint full-Canada base for orientation
+PF_COLORS = {
+    "Continuous (90–100%)": "#08519c", "Extensive discontinuous (50–90%)": "#3182bd",
+    "Sporadic discontinuous (10–50%)": "#6baed6", "Isolated patches (0–10%)": "#bdd7e7",
+}
+if os.path.exists(pf_geo_path) and os.path.exists(pf_csv):
+    pf_geo = json.load(open(pf_geo_path))
+    pf = pd.read_csv(pf_csv, dtype={"fid": str})
+    base = json.load(open(prov_geo_path)) if os.path.exists(prov_geo_path) else None
+    fig = choropleth_categorical_clean(pf_geo, pf, "fid", "zone",
+        color_map=PF_COLORS, ordered=list(PF_COLORS.keys()), legend_frac=0.34, base_geojson=base,
+        source_note="Source: NRCan, Atlas of Canada 5th ed. — permafrost (~1995; extent has since declined). Provincial outlines: Natural Earth.")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Permafrost data not yet available — run `python -m pipeline.build_geography`.")
+```
+
+## Arctic sea ice
+
+The clearest single signal of a warming North is the decline of **Arctic sea ice**. Its extent swings with the seasons — peaking in March, bottoming out in September — but the **September minimum has fallen by roughly 40% since satellite records began in 1979**. Canada's Arctic waters, including the Northwest Passage, are increasingly ice-free at the end of summer.
+
+```{python}
+#| echo: false
+si_path = "data/geography/nsidc_sea_ice.csv"
+if os.path.exists(si_path):
+    s = pd.read_csv(si_path)
+    sep = s[s["month"] == 9].sort_values("year")
+    mar = s[s["month"] == 3].sort_values("year")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=mar["year"], y=mar["extent_mkm2"], name="March (winter maximum)",
+                             mode="lines", line=dict(color="#9ecae1", width=2)))
+    fig.add_trace(go.Scatter(x=sep["year"], y=sep["extent_mkm2"], name="September (summer minimum)",
+                             mode="lines+markers", line=dict(color="#08519c", width=3), marker=dict(size=4)))
+    fig.update_layout(
+        plot_bgcolor="white", height=460, hovermode="x unified",
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        yaxis=dict(title="Sea-ice extent (million km²)", gridcolor="#e0e0e0", rangemode="tozero"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        margin=dict(t=40, b=120),
+        annotations=[dict(text=f"Source: NSIDC Sea Ice Index (G02135), Northern Hemisphere | Data as of: {get_data_date(si_path)}",
+                          xref="paper", yref="paper", x=0, y=-0.18, showarrow=False,
+                          font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Sea-ice data not yet available — run the data pipeline.")
+```
+
+## Download data
+
+- [Arctic sea-ice extent, monthly (CSV)](../data/geography/nsidc_sea_ice.csv) — NSIDC Sea Ice Index (G02135)

@@ -1,0 +1,340 @@
+{
+ "recommended": {
+  "countries": [
+   {
+    "code": "CAN",
+    "hex": "#7A263A",
+    "tier": "focal"
+   },
+   {
+    "code": "USA",
+    "hex": "#1B517D",
+    "tier": "focal"
+   },
+   {
+    "code": "DEU",
+    "hex": "#5F916F",
+    "tier": "focal"
+   },
+   {
+    "code": "AUS",
+    "hex": "#B17C11",
+    "tier": "focal"
+   },
+   {
+    "code": "GBR",
+    "hex": "#9C84D2",
+    "tier": "focal"
+   },
+   {
+    "code": "SWE",
+    "hex": "#208486",
+    "tier": "focal"
+   },
+   {
+    "code": "JPN",
+    "hex": "#DF6C7A",
+    "tier": "tail"
+   },
+   {
+    "code": "FRA",
+    "hex": "#4E7EAE",
+    "tier": "tail"
+   },
+   {
+    "code": "ITA",
+    "hex": "#446F20",
+    "tier": "tail"
+   },
+   {
+    "code": "KOR",
+    "hex": "#944E98",
+    "tier": "tail"
+   },
+   {
+    "code": "NLD",
+    "hex": "#D1804F",
+    "tier": "tail"
+   },
+   {
+    "code": "CHE",
+    "hex": "#964A27",
+    "tier": "tail"
+   },
+   {
+    "code": "NOR",
+    "hex": "#1496C3",
+    "tier": "tail"
+   },
+   {
+    "code": "DNK",
+    "hex": "#9E6685",
+    "tier": "tail"
+   },
+   {
+    "code": "FIN",
+    "hex": "#695B9C",
+    "tier": "tail"
+   },
+   {
+    "code": "ISR",
+    "hex": "#726F3B",
+    "tier": "tail"
+   },
+   {
+    "code": "NZL",
+    "hex": "#35633D",
+    "tier": "tail"
+   }
+  ],
+  "provinces": [
+   {
+    "code": "ON",
+    "hex": "#C95A40",
+    "priority": true,
+    "theme": "terracotta"
+   },
+   {
+    "code": "QC",
+    "hex": "#0079D1",
+    "priority": true,
+    "theme": "cobalt"
+   },
+   {
+    "code": "BC",
+    "hex": "#2C600A",
+    "priority": true,
+    "theme": "spruce"
+   },
+   {
+    "code": "AB",
+    "hex": "#BF8629",
+    "priority": true,
+    "theme": "wheat-gold"
+   },
+   {
+    "code": "NS",
+    "hex": "#419489",
+    "priority": true,
+    "theme": "sea-teal"
+   },
+   {
+    "code": "MB",
+    "hex": "#793F3C",
+    "priority": false,
+    "theme": "russet-earth"
+   },
+   {
+    "code": "SK",
+    "hex": "#945F23",
+    "priority": false,
+    "theme": "ochre-clay"
+   },
+   {
+    "code": "NB",
+    "hex": "#017953",
+    "priority": false,
+    "theme": "petrol-green"
+   },
+   {
+    "code": "NL",
+    "hex": "#016B6D",
+    "priority": false,
+    "theme": "deep-blue-teal"
+   },
+   {
+    "code": "PE",
+    "hex": "#08A1C1",
+    "priority": false,
+    "theme": "aqua"
+   },
+   {
+    "code": "YT",
+    "hex": "#596F7B",
+    "priority": false,
+    "theme": "slate"
+   },
+   {
+    "code": "NT",
+    "hex": "#8195AB",
+    "priority": false,
+    "theme": "arctic-blue-grey"
+   },
+   {
+    "code": "NU",
+    "hex": "#6B6197",
+    "priority": false,
+    "theme": "violet-grey"
+   }
+  ]
+ },
+ "alternative": {
+  "countries": [
+   {
+    "code": "CAN",
+    "hex": "#7A263A",
+    "tier": "focal"
+   },
+   {
+    "code": "USA",
+    "hex": "#145A84",
+    "tier": "focal"
+   },
+   {
+    "code": "DEU",
+    "hex": "#1C7973",
+    "tier": "focal"
+   },
+   {
+    "code": "AUS",
+    "hex": "#D37C6A",
+    "tier": "focal"
+   },
+   {
+    "code": "GBR",
+    "hex": "#C96BAF",
+    "tier": "focal"
+   },
+   {
+    "code": "SWE",
+    "hex": "#837800",
+    "tier": "focal"
+   },
+   {
+    "code": "JPN",
+    "hex": "#BB4D5D",
+    "tier": "tail"
+   },
+   {
+    "code": "FRA",
+    "hex": "#1A98E0",
+    "tier": "tail"
+   },
+   {
+    "code": "ITA",
+    "hex": "#24874D",
+    "tier": "tail"
+   },
+   {
+    "code": "KOR",
+    "hex": "#8A51A3",
+    "tier": "tail"
+   },
+   {
+    "code": "NLD",
+    "hex": "#BD8A3B",
+    "tier": "tail"
+   },
+   {
+    "code": "CHE",
+    "hex": "#91584A",
+    "tier": "tail"
+   },
+   {
+    "code": "NOR",
+    "hex": "#069EBD",
+    "tier": "tail"
+   },
+   {
+    "code": "DNK",
+    "hex": "#9F5F72",
+    "tier": "tail"
+   },
+   {
+    "code": "FIN",
+    "hex": "#6868B2",
+    "tier": "tail"
+   },
+   {
+    "code": "ISR",
+    "hex": "#547040",
+    "tier": "tail"
+   },
+   {
+    "code": "NZL",
+    "hex": "#03A384",
+    "tier": "tail"
+   }
+  ],
+  "provinces": [
+   {
+    "code": "ON",
+    "hex": "#BD7366",
+    "priority": true,
+    "theme": "terracotta"
+   },
+   {
+    "code": "QC",
+    "hex": "#035096",
+    "priority": true,
+    "theme": "cobalt"
+   },
+   {
+    "code": "BC",
+    "hex": "#2D600D",
+    "priority": true,
+    "theme": "spruce"
+   },
+   {
+    "code": "AB",
+    "hex": "#B88D17",
+    "priority": true,
+    "theme": "wheat-gold"
+   },
+   {
+    "code": "NS",
+    "hex": "#479388",
+    "priority": true,
+    "theme": "sea-teal"
+   },
+   {
+    "code": "MB",
+    "hex": "#773D3A",
+    "priority": false,
+    "theme": "russet-earth"
+   },
+   {
+    "code": "SK",
+    "hex": "#99602C",
+    "priority": false,
+    "theme": "ochre-clay"
+   },
+   {
+    "code": "NB",
+    "hex": "#037853",
+    "priority": false,
+    "theme": "petrol-green"
+   },
+   {
+    "code": "NL",
+    "hex": "#006B6D",
+    "priority": false,
+    "theme": "deep-blue-teal"
+   },
+   {
+    "code": "PE",
+    "hex": "#02A1BF",
+    "priority": false,
+    "theme": "aqua"
+   },
+   {
+    "code": "YT",
+    "hex": "#5C6E7E",
+    "priority": false,
+    "theme": "slate"
+   },
+   {
+    "code": "NT",
+    "hex": "#85969F",
+    "priority": false,
+    "theme": "arctic-blue-grey"
+   },
+   {
+    "code": "NU",
+    "hex": "#7D699A",
+    "priority": false,
+    "theme": "violet-grey"
+   }
+  ]
+ }
+}

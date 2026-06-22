@@ -3,12 +3,10 @@ title: "Housing"
 description: "House prices, affordability, rent, and household debt — Canada and OECD peers"
 ---
 
-How much it costs to buy or rent a home has become a defining question of the
-decade. The charts below track house prices, the gap between home prices and
-incomes, rent, and how much debt households carry. Consumer-price inflation —
-overall, core, and food — has its own page:
-[Cost of Living](../economics/cost-of-living.qmd). International comparisons use a
-broad group of 17 OECD peers so Canada's position can be read in context.
+How much it costs to rent or buy a home is a defining question for most Canadians.
+The charts below track house prices, the gap between home prices and incomes, rent,
+and how much debt households carry. Inflation has its own page:
+[Cost of Living](../economics/cost-of-living.qmd).
 
 ```{python}
 #| echo: false
@@ -19,10 +17,10 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, category_bar
 ```
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -32,7 +30,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("housing").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Real House Prices
+## Real house prices
 
 Inflation-adjusted ("real") house price index, set to 100 in 2015. Because it
 removes general inflation, it shows how house prices have moved relative to the
@@ -45,7 +43,7 @@ if os.path.exists(path):
     df = pd.read_csv(path)
     fig = peer_comparison_line(df, "year", "house_price_real",
         title="", yaxis_title="Real house price index (2015 = 100)",
-        show_average=True)
+        show_average=True, initial_start=2014)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -55,7 +53,7 @@ else:
     print("Real house price data not yet available. Run the data pipeline.")
 ```
 
-## Real House Price Growth Since 2015: Ranked
+## Real house price growth since 2015: ranked
 
 Each country's index equals 100 in 2015, so this ranks **how much real house prices have risen since 2015** — not which country's housing is most expensive today. A rebased index can't show price *levels*; it shows change from a common starting point.
 
@@ -69,7 +67,7 @@ if os.path.exists(path):
     fig.show(config={"displaylogo": False})
 ```
 
-## House Prices Relative to Incomes
+## House prices relative to incomes
 
 The price-to-income ratio divides house prices by household disposable income
 (indexed to 2015 = 100). It is a standard affordability gauge: when the line
@@ -82,7 +80,7 @@ if os.path.exists(path2):
     df = pd.read_csv(path2)
     fig = peer_comparison_line(df, "year", "price_to_income",
         title="", yaxis_title="Price-to-income ratio (2015 = 100)",
-        show_average=True)
+        show_average=True, initial_start=2014)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path2)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -92,7 +90,7 @@ else:
     print("Price-to-income data not yet available. Run the data pipeline.")
 ```
 
-## Change in Price-to-Income Since 2015: Ranked
+## Change in price-to-income since 2015: ranked
 
 This series is also rebased to 2015 = 100, so it ranks the **change** in the price-to-income ratio since 2015 — i.e. how much affordability has shifted — not the level of the ratio across countries.
 
@@ -106,11 +104,12 @@ if os.path.exists(path2):
     fig.show(config={"displaylogo": False})
 ```
 
-## New Housing Prices in Canada
+## New housing prices in Canada
 
 Statistics Canada's New Housing Price Index tracks changes in builders' selling
 prices of new homes (the "total" of house and land), monthly. This is a
-Canada-specific series shown over time.
+Canada-specific series shown over time. It covers builder-sold new houses, so it
+does not capture condominium apartments, whose prices can move differently.
 
 ```{python}
 #| echo: false
@@ -126,7 +125,7 @@ else:
     print("New Housing Price Index not yet available. Run the data pipeline.")
 ```
 
-## Home Prices vs. Incomes
+## Home prices vs. incomes
 
 House prices and household incomes, both in **real (inflation-adjusted) terms** and indexed to 2000 = 100 so they share one scale. Plotting the two paths together shows the affordability gap directly: the wider they spread, the more home prices have outrun what households actually earn. The price line is the OECD's real house-price index for Canada (which reflects the resale market); the income line is Statistics Canada's median after-tax income, also in constant dollars. (The New Housing Price Index isn't used here — it tracks builders' prices for *new* homes, which have lagged the resale run-up.)
 
@@ -169,9 +168,9 @@ else:
     print("Price/income data not yet available. Run the data pipeline.")
 ```
 
-## Actual Home Prices by City and Type
+## Actual home prices by city and type
 
-The charts above use index and proxy measures because actual transaction prices are tightly licensed. The figures in this section use the **CREA MLS® Home Price Index** — the real estate industry's benchmark for the price of a "typical" home in each market — **published here with CREA's written permission for educational use**. Unlike the census's owner-estimated values or the New Housing Price Index, this tracks actual resale prices and breaks them out by dwelling type.
+The charts above use index and proxy measures because actual transaction prices are tightly licensed. The figures in this section use the **CREA MLS® Home Price Index** — the real estate industry's benchmark for the price of a "typical" home in each market. Unlike the census's owner-estimated values or the New Housing Price Index, this tracks actual resale prices and breaks them out by dwelling type.
 
 This first chart shows the latest **benchmark price by city and dwelling type** — detached houses, townhouses, and apartments/condos — across Canada's major markets.
 
@@ -188,9 +187,9 @@ except Exception as e:
     print("CREA price data temporarily unavailable.")
 ```
 
-## Detached House Prices Over Time, by City
+## House prices over time, by city and type
 
-How the benchmark price of a detached (single-family) home has moved in each major market — the run-up that the index and proxy charts above can only hint at. Drag the slider to focus on a period.
+How the benchmark price of a typical home has moved in each major market, by dwelling type — detached, townhouse, or apartment/condo. This is the run-up that the index and proxy charts above can only hint at.
 
 ```{python}
 #| echo: false
@@ -200,7 +199,7 @@ else:
     print("CREA price data temporarily unavailable.")
 ```
 
-## How Many Years of Income a Home Costs
+## How many years of income a home costs
 
 Dividing the national benchmark price by median after-tax income gives an intuitive affordability gauge: how many years of a typical household's after-tax income it would take to buy the typical home. (The benchmark is deflated to 2024 dollars via CPI so it is comparable with the inflation-adjusted income series.) The ratio has climbed from roughly **5.7× in 2005 to 9.3× in 2024**.
 
@@ -212,9 +211,9 @@ else:
     print("CREA price data temporarily unavailable.")
 ```
 
-## Home Values by City
+## Home values by city
 
-Sale prices by city aren't openly available, but the census asks owners to estimate their home's value — a usable proxy. This maps **median dwelling value** across metropolitan areas (2021 Census). **Zoom and pan to your area.** Owner-estimated, 2021; city-level (CMA/CA).
+Sale prices by city aren't openly available, but the census asks owners to estimate their home's value, which gives a good general guide. This maps **median dwelling value** across metropolitan areas (2021 Census). **Zoom and pan to your area.** Owner-estimated, 2021; city-level (CMA/CA).
 
 For the full **neighbourhood-level** view — every census tract, where you can zoom right to your own street — open the dedicated map (kept on its own page so this one stays fast to load):
 
@@ -236,15 +235,15 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
     cma = pd.read_csv(cma_path, dtype={"cmauid": str})
     sub = cma.dropna(subset=["dwelling_value"])
     fig = choropleth_map(cma_geo, sub, "cmauid", "dwelling_value", name_col="name",
-        colorbar_title="Median dwelling value", value_prefix="$", value_fmt=",.0f", colorscale="Viridis",
+        colorbar_title="Median home<br>value", value_prefix="$", value_fmt=",.0f", colorscale="Viridis",
         zmin=float(sub["dwelling_value"].quantile(0.05)), zmax=float(sub["dwelling_value"].quantile(0.95)),
-        source_note="Source: 2021 Census (owner-estimated dwelling value). City-level (CMA/CA).")
+        source_note="Source: Statistics Canada, 2021 Census; owner-estimated dwelling value.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Home-value map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Affordability by City (home value ÷ income)
+## Affordability by city (home value ÷ income)
 
 Home value divided by median household income — roughly how many years of a typical household's income a typical home costs. It turns the price map into an *affordability* map: the same $1M home is far less attainable where incomes are lower. **Zoom and pan to your area.** (2021 Census; owner-estimated value ÷ median household income.)
 
@@ -253,9 +252,9 @@ Home value divided by median household income — roughly how many years of a ty
 if os.path.exists(cma_geo_path) and os.path.exists(cma_path):
     sub = cma.dropna(subset=["value_to_income"])
     fig = choropleth_map(cma_geo, sub, "cmauid", "value_to_income", name_col="name",
-        colorbar_title="Home value ÷ income", value_suffix="×", value_fmt=".1f", colorscale="YlOrRd",
+        colorbar_title="Home value<br>÷ income", value_suffix="×", value_fmt=".1f", colorscale="YlOrRd",
         zmin=float(sub["value_to_income"].quantile(0.05)), zmax=float(sub["value_to_income"].quantile(0.95)),
-        source_note="Source: 2021 Census — median dwelling value ÷ median household income. City-level (CMA/CA).")
+        source_note="Source: Statistics Canada, 2021 Census; owner-estimated dwelling value ÷ median household income.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Affordability map not yet available — run `python -m pipeline.build_census_geo`.")
@@ -272,14 +271,14 @@ if os.path.exists(rent_path):
     df = pd.read_csv(rent_path, parse_dates=["date"])
     fig = single_line(df, "date", "rent_index", title="",
                       yaxis_title="Rent CPI (2002 = 100)",
-                      rangeslider=True,
+                      rangeslider=True, initial_start=2014,
                       source_note=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date(rent_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Rent data not yet available. Run the data pipeline.")
 ```
 
-## Housing Starts
+## Housing starts
 
 The number of new homes on which construction began, monthly. Starts are the clearest gauge of new housing *supply* — the other side of the affordability story from the prices, rents, and demand above. Whether new supply keeps pace with population growth is central to the debate.
 
@@ -296,7 +295,7 @@ else:
     print("Housing starts data not yet available. Run the data pipeline.")
 ```
 
-## Rental Vacancy Rate
+## Rental vacancy rate
 
 The share of purpose-built rental apartments sitting empty, across census metropolitan areas. A low vacancy rate signals a tight rental market with little slack — upward pressure on rents and harder searches for tenants.
 
@@ -313,10 +312,29 @@ else:
     print("Vacancy rate data not yet available. Run the data pipeline.")
 ```
 
-## Household Debt
+The national average hides wide variation between cities. In the latest survey, vacancy ranged from under 2% in the tightest markets — where rentals are hardest to find and rents rise fastest — to over 6% in the loosest. Canada's largest metros are highlighted.
+
+```{python}
+#| echo: false
+cmavac_path = "data/housing/statcan_cma_vacancy.csv"
+if os.path.exists(cmavac_path):
+    cv = pd.read_csv(cmavac_path)
+    yr = int(cv["year"].iloc[0])
+    fig = category_bar(cv, "cma", "vacancy_rate", xaxis_title="Vacancy rate (%)",
+        value_fmt=".1f", ticksuffix="%",
+        highlight={"Toronto", "Vancouver", "Montréal", "Calgary", "Ottawa-Gatineau", "Edmonton"},
+        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada / CMHC, Table 34-10-0127-01 — {yr}.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CMA vacancy data not yet available. Run the data pipeline.")
+```
+
+## Household debt
 
 Household debt as a percentage of net disposable income. A value of 180% means
-households owe $1.80 for every dollar of annual after-tax income. It captures how
+households owe $1.80 for every dollar of annual after-tax income. Most of this debt
+is mortgages, with consumer credit and other loans making up the rest. It captures how
 leveraged households are — relevant to both affordability and financial risk.
 
 ```{python}
@@ -336,7 +354,9 @@ else:
     print("Household debt data not yet available. Run the data pipeline.")
 ```
 
-## Latest Household Debt: Ranked
+## Latest household debt: ranked
+
+**Data current to `{python} get_data_date("data/housing/oecd_household_debt.csv")`.**
 
 ```{python}
 #| echo: false
@@ -348,65 +368,52 @@ if os.path.exists(debt_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Borrowing Costs: Prime & Mortgage Rates
+## Household debt payments
 
-What households pay to borrow. The **prime rate** moves with the Bank of Canada's policy rate and underpins variable-rate mortgages and lines of credit; the **conventional 5-year mortgage rate** is the benchmark for the most common fixed term (and tracks the 5-year government bond yield below).
+The debt level above measures how much households *owe*; the **debt service ratio** measures how much they *pay* — the share of disposable income that goes to obligated debt payments (interest **and** principal) each quarter. It is the more direct gauge of financial stress, because it rises when interest rates climb even if the amount owed stays flat. The ratio fell sharply in 2020, when policy-rate cuts and mortgage-payment deferrals eased payments, then climbed back to around its historical high as households renewed mortgages at higher rates. Mortgage payments are the larger and more interest-rate-sensitive of the two components.
 
 ```{python}
 #| echo: false
-rates_path = "data/housing/boc_rates.csv"
-if os.path.exists(rates_path):
-    rt = pd.read_csv(rates_path, parse_dates=["date"])
-    figm = go.Figure()
-    figm.add_trace(go.Scatter(x=rt["date"], y=rt["mortgage_5yr"], name="Conventional 5-year mortgage",
-        mode="lines", line=dict(color="#d62728", width=2.5), hovertemplate="5-yr mortgage: %{y:.2f}%<extra></extra>"))
-    figm.add_trace(go.Scatter(x=rt["date"], y=rt["prime"], name="Prime rate",
-        mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="Prime: %{y:.2f}%<extra></extra>"))
-    figm.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
-        yaxis=dict(title="Interest rate (%)", gridcolor="#e0e0e0", ticksuffix="%", rangemode="tozero"),
+dsr_path = "data/housing/statcan_debt_service_ratio.csv"
+if os.path.exists(dsr_path):
+    d = pd.read_csv(dsr_path, parse_dates=["date"]).sort_values("date")
+    figd = go.Figure()
+    # Stacked area: mortgage + non-mortgage payments sum exactly to the total DSR,
+    # so the stack height is the headline ratio and the split shows what drives it.
+    # customdata carries the raw (un-stacked) component value for the hover.
+    figd.add_trace(go.Scatter(x=d["date"], y=d["dsr_mortgage"], name="Mortgage",
+        mode="lines", line=dict(width=0.5, color="#1f77b4"), stackgroup="dsr",
+        customdata=d["dsr_mortgage"],
+        hovertemplate="Mortgage: %{customdata:.1f}%<extra></extra>"))
+    figd.add_trace(go.Scatter(x=d["date"], y=d["dsr_nonmortgage"], name="Non-mortgage (consumer)",
+        mode="lines", line=dict(width=0.5, color="#f4a259"), stackgroup="dsr",
+        customdata=d["dsr_nonmortgage"],
+        hovertemplate="Non-mortgage: %{customdata:.1f}%<extra></extra>"))
+    figd.add_trace(go.Scatter(x=d["date"], y=d["dsr_total"], name="Total",
+        mode="lines", line=dict(width=2, color="#333333"),
+        hovertemplate="Total: %{y:.1f}%<extra></extra>"))
+    _xmax = d["date"].max()
+    figd.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="% of disposable income", gridcolor="#e0e0e0",
+                   ticksuffix="%", rangemode="tozero"),
         xaxis=dict(title="", gridcolor="#e0e0e0",
+            range=[pd.Timestamp("2006-01-01"), _xmax],
             rangeselector=dict(buttons=[
-                dict(count=5, label="5Y", step="year", stepmode="backward"),
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
                 dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
             rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
-        legend=dict(yanchor="top", y=0.98, xanchor="right", x=0.98, bgcolor="rgba(255,255,255,0.6)"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
         margin=dict(t=40, b=120, r=20))
-    figm.add_annotation(text=f"Source: Bank of Canada (prime rate; conventional 5-year mortgage rate) | Data as of: {get_data_date(rates_path)}",
+    figd.add_annotation(
+        text=f"Source: Statistics Canada 11-10-0065-01 (seasonally adjusted) | Data as of: {get_data_date(dsr_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
-    figm.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+    figd.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
-    print("Prime/mortgage rate data not yet available. Run the data pipeline.")
+    print("Debt service ratio data not yet available. Run the data pipeline.")
 ```
 
-## Government Bond Yields by Term
-
-What investors charge to lend to the Government of Canada at each term — the benchmark fixed borrowing costs are priced from. **Use the dropdown to switch term:** the 2-, 3- and 5-year yields map onto the common fixed-mortgage terms (the **5-year** especially drives 5-year fixed mortgage rates), while the 10-year and long-term reflect longer-horizon expectations.
-
-```{python}
-#| echo: false
-from pipeline.charts import single_line_multi
-bond_path = "data/economics/boc_bond_yields.csv"
-if os.path.exists(bond_path):
-    bonds = pd.read_csv(bond_path, parse_dates=["date"])
-    _bh = "%{x|%b %Y}: %{y:.2f}%<extra></extra>"
-    opts = [
-        {"col": "y5", "label": "5-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
-        {"col": "y2", "label": "2-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
-        {"col": "y3", "label": "3-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
-        {"col": "y7", "label": "7-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
-        {"col": "y10", "label": "10-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
-        {"col": "ylong", "label": "Long-term (~30-yr)", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
-    ]
-    fig = single_line_multi(bonds, "date", opts, rangeslider=True,
-        source_note=f"Source: Bank of Canada (Government of Canada benchmark bond yields) | Data as of: {get_data_date(bond_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Bond-yield data not yet available. Run the data pipeline.")
-```
-
-## Download Data
+## Download data
 
 - [Real House Price Index (CSV)](../data/housing/oecd_house_price_real.csv) — OECD Analytical House Prices
 - [Price-to-Income Ratio (CSV)](../data/housing/oecd_house_price_income.csv) — OECD Analytical House Prices
@@ -414,8 +421,10 @@ else:
 - [Rent, CPI (CSV)](../data/housing/statcan_rent_cpi.csv) — Statistics Canada Table 18-10-0004-01
 - [Housing Starts (CSV)](../data/housing/statcan_housing_starts.csv) — Statistics Canada / CMHC Table 34-10-0143-01
 - [Rental Vacancy Rate (CSV)](../data/housing/statcan_vacancy_rate.csv) — Statistics Canada / CMHC Table 34-10-0127-01
+- [Rental Vacancy Rate by City (CSV)](../data/housing/statcan_cma_vacancy.csv) — Statistics Canada / CMHC Table 34-10-0127-01
 - [City home value, value-to-income & more (CSV)](../data/geo/statcan_cma_indicators.csv) — 2021 Census (owner-estimated dwelling value)
 - [Home value by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_dwelling_value_2021.csv) — 2021 Census (owner-estimated dwelling value)
 - [Household Debt (CSV)](../data/housing/oecd_household_debt.csv) — OECD Household Dashboard
-- [Prime & 5-year mortgage rate (CSV)](../data/housing/boc_rates.csv) — Bank of Canada
-- [Government bond yields by term (CSV)](../data/economics/boc_bond_yields.csv) — Bank of Canada
+- [Household Debt Service Ratio (CSV)](../data/housing/statcan_debt_service_ratio.csv) — Statistics Canada Table 11-10-0065-01
+
+Mortgage and bond-yield data are on [Borrowing Costs](../economics/borrowing-costs.qmd).

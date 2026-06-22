@@ -9,10 +9,8 @@ spent on, and which departments it flows through. It complements the
 *general*-government finances with OECD peers) and the
 [Government Employment](index.qmd) page (the people behind the payroll line).
 
-As with the workforce, how much government *should* spend is a political question.
-The charts below describe the composition and trend without a favourable
-direction. A recurring theme: most federal spending is not the government
-operating itself — it is **transfers**, money moved to people (benefits like the
+Most federal spending is not the government
+operating itself: it is **transfers**, money moved to people (benefits like the
 Canada Child Benefit and elderly benefits) and to other governments (health and
 social transfers to the provinces).
 
@@ -25,13 +23,12 @@ from pipeline.charts import (single_line, lines_over_time, stacked_area,
                              category_bar, category_bar_views)
 ```
 
-## Revenue and Spending Over Time
+## Revenue and spending
 
 Measured against the size of the economy, federal revenue and spending have been
 relatively stable for decades — typically in the mid-to-high teens as a share of
-GDP — punctuated by sharp, temporary jumps in spending during recessions, most
-dramatically the COVID-19 response in 2020. The gap between the two lines is the
-budget surplus (revenue above spending) or deficit (spending above revenue).
+GDP — with sharp, temporary jumps during recessions. The gap between the two lines
+is the budget surplus (revenue above spending) or deficit (spending above revenue).
 
 ```{python}
 #| echo: false
@@ -46,7 +43,7 @@ if os.path.exists(fin_path):
     fig = lines_over_time(m, "year", "pct", "metric", yaxis_title="% of GDP",
         yticksuffix="%", hover_decimals=1,
         colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
-        group_order=["Total spending", "Revenue"], legend_orientation="h",
+        group_order=["Total spending", "Revenue"], rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -68,14 +65,14 @@ if os.path.exists(fin_path):
     fig = lines_over_time(m, "year", "valb", "metric", yaxis_title="$ billions (nominal)",
         ytickprefix="$", hover_decimals=1,
         colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
-        group_order=["Total spending", "Revenue"], legend_orientation="h",
+        group_order=["Total spending", "Revenue"], rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0477-01 (federal general government, nominal dollars) | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## The Budget Balance, by Era
+## The budget balance, by era
 
-The gap between revenue and spending is the federal **budget balance** — a surplus when revenue exceeds spending, a deficit when it falls short. This view makes the balance explicit as a share of GDP, with the periods in office of successive federal governments shaded for reference. It is descriptive: the shading shows *when* governments changed, not a claim about cause. (Shares of GDP begin in 1981; fiscal years are matched to governments approximately.)
+The gap between revenue and spending is the federal **budget balance** — a surplus when revenue exceeds spending, a deficit when it falls short. This view makes the balance explicit as a share of GDP, with the periods in office of successive federal governments shaded for reference. (Shares of GDP begin in 1981; fiscal years are matched to governments approximately.)
 
 ```{python}
 #| echo: false
@@ -105,23 +102,24 @@ if os.path.exists(fin_path):
         figb.add_annotation(x=(start - 0.5 + end - 0.5) / 2, y=1.0, yref="paper",
             yanchor="bottom", text=name, showarrow=False, font=dict(size=9, color="#888"))
     figb.add_hline(y=0, line_color="#888", line_width=1)
-    figb.update_layout(plot_bgcolor="white", height=460, bargap=0.15, showlegend=False,
+    figb.update_layout(plot_bgcolor="white", height=500, bargap=0.15, showlegend=False,
         yaxis=dict(title="Budget balance (% of GDP)", gridcolor="#e0e0e0",
                    ticksuffix="%", zeroline=False),
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
-        margin=dict(t=50, b=90, r=20))
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+                   rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        margin=dict(t=50, b=150, r=20))
     figb.add_annotation(
         text=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}",
-        xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))
+        xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False, font=dict(size=10, color="#999"))
     figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## What the Money Is Spent On — by Type
+## What the money is spent on — by type
 
 The federal government's own statement of operations splits spending by economic
 type. **Transfers dominate**: grants (largely to other governments and
 organizations) plus social benefits (to individuals) are well over half of all
-spending. The cost of the federal **workforce** — compensation of employees, shown
+spending. The cost of the federal **workforce** — salaries and benefits, shown
 in red — is a comparatively modest share, smaller than the interest paid on the
 public debt in recent years.
 
@@ -130,16 +128,17 @@ public debt in recent years.
 exp_path = "data/government/statcan_federal_expense_by_type.csv"
 EXP_COLORS = {
     "Grants": "#f28e2b", "Social benefits": "#4e79a7",
-    "Compensation of employees": "#d62728", "Interest on debt": "#59a14f",
+    "Salaries": "#d62728", "Interest on debt": "#59a14f",
     "Other expense": "#b07aa1", "Goods & services": "#76b7b2",
     "Capital consumption": "#edc948", "Subsidies": "#9c755f",
 }
 if os.path.exists(exp_path):
     df = pd.read_csv(exp_path)
+    df["category"] = df["category"].replace({"Compensation of employees": "Salaries"})
     d = df[df["category"].isin(EXP_COLORS)]
     fig = stacked_area(d, "year", "value_millions", "category",
         yaxis_title="$ billions", value_scale=1000.0, ytickprefix="$", hover_decimals=1,
-        colors=EXP_COLORS, group_order=list(EXP_COLORS.keys()),
+        colors=EXP_COLORS, group_order=list(EXP_COLORS.keys()), rangeslider=True,
         source_note=f"Source: Statistics Canada 10-10-0016-01 (federal government, statement of operations) | Data as of: {get_data_date(exp_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -165,7 +164,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## Which Departments the Money Flows Through
+## Which departments the money flows through
 
 Ranking departments by spending gives a very different picture from ranking them
 by **headcount** (on the [employment page](index.qmd)). The Department of Finance
@@ -209,7 +208,8 @@ if os.path.exists(depts_path):
     # departments (e.g. the Nuclear Safety Commission, ~0.04%) don't read as 0.0%
     df["share_label"] = df["share"].map(lambda s: f"{s:.1f}%" if s >= 1 else f"{s:.2f}%")
     grp = lambda names: df[df["department"].isin(names)]
-    views = [("Top 25 departments", df.nlargest(25, "value")),
+    views = [("Top 10 departments", df.nlargest(10, "value")),
+             ("Top 25 departments", df.nlargest(25, "value")),
              ("Top 50 departments", df.nlargest(50, "value")),
              ("Science, research & environment", grp(SCIENCE)),
              ("Public safety & security", grp(SAFETY)),
@@ -222,7 +222,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## What Governments Spend On — by Function
+## What governments spend on — by function
 
 Finally, a functional view: what the public sector funds, classified by purpose.
 Social protection (pensions, benefits), health, and education are the largest
@@ -243,7 +243,9 @@ transfers to the provinces that deliver those services. So read the chart below 
 fn_path = "data/government/statcan_govt_spending_by_function.csv"
 if os.path.exists(fn_path):
     df = pd.read_csv(fn_path)
-    latest = df[df["year"] == df["year"].max()]
+    latest = df[df["year"] == df["year"].max()].copy()
+    latest["function"] = latest["function"].replace(
+        {"Social protection": "Social protection (pensions, benefits)"})
     yr = int(df["year"].max())
     fig = category_bar(latest, "function", "value_millions", xaxis_title=f"$ billions ({yr}, all governments)",
         value_scale=1000.0, value_fmt=",.0f", tickprefix="$",
@@ -253,7 +255,7 @@ else:
     print("Run the data pipeline to generate this chart.")
 ```
 
-## Download Data
+## Download data
 
 - [Federal revenue, spending & balance, 1961– (CSV)](../data/government/statcan_federal_finance.csv) — Statistics Canada 36-10-0477-01 / 36-10-0222-01
 - [Federal expense by economic type (CSV)](../data/government/statcan_federal_expense_by_type.csv) — Statistics Canada 10-10-0016-01

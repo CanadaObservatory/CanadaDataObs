@@ -1,0 +1,14 @@
+{
+  "dataset_id": "worldbank_land_area",
+  "source": "World Bank (World Development Indicators)",
+  "source_table": "AG.LND.TOTL.K2",
+  "frequency": "annual",
+  "unit": "sq km (land area)",
+  "retrieved_at": "2026-06-20T03:09:45.377999+00:00",
+  "latest_observation_date": "2023",
+  "transformations": [
+    "all countries (WB aggregates removed), most recent year each"
+  ],
+  "notes": null,
+  "row_count": 216
+}

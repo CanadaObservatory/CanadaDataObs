@@ -1,0 +1,147 @@
+<!--
+  Dynamic y-axis autoscale (site-wide, via _quarto.yml format.html.include-after-body).
+
+  Problem: a chart opens on a recent x-window but keeps a FIXED y-range, so when the reader
+  widens the window (rangeselector / rangeslider / box-zoom) the y-scale doesn't follow —
+  recent variation looks flat against historical extremes (1980s rates, the 2022 inflation
+  spike). Plotly's "Autoscale" resets BOTH axes, which is not what we want.
+
+  This rescales ONLY the y-axis to the data visible in the current x-window, on every x-range
+  change. Charts opt in from the Python builder via layout.meta:
+      fig.update_layout(meta=dict(autoscaleY=True))
+  or with options:
+      fig.update_layout(meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08, min=-5, max=12)))
+    include : y-values always kept in range (e.g. the 1–3% target band + the zero baseline)
+    padFrac : fractional padding above/below the visible extent (default 0.08)
+    min/max : hard clamps the computed range never exceeds
+
+  Mirrors _includes/peer-legend-colours.html: resolve Plotly via requirejs (Quarto's AMD bundle
+  leaves window.Plotly undefined), bounded-poll for async-rendered charts, wire each opted-in
+  chart once. The x-only relayout filter + a busy flag prevent feedback loops; a
+  requestAnimationFrame debounce keeps slider-drag smooth.
+-->
+<script>
+(function () {
+  "use strict";
+
+  function plotly() {
+    if (window.Plotly) return window.Plotly;
+    try { if (window.requirejs) return window.requirejs("plotly"); } catch (e) {}
+    return null;
+  }
+
+  // Read the opt-in flag from layout.meta (with a _fullLayout fallback).
+  function cfg(gd) {
+    var m = (gd.layout && gd.layout.meta) || (gd._fullLayout && gd._fullLayout.meta);
+    var a = m && m.autoscaleY;
+    if (!a) return null;
+    if (a === true) a = {};
+    return {
+      include: a.include || [],
+      padFrac: (typeof a.padFrac === "number") ? a.padFrac : 0.08,
+      min: (typeof a.min === "number") ? a.min : null,
+      max: (typeof a.max === "number") ? a.max : null
+    };
+  }
+
+  // Convert an x value (data point or axis-range bound) to a comparable number.
+  function xNum(v, isDate) {
+    if (v === null || v === undefined) return NaN;
+    if (typeof v === "number") return v;
+    if (isDate) { var t = Date.parse(v); if (!isNaN(t)) return t; }
+    return Number(v);
+  }
+
+  function rescale(gd, P, opts) {
+    var xa = gd._fullLayout && gd._fullLayout.xaxis;
+    if (!xa || !xa.range) return;
+    var isDate = xa.type === "date";
+    var x0 = xNum(xa.range[0], isDate), x1 = xNum(xa.range[1], isDate);
+    if (x0 > x1) { var tmp = x0; x0 = x1; x1 = tmp; }
+
+    var ymin = Infinity, ymax = -Infinity;
+    (gd.data || []).forEach(function (tr) {
+      if (tr.visible === "legendonly" || tr.visible === false) return;
+      var xs = tr.x, ys = tr.y;
+      if (!xs || !ys) return;
+      for (var k = 0; k < xs.length; k++) {
+        var xv = xNum(xs[k], isDate);
+        if (!(xv >= x0 && xv <= x1)) continue;
+        var yv = ys[k];
+        if (yv === null || yv === undefined || yv !== yv) continue; // null / NaN
+        yv = +yv;
+        if (yv < ymin) ymin = yv;
+        if (yv > ymax) ymax = yv;
+      }
+    });
+    opts.include.forEach(function (v) {
+      if (v < ymin) ymin = v;
+      if (v > ymax) ymax = v;
+    });
+    if (ymin === Infinity) return;                       // nothing visible in the window
+
+    var span = ymax - ymin;
+    var pad = span > 0 ? span * opts.padFrac : Math.max(Math.abs(ymax) * 0.1, 0.5);
+    var lo = ymin - pad, hi = ymax + pad;
+    if (opts.min !== null && lo < opts.min) lo = opts.min;
+    if (opts.max !== null && hi > opts.max) hi = opts.max;
+    if (!(hi > lo)) return;
+
+    gd._yAutoBusy = true;
+    var done = function () { gd._yAutoBusy = false; };
+    P.relayout(gd, { "yaxis.range": [lo, hi] }).then(done, done);
+  }
+
+  function wire(gd, P) {
+    if (gd._yAutoWired) return;
+    if (typeof gd.on !== "function" || !gd.data) return;   // not initialised yet
+    var opts = cfg(gd);
+    gd._yAutoWired = true;
+    if (!opts) return;                                     // not opted in — skip
+
+    var pending = false;
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      window.requestAnimationFrame(function () {
+        pending = false;
+        rescale(gd, P, opts);
+      });
+    }
+
+    gd.on("plotly_relayout", function (ev) {
+      if (gd._yAutoBusy) return;                           // ignore our own y relayout
+      if (!ev) return;
+      var xChanged = ("xaxis.autorange" in ev) || ("xaxis.range" in ev) ||
+                     ("xaxis.range[0]" in ev) || ("xaxis.range[1]" in ev);
+      if (!xChanged) return;
+      schedule();
+    });
+
+    schedule();                                            // fit the opening window on load
+  }
+
+  function sweep() {
+    var P = plotly();
+    if (!P) return;
+    var divs = document.querySelectorAll(".plotly-graph-div, .js-plotly-plot");
+    Array.prototype.forEach.call(divs, function (gd) { wire(gd, P); });
+  }
+
+  // Bounded poll: catch charts as Quarto renders them, then stop (mirrors peer-legend-colours).
+  function start() {
+    sweep();
+    var ticks = 0;
+    var timer = setInterval(function () {
+      sweep();
+      if (++ticks >= 40) clearInterval(timer);             // ~12s at 300ms, then give up
+    }, 300);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+})();
+</script>

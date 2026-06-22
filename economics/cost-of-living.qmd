@@ -3,11 +3,9 @@ title: "Cost of Living"
 description: "Inflation — overall, core, and food — against the Bank of Canada target"
 ---
 
-The cost of living is consistently the issue Canadians name as their top concern.
 This page tracks consumer-price inflation: the headline **all-items** rate, the
 Bank of Canada's preferred **core** measure (CPI-trim), and **food** — the
-component households feel most. Related cost pressures have their own pages:
-[Housing](../housing/) and [Income & Inequality](../income/).
+component households feel most.
 
 ```{python}
 #| echo: false
@@ -17,9 +15,10 @@ from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import category_bar, lines_over_time, province_colors
 ```
 
-## Inflation (CPI, Year-over-Year)
+## Inflation (CPI, year-over-year)
 
 Canada's inflation rate, measured as the year-over-year change in the Consumer Price Index (all items). The grey band shows the Bank of Canada's 1–3% target range, with the 2% midpoint as a dashed line.
 
@@ -60,6 +59,7 @@ try:
 
     fig.update_layout(
         xaxis_title="", yaxis_title="Inflation (%)", plot_bgcolor="white",
+        meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
         xaxis=dict(gridcolor="#e0e0e0", range=[x_start, x_end], tickformat="%b\n%Y",
             rangeselector=dict(buttons=[
                 dict(count=1, label="1Y", step="year", stepmode="backward"),
@@ -67,23 +67,24 @@ try:
                 dict(count=5, label="5Y", step="year", stepmode="backward"),
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
                 dict(count=20, label="20Y", step="year", stepmode="backward"),
-                dict(step="all", label="All")], x=0, xanchor="left", y=1.01)),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.06, bgcolor="#f5f5f5")),
         yaxis=dict(gridcolor="#e0e0e0", range=[y_min, y_max]),
-        showlegend=False, margin=dict(b=100, t=40, r=80),
+        showlegend=False, margin=dict(b=150, t=40, r=80),
         annotations=[
             dict(text="2% target", xref="paper", yref="y", x=1.01, y=2,
                  xanchor="left", showarrow=False, font=dict(size=11, color="#888")),
-            dict(text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
-                 xref="paper", yref="paper", x=0, y=-0.15, showarrow=False, font=dict(size=10, color="#999")),
             dict(text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
-                 xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999")),
+                 xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False, font=dict(size=10, color="#999")),
+            dict(text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
+                 xref="paper", yref="paper", x=0, y=-0.42, yanchor="top", showarrow=False, font=dict(size=10, color="#999")),
         ])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 except FileNotFoundError:
     print("CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Headline, Core, and Food
+## Headline, core, and food
 
 Three views of the same question. **All-items** is the headline rate; **CPI-trim** is the Bank of Canada's preferred *core* measure, which strips out the most volatile price movements to show the underlying trend; **food** is the most-felt component, and has generally run hotter than overall inflation.
 
@@ -110,7 +111,9 @@ try:
         line=dict(color="#f28e2b", width=2), hovertemplate="Food: %{y:.1f}%<extra></extra>"))
     latest = ai["date"].max()
     figc.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
-        yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%"),
+        meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
+        yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%",
+                   range=[-3, 13]),
         xaxis=dict(title="", gridcolor="#e0e0e0", range=[pd.Timestamp("2015-01-01"), latest],
             rangeselector=dict(buttons=[
                 dict(count=5, label="5Y", step="year", stepmode="backward"),
@@ -127,7 +130,40 @@ except FileNotFoundError:
     print("Core/food CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## The Policy Rate vs. Inflation
+## Where inflation is coming from
+
+Inflation is an average across a basket of goods and services, but the pieces move at very different speeds. This shows the 12-month change in each of the eight major components of the Consumer Price Index — which corners of the basket are running hot and which are cool. It is the *rate* each component is rising, not its weight in the headline figure (shelter and food carry the most weight in the average); the all-items rate is marked in grey for reference.
+
+```{python}
+#| echo: false
+try:
+    comp = pd.read_csv("data/economics/statcan_cpi_components.csv", parse_dates=["date"])
+    comp["cpi_value"] = pd.to_numeric(comp["cpi_value"], errors="coerce")
+    comp = comp.sort_values(["product_group", "date"])
+    comp["yoy"] = comp.groupby("product_group")["cpi_value"].pct_change(12) * 100
+    latest = comp["date"].max()
+    cur = comp[comp["date"] == latest].dropna(subset=["yoy"]).copy()
+    short = {
+        "Household operations, furnishings and equipment": "Household operations & furnishings",
+        "Recreation, education and reading": "Recreation, education & reading",
+        "Alcoholic beverages, tobacco products and recreational cannabis": "Alcohol, tobacco & cannabis",
+        "Health and personal care": "Health & personal care",
+        "Clothing and footwear": "Clothing & footwear",
+    }
+    cur["label"] = cur["product_group"].map(lambda p: short.get(p, p))
+    cur["lbl"] = [f"{v:+.1f}%" for v in cur["yoy"]]
+    fig = category_bar(cur, "label", "yoy",
+        xaxis_title="12-month change (%)", ticksuffix="%",
+        highlight={"All-items"}, highlight_color="#555",
+        text_col="lbl", text_fmt="{}",
+        hovertemplate="%{y}: %{x:+.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada 18-10-0004-01 | {latest:%B %Y}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("CPI components data not yet available. Run the data pipeline to fetch it.")
+```
+
+## The policy rate vs. inflation
 
 The Bank of Canada raises its **policy interest rate** to cool inflation and lowers it to support the economy — so the two move together over time. This pairs the policy rate (the **Bank Rate**, the consistent series back to 1935) with year-over-year inflation, both on one scale. The early-1980s spike — the rate above **20%** against double-digit inflation — and the 2022–23 tightening cycle stand out. The grey band is the 1–3% inflation target.
 
@@ -169,16 +205,54 @@ except FileNotFoundError:
     print("Policy-rate data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Other Cost Pressures
+## The minimum wage, nominal and real
+
+Minimum wages are set by each province and territory, so there is no single national rate. This shows the four most populous provinces. In **nominal** dollars the minimum wage only ever rises; switch to **real** to adjust for inflation, which is what tells you whether the lowest-paid are actually gaining ground. (All 14 jurisdictions, including the federal rate, are in the data download.)
+
+```{python}
+#| echo: false
+mw_path = "data/economics/esdc_minimum_wage.csv"
+try:
+    mw = pd.read_csv(mw_path)
+    cpi = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in cpi.columns:
+        cpi = cpi[cpi["product_group"] == "All-items"]
+    cpi["yr"] = cpi["date"].dt.year
+    cpi_annual = cpi.groupby("yr")["cpi_value"].mean()
+    full_year = cpi.groupby("yr")["date"].nunique()
+    base_year = int(full_year[full_year >= 12].index.max())   # latest complete CPI year
+    base_cpi = cpi_annual[base_year]
+    PROVS = ["Ontario", "Quebec", "British Columbia", "Alberta"]
+    m = mw[(mw["jurisdiction"].isin(PROVS)) & (mw["year"] <= base_year)].copy()
+    m["real"] = m["min_wage"] * base_cpi / m["year"].map(cpi_annual)
+    m = m.dropna(subset=["real"])
+    fig = lines_over_time(m, "year", "min_wage", "jurisdiction",
+        yaxis_title="$ per hour", group_order=PROVS,
+        colors=province_colors(PROVS),
+        measures=[
+            {"col": "min_wage", "label": "Nominal", "yaxis_title": "$ per hour (nominal)",
+             "ytickprefix": "$", "hover_decimals": 2},
+            {"col": "real", "label": f"Real ({base_year} $)",
+             "yaxis_title": f"$ per hour (constant {base_year} $)", "ytickprefix": "$", "hover_decimals": 2},
+        ],
+        source_note=f"Source: ESDC, Historical Minimum Wage Rates in Canada (open.canada.ca); deflated by StatCan all-items CPI | Data as of: {get_data_date(mw_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("Minimum-wage data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Other cost pressures
 
 Inflation is only part of the cost-of-living picture. See also:
 
 - [Housing](../housing/) — house prices, the price-to-income gap, rent, and household debt
 - [Income & Inequality](../income/) — wages, median income, and low-income and food-insecurity rates
 
-## Download Data
+## Download data
 
 - [CPI / Inflation (CSV)](../data/economics/statcan_cpi.csv) — Statistics Canada 18-10-0004-01
+- [Minimum wage by jurisdiction (CSV)](../data/economics/esdc_minimum_wage.csv) — ESDC, Historical Minimum Wage Rates in Canada
 - [Food CPI (CSV)](../data/economics/statcan_food_cpi.csv) — Statistics Canada 18-10-0004-01
+- [CPI by major component (CSV)](../data/economics/statcan_cpi_components.csv) — Statistics Canada 18-10-0004-01
 - [CPI-trim core inflation (CSV)](../data/economics/statcan_cpi_trim.csv) — Statistics Canada 18-10-0256-01
 - [Bank of Canada policy rate (CSV)](../data/economics/boc_policy_rate.csv) — Bank of Canada (Bank Rate)

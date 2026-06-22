@@ -1,0 +1,78 @@
+---
+title: "Borrowing Costs"
+description: "What it costs to borrow in Canada — prime, mortgage rates, and government bond yields"
+---
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import get_data_date
+from pipeline.charts import single_line_multi
+```
+
+What it costs to borrow in Canada — the rates households and the government pay. These move with the Bank of Canada's policy rate, which it raises to cool inflation and lowers to support the economy (see [Cost of Living](cost-of-living.qmd) for the policy rate against inflation), and they set the price of mortgages and other credit.
+
+## Prime and mortgage rates
+
+What households pay to borrow. The **prime rate** moves with the Bank of Canada's policy rate and underpins variable-rate mortgages and lines of credit; the **conventional 5-year mortgage rate** is the posted benchmark for the most common fixed term — lenders typically negotiate discounts off it — and tracks the 5-year government bond yield below.
+
+```{python}
+#| echo: false
+rates_path = "data/housing/boc_rates.csv"
+if os.path.exists(rates_path):
+    rt = pd.read_csv(rates_path, parse_dates=["date"])
+    figm = go.Figure()
+    figm.add_trace(go.Scatter(x=rt["date"], y=rt["mortgage_5yr"], name="Conventional 5-year mortgage",
+        mode="lines", line=dict(color="#d62728", width=2.5), hovertemplate="5-yr mortgage: %{y:.2f}%<extra></extra>"))
+    figm.add_trace(go.Scatter(x=rt["date"], y=rt["prime"], name="Prime rate",
+        mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="Prime: %{y:.2f}%<extra></extra>"))
+    figm.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+        meta=dict(autoscaleY=dict(include=[0], min=0)),
+        yaxis=dict(title="Interest rate (%)", gridcolor="#e0e0e0", ticksuffix="%", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+            rangeselector=dict(buttons=[
+                dict(count=5, label="5Y", step="year", stepmode="backward"),
+                dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=20, label="20Y", step="year", stepmode="backward"),
+                dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        legend=dict(yanchor="top", y=0.98, xanchor="right", x=0.98, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=120, r=20))
+    figm.add_annotation(text=f"Source: Bank of Canada (prime rate; conventional 5-year mortgage rate) | Data as of: {get_data_date(rates_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))
+    figm.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Prime/mortgage rate data not yet available. Run the data pipeline.")
+```
+
+## Government bond yields
+
+What investors charge to lend to the Government of Canada at each term — the benchmark the fixed borrowing costs above are priced from. The 2-, 3- and 5-year yields map onto the common fixed-mortgage terms; the 10-year and long-term reflect longer-horizon expectations. **Use the dropdown to switch term.**
+
+```{python}
+#| echo: false
+bond_path = "data/economics/boc_bond_yields.csv"
+if os.path.exists(bond_path):
+    bonds = pd.read_csv(bond_path, parse_dates=["date"])
+    _bh = "%{x|%b %Y}: %{y:.2f}%<extra></extra>"
+    opts = [
+        {"col": "y5", "label": "5-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
+        {"col": "y2", "label": "2-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
+        {"col": "y3", "label": "3-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
+        {"col": "y7", "label": "7-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
+        {"col": "y10", "label": "10-year", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
+        {"col": "ylong", "label": "Long-term (~30-yr)", "yaxis_title": "Yield (%)", "hovertemplate": _bh},
+    ]
+    fig = single_line_multi(bonds, "date", opts, rangeslider=True,
+        source_note=f"Source: Bank of Canada (Government of Canada benchmark bond yields) | Data as of: {get_data_date(bond_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Bond-yield data not yet available. Run the data pipeline.")
+```
+
+## Download data
+
+- [Prime & 5-year mortgage rate (CSV)](../data/housing/boc_rates.csv) — Bank of Canada
+- [Government bond yields by term (CSV)](../data/economics/boc_bond_yields.csv) — Bank of Canada

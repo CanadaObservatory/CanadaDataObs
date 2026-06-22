@@ -178,7 +178,7 @@ else:
     print("NAPS monthly data not yet available. Run: python -m pipeline.build_naps_cities")
 ```
 
-## Download Data
+## Download data
 
 - [Air quality by city — annual (CSV)](../data/environment/naps_city_annual.csv) — ECCC NAPS Annual Summaries
 - [Air quality by city — monthly (CSV)](../data/environment/naps_city_monthly.csv) — ECCC NAPS Annual Summaries

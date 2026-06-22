@@ -76,45 +76,54 @@ PEER_CODES = list(PEER_COUNTRIES.keys())
 # Country to highlight in charts
 HIGHLIGHT_COUNTRY = "CAN"
 
-# Named comparators get their own colour (Canada itself stays red). Every other
-# peer is drawn in light grey. Kept here so the highlighted set is a one-line
-# change. Order in legends is handled in charts.py (alphabetical, these on top).
+# Named comparators ("focal" countries) always shown in colour; every other peer draws
+# light grey until activated. Order in legends handled in charts.py (alphabetical, on top).
+# LOCKED 2026-06-22 — deliberate data-ink palette (rationale: _strategy/colour-system-story.md;
+# values: _strategy/colour-registers.json). Canada = brand maroon (CANADA_COLOR below); Japan
+# PROMOTED to a focal comparator (owner: frequently of interest). Capstone-optimised via max-min
+# CIEDE2000 + Machado deuteranopia/protanopia: global normal-vision min ΔE 15.7, line-legible on
+# white, restrained "civic" register (register chosen per country for distinctness — mostly muted;
+# Japan & Germany deep).
 COMPARATOR_COLORS = {
-    "USA": "#1f77b4",  # blue
-    "AUS": "#ff7f0e",  # orange
-    "DEU": "#2ca02c",  # green
-    "GBR": "#9467bd",  # purple
-    "SWE": "#8c564b",  # brown
+    "USA": "#0650A3",  # deep blue
+    "AUS": "#C77109",  # gold
+    "DEU": "#0B6B2D",  # deep forest green
+    "GBR": "#B06487",  # rose-mauve
+    "SWE": "#249FD0",  # sky blue
+    "JPN": "#753803",  # bronze (promoted to focal comparator, 2026-06-22)
 }
 
-# The other 11 peers each ALSO own a fixed identity colour, but their lines draw
-# grey + legend-hidden until the reader activates one from the legend, then it
-# snaps to this colour (and back to grey when toggled off). The swap is wired
-# site-wide in _includes/peer-legend-colours.html, which reads each grey trace's
-# fixed colour from its Plotly `meta.fixedColor` (stashed by the chart builders).
-# Keeping the default view calm (only Canada + the 5 comparators + average in
-# colour) while giving every country a distinct, CONSISTENT colour the moment it
-# is shown — and because inactive peers are grey, a colour clash can only ever
-# appear between two countries the reader deliberately shows together.
-#
-# Palette = matplotlib tab20: COMPARATOR_COLORS above are its saturated members;
-# these are tab20's remaining saturated hues (cyan/pink/olive) + light tints,
-# each tint sitting in its dark partner's hue family but separated by lightness
-# (Korea light-blue vs USA blue, Finland light-purple vs UK purple, …). The one
-# soft pair is Israel/France (both pink), only visible if both are activated.
+# The other 10 peers each own a fixed identity colour but draw grey + legend-hidden
+# until the reader activates one (then it snaps to this colour; wired site-wide in
+# _includes/peer-legend-colours.html via each grey trace's Plotly `meta.fixedColor`).
+# The default view stays calm (only Canada + the focal comparators + average in colour),
+# yet every country has a distinct, CONSISTENT colour the moment it is shown.
+# LOCKED 2026-06-22 (was matplotlib tab20). Spread across a WIDE lightness range
+# (deep/muted/light) — lightness is the colour-blind-robust separation axis — so each
+# clears the focal six and the others in normal vision (global min ΔE 15.7). Under
+# colour-blindness the worst pair (~ΔE 6) is the irreducible cost of 17 > the ~8–12
+# distinct-colour ceiling; grey-until-active means clashing pairs never co-appear unless
+# the reader deliberately shows both (and the legend labels them).
 PEER_EXTRA_COLORS = {
-    "JPN": "#17becf",  # cyan
-    "FRA": "#e377c2",  # pink
-    "ITA": "#bcbd22",  # olive
-    "KOR": "#aec7e8",  # light blue    (vs USA blue, by lightness)
-    "NLD": "#ffbb78",  # light orange  (vs AUS orange)
-    "CHE": "#98df8a",  # light green   (vs DEU green)
-    "NOR": "#9edae5",  # light cyan    (vs JPN cyan)
-    "DNK": "#ff9896",  # salmon        (vs CAN red — Canada is bold + markers)
-    "FIN": "#c5b0d5",  # light purple  (vs GBR purple)
-    "ISR": "#f7b6d2",  # light pink    (vs FRA pink)
-    "NZL": "#c49c94",  # taupe         (vs SWE brown)
+    "FRA": "#AC4B3E",  # brick red
+    "ITA": "#006B63",  # deep teal
+    "KOR": "#3279DF",  # blue
+    "NLD": "#776500",  # dark olive-gold
+    "CHE": "#776EA3",  # muted periwinkle
+    "NOR": "#AD924A",  # tan / ochre
+    "DNK": "#708538",  # olive green
+    "FIN": "#33A0A0",  # teal
+    "ISR": "#F16458",  # coral
+    "NZL": "#11A876",  # green
 }
+
+# Comparators shown ON LOAD for the peer line charts: Canada + US + Australia + Germany
+# + Japan + the peer average (Japan added 2026-06-22 with its promotion to a focal
+# comparator). Sweden + UK keep their colour + top-of-legend rank but start hidden
+# (legendonly), and the 10 grey peers stay hidden too, so a busy 17-line chart opens
+# legible. Global default for peer_comparison_line / _by_age; a chart passes
+# initial_visible=[...] to override (e.g. ["USA"] on fertility).
+DEFAULT_VISIBLE_COMPARATORS = ["USA", "AUS", "DEU", "JPN"]
 
 # --- Statistics Canada Table IDs ---
 STATCAN_TABLES = {
@@ -128,7 +137,9 @@ OECD_MAX_REQUESTS_PER_HOUR = 60
 OECD_REQUEST_DELAY_SECONDS = 2  # Conservative delay between requests
 
 # --- Chart Styling ---
-CANADA_COLOR = "#d62728"  # Red for Canada
+CANADA_COLOR = "#7A263A"  # Brand maroon — Canada the entity, every chart (LOCKED 2026-06-22).
+#                           Retires chart-red #d62728 for the entity; valence reds (e.g. CPI
+#                           above-target bars) stay their own literals in the pages.
 PEER_COLOR = "#bdbdbd"    # Light grey for non-highlighted peers
 OECD_AVG_COLOR = "#555555"  # Dark grey for OECD average (blue is now the US)
 HIGHLIGHT_WIDTH = 3
@@ -140,6 +151,37 @@ PEER_ACTIVE_WIDTH = 2.6  # a grey peer's width once activated from the legend
 # Site attribution appended beneath every chart's source note (see the Figure.show
 # interceptor in charts.py). Change here to update it everywhere.
 BRAND = "Canada Observatory"
+
+# --- Provincial / territorial identity colours (LOCKED 2026-06-22) ---
+# Fixed identity per province, to replace cycling SERIES_PALETTE on provincial charts.
+# THREE tonal registers of the SAME hue identity, chosen by medium: MUTED = default for
+# LINES (most distinct), DEEP = a moodier/unified line option, PASTEL = large MAP fills.
+# Mutually distinct in normal vision + adjacency-clean on the map; province colour is
+# label/shape-supported (named regions on maps, dropdown on charts). Keyed by the StatCan
+# 2-letter code (PROVINCE_NAMES = the labels charts use). Wiring each province chart to
+# pass the chosen register to the builders is the remaining step — see
+# _strategy/colour-system-story.md.
+PROVINCE_NAMES = {
+    "ON": "Ontario", "QC": "Quebec", "BC": "British Columbia", "AB": "Alberta",
+    "NS": "Nova Scotia", "NB": "New Brunswick", "MB": "Manitoba", "SK": "Saskatchewan",
+    "NL": "Newfoundland and Labrador", "PE": "Prince Edward Island",
+    "YT": "Yukon", "NT": "Northwest Territories", "NU": "Nunavut",
+}
+PROVINCE_COLORS = {  # MUTED — default register for province LINES
+    "ON": "#A0543F", "QC": "#225490", "BC": "#27613F", "AB": "#C0923C", "NS": "#2C7C8E",
+    "NB": "#31A182", "MB": "#788741", "SK": "#6F79C2", "NL": "#8C3A57", "PE": "#EAB196",
+    "YT": "#7C949C", "NT": "#9E92B0", "NU": "#7C5A74",
+}
+PROVINCE_COLORS_DEEP = {  # moodier / unified line register
+    "ON": "#912D20", "QC": "#1E58AA", "BC": "#3F7B56", "AB": "#9E7621", "NS": "#1DA0B5",
+    "NB": "#3EA38B", "MB": "#8D9655", "SK": "#6E92EB", "NL": "#D1798D", "PE": "#A05829",
+    "YT": "#0089A9", "NT": "#62447A", "NU": "#915A89",
+}
+PROVINCE_COLORS_PASTEL = {  # large MAP fills
+    "ON": "#FBC0AE", "QC": "#7FB4F8", "BC": "#48B686", "AB": "#E0AC6B", "NS": "#64E1F7",
+    "NB": "#99E1CA", "MB": "#BCDA87", "SK": "#A4ABDD", "NL": "#ED879E", "PE": "#DE8C6D",
+    "YT": "#54ADC1", "NT": "#D4BAE7", "NU": "#D68DC8",
+}
 
 
 # ============================================================================
@@ -252,6 +294,26 @@ INDICATORS = [
               value_col="old_age_dependency", chart_recipe="line",
               wb_indicator="SP.POP.DPND.OL", start_period=1960,
               source_table="World Bank WDI (UN World Population Prospects)"),
+    Indicator("world_population", "population", "custom",
+              "Population of every country (global context)", "people", "annual",
+              value_col="population", chart_recipe="bar",
+              fetch_fn="fetch_world_population", output_subpath="worldbank_population.csv",
+              source_table="World Bank (SP.POP.TOTL)"),
+    Indicator("world_gdp", "economics", "custom",
+              "GDP of every country (global context)", "current US$", "annual",
+              value_col="gdp", chart_recipe="bar",
+              fetch_fn="fetch_world_gdp", output_subpath="worldbank_gdp.csv",
+              source_table="World Bank (NY.GDP.MKTP.CD)"),
+    Indicator("world_land_area", "geography", "custom",
+              "Land area of every country (global context)", "sq km", "annual",
+              value_col="land_area", chart_recipe="bar",
+              fetch_fn="fetch_world_land_area", output_subpath="worldbank_land_area.csv",
+              source_table="World Bank (AG.LND.TOTL.K2)"),
+    Indicator("voter_turnout", "population", "custom",
+              "Federal voter turnout", "% of electors", "per election",
+              value_col="turnout", chart_recipe="line",
+              fetch_fn="fetch_voter_turnout", output_subpath="voter_turnout.csv",
+              source_table="Elections Canada"),
 
     # ----- Economy & Jobs (OECD) -----
     Indicator("gdp_per_capita", "economics", "oecd",
@@ -265,6 +327,16 @@ INDICATORS = [
               value_col="gdp_per_hour", chart_recipe="ranked_bar",
               dataflow="OECD.SDD.TPS,DSD_PDB@DF_PDB_LV,1.0",
               key=f"{_C}.A.GDPHRS._T.USD_PPP_H.Q._Z._Z._Z",
+              source_table="OECD Productivity Database (PDB_LV)"),
+    # Labour utilisation = hours worked per head of population. The other half of
+    # the GDP-per-capita identity: GDP/capita (GDPPOP) = GDP/hour (GDPHRS) ×
+    # hours/capita (HRSPOP), all from the same PDB_LV table so the decomposition is
+    # exact. Unit H_PS (hours per person) is a physical count → PRICE_BASE=_Z.
+    Indicator("labour_utilisation", "economics", "oecd",
+              "Labour utilisation (hours worked per capita)", "Hours per person", "annual",
+              value_col="hours_per_capita", chart_recipe="line",
+              dataflow="OECD.SDD.TPS,DSD_PDB@DF_PDB_LV,1.0",
+              key=f"{_C}.A.HRSPOP._T.H_PS._Z._Z._Z._Z",
               source_table="OECD Productivity Database (PDB_LV)"),
     Indicator("unemployment", "economics", "oecd",
               "Unemployment rate", "% of labour force", "annual",
@@ -334,6 +406,13 @@ INDICATORS = [
                                "Alternative measures": "Measure of core inflation based on a trimmed mean approach, CPI-trim (year-over-year percent change)"},
               output_subpath="statcan_cpi_trim.csv",
               source_table="Statistics Canada 18-10-0256-01"),
+    # Minimum wage by jurisdiction over time (ESDC via open.canada.ca) — the
+    # cost-of-living companion; the page deflates to real with the CPI above.
+    Indicator("minimum_wage", "economics", "custom",
+              "Minimum wage by jurisdiction", "nominal CAD per hour", "annual",
+              value_col="min_wage", chart_recipe="line",
+              fetch_fn="fetch_minimum_wage", output_subpath="esdc_minimum_wage.csv",
+              source_table="ESDC, Historical Minimum Wage Rates in Canada (open.canada.ca)"),
     # Merchandise trade with the US (export dependence + balances) — bespoke
     # multi-series; the salient US-tariff/trade exposure indicator.
     Indicator("trade_us", "economics", "custom",
@@ -417,6 +496,14 @@ INDICATORS = [
               value_col="defence_pct_gdp", chart_recipe="ranked_bar",
               wb_indicator="MS.MIL.XPND.GD.ZS",
               source_table="World Bank (data from SIPRI)"),
+    # Tax structure (revenue mix): the six standard categories as % of GDP, so the
+    # composition shows alongside the total burden. Bespoke OECD fetcher (Revenue
+    # Statistics comparative tables) — tidy long format (country, year, tax_type).
+    Indicator("tax_structure", "fiscal", "custom",
+              "Tax structure (revenue mix)", "% of GDP", "annual",
+              value_col="pct_gdp", chart_recipe="stacked_bar",
+              fetch_fn="fetch_tax_structure", output_subpath="oecd_tax_structure.csv",
+              source_table="OECD Revenue Statistics (DSD_REV_COMP_OECD@DF_RSOECD)"),
 
     # ----- Government (workforce + federal spending) -----
     # Grouped under the "Public Finances" nav dropdown alongside the fiscal
@@ -534,6 +621,23 @@ INDICATORS = [
               statcan_table="34-10-0127-01",
               statcan_filters={"GEO": "Census metropolitan areas"},
               source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
+    Indicator("cma_vacancy", "housing", "custom",
+              "Rental vacancy rate by city (latest year)", "% of rental units", "annual",
+              value_col="vacancy_rate", chart_recipe="bar",
+              fetch_fn="fetch_cma_vacancy", output_subpath="statcan_cma_vacancy.csv",
+              source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
+    Indicator("debt_service_ratio", "housing", "custom",
+              "Household debt service ratio", "% of disposable income", "quarterly",
+              value_col="dsr_total", chart_recipe="line",
+              fetch_fn="fetch_debt_service_ratio",
+              output_subpath="statcan_debt_service_ratio.csv",
+              source_table="Statistics Canada 11-10-0065-01"),
+    Indicator("provincial_finance", "government", "custom",
+              "Provincial government finances (CGFS, % of GDP)", "% of provincial GDP",
+              "annual", value_col="net_debt_pct_gdp", chart_recipe="bar",
+              fetch_fn="fetch_provincial_finance",
+              output_subpath="statcan_provincial_finance.csv",
+              source_table="Statistics Canada 10-10-0017-01 + 36-10-0222-01"),
 
     # ----- Income & Inequality -----
     Indicator("gini", "income", "oecd",
@@ -542,6 +646,14 @@ INDICATORS = [
               # dims: REF_AREA.FREQ.MEASURE.STAT_OP.UNIT.AGE.METHODOLOGY.DEFINITION.POVERTY_LINE
               dataflow="OECD.WISE.INE,DSD_WISE_IDD@DF_IDD,1.0",
               key=f"{_C}.A.INC_DISP_GINI..._T.METH2012.D_CUR.",
+              source_table="OECD Income Distribution Database (IDD)"),
+    # Gini of MARKET income (before taxes & transfers). Paired with the disposable
+    # Gini above, the gap is the redistributive effect of taxes and transfers.
+    Indicator("gini_market", "income", "oecd",
+              "Gini coefficient (market income)", "0–1 (lower = more equal)",
+              "annual", value_col="gini_market", chart_recipe="line",
+              dataflow="OECD.WISE.INE,DSD_WISE_IDD@DF_IDD,1.0",
+              key=f"{_C}.A.INC_MRKT_GINI..._T.METH2012.D_CUR.",
               source_table="OECD Income Distribution Database (IDD)"),
     Indicator("poverty", "income", "oecd",
               "Relative poverty rate (<50% median)", "% of population", "annual",
@@ -590,6 +702,11 @@ INDICATORS = [
                                "Household food security status": "Food insecure",
                                "Statistics": "Percentage of persons"},
               source_table="Statistics Canada 13-10-0835-01"),
+    Indicator("income_distribution", "income", "custom",
+              "Income distribution by decile, over time", "constant dollars / % share", "annual",
+              value_col="avg_income", chart_recipe="line",
+              fetch_fn="fetch_income_distribution", output_subpath="income_deciles_avg.csv",
+              source_table="Statistics Canada 11-10-0193-01"),
 
     # ----- Health -----
     Indicator("life_expectancy", "health", "oecd",
@@ -792,6 +909,21 @@ INDICATORS = [
               value_col="consumption_co2_pc", chart_recipe="ranked_bar",
               fetch_fn="fetch_consumption_co2", output_subpath="owid_consumption_co2.csv",
               source_table="Our World in Data (Global Carbon Project)"),
+    Indicator("co2_per_gdp", "environment", "custom",
+              "CO2 emissions intensity (per unit GDP)", "kg CO2 per $ of GDP", "annual",
+              value_col="co2_per_gdp", chart_recipe="ranked_bar",
+              fetch_fn="fetch_co2_per_gdp", output_subpath="owid_co2_per_gdp.csv",
+              source_table="Our World in Data (Global Carbon Project)"),
+    Indicator("co2_global_context", "environment", "custom",
+              "CO2 per capita — global context", "tonnes CO2 per capita", "annual",
+              value_col="co2_per_capita", chart_recipe="line",
+              fetch_fn="fetch_co2_global_context", output_subpath="owid_co2_global_context.csv",
+              source_table="Our World in Data (Global Carbon Project)"),
+    Indicator("pm25_global_context", "environment", "custom",
+              "PM2.5 exposure — global context", "µg/m³", "annual",
+              value_col="pm25", chart_recipe="line",
+              fetch_fn="fetch_pm25_global_context", output_subpath="worldbank_pm25_global.csv",
+              source_table="World Bank (EN.ATM.PM25.MC.M3)"),
     Indicator("energy_mix", "environment", "custom",
               "Energy mix by source", "% of primary energy", "annual",
               fetch_fn="fetch_energy_mix", output_subpath="owid_energy_mix.csv",

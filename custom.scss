@@ -7,6 +7,19 @@ $primary: #17324D;        // Deep Navy — navbar, primary buttons
 $link-color: #1F6E8C;     // darkened Lake Blue — 5.2:1 on white/off-white (AA)
 $headings-color: #17324D;
 
+// Six-area accent colours (palette.md "Six-area accent mapping"). CHROME ONLY —
+// section/landing identity accents; chart data ink stays in pipeline/config.py.
+// Prairie Gold (2.5:1) fails contrast for text/thin strokes on the light page, so
+// gold accents that carry text or a hairline use Deep Ochre instead; the wave
+// bands themselves keep true gold (decorative fills clear of the contrast rule).
+$area-people:      #7A263A;   // Deep Maroon
+$area-economy:     #C2972F;   // Prairie Gold  (band/fill)
+$area-economy-ink: #A8842F;   // Deep Ochre    (gold text/strokes on light, 3.2:1)
+$area-government:  #17324D;   // Deep Navy
+$area-health:      #2A7F9E;   // Lake Blue
+$area-environment: #3F6F5E;   // Boreal Green
+$area-education:   #6B7280;   // Slate Grey
+
 // Typography: Radio-Canada (adopted 2026-06-11 — visual_assets/brand/typography.md).
 // Self-hosted variable woff2 (latin + latin-ext, roman + italic) via the
 // @font-face rules below; $web-font-path: false stops the flatly theme from
@@ -163,3 +176,78 @@ $font-family-sans-serif: "Radio Canada", -apple-system, BlinkMacSystemFont,
 }
 .area-card h3 { margin-top: 0; }
 .area-card p:last-child { margin-bottom: 0; }   // trim the sources line
+
+// Section-landing-page leaf: a variant of the logo in the section's own colour
+// (solid/leaf-display-<area>.svg), floated beside the intro like the home hero.
+.overview-leaf {
+  float: right;
+  width: 116px;
+  margin: 0.1rem 0 0.6rem 1.5rem;
+}
+@media (max-width: 575.98px) {
+  .overview-leaf { width: 80px; margin: 0 0 0.4rem 0.9rem; }
+}
+// Card rows (and any group heading) clear the floated leaf so they start fresh.
+.columns:has(> .area-card) { clear: both; }
+
+// Per-area card identity: the section title takes its area accent colour (the
+// text-safe ink for gold) and the card lifts with an area-coloured ring on hover
+// — echoing the six colour cells of the brand leaf. Each value is (title-ink,
+// hover-ring): they differ only for Economy, where the title darkens to ochre for
+// contrast while the ring keeps true Prairie Gold.
+.area-card { transition: box-shadow 0.15s ease, transform 0.15s ease; }
+.area-card:hover { transform: translateY(-2px); }
+
+$area-card-accents: (
+  "people":      ($area-people      $area-people),
+  "economy":     ($area-economy-ink $area-economy),
+  "government":  ($area-government   $area-government),
+  "health":      ($area-health       $area-health),
+  "environment": ($area-environment  $area-environment),
+  "education":   ($area-education     $area-education),
+);
+@each $name, $pair in $area-card-accents {
+  .area-card.area-#{$name} h3 a {
+    &, &:hover, &:focus { color: nth($pair, 1); }
+  }
+  .area-card.area-#{$name}:hover {
+    box-shadow: 0 4px 14px rgba(23, 50, 77, 0.13), 0 0 0 1.5px nth($pair, 2);
+  }
+}
+
+// Section-page identity: a short rule beneath the page title in the page's area
+// accent colour. The area is set per directory in `_metadata.yml`
+// (`body-classes: area-<x>`); the heading itself stays navy, so only the rule
+// carries colour — a quiet signature that ties each page back to its landing
+// card. Gold uses the text-safe ochre (a thin rule is a "thin stroke").
+@each $name, $accent in (
+  "people" $area-people, "economy" $area-economy-ink, "government" $area-government,
+  "health" $area-health, "environment" $area-environment, "education" $area-education
+) {
+  body.area-#{$name} #title-block-header .title {
+    display: inline-block;
+    border-bottom: 3px solid $accent;
+    padding-bottom: 0.15rem;
+  }
+}
+
+// Light in-page area accents (step 1 of the area-identity rollout): two quiet
+// touches that carry the area colour through the page body — the active "On this
+// page" TOC item, and a short bar beside each section (##) heading. Both keyed off
+// the per-directory body.area-* class; gold uses the ochre ink. The TOC's own "On
+// this page" h2 lives in <nav>, so #quarto-document-content scopes the bar to body
+// section headings only.
+@each $name, $accent in (
+  "people" $area-people, "economy" $area-economy-ink, "government" $area-government,
+  "health" $area-health, "environment" $area-environment, "education" $area-education
+) {
+  // The active TOC item is marked by recolouring its indicator bar — NOT the text:
+  // the small TOC type would fail AA in the lighter areas (ochre 3.2:1, lake 4.1:1).
+  body.area-#{$name} nav[role="doc-toc"] .nav-link.active {
+    border-left: 2px solid $accent;
+  }
+  body.area-#{$name} #quarto-document-content h2 {
+    border-left: 3px solid $accent;
+    padding-left: 0.55rem;
+  }
+}

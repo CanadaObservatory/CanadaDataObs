@@ -12,7 +12,7 @@ from pipeline.charts import choropleth_groups_map, DIVERSITY_MAP_GROUPS
 
 This map drops below the census tract to the **dissemination area (DA)** — Statistics Canada's *smallest* standard geography, about **400–700 people each** (several DAs make up one tract). Each little area is labelled by its StatCan ID. This page covers **Calgary**; other metros are linked from the [main Population page](diversity.qmd#diversity-by-neighbourhood).
 
-Descriptive only: "visible minority" is Statistics Canada's term, the map now adds explicit **White** and **Indigenous** categories (White is *derived* — "Not a visible minority" minus Indigenous identity; see the [method note](diversity.qmd#diversity-by-neighbourhood)), and there is no "good"/"bad" reading. **Use the dropdown** to switch groups; zoom and pan to your street.
+"Visible minority" is Statistics Canada's term, the map now adds explicit **White** and **Indigenous** categories (White is *derived* — "Not a visible minority" minus Indigenous identity; see the [method note](diversity.qmd#diversity-by-neighbourhood)). **Use the dropdown** to switch groups; zoom and pan to your street.
 
 ```{python}
 #| echo: false
@@ -24,7 +24,7 @@ if os.path.exists(da_geo) and os.path.exists(da_path):
     groups = DIVERSITY_MAP_GROUPS
     fig = choropleth_groups_map(geo, da, "dauid", groups, name_col="name", breakdown_exclude=["all_vm"],
         pop_col="population", colorscale="Viridis", opacity=0.6, center={"lat": 51.04, "lon": -114.07}, zoom=9.3, height=720,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021006); % of population by dissemination area, Calgary CMA. 'Visible minority' is StatCan's term. 'White' is derived (Not a visible minority − Indigenous identity); 'Indigenous' is Indigenous identity; with 'All visible minorities' they sum to 100%. Descriptive only.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021006 — Calgary CMA.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Calgary DA diversity map not available — run build_da_profile in pipeline.build_census_geo.")

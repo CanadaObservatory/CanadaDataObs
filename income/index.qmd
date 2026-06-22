@@ -3,10 +3,8 @@ title: "Income & Inequality"
 description: "Incomes, wages, and the distribution of income — Canada and OECD peers"
 ---
 
-Aggregate growth is only part of the picture; how income reaches households, and
-how evenly it is shared, is another. These charts track real (inflation-adjusted)
-incomes and wages, the Gini coefficient, and relative poverty — for Canada and a
-broad group of 17 OECD peers.
+These charts track incomes and wages — most in inflation-adjusted ("real")
+terms — along with the Gini coefficient and relative poverty.
 
 ```{python}
 #| echo: false
@@ -20,7 +18,7 @@ from pipeline.config import (
 from pipeline.charts import peer_comparison_line, ranked_bar, single_line
 ```
 
-## Where Canada Stands
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -30,7 +28,7 @@ from pipeline.charts import page_snapshot
 page_snapshot("income").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Median After-Tax Income in Canada
+## Median after-tax income in Canada
 
 Median after-tax income of **economic families and unattached individuals**
 (Statistics Canada's income unit — *not* equivalized per person), in 2024 constant
@@ -49,7 +47,7 @@ if os.path.exists(mi_path):
                       yaxis_title="Median after-tax income (2024 constant $)",
                       rangeslider=True, yaxis_tickformat="$,.0f",
                       source_note=(f"Source: Statistics Canada, Table 11-10-0190-01 — economic families & "
-                                   f"unattached individuals, 2024 constant dollars. "
+                                   f"unattached individuals, 2024 constant dollars.<br>"
                                    f"Latest year {latest_year}; accessed {get_retrieved_date(mi_path)}."))
     # interpret the 2020 bump directly on the chart
     v2020 = df[df["date"].dt.year == 2020]["median_income"]
@@ -68,7 +66,7 @@ and shifts in market income and transfers — read it as a one-off, not a durabl
 living standards.
 :::
 
-## Median Household Income by City
+## Median household income by city
 
 Median household total income by metropolitan area (2021 Census). For the full **neighbourhood-level** view — every census tract, where you can zoom right to your own street — open the dedicated map (kept on its own page so this one stays fast to load):
 
@@ -84,7 +82,7 @@ if os.path.exists(cma_geo_p) and os.path.exists(cma_p):
     cgeo = json.load(open(cma_geo_p))
     cdf = pd.read_csv(cma_p, dtype={"cmauid": str}).dropna(subset=["median_income"])
     fig = choropleth_map(cgeo, cdf, "cmauid", "median_income", name_col="name",
-        colorbar_title="Median household income", value_prefix="$", value_fmt=",.0f",
+        colorbar_title="Median<br>household<br>income", value_prefix="$", value_fmt=",.0f",
         colorscale="Viridis",
         zmin=float(cdf["median_income"].quantile(0.05)), zmax=float(cdf["median_income"].quantile(0.95)),
         source_note="Source: 2021 Census (Statistics Canada), by metropolitan area.")
@@ -93,7 +91,7 @@ else:
     print("Income map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Average Annual Wage (Real)
+## Average annual wage
 
 Average annual wages converted to US dollars at purchasing power parity and held
 in constant prices, so levels can be compared across countries and over time.
@@ -104,7 +102,8 @@ wage_path = "data/income/oecd_avg_wage.csv"
 if os.path.exists(wage_path):
     df = pd.read_csv(wage_path)
     fig = peer_comparison_line(df, "year", "avg_wage",
-        title="", yaxis_title="USD PPP (constant prices)", show_average=True)
+        title="", yaxis_title="USD PPP (constant prices)", show_average=True,
+        initial_visible=["USA"])
     fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
         text=f"Source: OECD Average Annual Wages | Data as of: {get_data_date(wage_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -114,7 +113,7 @@ else:
     print("Average wage data not yet available. Run the data pipeline.")
 ```
 
-## Latest Average Annual Wage: Ranked
+## Latest average annual wage: ranked
 
 ```{python}
 #| echo: false
@@ -126,7 +125,7 @@ if os.path.exists(wage_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Real Household Disposable Income per Capita
+## Real household disposable income per capita
 
 Real (inflation-adjusted) household disposable income per person, indexed to 2007 = 100. Disposable income is what households actually have to spend or save after taxes and transfers — a more direct gauge of household living standards than GDP per capita, which can rise without households feeling better off. Because it is indexed, the lines show *growth* since 2007 rather than dollar levels.
 
@@ -136,7 +135,8 @@ disp_path = "data/income/oecd_disposable_income.csv"
 if os.path.exists(disp_path):
     df = pd.read_csv(disp_path)
     fig = peer_comparison_line(df, "year", "disposable_income_index",
-        title="", yaxis_title="Index (2007 = 100, real)", show_average=True)
+        title="", yaxis_title="Index (2007 = 100, real)", show_average=True,
+        initial_visible=["USA"])
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Household Dashboard | Data as of: {get_data_date(disp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
@@ -145,7 +145,7 @@ else:
     print("Disposable income data not yet available. Run the data pipeline.")
 ```
 
-## Growth in Disposable Income Since 2007: Ranked
+## Growth in disposable income since 2007: ranked
 
 ```{python}
 #| echo: false
@@ -157,7 +157,7 @@ if os.path.exists(disp_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Income Inequality (Gini Coefficient)
+## Income inequality (Gini coefficient)
 
 The Gini coefficient of disposable (after-tax, after-transfer) income runs from 0
 (everyone has the same income) to 1 (one person has all of it). Lower values
@@ -179,7 +179,7 @@ else:
     print("Gini data not yet available. Run the data pipeline.")
 ```
 
-## Latest Gini Coefficient: Ranked
+## Latest Gini coefficient: ranked
 
 ```{python}
 #| echo: false
@@ -191,7 +191,121 @@ if os.path.exists(gini_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Relative Poverty Rate
+## Redistribution: before and after taxes and transfers
+
+The Gini coefficients above measure inequality of **disposable** income — what households have to spend after taxes and government transfers. Measuring inequality of **market** income instead — earnings from work and capital, before the government steps in — and comparing the two shows how much the tax-and-transfer system reduces inequality. For each country below, the orange dot is market-income inequality and the blue dot is disposable-income inequality; the line between them is the redistributive effect. Canada begins from relatively low market inequality and narrows it by a moderate amount — more than the United States, but less than the continental-European welfare states.
+
+```{python}
+#| echo: false
+gm_path = "data/income/oecd_gini_market.csv"
+if os.path.exists(gini_path) and os.path.exists(gm_path):
+    gd = pd.read_csv(gini_path).sort_values("year").groupby("country_code").tail(1)
+    gm = pd.read_csv(gm_path).sort_values("year").groupby("country_code").tail(1)
+    j = (gm[["country_code", "gini_market"]]
+         .merge(gd[["country_code", "gini", "country_name"]], on="country_code"))
+    j["reduction"] = j["gini_market"] - j["gini"]
+    j = j.sort_values("gini", ascending=False)        # most equal (low Gini) ends up at top
+    order = j["country_name"].tolist()
+    is_ca = (j["country_name"] == "Canada")
+    figr = go.Figure()
+    # connecting lines (one trace, Canada's drawn red so its row stands out)
+    for _, r in j.iterrows():
+        figr.add_trace(go.Scatter(x=[r["gini_market"], r["gini"]], y=[r["country_name"]] * 2,
+            mode="lines", line=dict(color="#d62728" if r["country_name"] == "Canada" else "#cfcfcf",
+                                    width=3 if r["country_name"] == "Canada" else 2),
+            showlegend=False, hoverinfo="skip"))
+    figr.add_trace(go.Scatter(x=j["gini_market"], y=j["country_name"], mode="markers",
+        name="Market income (before taxes & transfers)",
+        marker=dict(color="#e07b39", size=[12 if c else 9 for c in is_ca],
+                    line=dict(color="#d62728", width=[2 if c else 0 for c in is_ca])),
+        hovertemplate="Market: %{x:.3f}<extra>%{y}</extra>"))
+    figr.add_trace(go.Scatter(x=j["gini"], y=j["country_name"], mode="markers",
+        name="Disposable income (after taxes & transfers)",
+        marker=dict(color="#1f6e8c", size=[12 if c else 9 for c in is_ca],
+                    line=dict(color="#d62728", width=[2 if c else 0 for c in is_ca])),
+        hovertemplate="Disposable: %{x:.3f}<extra>%{y}</extra>"))
+    yr = int(j["year"].max()) if "year" in j else None
+    figr.update_layout(plot_bgcolor="white", height=600,
+        xaxis=dict(title="Gini coefficient (lower = more equal)", gridcolor="#e0e0e0"),
+        yaxis=dict(title="", categoryorder="array", categoryarray=order),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(l=10, r=20, t=60, b=70))
+    figr.add_annotation(
+        text="Source: OECD Income Distribution Database (latest available year per country)",
+        xref="paper", yref="paper", x=0, y=-0.11, showarrow=False, font=dict(size=10, color="#999"))
+    figr.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Market-income Gini data not yet available. Run the data pipeline.")
+```
+
+## Income distribution over time
+
+A single inequality number hides how income is actually shared. The chart below shows the **average after-tax income of each tenth (decile)** of Canadians, in constant 2024 dollars — slide through the years to watch real incomes rise, with the top decile pulling furthest ahead.
+
+```{python}
+#| echo: false
+adf_path = "data/income/income_deciles_avg.csv"
+if os.path.exists(adf_path):
+    adf = pd.read_csv(adf_path)
+    DEC_ORDER = ["Lowest decile", "Second decile", "Third decile", "Fourth decile",
+                 "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
+                 "Ninth decile", "Highest decile"]
+    LABELS = ["Lowest", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "Highest"]
+    piv = adf.pivot(index="year", columns="decile", values="avg_income")[DEC_ORDER]
+    years = piv.index.tolist()
+    ymax = float(piv.values.max())
+    steps = [dict(method="restyle", label=str(int(yr)), args=[{"y": [piv.loc[yr].tolist()]}])
+             for yr in years]
+    fig = go.Figure(go.Bar(x=LABELS, y=piv.loc[years[-1]].tolist(), marker_color="#4e79a7",
+        hovertemplate="%{x} decile: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=470,
+        yaxis=dict(title="Average after-tax income (2024 $)", tickprefix="$", tickformat=",",
+                   range=[0, ymax * 1.05], gridcolor="#e0e0e0"),
+        xaxis=dict(title="Income decile (lowest to highest tenth)"),
+        sliders=[dict(active=len(years) - 1, currentvalue=dict(prefix="Year: ", font=dict(size=14)),
+                      pad=dict(t=50), steps=steps)],
+        margin=dict(t=30, b=150),
+        annotations=[dict(text="Source: Statistics Canada, Table 11-10-0193-01 (average after-tax income, constant 2024 $).",
+            xref="paper", yref="paper", x=0, y=-0.42, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Income-distribution data not yet available. Run the data pipeline.")
+```
+
+The next chart shows the **share of all income** held by the top 10% and the bottom 40% of Canadians. Switch between **market income** (before taxes and transfers) and **after-tax income**: the market gap is wide and has widened since the 1970s, while the after-tax gap is far narrower — a direct picture of how the tax-and-transfer system redistributes income.
+
+```{python}
+#| echo: false
+sh_path = "data/income/income_top_bottom_share.csv"
+if os.path.exists(sh_path):
+    sdf = pd.read_csv(sh_path)
+    d0 = sdf[sdf["concept"] == "After-tax income"].sort_values("year")
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(x=d0["year"], y=d0["top10"], name="Top 10%", mode="lines",
+        line=dict(color="#d62728", width=2.5), hovertemplate="Top 10%: %{y:.1f}%<extra></extra>"))
+    fig2.add_trace(go.Scatter(x=d0["year"], y=d0["bottom40"], name="Bottom 40%", mode="lines",
+        line=dict(color="#4e79a7", width=2.5), hovertemplate="Bottom 40%: %{y:.1f}%<extra></extra>"))
+    buttons = []
+    for concept, label in [("After-tax income", "After taxes & transfers"),
+                           ("Market income", "Market (before tax & transfers)")]:
+        t = sdf[sdf["concept"] == concept].sort_values("year")
+        buttons.append(dict(method="update", label=label,
+            args=[{"y": [t["top10"].tolist(), t["bottom40"].tolist()]}]))
+    fig2.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+        yaxis=dict(title="Share of total income (%)", ticksuffix="%", gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        updatemenus=[dict(buttons=buttons, active=0, x=1, xanchor="right", y=1.13, yanchor="top",
+            bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)],
+        margin=dict(t=60, b=90),
+        annotations=[dict(text=f"Source: Statistics Canada, Table 11-10-0193-01 | Data as of: {get_data_date(sh_path)}",
+            xref="paper", yref="paper", x=0, y=-0.2, showarrow=False, font=dict(size=10, color="#999"))])
+    fig2.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Income-share data not yet available. Run the data pipeline.")
+```
+
+## Relative poverty rate
 
 The relative poverty rate is the share of people living on less than half of the
 national median disposable income. It measures low income relative to the
@@ -213,7 +327,7 @@ else:
     print("Poverty data not yet available. Run the data pipeline.")
 ```
 
-## Low-Income Rate in Canada (LIM-AT)
+## Low-income rate in Canada (LIM-AT)
 
 Statistics Canada's Low Income Measure, after tax (LIM-AT): the share of Canadians
 in households below half the median adjusted household income. This is the
@@ -233,7 +347,7 @@ else:
     print("Low-income data not yet available. Run the data pipeline.")
 ```
 
-## Food Insecurity
+## Food insecurity
 
 The share of people in households that experienced food insecurity in the past year — worrying about running out of food, compromising on quality or quantity, or going without. It is a direct measure of material hardship that income and poverty lines alone can miss, and has risen sharply in recent years.
 
@@ -250,13 +364,16 @@ else:
     print("Food insecurity data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [Median After-Tax Income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada Table 11-10-0190-01
 - [Neighbourhood income, GeoJSON](../data/geo/ct_income_2021.geojson) — 2021 Census, median household income by census tract
 - [Food Insecurity (CSV)](../data/income/statcan_food_insecurity.csv) — Statistics Canada Table 13-10-0835-01
 - [Average Annual Wage (CSV)](../data/income/oecd_avg_wage.csv) — OECD Average Annual Wages
 - [Real Household Disposable Income per Capita (CSV)](../data/income/oecd_disposable_income.csv) — OECD Household Dashboard
-- [Gini Coefficient (CSV)](../data/income/oecd_gini.csv) — OECD Income Distribution Database
+- [Gini Coefficient — disposable income (CSV)](../data/income/oecd_gini.csv) — OECD Income Distribution Database
+- [Gini Coefficient — market income (CSV)](../data/income/oecd_gini_market.csv) — OECD Income Distribution Database
+- [Average income by decile (CSV)](../data/income/income_deciles_avg.csv) — Statistics Canada Table 11-10-0193-01
+- [Top-10% vs bottom-40% income share (CSV)](../data/income/income_top_bottom_share.csv) — Statistics Canada Table 11-10-0193-01
 - [Relative Poverty Rate (CSV)](../data/income/oecd_poverty.csv) — OECD Income Distribution Database
 - [Low-Income Rate, LIM-AT (CSV)](../data/income/statcan_low_income.csv) — Statistics Canada Table 11-10-0135-01

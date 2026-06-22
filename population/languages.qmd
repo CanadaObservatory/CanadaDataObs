@@ -10,7 +10,7 @@ import pandas as pd
 from pipeline.charts import choropleth_groups_map
 ```
 
-## The Language of Home, by Neighbourhood
+## The language of home, by neighbourhood
 
 The language each household **speaks most often at home** — the census's most
 lived-in language measure — mapped by **census tract** (2021). **Use the dropdown
@@ -23,10 +23,8 @@ in Montréal's north end and Ottawa; Tagalog in Winnipeg's north.
 Shares are **single responses** as a percentage of the tract's population
 (excluding institutional residents). People who report two or more home languages,
 plus the long tail of languages not listed here, appear as *Other & multiple
-responses*, so the listed groups don't sum to exactly 100%. Like the
-[Diversity](diversity.qmd) and [Religion](religion.qmd) maps, this is a
-descriptive picture of residential geography — census tracts exist only in larger
-urban areas, so rural Canada is blank by geography convention, not omission.
+responses*, so the listed groups don't sum to exactly 100%. Census tracts exist
+only in larger urban areas, so rural Canada is left blank.
 
 ```{python}
 #| echo: false
@@ -45,12 +43,12 @@ if os.path.exists(geo_path) and os.path.exists(lang_path):
     fig = choropleth_groups_map(geo, lang, "ctuid", LANG_GROUPS, name_col="name",
         pop_col="population", colorscale="Viridis", opacity=0.6,
         breakdown_min=1.0,   # hover composition lists only languages ≥1% of the tract
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); language spoken most often at home, single responses, % of tract population excluding institutional residents. Hover lists languages above 1%. Descriptive only.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Language map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Download data
 
 - [Home Language by Census Tract (CSV)](../data/geo/statcan_ct_language_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007

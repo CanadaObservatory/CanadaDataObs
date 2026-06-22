@@ -7,10 +7,12 @@ description: "Canadian-born, naturalized citizens, and non-citizens, mapped by c
 #| echo: false
 import os, json
 import pandas as pd
+import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR, get_data_date
 from pipeline.charts import choropleth_groups_map
 ```
 
-## Citizenship & Nativity, by Neighbourhood
+## Citizenship & nativity, by neighbourhood
 
 Where the **Canadian-born**, **naturalized citizens** (immigrants who have become
 citizens), and **non-citizens** live, by **census tract** (2021). **Use the
@@ -22,15 +24,17 @@ the rest of the urban map is 80–95% Canadian-born.
 **How the groups are assembled.** The census reports *citizenship* (citizen or
 not) and *immigrant status* (non-immigrant / immigrant / non-permanent resident)
 on the same population base, and we combine them transparently:
-**Canadian-born** is StatCan's "non-immigrants" (Canadian citizens by birth);
-**naturalized citizens** is Canadian citizens *minus* the Canadian-born; and
-**non-citizens** is direct from the census (permanent residents on track to
-citizenship, temporary residents, and others). The three groups sum to 100%.
+
+- **Canadian-born** — StatCan's "non-immigrants" (Canadian citizens by birth).
+- **Naturalized citizens** — Canadian citizens *minus* the Canadian-born.
+- **Non-citizens** — direct from the census (permanent residents on track to citizenship, temporary residents, and others).
+
+The three groups sum to 100%.
 **Non-permanent residents** — people on work or study permits or claiming asylum,
 central to the recent [population-growth story](index.qmd) — are a *subset* of
 non-citizens, shown as a fourth map option. Census citizenship questions are
 asked of a 25% sample, so small tracts carry more noise than the diversity and
-language layers. Descriptive only: this maps who lives where, nothing more.
+language layers.
 
 ```{python}
 #| echo: false
@@ -48,12 +52,62 @@ if os.path.exists(geo_path) and os.path.exists(cit_path):
     fig = choropleth_groups_map(geo, cit, "ctuid", CIT_GROUPS, name_col="name",
         pop_col="population", colorscale="Viridis", opacity=0.6,
         breakdown_exclude=["npr"],
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population in private households (25% sample). Canadian-born = non-immigrants; naturalized = citizens − Canadian-born; NPR is a subset of non-citizens. Descriptive only.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Citizenship map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Voting
+
+Citizenship confers the right to vote. Whether Canadians exercise it has moved over more than 150 years of federal elections — drifting between roughly 60% and 80% of registered electors, with a mid-20th-century peak, a low in 2008, and a partial recovery since.
+
+```{python}
+#| echo: false
+to_path = "data/population/voter_turnout.csv"
+if os.path.exists(to_path):
+    to = pd.read_csv(to_path)
+    fig = go.Figure(go.Scatter(x=to["year"], y=to["turnout"], mode="lines+markers",
+        line=dict(color=CANADA_COLOR, width=2), marker=dict(size=5),
+        hovertemplate="%{x}: %{y:.1f}% turnout<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=420,
+        yaxis=dict(title="Turnout (% of electors)", gridcolor="#e0e0e0", ticksuffix="%"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        margin=dict(t=30, b=90),
+        annotations=[dict(text=f"Source: Elections Canada (federal general elections) | Data as of: {get_data_date(to_path)}",
+            xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Voter-turnout data not yet available. Run the data pipeline.")
+```
+
+Turnout also climbs steeply with age. Adults under 35 vote at the lowest rates and Canadians in their late 60s and early 70s at the highest, with a slight dip among the oldest — a gap that has persisted across recent elections.
+
+```{python}
+#| echo: false
+age_path = "data/population/voter_turnout_by_age.csv"
+if os.path.exists(age_path):
+    ag = pd.read_csv(age_path)
+    latest_yr = int(ag["year"].max())
+    cur = ag[ag["year"] == latest_yr].sort_values("age_group")
+    SHORT = {"18 to 24 years": "18–24", "25 to 34 years": "25–34", "35 to 44 years": "35–44",
+             "45 to 54 years": "45–54", "55 to 64 years": "55–64", "65 to 74 years": "65–74",
+             "75 years and over": "75+"}
+    fig = go.Figure(go.Bar(x=cur["age_group"].map(SHORT), y=cur["turnout"],
+        marker_color="#4e79a7", text=[f"{v:.0f}%" for v in cur["turnout"]], textposition="outside",
+        hovertemplate="%{x}: %{y:.1f}% turnout<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=400,
+        yaxis=dict(title="Turnout (%)", gridcolor="#e0e0e0", ticksuffix="%", range=[0, 88]),
+        xaxis=dict(title="Age group"), margin=dict(t=40, b=80),
+        annotations=[dict(text=f"Source: Elections Canada — estimated turnout by age, {latest_yr} federal election.",
+            xref="paper", yref="paper", x=0, y=-0.2, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Turnout-by-age data not yet available. Run the data pipeline.")
+```
+
+## Download data
 
 - [Citizenship & Nativity by Census Tract (CSV)](../data/geo/statcan_ct_citizenship_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007
+- [Federal voter turnout, 1867– (CSV)](../data/population/voter_turnout.csv) — Elections Canada
+- [Voter turnout by age, 2004– (CSV)](../data/population/voter_turnout_by_age.csv) — Elections Canada

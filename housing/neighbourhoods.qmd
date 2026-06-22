@@ -35,9 +35,9 @@ if os.path.exists(geo_path) and os.path.exists(dv_path):
     zlo = float(ct_df["dwelling_value"].quantile(0.05))
     zhi = float(ct_df["dwelling_value"].quantile(0.95))
     fig = choropleth_map(ct_geo, ct_df, "ctuid", "dwelling_value", name_col="name",
-        colorbar_title="Median dwelling value", value_prefix="$", colorscale="Viridis",
+        colorbar_title="Median home<br>value", value_prefix="$", colorscale="Viridis",
         zmin=zlo, zmax=zhi, height=720,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); owner-estimated median dwelling value by census tract.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007; owner-estimated dwelling value.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Census-tract home-value map not available — run `python -m pipeline.build_census_geo`.")

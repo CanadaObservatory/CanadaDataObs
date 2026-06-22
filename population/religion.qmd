@@ -9,9 +9,11 @@ import os, json
 import pandas as pd
 ```
 
-## Religion by Neighbourhood
+## Religion by neighbourhood
 
-The religious make-up of Canada down to the **census tract** — neighbourhood scale — for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area. Religion is self-reported, and the census asks it only once a decade. Like the diversity map above, this is a descriptive picture of where people live — there is no "good" or "bad" reading. **"No religion / secular"** is now the second-largest group nationally and is included; the many Christian denominations are rolled into a single "Christian" total. This is a separate concept from ethnicity and from Indigenous identity.
+The religious make-up of Canada's neighbourhoods (census tracts), for every metropolitan area (2021 Census). **Use the dropdown to switch between groups**, and zoom and pan to your area.
+
+Religion is self-reported, and the census asks it only once a decade. The many Christian denominations are rolled into a single "Christian" total.
 
 For an even finer view — Statistics Canada's smallest standard areas (**dissemination areas**, ~400–700 people each) — open a metro's dedicated map (each on its own page for load speed):
 
@@ -27,15 +29,15 @@ if os.path.exists(rel_geo) and os.path.exists(rel_path):
     geo = json.load(open(rel_geo))
     rel = pd.read_csv(rel_path, dtype={"ctuid": str})
     fig = choropleth_groups_map(geo, rel, "ctuid", RELIGION_MAP_GROUPS, name_col="name", pop_col="population", colorscale="Viridis", opacity=0.6,
-        source_note="Source: 2021 Census (Statistics Canada, Census Profile 98-401-X2021007); % of population by census tract. Religion is self-reported. Opens on 'No religion / secular'. Descriptive only.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Religion map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## How Religious Affiliation Has Changed
+## How religious affiliation has changed
 
-Canada has recorded religion in its census roughly **once a decade since 1871**, so the long view is unusually deep. The chart below traces Canada's composition over 150 years: a country that was about **95% Christian** from the 1870s through the mid-20th century became, by 2021, **53% Christian** — while **"No religion / secular"** rose from **0.2% to 35%**, now the second-largest group. Muslim, Hindu, Sikh and Buddhist populations were a negligible share until first counted separately in 1981, and each has grown steadily since. Use the **Show:** selector to switch between each group's *share* of the population and the *absolute number of people* — in raw counts even Christianity grew (Canada's population rose roughly tenfold over the period), even as its share fell.
+Canada has recorded religion in its census typically **once a decade since 1871**, providing a long time series that illustrates change. For its first century, through the mid-20th century, Canada was about **95% Christian**. By 2021, Canadians were **53% Christian**, while **"No religion / secular"** rose from **0.2% to 35%**. Because of their small size, religions other than Christian and Jewish were counted together as "other religion" up to 1971; from 1981 that catch-all was retired and a longer list of specific groups was recorded. Muslim, Hindu, Sikh and Buddhist populations have grown noticeably in the 21st century. Use the menu to switch between each group's share of the population and the absolute number of people; the legend lets you add or remove groups.
 
 ```{python}
 #| echo: false
@@ -59,11 +61,11 @@ else:
     print("Long-run religion data not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-For honest reading: religion is recorded once a decade (years ending in 1) on a total-population basis, and "Christian" sums all Christian denominations. This deep series is **Canada only**, and methods differ by era — **1981–2001** used the mandatory long form, **2011** the *voluntary* National Household Survey (flagged on the chart), and **2021** the mandatory census. **"Other religions" is shown only through 1971**: in that era it was the catch-all for all smaller faiths (including the then-tiny Muslim, Hindu, Sikh and Buddhist populations), but once those were counted separately from 1981 it would mean something narrower — so the line stops rather than imply continuity.
+Religion is recorded once a decade (years ending in 1) on a total-population basis, and "Christian" sums all Christian denominations. This deep series is **Canada only**, and methods differ by era — **1981–2001** used the mandatory long form, **2011** the *voluntary* National Household Survey (flagged on the chart), and **2021** the mandatory census. **"Other religions" is shown only through 1971**: in that era it was the catch-all for all smaller faiths (including the then-tiny Muslim, Hindu, Sikh and Buddhist populations), but once those were counted separately from 1981 it would mean something narrower — so the line stops rather than imply continuity.
 
 ### The scale of the shift, 1981–2021
 
-The lines above show *direction*; this ranks *magnitude*. Over four decades the Christian share fell by more than any other group's gain, while "No religion / secular" rose almost as much — together these two account for most of the change. The Muslim, Hindu and Sikh shares are smaller, but each more than quadrupled. (1981 is the first census in which the world religions were separately counted.)
+The lines above show *direction*; this ranks *magnitude*. Over four decades the Christian share fell significantly, while "No religion / secular" rose almost as much. The Muslim, Hindu and Sikh shares quadrupled since 1981.
 
 ```{python}
 #| echo: false
@@ -80,7 +82,7 @@ else:
 
 ### By province and city, 2001 to 2021
 
-The series above is national. To compare places, the chart below switches between Canada, each province and territory, and the eight largest metro areas across the **three most recent censuses — 2001, 2011 and 2021** (the 2026 Census will add a fourth point when it is released in 2027). Shares are of the total population; the smaller groups sit near the bottom of the axis — click legend entries to isolate them. **2011** was the voluntary National Household Survey (flagged on the chart), and metropolitan-area boundaries shift a little between censuses, so read each city's trajectory as indicative rather than exact.
+The series above is national. To compare places, the chart below switches between Canada, each province and territory, and the eight largest metro areas across the **three most recent censuses — 2001, 2011 and 2021**. Shares are of the total population; the smaller groups sit near the bottom of the axis — click legend entries to isolate them. **2011** was the voluntary National Household Survey (flagged on the chart), and metropolitan-area boundaries shift a little between censuses, so read each city's trajectory as indicative rather than exact.
 
 ```{python}
 #| echo: false
@@ -97,9 +99,9 @@ else:
 
 ### How the religious mix varies by city, 2021
 
-The national story plays out very differently across the country. **Toronto and Vancouver** are among the most religiously diverse metros anywhere — sizeable Muslim, Hindu, Sikh and Buddhist populations alongside a Christian plurality — while **Montréal** remains strongly Christian (Catholic) and the West Coast is heavily secular. Each bar is one metro's full 2021 composition; the segments sum to 100%.
+The national story plays out differently across the country. **Toronto and Vancouver** are among the most religiously diverse metros, while **Montréal** remains strongly Christian (Catholic). Each bar is one metro's full 2021 composition; the segments sum to 100%.
 
-These are **census metropolitan areas**, not just the core city: "Toronto" is the wider metro of ~6.2 million spanning the inner GTA — Mississauga, Brampton, Markham, Vaughan and more — not the City of Toronto alone (~2.8 million). That broader footprint is part of why its Sikh and Hindu shares are so large (Brampton in particular).
+These are **census metropolitan areas**, not just the core city: "Toronto" is the wider metro of ~6.2 million spanning the inner GTA — Mississauga, Brampton, Markham, Vaughan and more — not the City of Toronto alone (~2.8 million).
 
 ```{python}
 #| echo: false
@@ -117,7 +119,7 @@ else:
     print("Religion-by-city data not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
-## Download Data
+## Download data
 
 - [Religion by City (CSV)](../data/geo/statcan_cma_religion.csv) — 2021 Census (Statistics Canada)
 - [Religion by Neighbourhood / census tract (CSV)](../data/geo/statcan_ct_religion_2021.csv) — 2021 Census (Statistics Canada)

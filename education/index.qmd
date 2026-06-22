@@ -15,7 +15,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import lines_over_time, category_bar
+from pipeline.charts import lines_over_time, category_bar, province_colors
 
 # Load tuition and deflate to constant dollars of the latest year, using the
 # all-items CPI (annual average) — so the trend charts show *real* tuition.
@@ -33,7 +33,7 @@ if os.path.exists(tuition_path):
                   for row in tu.itertuples()]
 ```
 
-## Undergraduate Tuition Over Time
+## Undergraduate tuition
 
 Average undergraduate tuition for Canadian students, for Canada and the three provinces home to most of the country's largest universities. Quebec (and Newfoundland) hold tuition well below the national average; Ontario sits above it. Use the dropdown to switch between **real** (inflation-adjusted, constant dollars) and **nominal** (current dollars) — real terms isolate increases beyond general inflation.
 
@@ -41,12 +41,16 @@ Average undergraduate tuition for Canadian students, for Canada and the three pr
 #| echo: false
 if tu is not None:
     ug = tu[(tu["level"] == "Canadian undergraduate")
-            & (tu["geography"].isin(["Canada", "Ontario", "Quebec", "British Columbia"]))].dropna(subset=["real"])
+            & (tu["geography"].isin(["Canada", "Ontario", "Quebec", "British Columbia",
+                                     "Alberta", "Nova Scotia", "Newfoundland and Labrador"]))].dropna(subset=["real"]).copy()
+    ug["geography"] = ug["geography"].replace({"Newfoundland and Labrador": "Newfoundland<br>and Labrador"})
     fig = lines_over_time(ug, "year", "real", "geography",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
-        colors={"Canada": CANADA_COLOR, "Ontario": "#4e79a7", "Quebec": "#59a14f",
-                "British Columbia": "#b07aa1"},
-        group_order=["Canada", "Ontario", "Quebec", "British Columbia"],
+        colors=province_colors(["Canada", "Ontario", "Quebec", "British Columbia",
+                                "Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"]),
+        group_order=["Canada", "Ontario", "Quebec", "British Columbia",
+                     "Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"],
+        legendonly_groups=["Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
                   {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
@@ -55,27 +59,28 @@ else:
     print("Tuition data not yet available. Run the data pipeline.")
 ```
 
-## Domestic vs. International Tuition
+## Domestic vs. international tuition
 
 International students pay several times what domestic students do, and that gap has widened sharply — international undergraduate fees have far outpaced inflation, becoming a significant revenue source for universities. Use the dropdown to switch between real (constant) and nominal (current) dollars (Canada-wide).
 
 ```{python}
 #| echo: false
 if tu is not None:
-    ca = tu[tu["geography"] == "Canada"].dropna(subset=["real"])
+    ca = tu[tu["geography"] == "Canada"].dropna(subset=["real"]).copy()
+    ca["level"] = ca["level"].str.replace(" ", "<br>", regex=False)   # two-line legend entries
     fig = lines_over_time(ca, "year", "real", "level",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
-        colors={"International undergraduate": "#e15759", "International graduate": "#f28e2b",
-                "Canadian undergraduate": "#4e79a7", "Canadian graduate": "#76b7b2"},
-        group_order=["International undergraduate", "International graduate",
-                     "Canadian undergraduate", "Canadian graduate"],
+        colors={"International<br>undergraduate": "#e15759", "International<br>graduate": "#f28e2b",
+                "Canadian<br>undergraduate": "#4e79a7", "Canadian<br>graduate": "#76b7b2"},
+        group_order=["International<br>undergraduate", "International<br>graduate",
+                     "Canadian<br>undergraduate", "Canadian<br>graduate"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},
                   {"col": "tuition", "label": "Nominal (current $)", "yaxis_title": "Tuition (current $)"}],
         source_note=f"Source: Statistics Canada 37-10-0045-01, deflated by CPI (18-10-0004-01) | Data as of: {get_data_date(tuition_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Undergraduate Tuition by Field of Study
+## Undergraduate tuition by field of study
 
 What students pay varies widely by program. Professional fields — dentistry, medicine, law, pharmacy — sit far above the average, while education and the humanities are lowest. (Canada-wide, Canadian undergraduate students, latest year.)
 
@@ -86,7 +91,17 @@ if os.path.exists(field_path):
     bf = pd.read_csv(field_path)
     bf = bf[(bf["geography"] == "Canada") & (bf["field"] != "Total, field of study")]
     latest = int(bf["year"].max())
-    bf = bf[bf["year"] == latest]
+    bf = bf[bf["year"] == latest].copy()
+    bf["field"] = bf["field"].replace({
+        "Business, management and public administration": "Business and public admin",
+        "Social and behavioural sciences, and legal studies": "Social sciences",
+        "Mathematics, computer and information sciences": "Math and computer sciences",
+        "Physical and life sciences and technologies": "Physical & life sciences",
+        "Visual and performing arts, and communications technologies": "Visual & performing arts",
+        "Agriculture, natural resources and conservation": "Agriculture & natural resources",
+        "Personal, protective and transportation services": "Personal & protective services",
+        "Other health, parks, recreation and fitness": "Health, parks & recreation",
+    })
     fig = category_bar(bf, "field", "tuition",
         xaxis_title=f"Average undergraduate tuition, {latest}/{latest + 1} ($)",
         tickprefix="$", value_fmt=",.0f",
@@ -96,7 +111,7 @@ else:
     print("Tuition-by-field data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
 - [University tuition by level & province (CSV)](../data/education/statcan_tuition.csv) — Statistics Canada 37-10-0045-01
 - [Undergraduate tuition by field of study (CSV)](../data/education/statcan_tuition_by_field.csv) — Statistics Canada 37-10-0003-01

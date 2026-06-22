@@ -53,7 +53,7 @@ if os.path.exists(geo_path) and os.path.exists(ct_age_path):
                      ("15–64", "share_15_64", ".0f", "%"),
                      ("65+", "share_65_plus", ".0f", "%"),
                      ("Population", "pop_fmt", "", "")],
-        source_note="Source: 2021 Census of Population (Statistics Canada, Census Profile 98-401-X2021007); boundaries from StatCan. Colour scale capped at the 2nd–98th percentile.")
+        source_note="Source: Statistics Canada, 2021 Census Profile 98-401-X2021007.")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Census-tract age map not available — run `python -m pipeline.build_census_geo`.")

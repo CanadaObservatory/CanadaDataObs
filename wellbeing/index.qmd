@@ -1,6 +1,7 @@
 ---
 title: "Well-being"
 description: "Life satisfaction and what underlies it — Canada and OECD peers"
+body-classes: area-health   # nav-grouped under Health & Well-being
 ---
 
 ```{python}
@@ -21,7 +22,7 @@ average of responses to the Cantril ladder question, where people rate their
 current life from 0 (worst possible) to 10 (best possible). Scores shown are
 three-year averages.
 
-## Happiness Score (Life Evaluation)
+## Happiness score (life evaluation)
 
 ```{python}
 #| echo: false
@@ -29,7 +30,8 @@ whr_path = "data/wellbeing/whr_happiness.csv"
 if os.path.exists(whr_path):
     df = pd.read_csv(whr_path)
     fig = peer_comparison_line(df, "year", "happiness_score",
-        title="", yaxis_title="Life Evaluation (0–10)", show_average=True)
+        title="", yaxis_title="Life Evaluation (0–10)", show_average=True,
+        initial_visible=["USA", "AUS"])
     fig.update_layout(annotations=[dict(
         text=f"Source: World Happiness Report (Gallup World Poll) | Data as of: {get_data_date(whr_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -39,7 +41,7 @@ else:
     print("Happiness data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest Happiness Score: Ranked
+## Latest happiness score: ranked
 
 ```{python}
 #| echo: false
@@ -51,7 +53,7 @@ if os.path.exists(whr_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## What Underlies the Score
+## What underlies the score
 
 The World Happiness Report uses statistical analysis to estimate how much of each
 country's score is associated with six factors plus a baseline ("Dystopia +
@@ -91,15 +93,38 @@ if os.path.exists(whr_path):
         plot_bgcolor="white",
         xaxis=dict(gridcolor="#e0e0e0"),
         legend=dict(orientation="h", yanchor="top", y=-0.08, xanchor="center", x=0.5),
-        height=650, margin=dict(b=120, t=20),
+        height=680, margin=dict(b=170, t=20),
         annotations=[dict(
             text=f"Source: World Happiness Report ({latest_year}) | Data as of: {get_data_date(whr_path)}",
-            xref="paper", yref="paper", x=0, y=-0.22,
+            xref="paper", yref="paper", x=0, y=-0.30,
             showarrow=False, font=dict(size=10, color="#999"))],
     )
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Happiness data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Mental health
+
+The share of Canadians aged 12 and over rating their own mental health **very good
+or excellent** has fallen from 72% in 2015 to 55% in 2022 — one of the clearest
+trends in the national health survey. Unlike the charts above, this is a
+**Canada-only** series (Canadian Community Health Survey): self-rated mental health
+isn't collected on a comparable basis across the peer group.
+
+```{python}
+#| echo: false
+mh_path = "data/health/statcan_mental_health.csv"
+if os.path.exists(mh_path):
+    mh = pd.read_csv(mh_path, parse_dates=["date"])
+    fig = single_line(mh, "date", "pct_mh_very_good", title="",
+        yaxis_title="% rating mental health very good or excellent",
+        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(mh_path)}")
+    fig.update_yaxes(ticksuffix="%")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Mental-health data not yet available. Run the data pipeline.")
 ```
 
 ## Safety
@@ -109,8 +134,9 @@ and homicide rate, the specific kinds of crime people actually experience and ho
 often they get solved, and how metropolitan areas and Toronto neighbourhoods
 compare, see **[Crime & Safety](crime-safety.qmd)**.
 
-## Download Data
+## Download data
 
 - [Happiness Scores & Factor Decomposition (CSV)](../data/wellbeing/whr_happiness.csv) — World Happiness Report (Gallup World Poll)
+- [Perceived Mental Health, Very Good or Excellent (CSV)](../data/health/statcan_mental_health.csv) — Statistics Canada Table 13-10-0096-01 (CCHS)
 
 Crime & safety data downloads are on the [Crime & Safety](crime-safety.qmd) page.

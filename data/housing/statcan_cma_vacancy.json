@@ -1,0 +1,14 @@
+{
+  "dataset_id": "statcan_cma_vacancy",
+  "source": "Statistics Canada / CMHC",
+  "source_table": "34-10-0127-01",
+  "frequency": "annual",
+  "unit": "vacancy rate (%)",
+  "retrieved_at": "2026-06-19T18:55:58.000297+00:00",
+  "latest_observation_date": "2025",
+  "transformations": [
+    "CMA-level rows, latest year (2025)"
+  ],
+  "notes": null,
+  "row_count": 33
+}

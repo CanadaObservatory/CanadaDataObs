@@ -15,13 +15,57 @@ MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
               "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 ```
 
-Canada is a country defined by its physical extent. At **9.98 million km²** it is the second-largest country on Earth, with the **longest coastline of any nation** (about 243,000 km) and roughly **a fifth of the world's fresh water**. Yet it is home to only about 40 million people — so most of that vastness is boreal forest, tundra, rock and ice, and most Canadians live in a narrow band along the southern edge. The maps below describe that geography: where people are, what the land is made of, where the water is, and how fire and ice are changing.
+Canada is an expansive country with a diverse physical geography. At **9.98 million km²** it is the second-largest country on Earth, with the longest coastline of any nation and roughly **a fifth of the world's fresh water**. However, most of that vastness is boreal forest, tundra, rock and ice. Most Canadians live in a narrow band within a few hundred kilometres of the southern border. The maps below describe that geography: where people are, what the land is made of, where the water is, and how fire and ice are changing.
 
-*These pages are descriptive. They show physical and natural features and how they vary across the country; the sources are official (Statistics Canada, Natural Resources Canada, ECCC, NSIDC), and the maps carry no "good" or "bad" reading.*
+*Sources are official: Statistics Canada, Natural Resources Canada, Environment and Climate Change Canada, and the U.S. National Snow and Ice Data Center.*
+
+## Canada in the world
+
+How big is Canada, really, set against every country rather than its usual peers? By **land area** — solid ground, not counting lakes and rivers — Canada is the world's **4th-largest** country, behind only Russia, China, and the United States. Add back its immense fresh water and it rises to **2nd overall**. Each dot below is a country, ranked by land area on a ratio (logarithmic) scale; Canada is in red.
+
+```{python}
+#| echo: false
+import math
+la_path = "data/geography/worldbank_land_area.csv"
+if os.path.exists(la_path):
+    gw = pd.read_csv(la_path).sort_values("land_area", ascending=False).reset_index(drop=True)
+    gw["rank"] = gw.index + 1
+    n = len(gw)
+    can = gw[gw["country_code"] == "CAN"].iloc[0]
+    can_rank = int(can["rank"])
+    is_can = (gw["country_code"] == "CAN").tolist()
+    _lo, _hi = math.log10(float(gw["land_area"].min())), math.log10(float(gw["land_area"].max()))
+
+    fig = go.Figure(go.Scatter(
+        x=gw["rank"], y=gw["land_area"], mode="markers",
+        marker=dict(size=[12 if c else 5 for c in is_can],
+                    color=[CANADA_COLOR if c else "#9bb3a6" for c in is_can],
+                    line=dict(width=[1.5 if c else 0 for c in is_can], color="white")),
+        customdata=gw[["country_name", "rank"]].values,
+        hovertemplate="<b>%{customdata[0]}</b><br>%{y:,.0f} km²<br>Rank %{customdata[1]} of " + str(n) + "<extra></extra>"))
+    # Canada sits 4th — right among the leaders — so no separate "leaders" callout
+    # (it would collide); the label points down-right into the open space instead.
+    fig.add_annotation(x=can_rank, y=math.log10(float(can["land_area"])),
+        text=f"<b>Canada — {can_rank}th of {n}</b><br>by land area", showarrow=True, arrowhead=2,
+        ax=84, ay=-26, xanchor="left", font=dict(size=12, color=CANADA_COLOR), arrowcolor=CANADA_COLOR)
+    fig.update_layout(plot_bgcolor="white", height=460, showlegend=False,
+        xaxis=dict(title="Countries ranked by land area (1 = largest)",
+                   gridcolor="#e0e0e0", rangemode="tozero"),
+        yaxis=dict(title="Land area (km²)", type="log", gridcolor="#e0e0e0",
+                   range=[_lo - 0.3, _hi + 0.3],
+                   tickvals=[1e2, 1e3, 1e4, 1e5, 1e6, 1e7],
+                   ticktext=["100", "1,000", "10,000", "100,000", "1M", "10M"]),
+        margin=dict(t=55, b=95, r=30))
+    fig.add_annotation(text=f"Source: World Bank, AG.LND.TOTL.K2 (most recent year per country) | Data as of: {get_data_date(la_path)}",
+        xref="paper", yref="paper", x=0, y=-0.24, showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("World land-area data not yet available. Run the data pipeline.")
+```
 
 ## Where Canadians live
 
-Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Most Canadians live in a narrow band along the southern border, and the country empties out to the north. The map below zooms into that pattern at the level of individual cities: density here is people per square kilometre **within** each census metropolitan area or agglomeration — a read on how compactly each city is built. Because the range spans several orders of magnitude it is shaded on a **logarithmic** scale (each step is ten times denser). Pan and zoom to your own region.
+Population **density** lays the "empty Canada" story bare. Prince Edward Island packs about 27 people into every square kilometre; Nunavut has roughly **one person for every 50 km²** — a thousandfold difference. Most Canadians live in a narrow band along the southern border, and the country empties out to the north. The map below shows that pattern at the level of individual cities: density here is people per square kilometre **within** each census metropolitan area or agglomeration — a read on how compactly each city is built. Because the range spans several orders of magnitude it is shaded on a **logarithmic** scale (each step is ten times denser). Pan and zoom to your own region.
 
 ```{python}
 #| echo: false
@@ -30,9 +74,9 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_den):
     cma_geo = json.load(open(cma_geo_path))
     cd = pd.read_csv(cma_den, dtype={"cmauid": str})
     fig = choropleth_map(cma_geo, cd, "cmauid", "density", name_col="name",
-        colorbar_title="People per km²", colorscale="YlOrRd", value_fmt=",.0f", log=True,
+        colorbar_title="People<br>per km²", colorscale="YlOrRd", value_fmt=",.0f", log=True,
         center={"lat": 56, "lon": -96}, zoom=2.6,
-        source_note="Source: 2021 Census, Statistics Canada. Density within each metropolitan area (CMA/CA); logarithmic scale.")
+        source_note="Source: Statistics Canada, 2021 Census.")
     fig.show(config=MAP_CONFIG)
 else:
     print("City density not yet available — run `python -m pipeline.build_geography`.")
@@ -40,5 +84,6 @@ else:
 
 ## Download data
 
+- [Land area of every country (CSV)](../data/geography/worldbank_land_area.csv) — World Bank, AG.LND.TOTL.K2
 - [Population density & freshwater area by province (CSV)](../data/geo/statcan_prov_geography.csv) — 2021 Census + NRCan/StatCan area table
 - [Population density by metro area (CSV)](../data/geo/statcan_cma_density.csv) — 2021 Census (Statistics Canada)

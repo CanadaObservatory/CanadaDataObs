@@ -1,0 +1,59 @@
+---
+title: "Indigenous Lands"
+description: "First Nations reserves and modern land-claim settlement lands — the official legal boundaries"
+---
+
+```{python}
+#| echo: false
+import os, json
+import pandas as pd
+from pipeline.charts import choropleth_categorical
+
+MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
+              "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+geo_path = "data/geo/indigenous_lands.geojson"
+```
+
+This map shows the official legal boundaries of **First Nations reserves** and **modern
+land-claim settlement lands** across Canada. Reserves are tracts of land set apart for
+the use of a First Nation under the *Indian Act*; settlement lands are areas held under
+the comprehensive land-claim and self-government agreements negotiated since the 1970s —
+among them Nunavut's Inuit-owned lands and the Inuvialuit, Gwich'in, Sahtu, Tłı̨chǫ,
+Sechelt, and Yukon First Nations settlement lands. These are the specific parcels each
+agreement transfers, not entire territories — the Inuit-owned lands, for example, are
+about one-fifth of Nunavut. **Use the legend to show or hide each type**, and zoom and
+pan to your area — many reserves are small and appear only as you zoom in.
+
+These are the surveyed **legal boundaries** — where each land formally is — drawn from
+the federal Canada Lands Survey System. They are not traditional or treaty territories,
+which are a broader concept without a single authoritative boundary and are not shown here.
+
+```{python}
+#| echo: false
+if os.path.exists(geo_path):
+    gj = json.load(open(geo_path))
+    df = pd.DataFrame([{"id": f["id"], **f["properties"]} for f in gj["features"]])
+    # Two display categories (the lone "First Nations land" rides with reserves; the
+    # precise legal type still shows on hover). Neutral, non-valenced colours.
+    df["category"] = df["category"].replace({"First Nations land": "First Nations reserve"})
+    df["hover_detail"] = [f"{t} · {p}" if p else t
+                          for t, p in zip(df["full_type"], df["province"])]
+    COLORS = {"First Nations reserve": "#c08552", "Land-claim settlement land": "#4e8d7c"}
+    fig = choropleth_categorical(gj, df, "id", "category", name_col="name",
+        detail_col="hover_detail", color_map=COLORS,
+        ordered=["First Nations reserve", "Land-claim settlement land"], split_legend=True,
+        legend_title="Land type", center={"lat": 59, "lon": -96}, zoom=2.4,
+        source_note="Source: Natural Resources Canada — Canada Lands Survey System, Aboriginal Lands of Canada Legislative Boundaries (legal boundaries).")
+    fig.show(config=MAP_CONFIG)
+else:
+    print("Indigenous-lands data not yet available — run `python -m pipeline.build_indigenous_lands`.")
+```
+
+Reserves are concentrated in the south, where most Canadians live, but are scattered
+across every province and territory; the comprehensive land-claim settlement lands cover
+vast areas of the North. The boundaries reflect the current legal record and are updated
+as new surveys are registered.
+
+## Download data
+
+- [Indigenous lands of Canada (GeoJSON)](../data/geo/indigenous_lands.geojson) — Natural Resources Canada, Canada Lands Survey System (Aboriginal Lands of Canada Legislative Boundaries), Open Government Licence – Canada

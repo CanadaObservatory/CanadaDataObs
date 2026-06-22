@@ -21,12 +21,55 @@ from pipeline.charts import (
 LABOUR_AGES = ["Total (15–64)", "Youth (15–24)", "Prime-age (25–54)", "Older (55–64)"]
 ```
 
-How fast the economy is growing, how large it is per person, how productive an
-hour of work is, and how many people who want work can find it — these indicators
-place Canada's output and labour market alongside 17 OECD peers. Inflation and the
-cost of living have their own page: [Housing & Cost of Living](../housing/).
+This section explores how fast the economy is growing, how large it is,
+productivity, and employment levels. These indicators are placed alongside 17 OECD
+peers. Inflation and the cost of living have their own page:
+[Cost of Living](cost-of-living.qmd).
 
-## Where Canada Stands
+## Canada in the world
+
+With a GDP of about **US$2.2 trillion**, Canada is the world's **9th-largest economy** — behind the United States and China by a wide margin, but ahead of fast-growing giants like Brazil and Russia. Each dot below is a country, sorted by GDP on a ratio (logarithmic) scale; Canada is in red.
+
+```{python}
+#| echo: false
+import math
+gdp_world_path = "data/economics/worldbank_gdp.csv"
+if os.path.exists(gdp_world_path):
+    gw = pd.read_csv(gdp_world_path).sort_values("gdp", ascending=False).reset_index(drop=True)
+    gw["rank"] = gw.index + 1
+    n = len(gw)
+    can = gw[gw["country_code"] == "CAN"].iloc[0]
+    can_rank = int(can["rank"])
+    is_can = (gw["country_code"] == "CAN").tolist()
+
+    fig = go.Figure(go.Scatter(
+        x=gw["rank"], y=gw["gdp"], mode="markers",
+        marker=dict(size=[12 if c else 5 for c in is_can],
+                    color=[CANADA_COLOR if c else "#c2c9d1" for c in is_can],
+                    line=dict(width=[1.5 if c else 0 for c in is_can], color="white")),
+        customdata=gw[["country_name", "rank"]].values,
+        hovertemplate="<b>%{customdata[0]}</b><br>US$%{y:,.0f}<br>Rank %{customdata[1]} of " + str(n) + "<extra></extra>"))
+    # On a log y-axis, annotation y is given as log10(value), not the raw value.
+    fig.add_annotation(x=3, y=math.log10(float(gw["gdp"].iloc[0])), yshift=16, xanchor="left",
+        text="The U.S. and China<br>lead", showarrow=False, font=dict(size=10, color="#888"), align="left")
+    fig.add_annotation(x=can_rank, y=math.log10(float(can["gdp"])),
+        text=f"<b>Canada — {can_rank}th of {n}</b>", showarrow=True, arrowhead=2,
+        ax=62, ay=-36, font=dict(size=12, color=CANADA_COLOR), arrowcolor=CANADA_COLOR)
+    fig.update_layout(plot_bgcolor="white", height=460, showlegend=False,
+        xaxis=dict(title="Countries ranked by GDP (1 = largest economy)",
+                   gridcolor="#e0e0e0", rangemode="tozero"),
+        yaxis=dict(title="GDP (current US$)", type="log", gridcolor="#e0e0e0",
+                   tickvals=[1e8, 1e9, 1e10, 1e11, 1e12, 1e13],
+                   ticktext=["$100M", "$1B", "$10B", "$100B", "$1T", "$10T"]),
+        margin=dict(t=55, b=95, r=30))
+    fig.add_annotation(text=f"Source: World Bank, NY.GDP.MKTP.CD (most recent year per country) | Data as of: {get_data_date(gdp_world_path)}",
+        xref="paper", yref="paper", x=0, y=-0.24, showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("World GDP data not yet available. Run the data pipeline.")
+```
+
+## Where Canada stands
 
 A scorecard of where Canada ranks among the 17 peers on each measure (latest available year). Dots are ordered by rank, so **further right is more favourable for Canada** (lower-is-better measures like unemployment are flipped accordingly). Canada is red, key comparators in colour; hover a dot for its value and rank.
 
@@ -36,31 +79,9 @@ from pipeline.charts import page_snapshot
 page_snapshot("economics").show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## Real GDP Growth
+## Quarterly GDP growth
 
-Annual percentage change in real (inflation-adjusted) GDP — the headline measure of how fast the economy is expanding or contracting. The most recent year or two are OECD projections rather than final figures.
-
-```{python}
-#| echo: false
-gdpg_path = "data/economics/oecd_real_gdp_growth.csv"
-if os.path.exists(gdpg_path):
-    df = pd.read_csv(gdpg_path)
-    fig = peer_comparison_line(df, "year", "real_gdp_growth",
-        title="", yaxis_title="Real GDP growth (annual %)", show_average=True,
-        initial_start=2015)
-    fig.add_hline(y=0, line_dash="dot", line_color="#888", opacity=0.5)
-    fig.update_layout(annotations=[dict(
-        text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(gdpg_path)}",
-        xref="paper", yref="paper", x=0, y=-0.34,
-        showarrow=False, font=dict(size=10, color="#999"))])
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Real GDP growth data not yet available. Run the data pipeline.")
-```
-
-## Quarterly GDP Growth
-
-Real (inflation-adjusted) gross domestic product, shown as the change from the previous quarter, for every quarter back to 1961. Red bars mark quarters in which the economy contracted. A **recession** is commonly defined as two consecutive quarters of declining real GDP. The full record places recent quarters alongside past downturns — the contractions of the early 1980s and early 1990s, the 2008–09 financial crisis, and the record swings of the 2020 pandemic. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
+Real (inflation-adjusted) gross domestic product, shown as the change from the previous quarter, for every quarter back to 1961. Red bars mark quarters in which the economy contracted. A **recession** is commonly defined as two consecutive quarters of declining real GDP, though in Canada the official arbiter is the C.D. Howe Institute's Business Cycle Council; the recessions it has dated since 1980 are marked here as shaded bands. The full record places recent quarters alongside past downturns — the contractions of the early 1980s and early 1990s, the 2008–09 financial crisis, and the record swings of the 2020 pandemic. (Statistics Canada's published "% change" is this quarter-over-quarter measure; the figure often quoted in the news — "*X*% annualized" — is the same change compounded to a yearly rate.)
 
 ```{python}
 #| echo: false
@@ -78,6 +99,7 @@ if os.path.exists(gdpq_path):
                   for lbl, g in zip(q["qlabel"], q["growth"])]
     bar_colors = ["#d62728" if v < 0 else "#4e79a7" for v in q["growth"]]
     import math
+    from pipeline.charts import add_recession_bands
     # Clip the y-axis to normal quarters so past recessions stay legible; the
     # 2020 pandemic swings (≈ −11% / +9%) are ~5× any other quarter and would
     # otherwise crush the whole series into a flat band near zero.
@@ -94,6 +116,9 @@ if os.path.exists(gdpq_path):
         customdata=q["hover"],
         hovertemplate="%{customdata}<extra></extra>"))
     figq.add_hline(y=0, line_color="#888", line_width=1)
+    # Shade the C.D. Howe Business Cycle Council's dated recessions behind the bars
+    # (neutral grey, below the data) — visible once the slider is zoomed out past 2008.
+    add_recession_bands(figq)
     figq.update_layout(
         plot_bgcolor="white", showlegend=False, height=460, bargap=0.15,
         yaxis=dict(title="Quarter-over-quarter % change",
@@ -107,19 +132,41 @@ if os.path.exists(gdpq_path):
                    rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
         margin=dict(t=40, b=120))
     figq.add_annotation(
-        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted) | Data as of: {q['qlabel'].iloc[-1]}",
+        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted); recession bands: C.D. Howe Institute Business Cycle Council | Data as of: {q['qlabel'].iloc[-1]}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
         font=dict(size=10, color="#999"))
     if (q["growth"].abs() > 5).any():
-        figq.add_annotation(x="2020-07-01", y=_yhi, yanchor="top",
-            text="2020 pandemic<br>quarters (off-scale)",
+        figq.add_annotation(x="2020-07-01", y=1.0, yref="paper", yanchor="bottom",
+            text="2020 pandemic quarters (off-scale)",
             showarrow=False, align="center", font=dict(size=9, color="#999"))
     figq.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Quarterly GDP data not yet available. Run the data pipeline.")
 ```
 
-## GDP per Capita (PPP, Current USD)
+## Real GDP growth
+
+Annual percentage change in real (inflation-adjusted) GDP — the headline measure of how fast the economy is expanding or contracting. The most recent year or two are OECD projections rather than final figures.
+
+```{python}
+#| echo: false
+gdpg_path = "data/economics/oecd_real_gdp_growth.csv"
+if os.path.exists(gdpg_path):
+    df = pd.read_csv(gdpg_path)
+    fig = peer_comparison_line(df, "year", "real_gdp_growth",
+        title="", yaxis_title="Real GDP growth (annual %)", show_average=True,
+        initial_start=2015, initial_visible=["USA"])
+    fig.add_hline(y=0, line_dash="dot", line_color="#888", opacity=0.5)
+    fig.update_layout(meta=dict(autoscaleY=dict(include=[0])), annotations=[dict(
+        text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(gdpg_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34,
+        showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Real GDP growth data not yet available. Run the data pipeline.")
+```
+
+## GDP per capita (PPP, current USD)
 
 GDP per capita at purchasing power parity allows meaningful comparison of living standards across countries. Canada is shown in red; the United States and other key comparators are highlighted in colour, with the remaining peers in light grey.
 
@@ -130,7 +177,7 @@ if os.path.exists(gdppc_path):
     df = pd.read_csv(gdppc_path)
     fig = peer_comparison_line(df, "year", "gdp_per_capita",
         title="", yaxis_title="USD (PPP)", show_average=True, initial_start=2015)
-    fig.update_layout(yaxis_tickformat="$,.0f", annotations=[dict(
+    fig.update_layout(meta=dict(autoscaleY=True), yaxis_tickformat="$,.0f", annotations=[dict(
         text=f"Source: OECD National Accounts | Data as of: {get_data_date(gdppc_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -139,7 +186,7 @@ else:
     print("GDP per capita data not yet available. Run the data pipeline.")
 ```
 
-## Latest GDP per Capita: Ranked
+## Latest GDP per capita: ranked
 
 ```{python}
 #| echo: false
@@ -151,7 +198,7 @@ if os.path.exists(gdppc_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## GDP per Capita Relative to the US and Peers
+## GDP per capita relative to the US and peers
 
 One of the most-discussed economic questions is whether Canadian living standards are slipping behind. This chart answers it directly: Canada's GDP per capita (PPP) shown **as a percentage of the United States** and **of the peer-group average** (the other 16 OECD economies), over time. A value of 100% means parity; below 100% means Canada trails. We compare against the full peer group rather than the narrower G7, with the United States shown as a single named comparator.
 
@@ -191,7 +238,7 @@ else:
     print("GDP per capita data not yet available. Run the data pipeline.")
 ```
 
-## Labour Productivity (GDP per Hour Worked)
+## Labour productivity (GDP per hour worked)
 
 GDP per hour worked measures how efficiently an economy converts labour into output. Canada's productivity gap relative to the United States and other leading economies is a persistent concern.
 
@@ -221,7 +268,7 @@ else:
     print("Labour productivity data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest Labour Productivity: Ranked
+## Latest labour productivity: ranked
 
 ```{python}
 #| echo: false
@@ -233,7 +280,50 @@ if os.path.exists(prod_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Unemployment Rate
+## What drives GDP per capita: productivity or hours worked?
+
+GDP per capita — the broadest measure of material living standards — can rise for two very different reasons: each hour of work can produce more (**labour productivity**), or more hours can be worked per person in the population (**labour utilisation**, which rises when a larger share of people work or they work longer). The two multiply together to give GDP per capita exactly, so indexing all three to a common base year separates their contributions. The distinction matters because the two have very different ceilings: hours per capita can climb only so far — through higher employment or longer weeks — whereas productivity growth, driven by investment, skills and innovation, can compound indefinitely. This is why Canada's productivity record draws such concern.
+
+```{python}
+#| echo: false
+util_path = "data/economics/oecd_labour_utilisation.csv"
+if os.path.exists(prod_path) and os.path.exists(util_path):
+    p = pd.read_csv(prod_path)
+    u = pd.read_csv(util_path)
+    d = (p[p["country_code"] == "CAN"][["year", "gdp_per_hour"]]
+         .merge(u[u["country_code"] == "CAN"][["year", "hours_per_capita"]], on="year")
+         .sort_values("year"))
+    # GDP per capita is the exact product of the two PDB series (same price basis),
+    # so deriving it keeps the decomposition internally consistent and avoids mixing
+    # in the current-price national-accounts series shown earlier on this page.
+    d["gdp_per_capita"] = d["gdp_per_hour"] * d["hours_per_capita"]
+    base_year = int(d["year"].min())
+    base = d[d["year"] == base_year].iloc[0]
+    series = [
+        ("gdp_per_capita", "GDP per capita", "#d62728", 3),
+        ("gdp_per_hour", "Labour productivity (GDP per hour)", "#1f77b4", 2),
+        ("hours_per_capita", "Labour utilisation (hours per capita)", "#f28e2b", 2),
+    ]
+    figd = go.Figure()
+    for col, name, clr, w in series:
+        figd.add_trace(go.Scatter(x=d["year"], y=100 * d[col] / base[col], name=name,
+            mode="lines", line=dict(color=clr, width=w),
+            hovertemplate=f"{name}: %{{y:.1f}}<extra></extra>"))
+    figd.add_hline(y=100, line_dash="dot", line_color="#999", opacity=0.6)
+    figd.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title=f"Index ({base_year} = 100)", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(t=60, b=80))
+    figd.add_annotation(
+        text=f"Source: OECD Productivity Database (GDP per capita derived as productivity × hours per capita) | Data as of: {get_data_date(util_path)}",
+        xref="paper", yref="paper", x=0, y=-0.22, showarrow=False, font=dict(size=10, color="#999"))
+    figd.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Productivity-decomposition data not yet available. Run the data pipeline.")
+```
+
+## Unemployment rate
 
 Harmonised unemployment rate as a percentage of the labour force, allowing consistent comparison across countries. **Use the dropdown to switch age bracket** — youth (15–24) unemployment runs far above the prime-age rate, and the peer ranking shifts with it.
 
@@ -244,7 +334,8 @@ if os.path.exists(unemp_path):
     unemp = pd.read_csv(unemp_path)
     fig = peer_comparison_line_by_age(
         unemp, x_col="year", y_col="unemployment_rate", age_col="age",
-        yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0])
+        yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0],
+        initial_visible=["USA"])
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(unemp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -254,7 +345,7 @@ else:
     print("Unemployment-by-age data not yet available. Run the data pipeline to fetch it.")
 ```
 
-## Latest Unemployment Rate: Ranked
+## Latest unemployment rate: ranked
 
 ```{python}
 #| echo: false
@@ -267,7 +358,7 @@ if os.path.exists(unemp_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Unemployment by City
+## Unemployment by city
 
 The national rate hides large regional differences. This map shows the **current** unemployment rate in each of Canada's largest metropolitan areas — **zoom and pan to your area.** From the monthly Labour Force Survey (three-month moving average, seasonally adjusted), so it stays current with the national series above; it covers the ~40 largest CMAs (smaller centres aren't separately estimated by the LFS).
 
@@ -282,7 +373,7 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_unemp_path):
     sub = pd.read_csv(cma_unemp_path, dtype={"cmauid": str}).dropna(subset=["unemployment"])
     period = pd.to_datetime(str(sub["period"].iloc[0]) + "-01").strftime("%b %Y")
     fig = choropleth_map(cma_geo, sub, "cmauid", "unemployment", name_col="name",
-        colorbar_title="Unemployment rate", value_suffix="%", value_fmt=".1f", colorscale="YlOrRd",
+        colorbar_title="Unemployment<br>rate", value_suffix="%", value_fmt=".1f", colorscale="YlOrRd",
         zmin=float(sub["unemployment"].quantile(0.05)), zmax=float(sub["unemployment"].quantile(0.95)),
         source_note=f"Source: Statistics Canada Labour Force Survey 14-10-0459-01 (3-month moving average, seasonally adjusted) | 3 months ending {period}")
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -290,9 +381,9 @@ else:
     print("City unemployment map not yet available. Run the data pipeline.")
 ```
 
-## Employment Rate
+## Employment rate
 
-The share of an age group that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work. **Use the dropdown to switch age bracket:** older-worker (55–64) employment, in particular, has trended up across most peers.
+The share of an age group that is employed. It complements the unemployment rate by capturing people who are neither working nor counted as unemployed — for instance those who have stopped looking for work. **Use the dropdown to switch age bracket.**
 
 ```{python}
 #| echo: false
@@ -302,7 +393,8 @@ if os.path.exists(emp_path):
     fig = peer_comparison_line_by_age(
         df, x_col="year", y_col="employment_rate", age_col="age",
         yaxis_title="% of population in age group",
-        ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True)
+        ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True,
+        initial_visible=["USA"])
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(emp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -312,7 +404,7 @@ else:
     print("Employment rate data not yet available. Run the data pipeline.")
 ```
 
-## Latest Employment Rate: Ranked
+## Latest employment rate: ranked
 
 ```{python}
 #| echo: false
@@ -325,7 +417,7 @@ if os.path.exists(emp_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Business Investment
+## Business investment
 
 Gross fixed capital formation — spending on machinery, equipment, buildings, and intellectual property — as a share of GDP. Investment is what builds the capital each worker has to work with, so it is closely tied to the productivity and GDP-per-capita pictures above: persistently weak investment is one of the most common explanations for weak productivity growth.
 
@@ -344,7 +436,7 @@ else:
     print("Business investment data not yet available. Run the data pipeline.")
 ```
 
-## Latest Business Investment: Ranked
+## Latest business investment: ranked
 
 ```{python}
 #| echo: false
@@ -356,9 +448,13 @@ if os.path.exists(inv_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Current Account Balance
+## Trade with the world
 
-Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus. Whether a deficit is a concern depends on what it funds, so no favourable direction is implied.
+Canada is a deeply trade-dependent economy — and overwhelmingly dependent on a single partner. This section covers the overall balance with the rest of the world, the concentration of exports on the United States, and where the surplus and deficit actually sit.
+
+### Current account balance
+
+Canada's current account balance as a share of GDP — the broadest measure of its trade and income position with the rest of the world. Below zero is a deficit (the country spends and invests more than it earns abroad, financed by borrowing or selling assets to foreigners); above zero is a surplus.
 
 ```{python}
 #| echo: false
@@ -366,7 +462,7 @@ ca_path = "data/economics/oecd_current_account.csv"
 if os.path.exists(ca_path):
     df = pd.read_csv(ca_path)
     fig = peer_comparison_line(df, "year", "current_account",
-        title="", yaxis_title="% of GDP", show_average=True)
+        title="", yaxis_title="% of GDP", show_average=True, initial_visible=["USA"])
     fig.add_hline(y=0, line_dash="dash", line_color="#888", opacity=0.5)
     fig.update_layout(annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(ca_path)}",
@@ -376,7 +472,7 @@ else:
     print("Current account data not yet available. Run the data pipeline.")
 ```
 
-## Latest Current Account Balance: Ranked
+### Latest current account balance: ranked
 
 ```{python}
 #| echo: false
@@ -388,7 +484,7 @@ if os.path.exists(ca_path):
     fig.show(config={"displaylogo": False})
 ```
 
-## Trade Exposure to the United States
+### Trade exposure to the United States
 
 The United States takes about two-thirds of Canada's merchandise exports — a share that peaked near 88% around 2000, drifted down over the following two decades, and dropped sharply during the 2025 tariff conflict. Shown for scale, the **European Union** and **China** — Canada's next-largest export markets — each account for only about 5–6%, a measure of how concentrated Canada's trade is on a single partner. (Customs basis, seasonally adjusted.)
 
@@ -424,7 +520,7 @@ else:
     print("Trade data not yet available. Run the data pipeline.")
 ```
 
-## Trade Balance: the US vs. the Rest of the World
+### Trade balance: the US vs. the rest of the world
 
 Canada runs a large merchandise **surplus with the United States** and a **deficit with every other market combined** — so the overall trade balance hinges on the US relationship. (Monthly, seasonally adjusted; balance = exports − imports.)
 
@@ -455,7 +551,7 @@ if os.path.exists(trade_path):
     figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
-## The Canadian Dollar
+## The Canadian dollar
 
 The exchange rate against the **US dollar** — Canada's dominant trading partner (see the trade-exposure chart above). Shown as the Bank of Canada publishes it: **Canadian dollars per US dollar**, so a *higher* line means a *weaker* loonie. The daily average series begins in 2017.
 
@@ -475,11 +571,13 @@ else:
     print("Exchange-rate data not yet available. Run the data pipeline.")
 ```
 
-## Download Data
+## Download data
 
+- [GDP of Every Country (CSV)](../data/economics/worldbank_gdp.csv) — World Bank, NY.GDP.MKTP.CD
 - [Real GDP Growth (CSV)](../data/economics/oecd_real_gdp_growth.csv) — OECD Economic Outlook
 - [GDP per Capita (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts, PPP current USD
 - [Labour Productivity (CSV)](../data/economics/oecd_labour_productivity.csv) — OECD Productivity Database
+- [Labour Utilisation — hours per capita (CSV)](../data/economics/oecd_labour_utilisation.csv) — OECD Productivity Database
 - [Unemployment Rate by age (CSV)](../data/economics/oecd_unemployment_by_age.csv) — OECD Labour Force Statistics
 - [Employment Rate by age (CSV)](../data/economics/oecd_employment_by_age.csv) — OECD Labour Force Statistics
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts

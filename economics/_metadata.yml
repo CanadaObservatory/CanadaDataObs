@@ -1,0 +1,3 @@
+# Area identity (Economy & Affordability): tags every page in this directory with
+# the area body class so custom.scss can draw the area-colour title rule.
+body-classes: area-economy

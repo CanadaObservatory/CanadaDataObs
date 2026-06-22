@@ -1,0 +1,3 @@
+# Area identity (innovation → education): tags every page in this directory with the
+# area body class so custom.scss draws the area-colour title rule.
+body-classes: area-education

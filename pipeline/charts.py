@@ -8,7 +8,8 @@ import plotly.io as pio
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
-    PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS,
+    PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS, DEFAULT_VISIBLE_COMPARATORS,
+    PROVINCE_NAMES, PROVINCE_COLORS, PROVINCE_COLORS_DEEP, PROVINCE_COLORS_PASTEL,
     SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
@@ -43,7 +44,14 @@ if not getattr(go.Figure, "_datacan_branded", False):
         for _ann in (self.layout.annotations or ()):
             _t = _ann.text or ""
             if "Source" in _t and BRAND not in _t:
-                _ann.text = f"{_t}<br>{BRAND}"
+                # Wrap long notes (no right-edge clip) + anchor to the top so the note
+                # hangs BELOW its y instead of centring on it (centring is what rode up
+                # into range sliders / x-axis labels). One place → every chart. `_wrap`
+                # is module-level by call time (show() runs at render, after load).
+                _ann.text = f"{_wrap(_t, 115)}<br>{BRAND}"
+                if _ann.yanchor is None:
+                    _ann.yanchor = "top"
+                _ann.align = "left"
                 break
         return _orig_show(self, *args, **kwargs)
 
@@ -112,12 +120,84 @@ def _base_layout(title, yaxis_title, xaxis_title="", range_slider=True,
     )
 
 
+# --- Recession shading for Canadian macro time series --------------------------
+# Official Canadian business-cycle peaks→troughs from the C.D. Howe Institute
+# Business Cycle Council — the Canadian counterpart to the U.S. NBER (Philip Cross,
+# "Turning Points: Business Cycles in Canada since 1926"). These are immutable
+# historical facts, so hardcoding them is appropriate (cf. era markers): the COVID-19
+# (Feb–Apr 2020) and 2008/09 (Oct 2008–May 2009) turning points are from the
+# Council's communiqués; the early-1980s (Jun 1981–Oct 1982) and early-1990s
+# (Mar 1990–Apr 1992; the trough was later revised to May 1992) dates follow the
+# Council's published chronology. Only the four post-1980 downturns the Economy page
+# narrates are listed (so a shaded band always matches the prose); the 1974–75
+# recession is in range but omitted for that reason. Neutral grey — no valence; a
+# recession is a dated fact, not a judgment.
+CANADA_RECESSIONS = [
+    ("1981-06-01", "1982-10-31", "1981–82"),
+    ("1990-03-01", "1992-04-30", "1990–92"),
+    ("2008-10-01", "2009-05-31", "2008–09"),
+    ("2020-02-01", "2020-04-30", "2020"),
+]
+
+
+def add_recession_bands(fig, recessions=CANADA_RECESSIONS, *,
+                        fillcolor="rgba(120,120,120,0.13)", label=False,
+                        label_color="#999", line_width=0):
+    """Shade official recession periods behind a date-axis time series — the standard
+    macro convention, which orients a reader against the cycle without editorialising.
+
+    Defaults to the C.D. Howe Business Cycle Council's Canadian recession dating
+    (`CANADA_RECESSIONS`); each entry is (start, end, label) with ISO date strings.
+    Bands are layout `vrect` shapes drawn BELOW the data (`layer="below"`), so bars
+    and lines stay legible on top, and they do NOT change the axis range (a band
+    outside the current view is simply clipped). `label=True` writes the short label
+    at the top of each band (useful on a full-history view). Returns `fig` for
+    chaining. Reusable on any Canada macro series with a real date x-axis (quarterly
+    GDP, the policy rate, unemployment, …)."""
+    for start, end, lab in recessions:
+        fig.add_vrect(x0=start, x1=end, fillcolor=fillcolor, line_width=line_width,
+                      layer="below")
+        if label:
+            fig.add_annotation(x=start, y=1.0, yref="paper", yanchor="bottom",
+                               xanchor="left", text=lab, showarrow=False,
+                               font=dict(size=9, color=label_color))
+    return fig
+
+
 def _year_to_dt(years):
     """Plot an integer-year axis as real Jan-1 dates so Plotly's range slider and
     range-selector buttons (which only work on date axes) function; the axis and
     hover are formatted back to bare years (%Y)."""
     import pandas as pd
     return list(pd.to_datetime(pd.Index(years).astype(int).astype(str), format="%Y"))
+
+
+def _wrap(text, width=88):
+    """Word-wrap a source note with <br> so a long line doesn't clip at the figure's
+    right edge (Plotly annotations don't auto-wrap). Existing <br> breaks are kept."""
+    if not text:
+        return text
+    out = []
+    for seg in str(text).split("<br>"):
+        cur = ""
+        for w in seg.split(" "):
+            if cur and len(cur) + 1 + len(w) > width:
+                out.append(cur); cur = w
+            else:
+                cur = f"{cur} {w}" if cur else w
+        out.append(cur)
+    return "<br>".join(out)
+
+
+def _map_source_note(fig, source_note, y=-0.045):
+    """Add a wrapped, left-anchored source note below a map that grows DOWNWARD
+    (yanchor='top') so a long census source line never clips at the right edge or
+    rides up into the map. Map builders pair this with a bottom margin (b≈80) sized
+    for the wrapped lines plus the brand line the Figure.show interceptor appends."""
+    fig.add_annotation(text=_wrap(source_note), xref="paper", yref="paper",
+                       x=0, xanchor="left", y=y, yanchor="top", align="left",
+                       showarrow=False, font=dict(size=10, color="#999"))
+    return fig
 
 
 def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
@@ -139,8 +219,10 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
     if rangeslider:
         xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
     if initial_start is not None:
-        xaxis["range"] = [_year_to_dt([initial_start])[0],
-                          _year_to_dt([int(df[x_col].max())])[0]]
+        _s = _year_to_dt([initial_start])[0]
+        _e = _year_to_dt([int(df[x_col].max())])[0]
+        # small right buffer so the latest point isn't flush against the edge
+        xaxis["range"] = [_s, _e + (_e - _s) * 0.02]
     fig.update_layout(
         xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
@@ -152,7 +234,11 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
         # the by-age dropdown). Font size does NOT help — legend row height is driven
         # by the line-sample symbol, not the text. This height is the single site-wide
         # lever (both peer-line builders route through here).
-        plot_bgcolor="white", hovermode="x unified", height=600,
+        # 600 fits all 18 legend entries (see below) when extra_top is the default 40.
+        # The by-age dropdown builder passes extra_top=70 (room for its menu); add that
+        # extra top back to the height so the plot area — and the legend's room — stays
+        # constant, otherwise the 18-entry legend overflows and grows a scroll-stealing bar.
+        plot_bgcolor="white", hovermode="x unified", height=600 + max(0, extra_top - 40),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02,
                     font=dict(size=10), itemsizing="constant",
                     itemclick="toggle", itemdoubleclick="toggleothers"),
@@ -173,10 +259,12 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
     """
     Line chart comparing Canada against OECD peers.
 
-    `initial_visible` (optional, list of country codes): named comparators NOT in
-    the list also start legend-hidden, so e.g. `initial_visible=["USA"]` opens with
-    just Canada, the US and the peer average (used on the busy fertility chart).
-    Everything stays one legend click away.
+    `initial_visible` (optional, list of country codes): named comparators NOT in the
+    list start legend-hidden. Defaults to DEFAULT_VISIBLE_COMPARATORS (Canada + US +
+    Australia + Germany + the average on load; Sweden/UK coloured but hidden) — the
+    owner's 2026-06 site-review default that keeps the busy 17-line charts legible. Pass
+    an explicit list to override (e.g. `["USA"]` on fertility, `["GBR"]` where the prose
+    singles out the UK); everything stays one legend click away.
 
     `topical` (optional, list of country codes): non-comparator peers that THIS
     chart's prose singles out (e.g. Japan + Italy on the aging chart) — they open
@@ -195,6 +283,8 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
     """
     if highlight is None:
         highlight = [HIGHLIGHT_COUNTRY]
+    if initial_visible is None:
+        initial_visible = DEFAULT_VISIBLE_COMPARATORS
 
     def _name(code):
         s = df[df[country_col] == code]
@@ -315,7 +405,7 @@ def _ranked_footnote(source_note, year):
 def ranked_bar(df, value_col, xaxis_title, source_note,
                country_col="country_code", name_col="country_name",
                year_col="year", ascending=True, min_countries=10,
-               tickformat=None, hover_template=None, height=600):
+               tickformat=None, hover_template=None, height=600, xtitle_top=False):
     """
     Horizontal ranked bar of the latest comparable year — Canada red, peers grey.
 
@@ -349,6 +439,10 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
     xaxis = dict(gridcolor="#e0e0e0", title=xaxis_title)
     if tickformat:
         xaxis["tickformat"] = tickformat
+    # `xtitle_top` moves the value axis (ticks + title) to the TOP, so the title doubles
+    # as a chart heading and the blank gap below the bars closes (owner, §51/§54).
+    if xtitle_top:
+        xaxis["side"] = "top"
 
     fig.update_layout(
         xaxis=xaxis,
@@ -356,10 +450,10 @@ def ranked_bar(df, value_col, xaxis_title, source_note,
         plot_bgcolor="white",
         showlegend=False,
         height=height,
-        margin=dict(t=30, b=90, l=10, r=20),
+        margin=dict(t=(58 if xtitle_top else 30), b=120, l=10, r=20),
         annotations=[dict(
             text=_ranked_footnote(source_note, year),
-            xref="paper", yref="paper", x=1, y=-0.15,
+            xref="paper", yref="paper", x=0, xanchor="left", y=-0.15,
             showarrow=False, font=dict(size=10, color="#999"),
         )],
     )
@@ -372,7 +466,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
                                 show_average=True, avg_name="OECD peer average",
                                 hover_suffix="%", hover_decimals=1,
                                 source_note=None, rangeslider=True,
-                                initial_start=None, hide_peers=True,
+                                initial_start=None, hide_peers=True, initial_visible=None,
                                 option_layouts=None, menu_label="Age group:",
                                 topical=None):
     """Peer-comparison line chart with a category dropdown.
@@ -386,8 +480,11 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
     share a unit (e.g. tobacco use in %, alcohol in litres), pass `option_layouts`
     (a dict option->y-axis title): the dropdown then also rewrites the y-axis title and
     `autorange`s on switch, so each option gets its own scale. `menu_label` overrides
-    the small "Age group:" caption above the menu (e.g. "Substance:")."""
+    the small "Age group:" caption above the menu (e.g. "Substance:").
+    `initial_visible` overrides which comparators load (default DEFAULT_VISIBLE_COMPARATORS)."""
     highlight = [HIGHLIGHT_COUNTRY]
+    if initial_visible is None:
+        initial_visible = DEFAULT_VISIBLE_COMPARATORS
 
     def _name(code):
         s = df[df[country_col] == code]
@@ -452,6 +549,7 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
             name = _name(code)
             fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
                 line=dict(color=COMPARATOR_COLORS[code], width=2),
+                visible=(True if code in initial_visible else "legendonly"),
                 legendrank=10 + comparators.index(code), hovertemplate=_hov(name, True)))
         else:
             name = _name(code)
@@ -478,9 +576,6 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
         updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.13, yanchor="top", bgcolor="white", bordercolor="#ccc", borderwidth=1)])
-    fig.add_annotation(text=menu_label, xref="paper", yref="paper",
-        x=1, xanchor="right", y=1.17, yanchor="bottom", showarrow=False,
-        font=dict(size=11, color="#666"))
     return fig
 
 
@@ -530,16 +625,86 @@ def ranked_bar_by_age(df, value_col, age_col, xaxis_title, source_note, *,
         xaxis=xaxis,
         yaxis=dict(title="", categoryorder="array", categoryarray=d0["y"]),
         plot_bgcolor="white", showlegend=False, height=height,
-        margin=dict(t=60, b=90, l=10, r=20),
+        margin=dict(t=60, b=120, l=10, r=20),
         updatemenus=[dict(buttons=buttons, active=ages.index(default_age),
             direction="down", showactive=True, x=1, xanchor="right",
             y=1.06, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1)],
         annotations=[dict(text=_ranked_footnote(source_note, d0['year']),
-            xref="paper", yref="paper", x=1, y=-0.15, showarrow=False,
+            xref="paper", yref="paper", x=0, xanchor="left", y=-0.15, showarrow=False,
             font=dict(size=10, color="#999"))])
-    fig.add_annotation(text="Age group:", xref="paper", yref="paper",
-        x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
-        font=dict(size=11, color="#666"))
+    # No "Age group:" caption — the dropdown button is self-labelling and the prose
+    # names the menu (matches the caption removal on the by-age line chart, 2df1862).
+    return fig
+
+
+def ranked_bar_select(options, source_note, *, country_col="country_code",
+                      name_col="country_name", year_col="year", ascending=True,
+                      min_countries=10, height=600, default_index=0,
+                      menu_label=None):
+    """Ranked horizontal bar with a dropdown selecting among several measures.
+
+    Like `ranked_bar_by_age`, but the options are separate measures (each its own
+    DataFrame/value column) rather than one long age column — built to merge the
+    gross- and net-debt ranked bars into a single chart. Each option re-ranks on
+    its own latest comparable year (Canada always kept, via the same coverage rule
+    as `ranked_bar`); switching swaps the bars, recolours them (Canada red),
+    re-sorts the y-axis, and rewrites the x-axis title, hover, and footnote year.
+
+    `options` is a list of dicts, each:
+        label          — dropdown label (e.g. "Gross debt")
+        df             — the DataFrame for that measure
+        value_col      — the column to rank on
+        xaxis_title    — x-axis title for that measure
+        hover_template — optional per-option hover (default "%{y}: %{x}<extra></extra>")
+    `menu_label` draws a small caption above the dropdown (e.g. "Measure:")."""
+    def _bar_color(c):
+        return CANADA_COLOR if c == HIGHLIGHT_COUNTRY else COMPARATOR_COLORS.get(c, PEER_COLOR)
+
+    prepared = []
+    for opt in options:
+        d, vc = opt["df"], opt["value_col"]
+        year = _latest_year_with_coverage(d, vc, year_col, min_countries,
+                                          country_col=country_col,
+                                          require_code=HIGHLIGHT_COUNTRY)
+        latest = (d[d[year_col] == year].dropna(subset=[vc])
+                  .sort_values(vc, ascending=ascending))
+        names = (latest[name_col] if name_col in latest.columns
+                 else latest[country_col]).tolist()
+        prepared.append(dict(
+            label=opt["label"], year=int(year),
+            x=latest[vc].tolist(), y=names,
+            colors=[_bar_color(c) for c in latest[country_col]],
+            xaxis_title=opt.get("xaxis_title", ""),
+            hover=opt.get("hover_template", "%{y}: %{x}<extra></extra>")))
+
+    p0 = prepared[default_index]
+    fig = go.Figure(go.Bar(x=p0["x"], y=p0["y"], orientation="h",
+        marker_color=p0["colors"], hovertemplate=p0["hover"]))
+
+    buttons = []
+    for p in prepared:
+        buttons.append(dict(method="update", label=p["label"],
+            args=[{"x": [p["x"]], "y": [p["y"]], "marker.color": [p["colors"]],
+                   "hovertemplate": p["hover"]},
+                  {"yaxis.categoryarray": p["y"], "yaxis.categoryorder": "array",
+                   "xaxis.title.text": p["xaxis_title"],
+                   "annotations[0].text": _ranked_footnote(source_note, p["year"])}]))
+
+    fig.update_layout(
+        xaxis=dict(gridcolor="#e0e0e0", title=p0["xaxis_title"]),
+        yaxis=dict(title="", categoryorder="array", categoryarray=p0["y"]),
+        plot_bgcolor="white", showlegend=False, height=height,
+        margin=dict(t=60, b=120, l=10, r=20),
+        updatemenus=[dict(buttons=buttons, active=default_index,
+            direction="down", showactive=True, x=1, xanchor="right",
+            y=1.06, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1)],
+        annotations=[dict(text=_ranked_footnote(source_note, p0["year"]),
+            xref="paper", yref="paper", x=0, xanchor="left", y=-0.15, showarrow=False,
+            font=dict(size=10, color="#999"))])
+    if menu_label:
+        fig.add_annotation(text=menu_label, xref="paper", yref="paper",
+            x=1, xanchor="right", y=1.10, yanchor="bottom", showarrow=False,
+            font=dict(size=11, color="#666"))
     return fig
 
 
@@ -726,12 +891,15 @@ def add_city_markers(fig, cities=MAJOR_CITIES, textposition="top center"):
     """Overlay major cities (small dark dots + labels) to orient the physical-geography
     maps (ecozones, land cover, wildfire), where the data carries no city names. Drawn
     above the choropleth fill and kept out of the legend."""
+    # The dot is hoverable so it shows ITS OWN name ("Toronto"), not the ecozone
+    # polygon behind it — `hoverinfo="skip"` was transparent to hover, so hovering a
+    # city dot surfaced the underlying region's tooltip (a confusing mismatch).
     fig.add_trace(go.Scattermapbox(
         lat=[c[1] for c in cities], lon=[c[2] for c in cities],
         mode="markers+text", text=[c[0] for c in cities],
         textposition=textposition, textfont=dict(size=9, color="#222"),
-        marker=dict(size=6, color="#111"), hoverinfo="skip", showlegend=False,
-        name="cities"))
+        marker=dict(size=6, color="#111"), showlegend=False, name="cities",
+        hovertemplate="<b>%{text}</b><extra></extra>"))
     return fig
 
 
@@ -775,6 +943,35 @@ def add_line_features(fig, geojson, *, name_key="name", color="#0d2b5e", width=1
     return fig
 
 
+def add_polygon_overlay(fig, geojson, df, location_col, *, legend_name, line_color,
+                        customdata, hovertemplate, fill_opacity=0.10, line_width=1.3,
+                        legendgroup="overlay", visible=True):
+    """Overlay a reference polygon layer (e.g. legal park boundaries) ON TOP of an
+    existing map as a subdued OUTLINE + very light interior wash, with its own hover
+    and a single legend entry that toggles the whole layer.
+
+    Drawn as a low-opacity Choroplethmapbox (so the whole polygon is a hover target
+    and carries the faint wash) with a coloured `marker.line` as the principal cue,
+    plus a line-swatch Scattermapbox legend proxy sharing `legendgroup` — clicking the
+    legend entry toggles both (Plotly toggles a whole legendgroup together). Geometry
+    must be VALID (Mapbox GL silently blanks on self-intersections). `customdata`/
+    `hovertemplate` are passed through so the caller controls the hover wording (kept
+    distinct from any underlying layer's attributes). Reusable as more jurisdictions
+    are added; returns the figure."""
+    fig.add_trace(go.Choroplethmapbox(
+        geojson=geojson, locations=df[location_col], z=[0] * len(df),
+        zmin=0, zmax=1, featureidkey="id", showscale=False,
+        colorscale=[[0, line_color], [1, line_color]],
+        marker=dict(line=dict(width=line_width, color=line_color), opacity=fill_opacity),
+        customdata=customdata, hovertemplate=hovertemplate,
+        legendgroup=legendgroup, showlegend=False, name=legend_name, visible=visible))
+    fig.add_trace(go.Scattermapbox(
+        lat=[None], lon=[None], mode="lines", line=dict(color=line_color, width=2.6),
+        name=legend_name, legendgroup=legendgroup, showlegend=True,
+        hoverinfo="skip", visible=visible))
+    return fig
+
+
 def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color="#8a8f96",
                boundary_width=0.5, source_note=None, center=None, zoom=2.3, height=660):
     """Raster-image overlay map: places a pre-rendered **Web-Mercator** image (e.g. the
@@ -795,10 +992,9 @@ def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color=
     fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
     fig.update_layout(mapbox_style="white-bg", mapbox_layers=layers,
                       mapbox_zoom=zoom, mapbox_center=center,
-                      margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white")
+                      margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white")
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -951,7 +1147,7 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
         yaxis=dict(title="Age", dtick=10, gridcolor="#e0e0e0"),
         legend=dict(orientation="h", x=0, y=1.04, xanchor="left"),
         plot_bgcolor="white", height=height,
-        margin=dict(l=60, r=20, t=30, b=130),
+        margin=dict(l=60, r=20, t=30, b=170),
         sliders=[dict(active=len(steps) - 1, steps=steps,
                       currentvalue=dict(prefix="Year: ", font=dict(size=13)),
                       font=dict(size=10), pad=dict(t=34, b=6))],
@@ -960,6 +1156,98 @@ def population_pyramid(df, *, year_col="year", age_col="age", gender_col="gender
         fig.add_annotation(text=source_note, xref="paper", yref="paper",
                            x=0, xanchor="left", y=-0.31, showarrow=False,
                            font=dict(size=10, color="#999"))
+    return fig
+
+
+# Short forms + small (lon,lat°) nudges into the surrounding water for the small
+# Atlantic provinces, whose value labels would otherwise collide on a whole-Canada
+# choropleth (keyed by PRUID). The abbreviation keeps each identifiable once nudged.
+CANADA_SMALL_PROV_ABBREV = {"11": "PEI", "12": "NS", "13": "NB"}
+CANADA_SMALL_PROV_OFFSET = {"11": (1.6, 1.1), "12": (2.1, -1.4), "13": (-2.2, 0.4)}
+
+
+def _ring_area_centroid(ring):
+    """Shoelace area + area-weighted centroid of a single ring (lon/lat list)."""
+    a = cx = cy = 0.0
+    for i in range(len(ring) - 1):
+        x0, y0 = ring[i][0], ring[i][1]
+        x1, y1 = ring[i + 1][0], ring[i + 1][1]
+        cr = x0 * y1 - x1 * y0
+        a += cr; cx += (x0 + x1) * cr; cy += (y0 + y1) * cr
+    if a == 0:
+        return (sum(p[0] for p in ring) / len(ring),
+                sum(p[1] for p in ring) / len(ring), 0.0)
+    return (cx / (3 * a), cy / (3 * a), abs(a) / 2)
+
+
+def _largest_ring_centroid(geom):
+    """Label point for a (multi)polygon: the true area-centroid of its largest
+    outer ring (so a province's number sits in its body, not averaged into the sea)."""
+    t, coords = geom.get("type"), geom.get("coordinates")
+    rings = [coords[0]] if t == "Polygon" else (
+        [poly[0] for poly in coords] if t == "MultiPolygon" else [])
+    if not rings:
+        return None
+    best = max((_ring_area_centroid(r) for r in rings), key=lambda c: c[2])
+    return (best[0], best[1])
+
+
+def choropleth_clean(geojson, df, location_col, value_col, *, name_col=None,
+                     colorbar_title="", colorscale="Greens", reversescale=False,
+                     value_prefix="", value_suffix="", value_fmt=".0f", zmin=None,
+                     zmax=None, source_note=None, labels=True, height=560,
+                     parallels=(49, 77), center_lon=-96, projection="albers",
+                     label_abbrev=None, label_offset=None):
+    """CLEAN static-style choropleth — vector boundaries, NO basemap, a conic Canada
+    projection (the 'Datawrapper look'). For province/region-level maps that don't
+    need zoom/pan: crisp white borders on a transparent background, optional value
+    labels at centroids. The geojson features carry a top-level `id` == df[location_col].
+    Hover stays (a light touch), but there is no tiled basemap, pan, or zoom clutter."""
+    import pandas as pd
+    vals = pd.to_numeric(df[value_col], errors="coerce")
+    cd = df[[name_col]].to_numpy() if name_col else None
+    fig = go.Figure(go.Choropleth(
+        geojson=geojson, locations=df[location_col].astype(str), z=vals,
+        featureidkey="id", colorscale=colorscale, reversescale=reversescale,
+        zmin=zmin, zmax=zmax, marker_line_color="white", marker_line_width=0.8,
+        customdata=cd,
+        hovertemplate=(("<b>%{customdata[0]}</b><br>" if name_col else "")
+                       + f"{value_prefix}%{{z:{value_fmt}}}{value_suffix}<extra></extra>"),
+        colorbar=dict(title=dict(text=colorbar_title, side="top"), thickness=12,
+                      len=0.55, lenmode="fraction", x=0.02, xanchor="left", y=0.5,
+                      ticksuffix=value_suffix, tickprefix=value_prefix, outlinewidth=0),
+    ))
+    if labels:
+        label_abbrev = label_abbrev or {}      # id → short form (e.g. {"11": "PEI"})
+        label_offset = label_offset or {}      # id → (dlon, dlat) nudge for tight clusters
+        cents = {str(f.get("id")): _largest_ring_centroid(f.get("geometry") or {})
+                 for f in geojson.get("features", [])}
+        lons, lats, texts = [], [], []
+        for loc, v in zip(df[location_col], vals):
+            c = cents.get(str(loc))
+            if not c or pd.isna(v):
+                continue
+            dlon, dlat = label_offset.get(str(loc), (0, 0))
+            txt = f"{value_prefix}{v:{value_fmt}}{value_suffix}"
+            ab = label_abbrev.get(str(loc))
+            lons.append(c[0] + dlon); lats.append(c[1] + dlat)
+            texts.append(f"{ab} {txt}" if ab else txt)
+        if lons:
+            fig.add_trace(go.Scattergeo(
+                lon=lons, lat=lats, mode="text", text=texts,
+                textfont=dict(size=11, color="#222"), hoverinfo="skip", showlegend=False))
+    fig.update_geos(visible=False, showframe=False, showcoastlines=False,
+                    showland=False, showcountries=False, showlakes=False,
+                    fitbounds="locations", projection_type=projection,
+                    projection_parallels=list(parallels),
+                    projection_rotation=dict(lon=center_lon),
+                    bgcolor="rgba(0,0,0,0)")
+    fig.update_layout(height=height, margin=dict(l=0, r=0, t=10, b=46),
+                      paper_bgcolor="white", dragmode=False)
+    if source_note:
+        fig.add_annotation(text=_wrap(source_note), xref="paper", yref="paper",
+                           x=0, xanchor="left", y=-0.02, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1031,13 +1319,11 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         updatemenus=[_hover_toggle()],
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper",
-                           x=0, xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1160,15 +1446,14 @@ def choropleth_groups_map(geojson, df, location_col, groups, name_col, *,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=46, b=36), height=height,
+        margin=dict(l=0, r=0, t=46, b=80), height=height,
         updatemenus=[dict(buttons=buttons, active=0, x=0.01, y=0.99,
                           xanchor="left", yanchor="top", bgcolor="white",
                           bordercolor="#ccc", borderwidth=1, showactive=True),
                      _hover_toggle()],
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.04, showarrow=False, font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1183,7 +1468,7 @@ CATEGORICAL_PALETTE = [
 def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
                            color_map=None, ordered=None, source_note=None,
                            center=None, zoom=2.4, height=660, legend_title=None,
-                           legend_orientation="v", detail_col=None):
+                           legend_orientation="v", detail_col=None, split_legend=False):
     """Categorical choropleth — each polygon coloured by a *discrete* category
     rather than a continuous value (used for ecozones and permafrost zones).
 
@@ -1209,26 +1494,55 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
         colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
 
     hover_col = detail_col or cat_col   # detail_col (e.g. a composition breakdown) shows in
-    custom = (df[[name_col, hover_col]].to_numpy() if name_col   # the hover instead of the
-              else df[[hover_col]].to_numpy())                    # bare category
     name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
     cat_idx = 1 if name_col else 0
-    fig = go.Figure(go.Choroplethmapbox(
-        geojson=geojson, locations=df[location_col],
-        z=[code.get(v) for v in df[cat_col]],
-        zmin=-0.5, zmax=n - 0.5, featureidkey="id",
-        colorscale=colorscale, showscale=False,
-        marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
-        customdata=custom,
-        hovertemplate=f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>",
-    ))
-    # Choroplethmapbox shows no legend entry, so draw category swatches as
-    # zero-point Scattermapbox proxies (nothing rendered on the map; legend only).
-    for c in cats:
-        fig.add_trace(go.Scattermapbox(
-            lat=[None], lon=[None], mode="markers",
-            marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
+    htmpl = f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>"
+    hcols = [name_col, hover_col] if name_col else [hover_col]
+
+    if split_legend:
+        # One CHOROPLETH PER CATEGORY (single colour) so a legend click actually
+        # shows/hides that category's polygons. Each is paired with a swatch proxy
+        # sharing its legendgroup — clicking the proxy toggles the whole group
+        # (Choroplethmapbox itself draws no legend entry). Used by the parks map so
+        # Federal/Provincial/Territorial filter the CPCAD fills.
+        fig = go.Figure()
+        feat_by_id = {str(f.get("id")): f for f in geojson.get("features", [])}
+        for c in cats:
+            sub = df[df[cat_col] == c]
+            if not len(sub):
+                continue
+            # subset the geojson to THIS category's features so the geometry isn't
+            # embedded N times (which tripled the page weight when first tried)
+            sub_geo = {"type": "FeatureCollection", "features":
+                       [feat_by_id[i] for i in (str(x) for x in sub[location_col]) if i in feat_by_id]}
+            fig.add_trace(go.Choroplethmapbox(
+                geojson=sub_geo, locations=sub[location_col], z=[0] * len(sub),
+                zmin=0, zmax=1, featureidkey="id", showscale=False,
+                colorscale=[[0, color_map[c]], [1, color_map[c]]],
+                marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
+                customdata=sub[hcols].to_numpy(), hovertemplate=htmpl,
+                name=c, legendgroup=c, showlegend=False))
+            fig.add_trace(go.Scattermapbox(
+                lat=[None], lon=[None], mode="markers",
+                marker=dict(size=12, color=color_map[c]), name=c, legendgroup=c,
+                showlegend=True, hoverinfo="skip"))
+    else:
+        fig = go.Figure(go.Choroplethmapbox(
+            geojson=geojson, locations=df[location_col],
+            z=[code.get(v) for v in df[cat_col]],
+            zmin=-0.5, zmax=n - 0.5, featureidkey="id",
+            colorscale=colorscale, showscale=False,
+            marker=dict(line=dict(width=0.3, color="rgba(255,255,255,0.5)"), opacity=0.85),
+            customdata=df[hcols].to_numpy(),
+            hovertemplate=htmpl,
         ))
+        # Choroplethmapbox shows no legend entry, so draw category swatches as
+        # zero-point Scattermapbox proxies (nothing rendered on the map; legend only).
+        for c in cats:
+            fig.add_trace(go.Scattermapbox(
+                lat=[None], lon=[None], mode="markers",
+                marker=dict(size=12, color=color_map[c]), name=c, showlegend=True,
+            ))
     legend = (dict(orientation="v", yanchor="top", y=0.93, xanchor="left", x=1.01)
               if legend_orientation == "v"
               else dict(orientation="h", yanchor="top", y=-0.02, xanchor="center", x=0.5))
@@ -1237,13 +1551,116 @@ def choropleth_categorical(geojson, df, location_col, cat_col, *, name_col=None,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         legend=legend, showlegend=True, updatemenus=[_hover_toggle()],
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
+    return fig
+
+
+def choropleth_categorical_clean(geojson, df, location_col, cat_col, *, name_col=None,
+                                 color_map=None, ordered=None, detail_col=None,
+                                 source_note=None, height=560, legend_orientation="v",
+                                 legend_frac=0.24, legend_title=None,
+                                 parallels=(49, 77), center_lon=-96, projection="albers",
+                                 base_geojson=None, base_fill="#e9ecef"):
+    """CLEAN static categorical choropleth — the `choropleth_clean` look (vector
+    borders, NO tiled basemap, a conic Albers Canada projection) for *category*
+    region maps that don't need zoom/pan (ecozones, permafrost). One `go.Choropleth`
+    holds every polygon over a hard-stepped discrete colourscale (value i centred in
+    band i via zmin=-0.5/zmax=n-0.5, the same trick `choropleth_categorical` uses for
+    mapbox); the colourbar is hidden and a real legend is drawn with off-canvas
+    `Scattergeo` proxies, one per category. Colours are preserved from the existing
+    maps via `color_map`; pass `ordered` to fix the legend (and ordinal colour) order,
+    `detail_col` for a custom hover string, `name_col` for a per-feature hover label.
+
+    A vertical legend (default) reserves the right `legend_frac` of the figure via the
+    geo subplot's `domain`, so the legend never overlaps the map; pass
+    `legend_orientation="h"` for a bottom legend (few categories) instead. The geojson
+    features must carry a top-level `id` == df[location_col]; like the clean province
+    map this uses coastline-following terrestrial geometry (no basemap to hide
+    over-water artefacts), so the source geometry must be land-clipped."""
+    import pandas as pd
+    cats = list(ordered) if ordered else sorted(df[cat_col].dropna().unique())
+    if color_map is None:
+        color_map = {c: CATEGORICAL_PALETTE[i % len(CATEGORICAL_PALETTE)]
+                     for i, c in enumerate(cats)}
+    code = {c: i for i, c in enumerate(cats)}
+    n = len(cats)
+    colorscale = []
+    for i, c in enumerate(cats):
+        colorscale += [[i / n, color_map[c]], [(i + 1) / n, color_map[c]]]
+
+    hover_col = detail_col or cat_col
+    name_line = "<b>%{customdata[0]}</b><br>" if name_col else ""
+    cat_idx = 1 if name_col else 0
+    htmpl = f"{name_line}%{{customdata[{cat_idx}]}}<extra></extra>"
+    hcols = [name_col, hover_col] if name_col else [hover_col]
+
+    fig = go.Figure()
+    # Optional faint full-country base layer drawn UNDER the categories — for maps whose
+    # data covers only part of Canada (e.g. permafrost is northern), so the rest of the
+    # landmass + borders still show for orientation. fitbounds then frames the whole
+    # country (the base is the widest trace) rather than just the data extent.
+    if base_geojson is not None:
+        base_ids = [str(f.get("id")) for f in base_geojson.get("features", [])]
+        fig.add_trace(go.Choropleth(
+            geojson=base_geojson, locations=base_ids, z=[0] * len(base_ids),
+            featureidkey="id", colorscale=[[0, base_fill], [1, base_fill]],
+            showscale=False, marker_line_color="#c2c8cf", marker_line_width=0.8,
+            hoverinfo="skip", showlegend=False))
+    fig.add_trace(go.Choropleth(
+        geojson=geojson, locations=df[location_col].astype(str),
+        z=[code.get(v) for v in df[cat_col]],
+        zmin=-0.5, zmax=n - 0.5, featureidkey="id",
+        colorscale=colorscale, showscale=False,
+        marker_line_color="white", marker_line_width=0.5,
+        customdata=df[hcols].to_numpy(), hovertemplate=htmpl,
+    ))
+    # category swatches as off-canvas Scattergeo proxies (legend only; nothing on map)
+    for c in cats:
+        fig.add_trace(go.Scattergeo(
+            lon=[None], lat=[None], mode="markers",
+            marker=dict(size=11, color=color_map[c], symbol="square",
+                        line=dict(width=0.5, color="#999")),
+            name=c, showlegend=True, hoverinfo="skip"))
+
+    vertical = legend_orientation == "v"
+    # A vertical legend sits to the right; reserve that strip via the geo domain so the
+    # map never draws under it, and the source note stays bottom-left, clear of it. A
+    # horizontal legend hangs below the (full-width) map, so the source note drops below
+    # the legend and the bottom margin grows to fit both.
+    geo_domain = dict(x=[0.0, 1.0 - legend_frac if vertical else 1.0], y=[0.0, 1.0])
+    if vertical:
+        legend = dict(orientation="v", yanchor="middle", y=0.5,
+                      xanchor="left", x=1.0 - legend_frac + 0.01)
+        gap = 14                       # px below the map to the source note's top
+    else:
+        legend = dict(orientation="h", yanchor="top", y=-0.01, xanchor="center", x=0.5)
+        gap = 70                       # clear the bottom legend before the source note
+    if legend_title:
+        legend["title"] = dict(text=legend_title)
+    # Size the bottom margin to the wrapped source-note line count (+1 for the brand
+    # line the show() interceptor appends) so it never clips; the note hangs from
+    # yanchor=top a fixed pixel gap below the map.
+    src_wrapped = _wrap(source_note) if source_note else None
+    n_src = (src_wrapped.count("<br>") + 2) if source_note else 0
+    b_margin = (gap + n_src * 16 + 12) if source_note else (gap + 12)
+    fig.update_geos(visible=False, showframe=False, showcoastlines=False,
+                    showland=False, showcountries=False, showlakes=False,
+                    fitbounds="locations", projection_type=projection,
+                    projection_parallels=list(parallels),
+                    projection_rotation=dict(lon=center_lon),
+                    domain=geo_domain, bgcolor="rgba(0,0,0,0)")
+    fig.update_layout(height=height, margin=dict(l=0, r=0, t=10, b=b_margin),
+                      paper_bgcolor="white", dragmode=False,
+                      legend=legend, showlegend=True)
+    if source_note:
+        src_y = -gap / (height - 10 - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=src_y, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1268,12 +1685,10 @@ def bubble_map(df, lat_col, lon_col, size_col, *, color="#e3492a", opacity=0.5,
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         updatemenus=[_hover_toggle()])
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1319,12 +1734,10 @@ def point_value_map(df, lat_col, lon_col, groups, *, colorscale="RdBu", reverses
     fig.update_layout(
         mapbox_style="white-bg", mapbox_layers=_labelled_basemap(),
         mapbox_zoom=zoom, mapbox_center=center,
-        margin=dict(l=0, r=0, t=10, b=36), height=height, plot_bgcolor="white",
+        margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white",
         updatemenus=menus)
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.04, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        _map_source_note(fig, source_note)
     return fig
 
 
@@ -1427,18 +1840,29 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                       width=3 if g == thick_group else 1.8),
             marker=dict(size=6), hovertemplate=hover(g, init)))
 
-    xaxis = dict(title="Census year", gridcolor="#e0e0e0",
+    xaxis = dict(title="", gridcolor="#e0e0e0",
                  tickmode="array", tickvals=years)
     if rangeslider:   # draggable time window for the deep (1871–) long-run series
         xaxis["rangeslider"] = dict(visible=True, thickness=0.07, bgcolor="#f5f5f5")
-    b_margin = 120 if rangeslider else 90
-    src_y = -0.30 if rangeslider else -0.18
+    t_margin = 70 if (dropdown or measures) else 40
+    # The source note hangs DOWN from its anchor (yanchor=top). Wrap it to fit the plot
+    # (narrowed by the right-hand legend) so it never clips at the right edge, size the
+    # bottom margin to the wrapped line count (+1 for the brand line the show()
+    # interceptor appends), and leave a gap below the x-axis labels (or the range
+    # slider, when present) so the note clears them. One place → all history_lines charts.
+    if source_note:
+        src_wrapped = _wrap(source_note, 100)
+        n_src = src_wrapped.count("<br>") + 2
+        src_gap = 96 if rangeslider else 46
+        b_margin = src_gap + n_src * 16 + 14
+    else:
+        b_margin = 120 if rangeslider else 90
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=xaxis,
         yaxis=dict(title=init.get("ytitle", yaxis_title), gridcolor="#e0e0e0", rangemode="tozero"),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
-        margin=dict(l=10, r=180, t=70 if (dropdown or measures) else 40, b=b_margin),
+        margin=dict(l=10, r=180, t=t_margin, b=b_margin),
     )
     if dropdown:
         buttons = [dict(method="restyle", label=geo,
@@ -1457,9 +1881,6 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
         fig.update_layout(updatemenus=[dict(buttons=mbtns, active=0, x=0.0, y=1.14,
                           xanchor="left", yanchor="top", bgcolor="white",
                           bordercolor="#ccc", borderwidth=1, showactive=True)])
-        fig.add_annotation(text="Show:", xref="paper", yref="paper",
-                           x=0.0, y=1.20, xanchor="left", yanchor="bottom",
-                           showarrow=False, font=dict(size=11, color="#666"))
     if nhs_year in years:
         fig.add_vrect(x0=nhs_year - 0.25, x1=nhs_year + 0.25, line_width=0,
                       fillcolor="#000", opacity=0.05)
@@ -1467,8 +1888,9 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                            text=nhs_label, showarrow=False,
                            font=dict(size=9, color="#999"))
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper",
-                           x=0, xanchor="left", y=src_y, showarrow=False,
+        src_y = -src_gap / (height - t_margin - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper",
+                           x=0, xanchor="left", y=src_y, yanchor="top", showarrow=False,
                            align="left", font=dict(size=10, color="#999"))
     return fig
 
@@ -1498,17 +1920,26 @@ def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
         text=[f"{dl:+.1f} pp" for dl in deltas], textposition="auto",
         cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
     pad = max(abs(min(deltas)), abs(max(deltas))) * 0.15
+    # Source note hangs below the plot (yanchor=top); size the bottom margin to the
+    # wrapped line count (+1 for the brand line the show() interceptor appends) so it
+    # clears the x-axis title and never clips.
+    if source_note:
+        src_wrapped = _wrap(source_note, 82)
+        b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
+    else:
+        b_margin = 70
     fig.update_layout(
         plot_bgcolor="white", height=height, showlegend=False,
         xaxis=dict(title=f"Change in share, {year_start}→{year_end} (percentage points)",
                    gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5,
                    range=[min(deltas) - pad, max(deltas) + pad]),
         yaxis=dict(gridcolor="white"),
-        margin=dict(l=160, r=40, t=20, b=70),
+        margin=dict(l=160, r=40, t=20, b=b_margin),
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.2, showarrow=False, font=dict(size=10, color="#999"))
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-58 / (height - 20 - b_margin), yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1530,16 +1961,25 @@ def composition_bars(df, *, group_colors, year, geographies=None, value_col="sha
             x=[float(piv.loc[geo, g]) if (geo in piv.index and g in piv.columns
                and pd.notna(piv.loc[geo, g])) else 0 for geo in geos],
             hovertemplate=f"{g}: %{{x:.1f}}%<extra></extra>"))
+    # Source note wraps (so a long note never clips at the right) and hangs below the
+    # plot (yanchor=top), with the bottom margin sized to its line count (+1 for the
+    # brand line the show() interceptor appends).
+    if source_note:
+        src_wrapped = _wrap(source_note, 82)
+        b_margin = 44 + (src_wrapped.count("<br>") + 2) * 16 + 12
+    else:
+        b_margin = 70
     fig.update_layout(
         barmode="stack", plot_bgcolor="white", height=height, hovermode="y unified",
         xaxis=dict(title=None, gridcolor="#e0e0e0", ticksuffix="%", range=[0, 100]),
         yaxis=dict(autorange="reversed"),         # first geography at top
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-        margin=dict(l=110, r=20, t=70, b=70),
+        margin=dict(l=110, r=20, t=70, b=b_margin),
     )
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-0.16, showarrow=False, font=dict(size=10, color="#999"))
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0, xanchor="left",
+                           y=-44 / (height - 70 - b_margin), yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1585,7 +2025,8 @@ def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
 
 def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
                 rangeslider=False, source_note=None, hovertemplate=None,
-                yaxis_tickformat=None, customdata=None, initial_full=False):
+                yaxis_tickformat=None, customdata=None, initial_full=False,
+                initial_start=None):
     """Single Canada-only time series.
 
     Set rangeslider=True for long series (more than a decade or two) to add a
@@ -1621,20 +2062,31 @@ def single_line(df, x_col, y_col, title, yaxis_title, color=CANADA_COLOR,
         # initial_full=True opens on the whole record instead.
         import pandas as pd
         xmin, xmax = df[x_col].min(), df[x_col].max()
-        xaxis["range"] = [xmin if initial_full else max(xmin, pd.Timestamp("1999-01-01")), xmax]
+        if initial_full:
+            _start = xmin
+        elif initial_start is not None:
+            _start = max(xmin, pd.Timestamp(f"{int(initial_start)}-01-01"))
+        else:
+            _start = max(xmin, pd.Timestamp("1999-01-01"))
+        # Small right buffer (~2% of the visible span) so the latest point isn't flush
+        # against the edge, which reads as "clipped".
+        xaxis["range"] = [_start, xmax + (xmax - _start) * 0.02]
     yaxis = dict(title=yaxis_title, gridcolor="#e0e0e0")
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat
     fig.update_layout(
         xaxis=xaxis, yaxis=yaxis, plot_bgcolor="white",
         hovermode="x", showlegend=False,
-        margin=dict(t=40, b=(140 if rangeslider else 80)),
+        margin=dict(t=40, b=(140 if rangeslider else 130)),
     )
     if source_note:
+        # Hang the note from yanchor=top below the slider / x-axis labels, with enough
+        # bottom margin for the wrapped note + the brand line the show() interceptor adds
+        # (some GC InfoBase notes are long because their "data as of" is a phrase).
         fig.add_annotation(
-            text=source_note, xref="paper", yref="paper",
-            x=0, y=(-0.34 if rangeslider else -0.18),
-            showarrow=False, font=dict(size=10, color="#999"))
+            text=_wrap(source_note, 88), xref="paper", yref="paper",
+            x=0, xanchor="left", y=(-0.34 if rangeslider else -0.16), yanchor="top",
+            align="left", showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1654,11 +2106,42 @@ def _series_colors(groups, colors):
     return {g: SERIES_PALETTE[i % len(SERIES_PALETTE)] for i, g in enumerate(groups)}
 
 
+import unicodedata as _ud
+def _norm_prov(s):
+    s = str(s).replace("<br>", " ").replace("&", "and")
+    s = "".join(c for c in _ud.normalize("NFKD", s) if not _ud.combining(c))
+    return " ".join(s.lower().split())
+_PROV_NAME2CODE = {_norm_prov(v): k for k, v in PROVINCE_NAMES.items()}
+
+def province_colors(labels, register="muted"):
+    """Locked provincial/territorial identity colours keyed to `labels`.
+
+    Accepts any of the names in PROVINCE_NAMES, plus 'Canada', and is tolerant of
+    '<br>' line-breaks, accents (Québec), and '&'. `register`: 'muted' (default —
+    province LINES) | 'deep' | 'pastel' (large map fills). Canada -> brand maroon.
+    Unrecognised labels fall back to SERIES_PALETTE so a call never breaks. Pass the
+    result as `colors=` to lines_over_time / stacked_area (single source of truth =
+    config.py PROVINCE_COLORS*)."""
+    pal = {"muted": PROVINCE_COLORS, "deep": PROVINCE_COLORS_DEEP,
+           "pastel": PROVINCE_COLORS_PASTEL}.get(register, PROVINCE_COLORS)
+    out, spi = {}, 0
+    for lab in labels:
+        n = _norm_prov(lab)
+        if n in ("canada", "can"):
+            out[lab] = CANADA_COLOR
+        elif n in _PROV_NAME2CODE:
+            out[lab] = pal[_PROV_NAME2CODE[n]]
+        else:
+            out[lab] = SERIES_PALETTE[spi % len(SERIES_PALETTE)]; spi += 1
+    return out
+
+
 def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
                     colors=None, group_order=None, source_note=None, height=460,
                     yaxis_tickformat=None, ytickprefix="", yticksuffix="",
                     hover_decimals=0, legend_orientation="v", rangemode="tozero",
-                    measures=None):
+                    measures=None, rangeslider=False, initial_start=None,
+                    legendonly_groups=(), x_pad=False):
     """Plain multi-line time series for annual data — integer-year safe (no
     date-axis range buttons, unlike the OECD peer charts). `df` is long:
     (x_col, group_col, value_col). Used for government employment by level and
@@ -1667,43 +2150,79 @@ def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,
     `measures`: optional list of {col, label, yaxis_title} — adds a dropdown that
     switches every line between alternative value columns (e.g. nominal vs real),
     re-scaling the y-axis and updating its title. When given, the first measure is
-    shown initially and `value_col` is ignored."""
+    shown initially and `value_col` is ignored. A measure may also carry its own
+    `hover_decimals`/`ytickprefix`/`yticksuffix` (e.g. whole jobs vs. a per-capita
+    rate to one decimal); the dropdown then rewrites the hover format and y-tick
+    affixes too. Defaults fall back to the chart-level values."""
+    def _hover_tmpl(g, dec, pre, suf):
+        return f"{g}: {pre}%{{y:,.{dec}f}}{suf}<extra></extra>"
     groups = group_order or list(df[group_col].drop_duplicates())
     cmap = _series_colors(groups, colors)
     subsets = {g: df[df[group_col] == g].sort_values(x_col) for g in groups}
-    init_col = measures[0]["col"] if measures else value_col
-    init_title = measures[0].get("yaxis_title", yaxis_title) if measures else yaxis_title
+    m0 = measures[0] if measures else {}
+    init_col = m0.get("col", value_col)
+    init_title = m0.get("yaxis_title", yaxis_title)
+    init_dec = m0.get("hover_decimals", hover_decimals)
+    init_pre = m0.get("ytickprefix", ytickprefix)
+    init_suf = m0.get("yticksuffix", yticksuffix)
+    legendonly = {str(g) for g in legendonly_groups}
     fig = go.Figure()
     for g in groups:
         s = subsets[g]
         fig.add_trace(go.Scatter(
             x=s[x_col], y=s[init_col], name=str(g), mode="lines+markers",
+            visible=("legendonly" if str(g) in legendonly else True),
             line=dict(color=cmap[g], width=2.5), marker=dict(size=5),
-            hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
+            hovertemplate=_hover_tmpl(g, init_dec, init_pre, init_suf)))
+    # A range slider needs the bottom free, so it forces the legend to the right and
+    # pushes the source note + bottom margin below the slider.
+    use_v = legend_orientation == "v" or rangeslider
     legend = (dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
-              if legend_orientation == "v"
+              if use_v
               else dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5))
     yaxis = dict(title=init_title, gridcolor="#e0e0e0", rangemode=rangemode,
-                 tickprefix=ytickprefix, ticksuffix=yticksuffix)
+                 tickprefix=init_pre, ticksuffix=init_suf)
     if yaxis_tickformat:
         yaxis["tickformat"] = yaxis_tickformat
+    xaxis = dict(title="", gridcolor="#e0e0e0")
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
+    # Optional x-range padding so the first/last point isn't flush against the axis —
+    # also separates the first x-tick label from the y-axis "0" tick (owner-flagged on
+    # the tuition charts). `initial_start` opens on a recent window; the data/slider
+    # still span everything.
+    if initial_start is not None or x_pad:
+        import pandas as pd
+        xv = pd.concat([subsets[g][x_col] for g in groups])
+        xmin, xmax = xv.min(), xv.max()
+        lo = initial_start if initial_start is not None else xmin
+        pad = (xmax - lo) * 0.02 if x_pad else 0
+        xaxis["range"] = [lo - (0.5 if x_pad else 0), xmax + max(pad, 0.5 if x_pad else 0)]
+    b = 150 if rangeslider else 100
+    src_y = -0.34 if rangeslider else -0.18
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
-        xaxis=dict(title="", gridcolor="#e0e0e0"), yaxis=yaxis, legend=legend,
-        margin=dict(l=10, r=(175 if legend_orientation == "v" else 20),
-                    t=(60 if measures else 30), b=80))
+        xaxis=xaxis, yaxis=yaxis, legend=legend,
+        margin=dict(l=10, r=(175 if use_v else 20),
+                    t=(60 if measures else 30), b=b))
     if measures:
-        buttons = [dict(method="update", label=m["label"],
-                        args=[{"y": [subsets[g][m["col"]].tolist() for g in groups]},
-                              {"yaxis.title.text": m.get("yaxis_title", yaxis_title),
-                               "yaxis.autorange": True}])
+        def _btn_args(m):
+            dec = m.get("hover_decimals", hover_decimals)
+            pre = m.get("ytickprefix", ytickprefix)
+            suf = m.get("yticksuffix", yticksuffix)
+            return [{"y": [subsets[g][m["col"]].tolist() for g in groups],
+                     "hovertemplate": [_hover_tmpl(g, dec, pre, suf) for g in groups]},
+                    {"yaxis.title.text": m.get("yaxis_title", yaxis_title),
+                     "yaxis.autorange": True,
+                     "yaxis.tickprefix": pre, "yaxis.ticksuffix": suf}]
+        buttons = [dict(method="update", label=m["label"], args=_btn_args(m))
                    for m in measures]
         fig.update_layout(updatemenus=[dict(buttons=buttons, active=0, x=0,
             xanchor="left", y=1.14, yanchor="top", bgcolor="white",
             bordercolor="#ccc", borderwidth=1, showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           xanchor="left", y=-0.18, showarrow=False,
+                           xanchor="left", y=src_y, showarrow=False,
                            font=dict(size=10, color="#999"))
     return fig
 
@@ -1878,21 +2397,21 @@ def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=Tru
     fig.update_layout(
         xaxis=xaxis, yaxis=dict(title=options[0]["yaxis_title"], gridcolor="#e0e0e0"),
         plot_bgcolor="white", hovermode="x", showlegend=False, height=height,
-        margin=dict(t=60, b=(140 if rangeslider else 80)),
+        margin=dict(t=60, r=30, b=(140 if rangeslider else 80)),
         updatemenus=[dict(buttons=buttons, active=0, x=1, xanchor="right", y=1.13,
                           yanchor="top", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
-                           y=(-0.34 if rangeslider else -0.18), showarrow=False,
-                           font=dict(size=10, color="#999"))
+                           xanchor="left", y=(-0.34 if rangeslider else -0.18), yanchor="top",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
 def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
                  group_order=None, source_note=None, height=480,
                  ytickprefix="", yticksuffix="", hover_decimals=0, value_scale=1.0,
-                 legend_orientation="v"):
+                 legend_orientation="v", rangeslider=False):
     """Stacked area over time — the composition of a total by category
     (public-sector sectors, federal expense by type, government spending by
     function). `df` is long: (x_col, group_col, value_col). `value_scale` divides
@@ -1912,17 +2431,28 @@ def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
             x=xs, y=[s.get(x) for x in xs], name=str(g), mode="lines",
             stackgroup="one", line=dict(width=0.5, color=cmap[g]), fillcolor=cmap[g],
             hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
-    if legend_orientation == "h":   # legend below the plot → x-axis uses full width
-        legend = dict(orientation="h", yanchor="top", y=-0.07, xanchor="left", x=0)
-        margin = dict(l=10, r=20, t=30, b=130)
-        src_y = -0.40
+    if legend_orientation == "h" and not rangeslider:
+        # Legend ABOVE the plot → the x-axis uses full width AND the bottom stays free for
+        # the source note (a bottom h-legend with many bands wraps and collides with it).
+        legend = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0)
+        margin = dict(l=10, r=20, t=90, b=90)
+        src_y = -0.16
+    elif legend_orientation == "h" and rangeslider:
+        # Legend BELOW the range slider (full width) → frees the plot of a wide right-hand
+        # legend with long entries; the source note sits below the legend.
+        legend = dict(orientation="h", yanchor="top", y=-0.30, xanchor="left", x=0)
+        margin = dict(l=10, r=20, t=30, b=215)
+        src_y = -0.54
     else:                            # legend stacked on the right (default)
         legend = dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02)
-        margin = dict(l=10, r=200, t=30, b=80)
-        src_y = -0.18
+        margin = dict(l=10, r=200, t=30, b=(150 if rangeslider else 110))
+        src_y = -0.34 if rangeslider else -0.18
+    xaxis = dict(title="", gridcolor="#e0e0e0")
+    if rangeslider:
+        xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0",
                    tickprefix=ytickprefix, ticksuffix=yticksuffix),
         legend=legend, margin=margin)
@@ -1958,15 +2488,26 @@ def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
         text=text, textposition="auto", cliponaxis=False,
         hovertemplate=hovertemplate or
         f"%{{y}}: {tickprefix}%{{x:{value_fmt}}}{ticksuffix}<extra></extra>"))
+    height_val = height or (150 + 26 * len(d))
+    # The source note hangs below the plot (yanchor=top); size the bottom margin to the
+    # wrapped line count (+1 for the brand line the show() interceptor appends) and leave
+    # a clear gap below the x-axis title (owner: source notes need breathing room).
+    if source_note:
+        src_wrapped = _wrap(source_note, 82)
+        n_src = src_wrapped.count("<br>") + 2
+        b_margin = 58 + n_src * 16 + 12
+    else:
+        b_margin = 70
     fig.update_layout(
-        plot_bgcolor="white", showlegend=False, height=height or (150 + 26 * len(d)),
+        plot_bgcolor="white", showlegend=False, height=height_val,
         xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",
                    tickprefix=tickprefix, ticksuffix=ticksuffix),
-        yaxis=dict(title=""), margin=dict(l=10, r=(70 if text else 20), t=20, b=70))
+        yaxis=dict(title=""), margin=dict(l=10, r=(70 if text else 20), t=20, b=b_margin))
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=1,
-                           xanchor="right", y=-0.12, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        src_y = -58 / (height_val - 20 - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=src_y, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
 
@@ -1987,7 +2528,7 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
         s = sub.copy()
         s["_v"] = pd.to_numeric(s[value_col], errors="coerce") / value_scale
         s = s.dropna(subset=["_v"]).sort_values("_v")     # ascending → largest on top
-        y = s[label_col].astype(str).tolist()
+        y = [_wrap(str(v), 32) for v in s[label_col]]      # wrap long category names to 2 lines
         t = ([text_fmt.format(v) for v in s[text_col]]
              if text_col and text_col in s.columns else None)
         return s["_v"].tolist(), y, t
@@ -1996,6 +2537,14 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
     x0, y0, t0 = prepped[0][1]
     def height(n):
         return base_px + bar_px * n
+    h0 = height(len(y0))
+    # Match category_bar's self-sizing source note (wrap to fit, hang from yanchor=top,
+    # bottom margin sized to the line count incl. the brand line) so it never clips.
+    if source_note:
+        src_wrapped = _wrap(source_note, 82)
+        b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
+    else:
+        b_margin = 70
     fig = go.Figure(go.Bar(
         x=x0, y=y0, orientation="h", marker_color=color,
         text=t0, textposition="auto", cliponaxis=False,
@@ -2006,16 +2555,17 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
                            "yaxis.categoryorder": "array", "xaxis.autorange": True}])
                for lab, (x, y, t) in prepped]
     fig.update_layout(
-        plot_bgcolor="white", showlegend=False, height=height(len(y0)),
+        plot_bgcolor="white", showlegend=False, height=h0,
         xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",
                    tickprefix=tickprefix, ticksuffix=ticksuffix),
         yaxis=dict(title="", categoryorder="array", categoryarray=y0),
-        margin=dict(l=10, r=70, t=52, b=70),
+        margin=dict(l=10, r=70, t=52, b=b_margin),
         updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.0,
                           yanchor="bottom", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)])
     if source_note:
-        fig.add_annotation(text=source_note, xref="paper", yref="paper", x=1,
-                           xanchor="right", y=-0.06, showarrow=False,
-                           font=dict(size=10, color="#999"))
+        src_y = -58 / (h0 - 52 - b_margin)
+        fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0,
+                           xanchor="left", y=src_y, yanchor="top", align="left",
+                           showarrow=False, font=dict(size=10, color="#999"))
     return fig

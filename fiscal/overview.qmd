@@ -1,0 +1,62 @@
+---
+title: "Government & Public Finances"
+title-block-banner: "#17324D"
+title-block-banner-color: "#F7F4EE"
+body-classes: area-government
+---
+
+![](../visual_assets/brand/botanical/solid/leaf-display-navy.svg){.overview-leaf fig-alt="The Canada Observatory leaf in the Government & Public Finances colour"}
+
+What governments owe and spend, who works for them, and how Canada's public finances compare with a broad group of OECD peers. Three views:
+
+::::{.columns}
+
+:::{.column .area-card .area-government width="32%"}
+![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
+
+### [Government Finances](index.qmd)
+Debt, deficits, revenue, the tax mix, interest costs, and defence — Canada's
+general-government finances against 17 OECD peers.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-government width="32%"}
+![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
+
+### [Provincial Finances](provincial.qmd)
+What each province raises, spends, and owes, compared on a common basis — net
+debt, government size, and balances by province.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column .area-card .area-government width="32%"}
+![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
+
+### [Government Employment](../government/index.qmd)
+Who works for government — employment by level, the whole public-sector
+workforce, the federal public service, and an OECD peer comparison.
+:::
+
+::::
+
+::::{.columns}
+
+:::{.column .area-card .area-government width="32%"}
+![](../visual_assets/brand/motifs/banner-government.svg){.area-banner}
+
+### [Federal Spending](../government/spending.qmd)
+Federal revenue and spending back to 1961 — by economic type, standard object,
+department, and function.
+:::
+
+:::{.column width="2%"}
+:::
+
+:::{.column width="32%"}
+:::
+
+::::

@@ -40,9 +40,9 @@ if os.path.exists(temp_path):
         yaxis=dict(title="Departure from 1961–1990 average (°C)", gridcolor="#e0e0e0",
                    ticksuffix=" °C", zeroline=False),
         xaxis=dict(title="", gridcolor="#e0e0e0", dtick=10),
-        margin=dict(t=30, b=90),
+        margin=dict(t=30, b=120),
         annotations=[dict(
-            text=f"Source: Environment and Climate Change Canada, Canadian Environmental Sustainability Indicators (temperature change) | Data as of: {get_data_date(temp_path)}",
+            text=f"Source: ECCC, Canadian Environmental Sustainability Indicators | Data as of: {get_data_date(temp_path)}",
             xref="paper", yref="paper", x=0, y=-0.20, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -114,7 +114,7 @@ if os.path.exists(ctvb_path):
         yaxis=dict(title="", tickfont=dict(size=11), automargin=True),
         margin=dict(t=30, b=90, l=10),
         annotations=[dict(
-            text=f"Source: Environment and Climate Change Canada, Climate Trends and Variations Bulletin (Annual 2024) | trend over 1948–2024",
+            text="Source: ECCC Climate Trends and Variations Bulletin | 1948–2024 trend",
             xref="paper", yref="paper", x=0, y=-0.16, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -164,7 +164,7 @@ if os.path.exists(ctvb_path):
         mapbox=dict(style="carto-positron", center=dict(lat=64, lon=-96), zoom=1.9),
         height=430, margin=dict(t=10, b=34, l=0, r=0),
         annotations=[dict(
-            text="Markers = each region's approximate centre (regions are areas, not points); colour = 1948–2024 warming trend. Source: ECCC Climate Trends and Variations Bulletin.",
+            text="Source: ECCC Climate Trends and Variations Bulletin",
             xref="paper", yref="paper", x=0, y=-0.07, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "scrollZoom": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -177,20 +177,12 @@ Some Canadian temperature records are remarkably long: Toronto's reaches back to
 **1841**. Use the dropdown to switch cities. Each chart shows two series that are
 deliberately kept **separate, not spliced**: the **homogenized** record (the
 trend-quality series, which the open national dataset currently carries to 2020) and
-a **raw** recent tail computed from current daily observations. They are different
-products, so they don't line up perfectly where they meet — that small offset is
-expected, and joining them into one line would hide exactly the station-change
-effects the homogenized series is built to remove. The dashed line is a
-least-squares trend fitted to each city's homogenized record, with its rate in the
-legend; because records begin in different decades, read each rate on its own
-rather than ranking cities by it (the [regional comparison](#the-north-is-warming-fastest)
-above uses a common 1948–2024 period for that).
+a **raw** recent tail computed from current daily observations.
 
 The Arctic stations tell their own story. **Alert and Eureka begin only in 1948 and
 1951** — there are no earlier instrumental records that far north, because the first
 permanent High Arctic weather stations were not built until the 1947–1950 Joint
-Arctic Weather Stations program. So these are ~75-year records, against Toronto's
-~180.
+Arctic Weather Stations program.
 
 ```{python}
 #| echo: false
@@ -201,7 +193,7 @@ if os.path.exists(city_path):
     cities = ["Toronto", "Vancouver", "Winnipeg", "Calgary", "Alert", "Eureka"]
     cities = [c for c in cities if c in set(ct["city"])]
     fig = go.Figure()
-    trace_city = []   # 3 traces per city: homogenized, raw tail, trend
+    trace_city = []   # 2 traces per city: homogenized, raw tail
     for city in cities:
         homog = ct[(ct["city"] == city) & (ct["series"] == "Homogenized (AHCCD)")].sort_values("year")
         raw = ct[(ct["city"] == city) & (ct["series"] == "Recent (raw)")].sort_values("year")
@@ -216,21 +208,6 @@ if os.path.exists(city_path):
             mode="lines+markers", line=dict(color="#ff7f0e", width=2, dash="dot"),
             marker=dict(size=5), visible=vis,
             hovertemplate="%{x}: %{y:.1f} °C<extra>Recent (raw)</extra>"))
-        trace_city.append(city)
-        # Least-squares trend over the homogenized record only (°C per century).
-        hx = homog["year"].to_numpy(dtype=float)
-        hy = homog["temp"].to_numpy(dtype=float)
-        if len(hx) >= 10:
-            slope, intercept = np.polyfit(hx, hy, 1)
-            tx = np.array([hx.min(), hx.max()])
-            fig.add_trace(go.Scatter(
-                x=tx, y=slope * tx + intercept,
-                name=f"Linear trend ({slope * 100:+.1f} °C / century)",
-                mode="lines", line=dict(color="#333333", width=1.5, dash="dash"),
-                visible=vis, hoverinfo="skip"))
-        else:
-            fig.add_trace(go.Scatter(x=[], y=[], name="Linear trend",
-                                     visible=vis, showlegend=False))
         trace_city.append(city)
     buttons = [dict(method="update", label=city,
                     args=[{"visible": [tc == city for tc in trace_city]},
@@ -249,7 +226,7 @@ if os.path.exists(city_path):
                           borderwidth=1, showactive=True)],
         margin=dict(t=50, b=120, r=180),
         annotations=[dict(
-            text=f"Sources: ECCC AHCCD (homogenized, to 2020) + MSC daily observations (raw recent), via the GeoMet API | as of {get_data_date(city_path)}",
+            text=f"Source: ECCC AHCCD (homogenized) + MSC daily observations | as of {get_data_date(city_path)}",
             xref="paper", yref="paper", x=0, y=-0.42, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -263,8 +240,11 @@ Warming isn't spread evenly across the year. In much of the country the **cold
 seasons have warmed most** — winter in the continental interior (Winnipeg, Calgary),
 and autumn in the High Arctic, where the later autumn freeze-up of sea ice keeps the
 season milder for longer. Cities near the coasts and the Great Lakes (Toronto,
-Vancouver) warm more evenly across the seasons. Pick a city; each season's warming
-rate over its homogenized record (°C per century) is shown in the legend.
+Vancouver) warm more evenly across the seasons. Each season's warming rate over its
+homogenized record (°C per century) is shown in the legend, for either the seasonal
+**average** temperature or the average **daytime high**. The daytime high has
+generally warmed a little less than the overall average — because the fastest
+warming has come at night.
 
 ```{python}
 #| echo: false
@@ -277,35 +257,53 @@ if os.path.exists(seas_path):
     SEASON_COLORS = {"Winter": "#1f77b4", "Spring": "#2ca02c",
                      "Summer": "#d62728", "Autumn": "#ff7f0e"}
     SEASONS = ["Winter", "Spring", "Summer", "Autumn"]
+    # Two metrics share one chart via a second dropdown: the seasonal average
+    # temperature and the seasonal average of daily-high temperatures.
+    METRICS = [("temp", "Average temperature", "Seasonal mean temperature (°C)"),
+               ("temp_max", "Daytime highs", "Seasonal mean daily-high temperature (°C)")]
     fig = go.Figure()
     trace_city = []
+    ys = {m[0]: [] for m in METRICS}      # per-metric y arrays, one per trace
+    names = {m[0]: [] for m in METRICS}   # per-metric legend names, one per trace
     for city in cities:
         for season in SEASONS:
             s = cs[(cs["city"] == city) & (cs["season"] == season)].sort_values("year")
-            name = season
-            if len(s) >= 10:
-                slope = np.polyfit(s["year"].to_numpy(float), s["temp"].to_numpy(float), 1)[0]
-                name = f"{season} ({slope * 100:+.1f} °C/century)"
+            x = s["year"].tolist()
+            for col, _lbl, _yt in METRICS:
+                nm = season
+                sv = s.dropna(subset=[col])
+                if len(sv) >= 10:
+                    slope = np.polyfit(sv["year"].to_numpy(float), sv[col].to_numpy(float), 1)[0]
+                    nm = f"{season} ({slope * 100:+.1f} °C/century)"
+                ys[col].append(s[col].tolist())
+                names[col].append(nm)
             fig.add_trace(go.Scatter(
-                x=s["year"], y=s["temp"], name=name, mode="lines",
+                x=x, y=s["temp"].tolist(), name=names["temp"][-1], mode="lines",
                 line=dict(color=SEASON_COLORS[season], width=1.8),
                 visible=(city == cities[0]),
                 hovertemplate=f"{season} %{{x}}: %{{y:.1f}} °C<extra></extra>"))
             trace_city.append(city)
-    buttons = [dict(method="update", label=city,
+    city_buttons = [dict(method="update", label=city,
                     args=[{"visible": [tc == city for tc in trace_city]},
                           {"xaxis.autorange": True, "yaxis.autorange": True}])
                for city in cities]
+    metric_buttons = [dict(method="update", label=lbl,
+                    args=[{"y": ys[col], "name": names[col]},
+                          {"yaxis.title.text": yt, "yaxis.autorange": True}])
+               for col, lbl, yt in METRICS]
     fig.update_layout(
         plot_bgcolor="white", height=520, hovermode="x unified",
         xaxis=dict(title="", gridcolor="#e0e0e0",
                    rangeslider=dict(visible=True, thickness=0.07, bgcolor="#f5f5f5")),
         yaxis=dict(title="Seasonal mean temperature (°C)", gridcolor="#e0e0e0", ticksuffix=" °C"),
         legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
-        updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.12,
+        updatemenus=[dict(buttons=city_buttons, active=0, x=0, xanchor="left", y=1.22,
+                          yanchor="top", bgcolor="white", bordercolor="#ccc",
+                          borderwidth=1, showactive=True),
+                     dict(buttons=metric_buttons, active=0, x=0, xanchor="left", y=1.11,
                           yanchor="top", bgcolor="white", bordercolor="#ccc",
                           borderwidth=1, showactive=True)],
-        margin=dict(t=50, b=120, r=205),
+        margin=dict(t=85, b=120, r=205),
         annotations=[dict(
             text=f"Source: ECCC AHCCD seasonal (homogenized, to 2020), via the GeoMet API | as of {get_data_date(seas_path)}",
             xref="paper", yref="paper", x=0, y=-0.42, showarrow=False,
@@ -442,7 +440,7 @@ show_spiral("Eureka", "Eureka · High Arctic")
 
 *Same scale on both, 1948 onward (when the Arctic stations begin). Full monthly anomalies — no smoothing — from the homogenized record (to 2020); the green ring is the 1961–1990 normal; each loop is coloured by that year's average departure. Source: ECCC AHCCD, via the GeoMet API.*
 
-## Download Data
+## Download data
 
 - [National temperature departure (CSV)](../data/environment/cesi_temperature.csv) — ECCC CESI (vs 1961–1990)
 - [Regional warming trends (CSV)](../data/environment/cesi_ctvb_regional.csv) — ECCC Climate Trends and Variations Bulletin

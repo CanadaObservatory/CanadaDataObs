@@ -18,17 +18,23 @@ import sys
 import logging
 
 from pipeline.config import INDICATORS
-from pipeline.fetch_oecd import fetch_oecd_indicator, fetch_labour_by_age
+from pipeline.fetch_oecd import (fetch_oecd_indicator, fetch_labour_by_age,
+                                 fetch_tax_structure)
 from pipeline.fetch_statcan import (
     fetch_statcan_indicator,
     fetch_population_quarterly, fetch_population_components, fetch_cpi,
     fetch_provincial_electricity, fetch_tuition, fetch_tuition_by_field,
     fetch_trade_us, fetch_cma_unemployment,
-    fetch_age_structure, fetch_interprovincial_migration,
+    fetch_age_structure, fetch_interprovincial_migration, fetch_minimum_wage,
+    fetch_voter_turnout, fetch_cma_vacancy, fetch_income_distribution,
+    fetch_debt_service_ratio, fetch_provincial_finance,
 )
-from pipeline.fetch_owid import fetch_energy_mix, fetch_consumption_co2
+from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
+                                  fetch_co2_per_gdp, fetch_co2_global_context)
 from pipeline.fetch_whr import fetch_happiness
-from pipeline.fetch_worldbank import fetch_worldbank_indicator
+from pipeline.fetch_worldbank import (fetch_worldbank_indicator, fetch_world_population,
+                                       fetch_pm25_global_context, fetch_world_gdp,
+                                       fetch_world_land_area)
 from pipeline.fetch_boc import fetch_boc_indicator
 from pipeline.fetch_geography import fetch_wildfire, fetch_sea_ice
 from pipeline.fetch_environment import fetch_ghg, fetch_ghg_by_sector
@@ -54,8 +60,20 @@ CUSTOM_FETCHERS = {
     "fetch_population_quarterly": fetch_population_quarterly,
     "fetch_population_components": fetch_population_components,
     "fetch_cpi": fetch_cpi,
+    "fetch_minimum_wage": fetch_minimum_wage,
+    "fetch_voter_turnout": fetch_voter_turnout,
+    "fetch_cma_vacancy": fetch_cma_vacancy,
+    "fetch_income_distribution": fetch_income_distribution,
+    "fetch_debt_service_ratio": fetch_debt_service_ratio,
+    "fetch_provincial_finance": fetch_provincial_finance,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,
+    "fetch_co2_per_gdp": fetch_co2_per_gdp,
+    "fetch_co2_global_context": fetch_co2_global_context,
+    "fetch_world_population": fetch_world_population,
+    "fetch_world_gdp": fetch_world_gdp,
+    "fetch_world_land_area": fetch_world_land_area,
+    "fetch_pm25_global_context": fetch_pm25_global_context,
     "fetch_happiness": fetch_happiness,
     "fetch_provincial_electricity": fetch_provincial_electricity,
     "fetch_tuition": fetch_tuition,
@@ -63,6 +81,7 @@ CUSTOM_FETCHERS = {
     "fetch_trade_us": fetch_trade_us,
     "fetch_cma_unemployment": fetch_cma_unemployment,
     "fetch_labour_by_age": fetch_labour_by_age,
+    "fetch_tax_structure": fetch_tax_structure,
     "fetch_age_structure": fetch_age_structure,
     "fetch_interprovincial_migration": fetch_interprovincial_migration,
     "fetch_wildfire": fetch_wildfire,

@@ -49,7 +49,7 @@ else:
 
 ## How long the commute takes
 
-The average one-way commute is about 24 minutes nationally, but it is far longer in the big-city regions — and longest of all across the Greater Toronto Area, where many commute between suburbs and the core.
+The average one-way commute is about **24 minutes nationally** — highlighted in maroon below — but it is far longer in the big-city regions, and longest of all across the Greater Toronto Area, where many commute between suburbs and the core.
 
 ```{python}
 #| echo: false
@@ -59,7 +59,7 @@ if os.path.exists(dur_path):
     d = d[d["geo"].isin(MAJOR)]
     fig = category_bar(d, "geo", "avg_min", xaxis_title="Average one-way commute (minutes)",
         value_fmt=".0f", ticksuffix=" min",
-        highlight={"Toronto", "Montréal", "Vancouver", "Calgary", "Ottawa - Gatineau"},
+        highlight={"Canada"},
         hovertemplate="%{y}: %{x:.1f} min<extra></extra>",
         source_note="Source: Statistics Canada, 2021 Census, Table 98-10-0457-01.")
     fig.show(config=SHOW)

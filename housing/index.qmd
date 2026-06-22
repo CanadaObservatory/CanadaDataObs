@@ -323,6 +323,7 @@ if os.path.exists(cmavac_path):
     fig = category_bar(cv, "cma", "vacancy_rate", xaxis_title="Vacancy rate (%)",
         value_fmt=".1f", ticksuffix="%",
         highlight={"Toronto", "Vancouver", "Montréal", "Calgary", "Ottawa-Gatineau", "Edmonton"},
+        highlight_color="#f28e2b",
         hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
         source_note=f"Source: Statistics Canada / CMHC, Table 34-10-0127-01 — {yr}.")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

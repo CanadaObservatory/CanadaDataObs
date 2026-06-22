@@ -18,6 +18,7 @@ Run:    python -m pipeline.social_cards
 Output: social/<name>_<period>.png  (git-ignored — a derived artifact)
 """
 
+import base64
 import math
 import os
 import subprocess
@@ -29,6 +30,20 @@ from pipeline.config import PROJECT_ROOT
 
 OUT_DIR = PROJECT_ROOT / "social"
 
+# Canonical card sizes (px), 2026 best practice — full per-network notes + sources in
+# the social-media-image-sizes reference memory. 4:5 portrait is the strongest
+# general-purpose default (mobile-first; IG/FB/LinkedIn/X); 1:1 is universally safe;
+# 16:9 suits X in-stream + slides; 1.91:1 is the link/share (OG) preview (== the site
+# og:image). NOTE: build_cpi_card currently composes a 1:1 layout; portrait/landscape/og
+# need a per-aspect layout pass (element reflow) — the next build step.
+SOCIAL_FORMATS = {
+    "portrait":  (1080, 1350),   # 4:5    — IG / FB / LinkedIn feed (best reach; default)
+    "square":    (1080, 1080),   # 1:1    — universal (X, LinkedIn)
+    "landscape": (1200, 675),    # 16:9   — X in-stream, slides
+    "og":        (1200, 630),    # 1.91:1 — link / share preview (== site og:image)
+    # "story":   (1080, 1920),   # 9:16   — full-screen vertical (future)
+}
+
 # --- brand palette (chrome, not data ink) ---
 BG = "#F7F4EE"      # Warm Off-White — the brand surface
 NAVY = "#17324D"
@@ -37,7 +52,7 @@ RED = "#C0392B"      # valence: inflation above the BoC target band
 LAKE = "#2A7F9E"     # valence: below the band
 SLATE = "#6B7280"
 INBAND = "#5E6B7A"   # within the 1-3% band
-FONT = "Helvetica Neue, Helvetica, Arial, sans-serif"
+FONT = "'Radio Canada', 'Helvetica Neue', Helvetica, Arial, sans-serif"
 
 # The botanical display leaf + the six cells wedges (from
 # visual_assets/brand/botanical/leaf-botanical-cells.svg).
@@ -61,6 +76,23 @@ _LEAF = ("M 50.0 4.0 Q 50.0 4.0 50.4 5.1 L 51.9 9.2 Q 53.2 13.0 55.0 11.5 L 56.6
 _WEDGES = [("3.9 -39.1", "97.5 -38.3", "#C2972F"), ("97.5 -38.3", "142.9 24.2", "#17324D"),
            ("142.9 24.2", "113.6 114.6", "#2A7F9E"), ("113.6 114.6", "-12.3 115.7", "#7A263A"),
            ("-12.3 115.7", "-42.9 24.2", "#3F6F5E"), ("-42.9 24.2", "3.9 -39.1", "#6B7280")]
+
+
+_FONT_PATH = PROJECT_ROOT / "visual_assets/brand/fonts/radio-canada-latin.woff2"
+_font_css_cache = None
+
+
+def _font_css():
+    """@font-face embedding Radio Canada (base64) so the rasterizer renders the
+    BRAND type, not a system fallback — keeps every card on-brand. Latin subset
+    (English copy); add radio-canada-latin-ext.woff2 the same way for accents."""
+    global _font_css_cache
+    if _font_css_cache is None:
+        b64 = base64.b64encode(_FONT_PATH.read_bytes()).decode()
+        _font_css_cache = ('@font-face{font-family:"Radio Canada";font-style:normal;'
+                           'font-weight:300 700;'
+                           f'src:url(data:font/woff2;base64,{b64}) format("woff2");}}')
+    return _font_css_cache
 
 
 def _cells_leaf(x, y, s, clip_id="cbcSocial"):
@@ -140,6 +172,7 @@ def _cpi_card_svg(window):
     parts.append(_txt(70, 1002, 27, SLATE, "Canada Observatory · Source: Statistics Canada (CPI)"))
 
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">'
+            f'<defs><style>{_font_css()}</style></defs>'
             + "".join(parts) + "</svg>")
 
 

@@ -111,11 +111,14 @@ def _txt(x, y, s, fill, text, *, weight=400, anchor="start", spacing=None):
             f'font-weight="{weight}" fill="{fill}" text-anchor="{anchor}"{sp}>{text}</text>')
 
 
-def _cpi_card_svg(window):
-    """Build the 1080x1080 CPI card SVG from a tidy [date, yoy] window."""
-    W = H = 1080
-    x0, x1 = 150, 1010
-    ctop, cbot = 240, 900   # chart pulled up to tighten the gap under the header
+def _cpi_card_svg(window, W, H):
+    """Build the CPI card SVG (W×H) from a tidy [date, yoy] window. Fixed-top
+    header + bottom footer; the chart fills the space between, so one composition
+    works square, portrait (taller chart) and the wide landscape/OG banners."""
+    x0, x1 = 150, W - 70
+    title_y, sub_y, ctop = 130, 178, 235
+    cbot, foot_y = H - 110, H - 42
+    leaf_sz = 132
     vals = window["yoy"].tolist()
     maxv = max(3.0, max(vals) + 0.6)   # modest headroom above the tallest bar for its label
 
@@ -128,9 +131,9 @@ def _cpi_card_svg(window):
     parts = [f'<rect x="0" y="0" width="{W}" height="{H}" fill="{BG}"/>']
 
     # Header: title + subtitle (left), cells-leaf mark (upper right)
-    parts.append(_txt(70, 130, 54, NAVY, "Inflation (CPI)", weight=600))
-    parts.append(_txt(70, 178, 31, SLATE, "Year-over-year change · Canada"))
-    parts.append(_cells_leaf(890, 60, 150))
+    parts.append(_txt(70, title_y, 54, NAVY, "Inflation (CPI)", weight=600))
+    parts.append(_txt(70, sub_y, 31, SLATE, "Year-over-year change · Canada"))
+    parts.append(_cells_leaf(x1 - leaf_sz * 0.86, 46, leaf_sz))
 
     # Bank of Canada 1-3% target band + 2% midpoint line
     parts.append(f'<rect x="{x0}" y="{y(3):.1f}" width="{x1-x0}" height="{y(1)-y(3):.1f}" '
@@ -169,32 +172,40 @@ def _cpi_card_svg(window):
             parts.append(_txt(cx, cbot + 36, 24, SLATE, str(d.year), anchor="middle"))
 
     # footer (no URL until the .ca domain is live; no "next update" — that lives on the site)
-    parts.append(_txt(70, 1002, 27, SLATE, "Canada Observatory · Source: Statistics Canada (CPI)"))
+    parts.append(_txt(70, foot_y, 27, SLATE, "Canada Observatory · Source: Statistics Canada (CPI)"))
 
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">'
             f'<defs><style>{_font_css()}</style></defs>'
             + "".join(parts) + "</svg>")
 
 
-def _svg_to_png(svg_str, out_png, px):
-    """Rasterize an SVG string to a px-by-px PNG via qlmanage + sips (macOS)."""
+def _svg_to_png(svg_str, out_png, w, h):
+    """Rasterize an SVG string to a w×h PNG via qlmanage + sips (macOS QuickLook).
+
+    qlmanage thumbnails an SVG into a SQUARE (max side), letterboxing a non-square
+    viewBox with the SVG centred; we normalise to that square then centre-crop to
+    w×h (the project's standard SVG->PNG recipe; see visual_assets/brand/README.md)."""
     OUT_DIR.mkdir(exist_ok=True)
+    m = max(w, h)
     with tempfile.TemporaryDirectory() as td:
         svg_path = os.path.join(td, "card.svg")
         with open(svg_path, "w") as f:
             f.write(svg_str)
-        subprocess.run(["qlmanage", "-t", "-s", str(px), "-o", td, svg_path],
+        subprocess.run(["qlmanage", "-t", "-s", str(m), "-o", td, svg_path],
                        capture_output=True)
         rendered = os.path.join(td, "card.svg.png")
         if not os.path.exists(rendered):
             raise RuntimeError("qlmanage produced no PNG (is this macOS?)")
-        subprocess.run(["sips", "-z", str(px), str(px), rendered, "--out", str(out_png)],
+        subprocess.run(["sips", "-z", str(m), str(m), rendered], check=True, capture_output=True)
+        subprocess.run(["sips", "-c", str(h), str(w), rendered, "--out", str(out_png)],
                        check=True, capture_output=True)
     return out_png
 
 
-def build_cpi_card(months=24, px=1080):
-    """Build the CPI 'latest release' card -> social/cpi_inflation_<YYYY-MM>.png."""
+def build_cpi_card(fmt="portrait", months=24):
+    """Build the CPI 'latest release' card for a SOCIAL_FORMATS key
+    -> social/cpi_inflation_<YYYY-MM>_<fmt>.png."""
+    w, h = SOCIAL_FORMATS[fmt]
     df = pd.read_csv(PROJECT_ROOT / "data/economics/statcan_cpi.csv", parse_dates=["date"])
     if "product_group" in df.columns:
         df = df[df["product_group"] == "All-items"]
@@ -202,11 +213,16 @@ def build_cpi_card(months=24, px=1080):
     df["yoy"] = pd.to_numeric(df["cpi_value"], errors="coerce").pct_change(12) * 100
     window = df.dropna(subset=["yoy"]).tail(months).reset_index(drop=True)
     period = window["date"].iloc[-1].strftime("%Y-%m")
-    out = OUT_DIR / f"cpi_inflation_{period}.png"
-    _svg_to_png(_cpi_card_svg(window), out, px)
-    print(f"  wrote {out}  ({window['yoy'].iloc[-1]:.1f}% for {period})")
+    out = OUT_DIR / f"cpi_inflation_{period}_{fmt}.png"
+    _svg_to_png(_cpi_card_svg(window, w, h), out, w, h)
+    print(f"  wrote {out}  ({window['yoy'].iloc[-1]:.1f}% for {period}, {w}×{h})")
     return out
 
 
+def build_all_cpi_cards(months=24):
+    """Every SOCIAL_FORMATS variant of the CPI card."""
+    return [build_cpi_card(fmt, months) for fmt in SOCIAL_FORMATS]
+
+
 if __name__ == "__main__":
-    build_cpi_card()
+    build_all_cpi_cards()

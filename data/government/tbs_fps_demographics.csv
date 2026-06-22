@@ -189,6 +189,18 @@ year,dimension,category,employees
 2025,Age band,65+,10094
 2025,Age band,<20,632
 2025,Age band,Unknown,1
+2026,Age band,20-24,9919
+2026,Age band,25-29,29394
+2026,Age band,30-34,42423
+2026,Age band,35-39,44221
+2026,Age band,40-44,50796
+2026,Age band,45-49,53454
+2026,Age band,50-54,47121
+2026,Age band,55-59,35866
+2026,Age band,60-64,21180
+2026,Age band,65+,10420
+2026,Age band,<20,487
+2026,Age band,Unknown,1
 2010,First official language,English,198189
 2010,First official language,French,81081
 2010,First official language,Unknown,3710
@@ -237,6 +249,9 @@ year,dimension,category,employees
 2025,First official language,English,252891
 2025,First official language,French,100931
 2025,First official language,Unknown,4143
+2026,First official language,English,243432
+2026,First official language,French,97343
+2026,First official language,Unknown,4507
 2010,Region,Alberta,16520
 2010,Region,British Columbia,26035
 2010,Region,Manitoba,11963
@@ -487,6 +502,22 @@ year,dimension,category,employees
 2025,Region,Saskatchewan,6640
 2025,Region,Unknown,8315
 2025,Region,Yukon,474
+2026,Region,Alberta,18603
+2026,Region,British Columbia,27941
+2026,Region,Manitoba,12680
+2026,Region,National Capital Region (NCR),146149
+2026,Region,New Brunswick,12507
+2026,Region,Newfoundland and Labrador,6889
+2026,Region,Northwest Territories,594
+2026,Region,Nova Scotia,12875
+2026,Region,Nunavut,372
+2026,Region,Ontario (minus the NCR),47374
+2026,Region,Outside of Canada,1600
+2026,Region,Prince Edward Island,3953
+2026,Region,Quebec (minus the NCR),37894
+2026,Region,Saskatchewan,6381
+2026,Region,Unknown,9005
+2026,Region,Yukon,465
 2010,Sex,Men,126723
 2010,Sex,Women,156146
 2011,Sex,Men,126427
@@ -529,6 +560,9 @@ year,dimension,category,employees
 2025,Sex,Men,155361
 2025,Sex,Unknown,70
 2025,Sex,Women,202510
+2026,Sex,Men,151080
+2026,Sex,Unknown,118
+2026,Sex,Women,194063
 2010,Tenure,Casual,7292
 2010,Tenure,Indeterminate,243826
 2010,Tenure,Student,6128
@@ -602,3 +636,8 @@ year,dimension,category,employees
 2025,Tenure,Student,7370
 2025,Tenure,Term,39468
 2025,Tenure,Unknown,45
+2026,Tenure,Casual,3221
+2026,Tenure,Indeterminate,300470
+2026,Tenure,Student,5907
+2026,Tenure,Term,35648
+2026,Tenure,Unknown,36

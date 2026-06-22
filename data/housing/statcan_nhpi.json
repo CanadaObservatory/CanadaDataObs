@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 18-10-0205-01",
   "frequency": "monthly",
   "unit": "index (Dec 2016=100)",
-  "retrieved_at": "2026-06-21T16:00:02.374353+00:00",
+  "retrieved_at": "2026-06-22T18:17:18.994399+00:00",
   "latest_observation_date": "2026-05-01",
   "transformations": [
     "filtered to {'GEO': 'Canada', 'New housing price indexes': 'Total (house and land)'}"

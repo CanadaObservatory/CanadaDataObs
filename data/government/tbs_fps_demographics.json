@@ -4,11 +4,11 @@
   "source_table": "TBS Federal public service statistics (open.canada.ca)",
   "frequency": "annual",
   "unit": "employees (March 31 headcount)",
-  "retrieved_at": "2026-06-21T15:59:33.475074+00:00",
-  "latest_observation_date": "2025",
+  "retrieved_at": "2026-06-22T18:17:01.773327+00:00",
+  "latest_observation_date": "2026",
   "transformations": [
     "age/tenure/region/language summed CPA+SA; sex from dept\u00d7sex cross-tab (Total rows dropped)"
   ],
   "notes": null,
-  "row_count": 603
+  "row_count": 642
 }

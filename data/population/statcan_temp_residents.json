@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 17-10-0121-01",
   "frequency": "quarterly",
   "unit": "persons",
-  "retrieved_at": "2026-06-21T15:57:44.221258+00:00",
+  "retrieved_at": "2026-06-22T18:14:45.070395+00:00",
   "latest_observation_date": "2026-04-01",
   "transformations": [
     "filtered to {'GEO': 'Canada', 'Non-permanent resident types': 'Total, non-permanent residents'}"

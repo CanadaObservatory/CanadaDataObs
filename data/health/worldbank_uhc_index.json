@@ -4,7 +4,7 @@
   "source_table": "World Bank / WHO Universal Health Coverage",
   "frequency": "annual",
   "unit": "index (0\u2013100)",
-  "retrieved_at": "2026-06-21T16:01:12.857949+00:00",
+  "retrieved_at": "2026-06-22T18:19:22.370591+00:00",
   "latest_observation_date": "2023",
   "transformations": [
     "World Bank indicator SH_UHC_SCI, filtered to 17 OECD peers"

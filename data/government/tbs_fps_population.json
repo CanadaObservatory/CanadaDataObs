@@ -4,11 +4,11 @@
   "source_table": "TBS Federal public service statistics (open.canada.ca)",
   "frequency": "annual",
   "unit": "employees (March 31 headcount)",
-  "retrieved_at": "2026-06-21T15:59:30.494492+00:00",
-  "latest_observation_date": "2025",
+  "retrieved_at": "2026-06-22T18:16:59.487879+00:00",
+  "latest_observation_date": "2026",
   "transformations": [
     "population total; CPA + SA segments + summed Total"
   ],
   "notes": "Excludes RCMP regular/civilian members and the Canadian Armed Forces.",
-  "row_count": 48
+  "row_count": 51
 }

@@ -4,7 +4,7 @@
   "source_table": "open.canada.ca b545fe25",
   "frequency": "per election",
   "unit": "% of eligible electors",
-  "retrieved_at": "2026-06-19T18:48:44.721469+00:00",
+  "retrieved_at": "2026-06-22T18:15:28.575859+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "Canada, all genders, 7 standard age groups, 2004\u2013"

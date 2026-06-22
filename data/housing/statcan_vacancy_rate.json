@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 34-10-0127-01 (CMHC)",
   "frequency": "annual",
   "unit": "% of rental units",
-  "retrieved_at": "2026-06-21T16:00:07.215725+00:00",
+  "retrieved_at": "2026-06-22T18:17:23.567512+00:00",
   "latest_observation_date": "2025-01-01",
   "transformations": [
     "filtered to {'GEO': 'Census metropolitan areas'}"

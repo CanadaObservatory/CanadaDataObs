@@ -11,7 +11,7 @@ year,department,employees
 2010,Global Affairs Canada,6968
 2010,Agriculture and Agri-Food Canada,6938
 2010,Canadian Food Inspection Agency,6549
-2010,Royal Canadian Mounted Police (Civilian Staff),6250
+2010,Royal Canadian Mounted Police (RCMP),6250
 2010,"Innovation, Science and Economic Development Canada",5769
 2010,Statistics Canada,5558
 2010,Transport Canada,5524
@@ -62,7 +62,7 @@ year,department,employees
 2010,Social Sciences and Humanities Research Council of Canada,206
 2010,Canadian Human Rights Commission,199
 2010,Office of the Commissioner of Official Languages,174
-2010,Office of the Governor General's Secretary,171
+2010,Office of the Secretary to the Governor General,171
 2010,Impact Assessment Agency of Canada,133
 2010,Canada Industrial Relations Board,106
 2010,Women and Gender Equality Canada,93
@@ -111,7 +111,7 @@ year,department,employees
 2011,Global Affairs Canada,6901
 2011,Canadian Food Inspection Agency,6688
 2011,Statistics Canada,6424
-2011,Royal Canadian Mounted Police (Civilian Staff),6147
+2011,Royal Canadian Mounted Police (RCMP),6147
 2011,"Innovation, Science and Economic Development Canada",5581
 2011,Transport Canada,5553
 2011,Crown-Indigenous Relations and Northern Affairs Canada,5427
@@ -162,7 +162,7 @@ year,department,employees
 2011,Registrar of the Supreme Court of Canada,210
 2011,Federal Economic Development Agency for Southern Ontario,209
 2011,Canadian Human Rights Commission,197
-2011,Office of the Governor General's Secretary,190
+2011,Office of the Secretary to the Governor General,190
 2011,Office of the Commissioner of Official Languages,164
 2011,Canada Industrial Relations Board,102
 2011,Women and Gender Equality Canada,102
@@ -210,7 +210,7 @@ year,department,employees
 2012,Global Affairs Canada,6702
 2012,Agriculture and Agri-Food Canada,6644
 2012,Canadian Food Inspection Agency,6580
-2012,Royal Canadian Mounted Police (Civilian Staff),6210
+2012,Royal Canadian Mounted Police (RCMP),6210
 2012,Statistics Canada,5556
 2012,Crown-Indigenous Relations and Northern Affairs Canada,5409
 2012,Transport Canada,5370
@@ -262,7 +262,7 @@ year,department,employees
 2012,Transportation Safety Board of Canada,216
 2012,Social Sciences and Humanities Research Council of Canada,213
 2012,Canadian Human Rights Commission,209
-2012,Office of the Governor General's Secretary,166
+2012,Office of the Secretary to the Governor General,166
 2012,Office of the Commissioner of Official Languages,165
 2012,Women and Gender Equality Canada,98
 2012,Canada Industrial Relations Board,89
@@ -309,7 +309,7 @@ year,department,employees
 2013,Canadian Food Inspection Agency,6254
 2013,Global Affairs Canada,6168
 2013,Agriculture and Agri-Food Canada,5991
-2013,Royal Canadian Mounted Police (Civilian Staff),5971
+2013,Royal Canadian Mounted Police (RCMP),5971
 2013,Shared Services Canada,5299
 2013,Crown-Indigenous Relations and Northern Affairs Canada,4975
 2013,"Immigration, Refugees and Citizenship Canada",4850
@@ -363,7 +363,7 @@ year,department,employees
 2013,Transportation Safety Board of Canada,202
 2013,Social Sciences and Humanities Research Council of Canada,199
 2013,Office of the Commissioner of Official Languages,162
-2013,Office of the Governor General's Secretary,158
+2013,Office of the Secretary to the Governor General,158
 2013,Women and Gender Equality Canada,100
 2013,Public Service Labour Relations Board,96
 2013,Canada Industrial Relations Board,91
@@ -406,7 +406,7 @@ year,department,employees
 2014,Health Canada,9341
 2014,Environment and Climate Change Canada,6550
 2014,Canadian Food Inspection Agency,6315
-2014,Royal Canadian Mounted Police (Civilian Staff),6065
+2014,Royal Canadian Mounted Police (RCMP),6065
 2014,Global Affairs Canada,6027
 2014,"Immigration, Refugees and Citizenship Canada",5927
 2014,Shared Services Canada,5394
@@ -461,7 +461,7 @@ year,department,employees
 2014,Transportation Safety Board of Canada,203
 2014,Canadian Human Rights Commission,199
 2014,Office of the Commissioner of Official Languages,171
-2014,Office of the Governor General's Secretary,155
+2014,Office of the Secretary to the Governor General,155
 2014,Women and Gender Equality Canada,98
 2014,Public Service Labour Relations Board,91
 2014,Canada Industrial Relations Board,88
@@ -500,7 +500,7 @@ year,department,employees
 2015,Fisheries and Oceans Canada,9858
 2015,Health Canada,9079
 2015,Environment and Climate Change Canada,6595
-2015,Royal Canadian Mounted Police (Civilian Staff),6437
+2015,Royal Canadian Mounted Police (RCMP),6437
 2015,"Immigration, Refugees and Citizenship Canada",6385
 2015,Canadian Food Inspection Agency,6009
 2015,Global Affairs Canada,5973
@@ -557,7 +557,7 @@ year,department,employees
 2015,Social Sciences and Humanities Research Council of Canada,209
 2015,Canadian Human Rights Commission,204
 2015,Office of the Commissioner of Official Languages,172
-2015,Office of the Governor General's Secretary,156
+2015,Office of the Secretary to the Governor General,156
 2015,Women and Gender Equality Canada,92
 2015,Financial Consumer Agency of Canada,84
 2015,Indian Oil and Gas Canada,80
@@ -589,7 +589,7 @@ year,department,employees
 2016,Fisheries and Oceans Canada,9901
 2016,Health Canada,9189
 2016,"Immigration, Refugees and Citizenship Canada",6587
-2016,Royal Canadian Mounted Police (Civilian Staff),6571
+2016,Royal Canadian Mounted Police (RCMP),6571
 2016,Environment and Climate Change Canada,6475
 2016,Canadian Food Inspection Agency,5946
 2016,Global Affairs Canada,5890
@@ -645,7 +645,7 @@ year,department,employees
 2016,Registrar of the Supreme Court of Canada,212
 2016,Social Sciences and Humanities Research Council of Canada,210
 2016,Canadian Human Rights Commission,205
-2016,Office of the Governor General's Secretary,166
+2016,Office of the Secretary to the Governor General,166
 2016,Office of the Commissioner of Official Languages,164
 2016,Financial Consumer Agency of Canada,94
 2016,Women and Gender Equality Canada,91
@@ -675,7 +675,7 @@ year,department,employees
 2017,Public Services and Procurement Canada,12894
 2017,Fisheries and Oceans Canada,10230
 2017,Health Canada,9327
-2017,Royal Canadian Mounted Police (Civilian Staff),6801
+2017,Royal Canadian Mounted Police (RCMP),6801
 2017,Environment and Climate Change Canada,6601
 2017,"Immigration, Refugees and Citizenship Canada",6465
 2017,Canadian Food Inspection Agency,6180
@@ -733,7 +733,7 @@ year,department,employees
 2017,Transportation Safety Board of Canada,209
 2017,Canadian Human Rights Commission,191
 2017,Office of the Commissioner of Official Languages,155
-2017,Office of the Governor General's Secretary,149
+2017,Office of the Secretary to the Governor General,149
 2017,Financial Consumer Agency of Canada,99
 2017,Women and Gender Equality Canada,99
 2017,Indian Oil and Gas Canada,88
@@ -762,7 +762,7 @@ year,department,employees
 2018,Public Services and Procurement Canada,13988
 2018,Fisheries and Oceans Canada,11138
 2018,Health Canada,9739
-2018,Royal Canadian Mounted Police (Civilian Staff),7240
+2018,Royal Canadian Mounted Police (RCMP),7240
 2018,"Immigration, Refugees and Citizenship Canada",6993
 2018,Environment and Climate Change Canada,6836
 2018,Global Affairs Canada,6354
@@ -820,7 +820,7 @@ year,department,employees
 2018,Transportation Safety Board of Canada,210
 2018,Canadian Human Rights Commission,206
 2018,Office of the Commissioner of Official Languages,164
-2018,Office of the Governor General's Secretary,148
+2018,Office of the Secretary to the Governor General,148
 2018,Women and Gender Equality Canada,121
 2018,Financial Consumer Agency of Canada,115
 2018,Indian Oil and Gas Canada,88
@@ -850,7 +850,7 @@ year,department,employees
 2019,Fisheries and Oceans Canada,11911
 2019,Health Canada,10794
 2019,"Immigration, Refugees and Citizenship Canada",7864
-2019,Royal Canadian Mounted Police (Civilian Staff),7564
+2019,Royal Canadian Mounted Police (RCMP),7564
 2019,Environment and Climate Change Canada,7276
 2019,Global Affairs Canada,6561
 2019,Shared Services Canada,6528
@@ -908,7 +908,7 @@ year,department,employees
 2019,Canadian Human Rights Commission,199
 2019,Women and Gender Equality Canada,181
 2019,Office of the Commissioner of Official Languages,174
-2019,Office of the Governor General's Secretary,148
+2019,Office of the Secretary to the Governor General,148
 2019,Financial Consumer Agency of Canada,128
 2019,Indian Oil and Gas Canada,87
 2019,Veterans Review and Appeal Board,79
@@ -938,7 +938,7 @@ year,department,employees
 2020,Fisheries and Oceans Canada,12654
 2020,Health Canada,11223
 2020,"Immigration, Refugees and Citizenship Canada",8496
-2020,Royal Canadian Mounted Police (Civilian Staff),8022
+2020,Royal Canadian Mounted Police (RCMP),8022
 2020,Environment and Climate Change Canada,7550
 2020,Shared Services Canada,7185
 2020,Global Affairs Canada,6860
@@ -996,7 +996,7 @@ year,department,employees
 2020,Registrar of the Supreme Court of Canada,237
 2020,Transportation Safety Board of Canada,225
 2020,Office of the Commissioner of Official Languages,173
-2020,Office of the Governor General's Secretary,167
+2020,Office of the Secretary to the Governor General,167
 2020,Financial Consumer Agency of Canada,147
 2020,Canadian Northern Economic Development Agency,99
 2020,Indian Oil and Gas Canada,88
@@ -1026,7 +1026,7 @@ year,department,employees
 2021,Fisheries and Oceans Canada,13526
 2021,Health Canada,9204
 2021,"Immigration, Refugees and Citizenship Canada",8991
-2021,Royal Canadian Mounted Police (Civilian Staff),8436
+2021,Royal Canadian Mounted Police (RCMP),8436
 2021,Environment and Climate Change Canada,7616
 2021,Shared Services Canada,7553
 2021,Global Affairs Canada,6994
@@ -1086,13 +1086,13 @@ year,department,employees
 2021,Transportation Safety Board of Canada,231
 2021,Office of the Commissioner of Official Languages,177
 2021,Financial Consumer Agency of Canada,161
-2021,Office of the Governor General's Secretary,158
+2021,Office of the Secretary to the Governor General,158
 2021,Canadian Northern Economic Development Agency,109
 2021,Veterans Review and Appeal Board,93
 2021,Indian Oil and Gas Canada,88
 2021,Patented Medicine Prices Review Board Canada,79
 2021,Civilian Review and Complaints Commission for the RCMP,77
-2021,National Security Intelligence and Review Agency,73
+2021,National Security and Intelligence Review Agency,73
 2021,Office of the Commissioner for Federal Judicial Affairs Canada,72
 2021,Canadian Dairy Commission,71
 2021,Polar Knowledge Canada,69
@@ -1116,7 +1116,7 @@ year,department,employees
 2022,Fisheries and Oceans Canada,13537
 2022,"Immigration, Refugees and Citizenship Canada",10248
 2022,Health Canada,9886
-2022,Royal Canadian Mounted Police (Civilian Staff),8690
+2022,Royal Canadian Mounted Police (RCMP),8690
 2022,Shared Services Canada,7948
 2022,Environment and Climate Change Canada,7840
 2022,Global Affairs Canada,7112
@@ -1176,7 +1176,7 @@ year,department,employees
 2022,Registrar of the Supreme Court of Canada,221
 2022,Financial Consumer Agency of Canada,196
 2022,Office of the Commissioner of Official Languages,178
-2022,Office of the Governor General's Secretary,177
+2022,Office of the Secretary to the Governor General,177
 2022,Canadian Northern Economic Development Agency,113
 2022,Veterans Review and Appeal Board,97
 2022,Indian Oil and Gas Canada,85
@@ -1185,7 +1185,7 @@ year,department,employees
 2022,Polar Knowledge Canada,75
 2022,Canadian Dairy Commission,70
 2022,Office of the Commissioner for Federal Judicial Affairs Canada,68
-2022,National Security Intelligence and Review Agency,67
+2022,National Security and Intelligence Review Agency,67
 2022,Accessibility Standards Canada,44
 2022,Military Grievances External Review Committee,44
 2022,The Correctional Investigator Canada,37
@@ -1207,7 +1207,7 @@ year,department,employees
 2023,Fisheries and Oceans Canada,14526
 2023,"Immigration, Refugees and Citizenship Canada",12258
 2023,Health Canada,10003
-2023,Royal Canadian Mounted Police (Civilian Staff),9386
+2023,Royal Canadian Mounted Police (RCMP),9386
 2023,Shared Services Canada,8879
 2023,Environment and Climate Change Canada,8411
 2023,Indigenous Services Canada,7722
@@ -1266,12 +1266,12 @@ year,department,employees
 2023,Registrar of the Supreme Court of Canada,248
 2023,Financial Consumer Agency of Canada,216
 2023,Transportation Safety Board of Canada,209
-2023,Office of the Governor General's Secretary,184
+2023,Office of the Secretary to the Governor General,184
 2023,Office of the Commissioner of Official Languages,167
 2023,Veterans Review and Appeal Board,113
 2023,Canadian Northern Economic Development Agency,111
 2023,Civilian Review and Complaints Commission for the RCMP,92
-2023,National Security Intelligence and Review Agency,92
+2023,National Security and Intelligence Review Agency,92
 2023,Polar Knowledge Canada,89
 2023,Patented Medicine Prices Review Board Canada,83
 2023,Indian Oil and Gas Canada,75
@@ -1297,7 +1297,7 @@ year,department,employees
 2024,Canada Border Services Agency,17226
 2024,Fisheries and Oceans Canada,14716
 2024,"Immigration, Refugees and Citizenship Canada",13092
-2024,Royal Canadian Mounted Police (Civilian Staff),10309
+2024,Royal Canadian Mounted Police (RCMP),10309
 2024,Health Canada,10187
 2024,Shared Services Canada,9502
 2024,Environment and Climate Change Canada,8901
@@ -1357,12 +1357,12 @@ year,department,employees
 2024,Financial Consumer Agency of Canada,231
 2024,Transportation Safety Board of Canada,218
 2024,Office of the Commissioner of Official Languages,178
-2024,Office of the Governor General's Secretary,172
+2024,Office of the Secretary to the Governor General,172
 2024,Veterans Review and Appeal Board,161
 2024,Canadian Northern Economic Development Agency,115
 2024,Civilian Review and Complaints Commission for the RCMP,107
 2024,Federal Economic Development Agency for Northern Ontario,89
-2024,National Security Intelligence and Review Agency,85
+2024,National Security and Intelligence Review Agency,85
 2024,Polar Knowledge Canada,82
 2024,Patented Medicine Prices Review Board Canada,81
 2024,Indian Oil and Gas Canada,79
@@ -1389,7 +1389,7 @@ year,department,employees
 2025,Correctional Service Canada,18902
 2025,Canada Border Services Agency,17234
 2025,Fisheries and Oceans Canada,14451
-2025,Royal Canadian Mounted Police,11220
+2025,Royal Canadian Mounted Police (RCMP),11220
 2025,"Immigration, Refugees and Citizenship Canada",11148
 2025,Health Canada,9628
 2025,Shared Services Canada,8894
@@ -1451,12 +1451,12 @@ year,department,employees
 2025,Transportation Safety Board of Canada,230
 2025,Veterans Review and Appeal Board,178
 2025,Office of the Commissioner of Official Languages,170
-2025,Office of the Governor General's Secretary,163
+2025,Office of the Secretary to the Governor General,163
 2025,Canadian Northern Economic Development Agency,123
 2025,Federal Economic Development Agency for Northern Ontario,103
 2025,Civilian Review and Complaints Commission for the RCMP,96
 2025,Polar Knowledge Canada,92
-2025,National Security Intelligence and Review Agency,89
+2025,National Security and Intelligence Review Agency,89
 2025,Indian Oil and Gas Canada,87
 2025,Canadian Dairy Commission,85
 2025,Patented Medicine Prices Review Board Canada,80
@@ -1475,3 +1475,96 @@ year,department,employees
 2025,Law Commission of Canada,6
 2025,Office of the Intelligence Commissioner,4
 2025,Statistical Survey Operations,4
+2026,Canada Revenue Agency,48774
+2026,Employment and Social Development Canada,35540
+2026,National Defence,31838
+2026,Correctional Service Canada,18846
+2026,Public Services and Procurement Canada,18057
+2026,Canada Border Services Agency,16759
+2026,Fisheries and Oceans Canada,13868
+2026,Royal Canadian Mounted Police (RCMP),11218
+2026,"Immigration, Refugees and Citizenship Canada",10848
+2026,Health Canada,9056
+2026,Shared Services Canada,8624
+2026,Environment and Climate Change Canada,8185
+2026,Indigenous Services Canada,7992
+2026,Global Affairs Canada,7532
+2026,Statistics Canada,7371
+2026,Transport Canada,6299
+2026,Canadian Food Inspection Agency,6207
+2026,"Innovation, Science and Economic Development Canada",6200
+2026,Natural Resources Canada,5626
+2026,Agriculture and Agri-Food Canada,5485
+2026,Department of Justice Canada,5188
+2026,Parks Canada,4773
+2026,National Research Council Canada,4614
+2026,Communications Security Establishment,4029
+2026,Veterans Affairs Canada,3549
+2026,Public Health Agency of Canada,2877
+2026,Immigration and Refugee Board of Canada,2436
+2026,Treasury Board of Canada Secretariat,2162
+2026,Canadian Heritage,1846
+2026,Crown-Indigenous Relations and Northern Affairs Canada,1715
+2026,Public Safety Canada,1709
+2026,"Housing, Infrastructure and Communities Canada",1672
+2026,Elections Canada,1612
+2026,Federal Judges not part of any department,1209
+2026,Office of the Superintendent of Financial Institutions Canada,1191
+2026,Privy Council Office,1121
+2026,Public Prosecution Service of Canada,1103
+2026,Canadian Space Agency,1060
+2026,Canadian Nuclear Safety Commission,1044
+2026,Library and Archives Canada,1026
+2026,Department of Finance Canada,919
+2026,Courts Administration Service,826
+2026,Public Service Commission of Canada,740
+2026,Canadian Radio-television and Telecommunications Commission,728
+2026,Office of the Auditor General of Canada,718
+2026,Administrative Tribunals Support Service of Canada,632
+2026,Canada School of Public Service,598
+2026,Canada Energy Regulator,592
+2026,Natural Sciences and Engineering Research Canada,583
+2026,Atlantic Canada Opportunities Agency,558
+2026,Impact Assessment Agency of Canada,557
+2026,Financial Transactions and Reports Analysis Centre of Canada,508
+2026,Western Economic Diversification Canada,494
+2026,Parole Board of Canada,487
+2026,Canadian Institutes of Health Research,481
+2026,Canadian Grain Commission,473
+2026,Social Sciences and Humanities Research Council of Canada,383
+2026,Women and Gender Equality Canada,365
+2026,Canadian Transportation Agency,358
+2026,National Film Board,357
+2026,Canada Economic Development for Quebec Regions,349
+2026,Offices of the Information and Privacy Commissioners of Canada,335
+2026,Canadian Human Rights Commission,276
+2026,Financial Consumer Agency of Canada,258
+2026,Registrar of the Supreme Court of Canada,252
+2026,Federal Economic Development Agency for Southern Ontario,246
+2026,Transportation Safety Board of Canada,227
+2026,Office of the Commissioner of Official Languages,185
+2026,Office of the Secretary to the Governor General,170
+2026,Veterans Review and Appeal Board,162
+2026,Canadian Northern Economic Development Agency,123
+2026,Federal Economic Development Agency for Northern Ontario,109
+2026,Civilian Review and Complaints Commission for the RCMP,94
+2026,Indian Oil and Gas Canada,86
+2026,Canadian Dairy Commission,84
+2026,National Security and Intelligence Review Agency,81
+2026,Patented Medicine Prices Review Board Canada,78
+2026,Polar Knowledge Canada,78
+2026,Office of the Commissioner for Federal Judicial Affairs Canada,72
+2026,Accessibility Standards Canada,56
+2026,Military Grievances External Review Committee,52
+2026,Office of the Public Sector Integrity Commissioner of Canada,41
+2026,The Correctional Investigator Canada,40
+2026,Canadian Intergovernmental Conference Secretariat,37
+2026,International Joint Commission,32
+2026,Office of the Commissioner of Lobbying of Canada,32
+2026,Military Police Complaints Commission of Canada,31
+2026,Copyright Board Canada,23
+2026,RCMP External Review Committee,22
+2026,Law Commission of Canada,13
+2026,Secretariat of the National Security and Intelligence Committee of Parliamentarians,12
+2026,Office of the Intelligence Commissioner,4
+2026,Statistical Survey Operations,4

@@ -4,7 +4,7 @@
   "source_table": "elections.ca turnout table",
   "frequency": "per election",
   "unit": "% of registered electors",
-  "retrieved_at": "2026-06-19T18:48:44.455129+00:00",
+  "retrieved_at": "2026-06-22T18:15:28.130711+00:00",
   "latest_observation_date": "2025",
   "transformations": [
     "general elections only (1898/1942/1992 referendums dropped)"

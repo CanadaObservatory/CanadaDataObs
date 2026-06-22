@@ -83,9 +83,9 @@ def _cpi_card_svg(window):
     """Build the 1080x1080 CPI card SVG from a tidy [date, yoy] window."""
     W = H = 1080
     x0, x1 = 150, 1010
-    ctop, cbot = 300, 900
+    ctop, cbot = 240, 900   # chart pulled up to tighten the gap under the header
     vals = window["yoy"].tolist()
-    maxv = max(4.0, math.ceil(max(vals) * 2) / 2 + 0.5)
+    maxv = max(3.0, max(vals) + 0.6)   # modest headroom above the tallest bar for its label
 
     def y(v):
         return cbot - (v / maxv) * (cbot - ctop)
@@ -108,11 +108,9 @@ def _cpi_card_svg(window):
                      f'stroke="{NAVY}" stroke-width="1.4" opacity="0.22" stroke-dasharray="7 7"/>')
     parts.append(f'<line x1="{x0}" y1="{y(2):.1f}" x2="{x1}" y2="{y(2):.1f}" '
                  f'stroke="#555" stroke-width="1.6" opacity="0.55" stroke-dasharray="5 7"/>')
-    # band caption sits in the clear area just above the band (bars rarely exceed 3%)
-    parts.append(_txt(x0 + 6, y(3) - 18, 24, SLATE, "Bank of Canada 1–3% target band"))
 
-    # y-axis % labels
-    tick = 2 if maxv <= 6 else 4
+    # y-axis % labels (the band + dashed line carry the target; no text label needed)
+    tick = 1 if maxv <= 5 else 2
     v = 0
     while v <= maxv + 0.01:
         parts.append(_txt(x0 - 18, y(v) + 9, 24, SLATE, f"{v:g}%", anchor="end"))

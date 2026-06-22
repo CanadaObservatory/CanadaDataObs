@@ -24,8 +24,10 @@ and Hudson Bay; and the worn **Appalachian** uplands of the east. The map below 
 view of that terrain — pan and zoom to follow a valley or a coastline. Scattered across it are
 Canada's **named summits**, each coloured by its elevation; hover for a name and height, and zoom in
 to see the labels of the highest peak in each province and territory. The layer controls (top-right)
-add optional context — cities, lakes and rivers, the **ecozones**, the **permafrost** zones, and the
-**Arctic tree line** (the northern limit of the forest, where the taiga gives way to tundra).
+add optional context — cities, lakes and rivers, two landmark southern-Ontario ridges (the
+**Niagara Escarpment** and the **Oak Ridges Moraine**, north of Toronto — zoom in for their labels),
+the **ecozones**, the **permafrost** zones, and the **Arctic tree line** (the northern limit of the
+forest, where the taiga gives way to tundra).
 
 ```{python}
 #| echo: false
@@ -46,6 +48,7 @@ _data = {
     "ecozones": _load("data/geo/nef_ecozones.geojson"),
     "treeline": _load("data/geo/treeline.geojson"),
     "permafrost": _load("data/geo/permafrost_zones.geojson"),
+    "landforms": _load("data/geo/landforms.geojson"),
     "cities": [{"name": c[0], "lat": c[1], "lon": c[2]} for c in MAJOR_CITIES],
 }
 print('<script>window.ELEV = ' + json.dumps(_data, separators=(",", ":")) + ';</script>')
@@ -64,6 +67,8 @@ print('<script>window.ELEV = ' + json.dumps(_data, separators=(",", ":")) + ';</
   font-size:11px;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;}
 .city-label{background:transparent;border:0;box-shadow:none;color:#111;font-size:11px;
   text-shadow:0 0 3px #fff,0 0 3px #fff;}
+.lf-label{background:transparent;border:0;box-shadow:none;color:#5a3a1a;font-weight:700;
+  font-size:12px;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;}
 .cat-legend{font-size:11px;line-height:1.5;max-width:330px;}
 .cat-legend>div{column-gap:14px;}
 .cat-legend i{width:11px;height:11px;}
@@ -157,6 +162,14 @@ boundary): AAFC/ECCC National Ecological Framework. Permafrost (~1995 mapping): 
   var pfLayer=L.geoJSON(E.permafrost,{pane:'ecoPane',
     style:function(f){return {fillColor:PFCOLORS[f.properties.zone]||'#ccc',color:'#5a7a9a',weight:0.3,fillOpacity:0.5};},
     onEachFeature:function(f,l){l.bindTooltip('Permafrost: '+f.properties.zone,{sticky:true});}});
+  // notable southern-Ontario landforms (review §437): the Niagara Escarpment and the Oak
+  // Ridges Moraine (the large ridge north of Toronto) — dashed outlines; labels at z>=6.
+  var LFCOLORS={"Niagara Escarpment":"#8a5a2b","Oak Ridges Moraine":"#6a8d3a"};
+  var landformLayer=L.geoJSON(E.landforms,{style:function(f){return {color:LFCOLORS[f.properties.name]||'#555',weight:2.2,fill:false,opacity:0.95,dashArray:'5,3'};},
+    onEachFeature:function(f,l){l.bindTooltip(f.properties.name,{sticky:true});}});
+  var landformLabels=L.layerGroup();
+  [["Niagara Escarpment",44.30,-80.30],["Oak Ridges Moraine",44.05,-79.20]].forEach(function(a){
+    L.marker([a[1],a[2]],{icon:L.divIcon({className:'lf-label',html:a[0],iconSize:[150,16],iconAnchor:[-5,8]}),interactive:false,keyboard:false}).addTo(landformLabels);});
   // categorical legends shown only while their layer is on
   function catLegend(title,colorMap,order,cols){
     var c=L.control({position:'topleft'});
@@ -178,14 +191,17 @@ boundary): AAFC/ECCC National Ecological Framework. Permafrost (~1995 mapping): 
   map.on('overlayadd',function(e){
     if(e.layer===ecoLayer){ecoLegend.addTo(map); if(map.hasLayer(pfLayer))setTimeout(function(){uncheckLayer('Permafrost');},0);}
     if(e.layer===pfLayer){pfLegend.addTo(map); if(map.hasLayer(ecoLayer))setTimeout(function(){uncheckLayer('Ecozones');},0);}
+    if(e.layer===landformLayer)syncLabels();
   });
-  map.on('overlayremove',function(e){if(e.layer===ecoLayer)map.removeControl(ecoLegend);if(e.layer===pfLayer)map.removeControl(pfLegend);});
-  provLayer.addTo(map); hydro.addTo(map); cityLayer.addTo(map); peakLayer.addTo(map);
+  map.on('overlayremove',function(e){if(e.layer===ecoLayer)map.removeControl(ecoLegend);if(e.layer===pfLayer)map.removeControl(pfLegend);if(e.layer===landformLayer&&map.hasLayer(landformLabels))map.removeLayer(landformLabels);});
+  provLayer.addTo(map); hydro.addTo(map); cityLayer.addTo(map); peakLayer.addTo(map); landformLayer.addTo(map);
   function syncLabels(){var z=map.getZoom();
-    if(z>=5){if(!map.hasLayer(peakLabels))peakLabels.addTo(map);}else{if(map.hasLayer(peakLabels))map.removeLayer(peakLabels);}}
+    if(z>=5){if(!map.hasLayer(peakLabels))peakLabels.addTo(map);}else{if(map.hasLayer(peakLabels))map.removeLayer(peakLabels);}
+    if(z>=6&&map.hasLayer(landformLayer)){if(!map.hasLayer(landformLabels))landformLabels.addTo(map);}else{if(map.hasLayer(landformLabels))map.removeLayer(landformLabels);}}
   map.on('zoomend',syncLabels); syncLabels();
   L.control.layers(null,{'Peaks':peakLayer,'Cities':cityLayer,'Lakes &amp; rivers':hydro,
-    'Province borders':provLayer,'Ecozones':ecoLayer,'Permafrost':pfLayer,'Tree line':treeLayer},
+    'Province borders':provLayer,'Escarpment &amp; moraine':landformLayer,'Ecozones':ecoLayer,
+    'Permafrost':pfLayer,'Tree line':treeLayer},
     {collapsed:false,position:'topright'}).addTo(map);
   var lg=L.control({position:'bottomleft'});
   lg.onAdd=function(){var d=L.DomUtil.create('div','elev-legend');

@@ -4,11 +4,11 @@
   "source_table": "18-10-0004-01",
   "frequency": "monthly",
   "unit": "index (2002=100)",
-  "retrieved_at": "2026-06-19T16:28:28.404378+00:00",
-  "latest_observation_date": "2026-04-01",
+  "retrieved_at": "2026-06-22T14:42:36.550270+00:00",
+  "latest_observation_date": "2026-05-01",
   "transformations": [
     "filtered to the 8 major CPI components + All-items, Canada only"
   ],
   "notes": null,
-  "row_count": 8060
+  "row_count": 8069
 }

@@ -36,7 +36,7 @@ try:
     colors = []
     for v in cpi["inflation_yoy"]:
         if v > 3:
-            colors.append(CANADA_COLOR)
+            colors.append("#C0392B")   # above target: alert red (a valence, NOT the Canada-entity maroon)
         elif v < 1:
             colors.append("#1f77b4")
         else:

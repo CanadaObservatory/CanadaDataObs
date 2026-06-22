@@ -284,12 +284,20 @@ exe_path = "data/government/infobase_fps_executive.csv"
 if os.path.exists(exe_path):
     df = pd.read_csv(exe_path)
     piv = df.pivot_table(index="year", columns="category", values="employees").reset_index()
-    piv["share"] = piv["Executive"] / (piv["Executive"] + piv["Non-executive"]) * 100
+    piv["total"] = piv["Executive"] + piv["Non-executive"]
+    piv["share"] = piv["Executive"] / piv["total"] * 100
     piv["date"] = pd.to_datetime(piv["year"], format="%Y")
     fig = single_line(piv, "date", "share", title="",
         yaxis_title="Executives (% of employees)",
-        hovertemplate="%{y:.2f}% executives<extra></extra>",
+        customdata=piv[["Executive", "total"]].to_numpy(),
+        hovertemplate="%{x|%Y}: %{y:.2f}% — %{customdata[0]:,.0f} executives of %{customdata[1]:,.0f} employees<extra></extra>",
         source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase), employee population by executive level | Data as of: {get_data_date(exe_path)}")
+    # surface the actual executive headcount (review §314), latest year, computed
+    last = piv.dropna(subset=["Executive"]).iloc[-1]
+    fig.add_annotation(x=last["date"], y=last["share"],
+        text=f"{int(last['Executive']):,} executives<br>({int(last['year'])})",
+        showarrow=True, arrowhead=2, ax=-55, ay=-22,
+        font=dict(size=10, color="#777"), arrowcolor="#999")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")

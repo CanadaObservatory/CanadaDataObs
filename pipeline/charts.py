@@ -1895,31 +1895,45 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
     return fig
 
 
-def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
-                geography="Canada", geo_col="geography", source_note=None, height=460):
-    """Diverging horizontal bars of each group's change in <value_col> between two years
-    for one geography — the 'scale of change' view that quantifies what the long-run line
-    chart shows. Bars are coloured by group (same palette as the lines), diverge around
-    zero, and are sorted by signed change (largest decline at the bottom, largest gain at
-    the top); each y-label carries the group's start→end values."""
+def change_bars(df, *, group_colors, year_end, year_start=None, year_starts=None,
+                value_col="share", geography="Canada", geo_col="geography",
+                source_note=None, height=460):
+    """Diverging horizontal bars of each group's change in <value_col> between a baseline
+    year and `year_end` for one geography — the 'scale of change' view that quantifies
+    what the long-run line chart shows. Bars are coloured by group (same palette as the
+    lines), diverge around zero, and are sorted by signed change (largest decline at the
+    bottom, largest gain at the top); each y-label carries the group's start→end values.
+
+    Pass `year_start` for a single fixed baseline, or `year_starts` (a list) to add a
+    baseline-year dropdown (each option recomputes the bars + x-axis title/range);
+    `year_start` then selects the default option."""
     d = df[df[geo_col] == geography].copy()
     d["year"] = d["year"].astype(int)
-    rows = []
-    for g in group_colors:                       # palette order; skip groups absent in either year
-        sub = d[d["group"] == g]
-        s0, s1 = sub[sub["year"] == year_start][value_col], sub[sub["year"] == year_end][value_col]
-        if len(s0) and len(s1):
-            a, b = float(s0.iloc[0]), float(s1.iloc[0])
-            rows.append((g, a, b, b - a))
-    rows.sort(key=lambda r: r[3])                 # ascending → most-negative first (bottom)
-    deltas = [round(r[3], 1) for r in rows]        # round for display (avoids float noise like 4.4799…)
-    labels = [f"{g}<br>{a:.0f}% → {b:.0f}%" for g, a, b, _ in rows]
+
+    def _compute(ys):
+        rows = []
+        for g in group_colors:                   # palette order; skip groups absent in either year
+            sub = d[d["group"] == g]
+            s0 = sub[sub["year"] == ys][value_col]
+            s1 = sub[sub["year"] == year_end][value_col]
+            if len(s0) and len(s1):
+                a, b = float(s0.iloc[0]), float(s1.iloc[0])
+                rows.append((g, a, b, b - a))
+        rows.sort(key=lambda r: r[3])             # ascending → most-negative first (bottom)
+        deltas = [round(r[3], 1) for r in rows]    # round for display (avoids float noise)
+        labels = [f"{g}<br>{a:.0f}% → {b:.0f}%" for g, a, b, _ in rows]
+        colors = [group_colors.get(g, "#888") for g, *_ in rows]
+        text = [f"{dl:+.1f} pp" for dl in deltas]
+        pad = (max(abs(min(deltas)), abs(max(deltas))) * 0.15) if deltas else 1.0
+        return deltas, labels, colors, text, [min(deltas) - pad, max(deltas) + pad]
+
+    starts = year_starts or [year_start]
+    default_start = year_start if year_start in starts else starts[0]
+    has_menu = bool(year_starts) and len(year_starts) > 1
+    d0, l0, c0, t0, r0 = _compute(default_start)
     fig = go.Figure(go.Bar(
-        x=deltas, y=labels, orientation="h",
-        marker_color=[group_colors.get(g, "#888") for g, *_ in rows],
-        text=[f"{dl:+.1f} pp" for dl in deltas], textposition="auto",
-        cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
-    pad = max(abs(min(deltas)), abs(max(deltas))) * 0.15
+        x=d0, y=l0, orientation="h", marker_color=c0,
+        text=t0, textposition="auto", cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
     # Source note hangs below the plot (yanchor=top); size the bottom margin to the
     # wrapped line count (+1 for the brand line the show() interceptor appends) so it
     # clears the x-axis title and never clips.
@@ -1928,17 +1942,29 @@ def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
         b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
     else:
         b_margin = 70
+    t_margin = 56 if has_menu else 20
     fig.update_layout(
         plot_bgcolor="white", height=height, showlegend=False,
-        xaxis=dict(title=f"Change in share, {year_start}→{year_end} (percentage points)",
+        xaxis=dict(title=f"Change in share, {default_start}→{year_end} (percentage points)",
                    gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5,
-                   range=[min(deltas) - pad, max(deltas) + pad]),
-        yaxis=dict(gridcolor="white"),
-        margin=dict(l=160, r=40, t=20, b=b_margin),
+                   range=r0),
+        yaxis=dict(gridcolor="white", categoryorder="array", categoryarray=l0),
+        margin=dict(l=160, r=40, t=t_margin, b=b_margin),
     )
+    if has_menu:
+        buttons = []
+        for ys in year_starts:
+            dd, ll, cc, tt, rr = _compute(ys)
+            buttons.append(dict(label=str(ys), method="update",
+                args=[{"x": [dd], "y": [ll], "text": [tt], "marker.color": [cc]},
+                      {"xaxis.title.text": f"Change in share, {ys}→{year_end} (percentage points)",
+                       "xaxis.range": rr, "yaxis.categoryarray": ll}]))
+        fig.update_layout(updatemenus=[dict(buttons=buttons, x=0, xanchor="left", y=1.14,
+            yanchor="top", direction="down", showactive=True,
+            active=year_starts.index(default_start))])
     if source_note:
         fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-58 / (height - 20 - b_margin), yanchor="top", align="left",
+                           y=-58 / (height - t_margin - b_margin), yanchor="top", align="left",
                            showarrow=False, font=dict(size=10, color="#999"))
     return fig
 

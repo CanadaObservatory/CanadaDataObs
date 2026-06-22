@@ -1,0 +1,119 @@
+{
+  "_status": "WORKING colour system (2026-06-21). Identities finessed with owner; registers = tonal variants of the SAME hue identity, chosen by context. Not yet wired into config.py.",
+  "_system": {
+    "country_lines": "deep-muted (CVD-safe, focal-7 min 16.8/15.2)",
+    "province_lines": "BOTH kept \u2014 muted (most distinct, dense charts) + deep (moody/unified). Same hue identity, register by context.",
+    "map_fills": "pastel-leaning",
+    "tails": "11 (now 10 + promoted JPN); grey-until-active; calmed + red-reserved",
+    "fixed": "Canada=#7A263A maroon; US=deep blue; OECD avg=#555 dashed reserved"
+  },
+  "countries": {
+    "focal_order": [
+      "CAN",
+      "USA",
+      "AUS",
+      "DEU",
+      "GBR",
+      "SWE",
+      "JPN"
+    ],
+    "muted": {
+      "CAN": "#7A263A",
+      "USA": "#0650A3",
+      "AUS": "#C77109",
+      "DEU": "#5C9D6F",
+      "GBR": "#B06487",
+      "SWE": "#249FD0",
+      "JPN": "#8F4708"
+    },
+    "deep": {
+      "CAN": "#7A263A",
+      "USA": "#034990",
+      "AUS": "#A76728",
+      "DEU": "#50946C",
+      "GBR": "#9F5C7C",
+      "SWE": "#278FC0",
+      "JPN": "#753803"
+    },
+    "tails": {
+      "DNK": "#736F31",
+      "FIN": "#7058BA",
+      "CHE": "#327CE3",
+      "NLD": "#AA8E4B",
+      "NZL": "#206F3E",
+      "NOR": "#AF6E52",
+      "ISR": "#7C4D85",
+      "KOR": "#9F7AB8",
+      "FRA": "#906100",
+      "ITA": "#0F9890"
+    },
+    "_tails_note": "line-optimised wide-lightness set (2026-06-21): normal-vision min 12.3 vs focal & each other; deep/muted/light mix; CVD floor ~6 handled by grey-until-active",
+    "optimised_lines": {
+      "CAN": "#7A263A",
+      "USA": "#0650A3",
+      "AUS": "#C77109",
+      "DEU": "#0B6B2D",
+      "GBR": "#B06487",
+      "SWE": "#249FD0",
+      "JPN": "#753803",
+      "NZL": "#11A876",
+      "ITA": "#006B63",
+      "NLD": "#776500",
+      "ISR": "#F16458",
+      "CHE": "#776EA3",
+      "FIN": "#33A0A0",
+      "DNK": "#708538",
+      "FRA": "#AC4B3E",
+      "NOR": "#AD924A",
+      "KOR": "#3279DF"
+    },
+    "_optimised_note": "CAPSTONE-optimised line set (2026-06-21): global normal-vision min \u0394E 15.7 (USA-KOR); CVD worst-mode min 6.0. Focal: CAN maroon, USA/AUS/GBR/SWE muted, JPN deep, DEU deep-forest. 10 tails globally re-placed (wide lightness). All pairs >=15.7 normal."
+  },
+  "provinces": {
+    "muted": {
+      "ON": "#A0543F",
+      "QC": "#225490",
+      "BC": "#27613F",
+      "AB": "#C0923C",
+      "NS": "#2C7C8E",
+      "NB": "#31A182",
+      "MB": "#788741",
+      "SK": "#6F79C2",
+      "NL": "#8C3A57",
+      "PE": "#EAB196",
+      "YT": "#7C949C",
+      "NT": "#9E92B0",
+      "NU": "#7C5A74"
+    },
+    "deep": {
+      "ON": "#912D20",
+      "QC": "#1E58AA",
+      "BC": "#3F7B56",
+      "AB": "#9E7621",
+      "NS": "#1DA0B5",
+      "NB": "#3EA38B",
+      "MB": "#8D9655",
+      "SK": "#6E92EB",
+      "NL": "#D1798D",
+      "PE": "#A05829",
+      "YT": "#0089A9",
+      "NT": "#62447A",
+      "NU": "#915A89"
+    },
+    "pastel": {
+      "ON": "#FBC0AE",
+      "QC": "#7FB4F8",
+      "BC": "#48B686",
+      "AB": "#E0AC6B",
+      "NS": "#64E1F7",
+      "NB": "#99E1CA",
+      "MB": "#BCDA87",
+      "SK": "#A4ABDD",
+      "NL": "#ED879E",
+      "PE": "#DE8C6D",
+      "YT": "#54ADC1",
+      "NT": "#D4BAE7",
+      "NU": "#D68DC8"
+    }
+  }
+}

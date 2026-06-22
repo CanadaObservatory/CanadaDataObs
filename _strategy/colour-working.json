@@ -1,0 +1,40 @@
+{
+  "_status": "IN-PROGRESS working palette (2026-06-21). Provinces hand-finessed v4 (civic-atlas register). Countries = verified solver output. NOT yet wired into config.py.",
+  "countries": {
+    "_focal_cvd_safe_min_dE": 16.4,
+    "CAN": "#7A263A",
+    "USA": "#0650A3",
+    "AUS": "#C77109",
+    "DEU": "#5C9D6F",
+    "GBR": "#B06487",
+    "SWE": "#249FD0",
+    "_tail_grey_until_active": true,
+    "JPN": "#654CD4",
+    "FRA": "#2377FB",
+    "ITA": "#AB4900",
+    "KOR": "#BF704B",
+    "NLD": "#A5903E",
+    "CHE": "#CC6FC8",
+    "NOR": "#8F548E",
+    "DNK": "#9C7FFB",
+    "FIN": "#269D00",
+    "ISR": "#5E752B",
+    "NZL": "#6669AE"
+  },
+  "provinces_v4": {
+    "_note": "v8: QC -> clearer deeper ocean blue #225490 (QC-NS 15->20). Adjacency-clean; global min NL-NU 12.",
+    "ON": "#A0543F",
+    "QC": "#225490",
+    "BC": "#27613F",
+    "AB": "#C0923C",
+    "NS": "#2C7C8E",
+    "NB": "#31A182",
+    "MB": "#788741",
+    "SK": "#6F79C2",
+    "NL": "#8C3A57",
+    "PE": "#EAB196",
+    "YT": "#7C949C",
+    "NT": "#9E92B0",
+    "NU": "#7C5A74"
+  }
+}

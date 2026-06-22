@@ -12,7 +12,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
 from pipeline.charts import (single_line, single_bar, peer_comparison_line,
-                             ranked_bar, population_pyramid)
+                             ranked_bar, population_pyramid, province_colors)
 ```
 
 ## Canada in the world
@@ -92,12 +92,13 @@ provinces["pop_m"] = provinces["population"] / 1e6
 latest = provinces.groupby("geography")["population"].last().sort_values(ascending=False)
 top_provinces = latest.index.tolist()
 
-# Color palette
-colors = [
-    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-    "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-    "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5",
-]
+# Locked provincial/territorial identity colours (config.PROVINCE_COLORS, muted
+# register) — the same hues used on every other province chart. The pre-1999
+# combined "Northwest Territories including Nunavut" isn't a registry entry, so it
+# inherits the NWT identity (it ends where the separate NT line begins).
+pcolors = province_colors(top_provinces)
+pcolors["Northwest Territories including Nunavut"] = \
+    province_colors(["Northwest Territories"])["Northwest Territories"]
 
 # Shorten the two longest legend labels (Newfoundland wraps to two lines so the full
 # name is kept; the hover still shows each geography's full name).
@@ -107,14 +108,14 @@ LEGEND_NAME = {
 }
 
 fig = go.Figure()
-for i, geo in enumerate(top_provinces):
+for geo in top_provinces:
     subset = provinces[provinces["geography"] == geo]
     fig.add_trace(go.Scatter(
         x=subset["date"],
         y=subset["pop_m"],
         name=LEGEND_NAME.get(geo, geo),
         mode="lines",
-        line=dict(color=colors[i % len(colors)], width=2),
+        line=dict(color=pcolors[geo], width=2),
         hovertemplate=f"<b>{geo}</b><br>%{{x|%Y}} Q%{{customdata}}: %{{y:.2f}} million<extra></extra>",
         customdata=subset["date"].dt.quarter,
     ))

@@ -201,7 +201,7 @@ else:
 
 ## How many years of income a home costs
 
-Dividing the national benchmark price by median after-tax income gives an intuitive affordability gauge: how many years of a typical household's after-tax income it would take to buy the typical home. (The benchmark is deflated to 2024 dollars via CPI so it is comparable with the inflation-adjusted income series.) The ratio has climbed from roughly **5.7× in 2005 to 9.3× in 2024**.
+Dividing the national benchmark price by median after-tax income gives an intuitive affordability gauge: how many years of a typical household's after-tax income it would take to buy the typical home. (The benchmark is deflated to 2024 dollars via CPI so it is comparable with the inflation-adjusted income series.) The ratio has climbed from roughly **5.7× in 2005 to 9.3× in 2024**. Use the selector to switch from the typical home to a specific dwelling type — a detached house now costs more than **10× income**, while an apartment or condo stays under **7×**.
 
 ```{python}
 #| echo: false

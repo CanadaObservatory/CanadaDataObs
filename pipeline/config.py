@@ -76,53 +76,54 @@ PEER_CODES = list(PEER_COUNTRIES.keys())
 # Country to highlight in charts
 HIGHLIGHT_COUNTRY = "CAN"
 
-# Named comparators get their own colour (Canada itself stays red). Every other
-# peer is drawn in light grey. Kept here so the highlighted set is a one-line
-# change. Order in legends is handled in charts.py (alphabetical, these on top).
+# Named comparators ("focal" countries) always shown in colour; every other peer draws
+# light grey until activated. Order in legends handled in charts.py (alphabetical, on top).
+# LOCKED 2026-06-22 — deliberate data-ink palette (rationale: _strategy/colour-system-story.md;
+# values: _strategy/colour-registers.json). Canada = brand maroon (CANADA_COLOR below); Japan
+# PROMOTED to a focal comparator (owner: frequently of interest). Capstone-optimised via max-min
+# CIEDE2000 + Machado deuteranopia/protanopia: global normal-vision min ΔE 15.7, line-legible on
+# white, restrained "civic" register (register chosen per country for distinctness — mostly muted;
+# Japan & Germany deep).
 COMPARATOR_COLORS = {
-    "USA": "#1f77b4",  # blue
-    "AUS": "#ff7f0e",  # orange
-    "DEU": "#2ca02c",  # green
-    "GBR": "#9467bd",  # purple
-    "SWE": "#8c564b",  # brown
+    "USA": "#0650A3",  # deep blue
+    "AUS": "#C77109",  # gold
+    "DEU": "#0B6B2D",  # deep forest green
+    "GBR": "#B06487",  # rose-mauve
+    "SWE": "#249FD0",  # sky blue
+    "JPN": "#753803",  # bronze (promoted to focal comparator, 2026-06-22)
 }
 
-# The other 11 peers each ALSO own a fixed identity colour, but their lines draw
-# grey + legend-hidden until the reader activates one from the legend, then it
-# snaps to this colour (and back to grey when toggled off). The swap is wired
-# site-wide in _includes/peer-legend-colours.html, which reads each grey trace's
-# fixed colour from its Plotly `meta.fixedColor` (stashed by the chart builders).
-# Keeping the default view calm (only Canada + the 5 comparators + average in
-# colour) while giving every country a distinct, CONSISTENT colour the moment it
-# is shown — and because inactive peers are grey, a colour clash can only ever
-# appear between two countries the reader deliberately shows together.
-#
-# Palette = matplotlib tab20: COMPARATOR_COLORS above are its saturated members;
-# these are tab20's remaining saturated hues (cyan/pink/olive) + light tints,
-# each tint sitting in its dark partner's hue family but separated by lightness
-# (Korea light-blue vs USA blue, Finland light-purple vs UK purple, …). The one
-# soft pair is Israel/France (both pink), only visible if both are activated.
+# The other 10 peers each own a fixed identity colour but draw grey + legend-hidden
+# until the reader activates one (then it snaps to this colour; wired site-wide in
+# _includes/peer-legend-colours.html via each grey trace's Plotly `meta.fixedColor`).
+# The default view stays calm (only Canada + the focal comparators + average in colour),
+# yet every country has a distinct, CONSISTENT colour the moment it is shown.
+# LOCKED 2026-06-22 (was matplotlib tab20). Spread across a WIDE lightness range
+# (deep/muted/light) — lightness is the colour-blind-robust separation axis — so each
+# clears the focal six and the others in normal vision (global min ΔE 15.7). Under
+# colour-blindness the worst pair (~ΔE 6) is the irreducible cost of 17 > the ~8–12
+# distinct-colour ceiling; grey-until-active means clashing pairs never co-appear unless
+# the reader deliberately shows both (and the legend labels them).
 PEER_EXTRA_COLORS = {
-    "JPN": "#17becf",  # cyan
-    "FRA": "#e377c2",  # pink
-    "ITA": "#bcbd22",  # olive
-    "KOR": "#aec7e8",  # light blue    (vs USA blue, by lightness)
-    "NLD": "#ffbb78",  # light orange  (vs AUS orange)
-    "CHE": "#98df8a",  # light green   (vs DEU green)
-    "NOR": "#9edae5",  # light cyan    (vs JPN cyan)
-    "DNK": "#ff9896",  # salmon        (vs CAN red — Canada is bold + markers)
-    "FIN": "#c5b0d5",  # light purple  (vs GBR purple)
-    "ISR": "#f7b6d2",  # light pink    (vs FRA pink)
-    "NZL": "#c49c94",  # taupe         (vs SWE brown)
+    "FRA": "#AC4B3E",  # brick red
+    "ITA": "#006B63",  # deep teal
+    "KOR": "#3279DF",  # blue
+    "NLD": "#776500",  # dark olive-gold
+    "CHE": "#776EA3",  # muted periwinkle
+    "NOR": "#AD924A",  # tan / ochre
+    "DNK": "#708538",  # olive green
+    "FIN": "#33A0A0",  # teal
+    "ISR": "#F16458",  # coral
+    "NZL": "#11A876",  # green
 }
 
-# Comparators shown ON LOAD for the peer line charts (owner, 2026-06-18 site review):
-# Canada + US + Australia + Germany + the peer average. The other named comparators
-# (Sweden, UK) keep their colour + top-of-legend rank but start hidden (legendonly),
-# and the 11 grey peers stay hidden too, so a busy 17-line chart opens legible. Global
-# default for peer_comparison_line / _by_age; a chart passes initial_visible=[...] to
-# override (e.g. ["USA"] on fertility, or ["GBR"] where the prose singles out the UK).
-DEFAULT_VISIBLE_COMPARATORS = ["USA", "AUS", "DEU"]
+# Comparators shown ON LOAD for the peer line charts: Canada + US + Australia + Germany
+# + Japan + the peer average (Japan added 2026-06-22 with its promotion to a focal
+# comparator). Sweden + UK keep their colour + top-of-legend rank but start hidden
+# (legendonly), and the 10 grey peers stay hidden too, so a busy 17-line chart opens
+# legible. Global default for peer_comparison_line / _by_age; a chart passes
+# initial_visible=[...] to override (e.g. ["USA"] on fertility).
+DEFAULT_VISIBLE_COMPARATORS = ["USA", "AUS", "DEU", "JPN"]
 
 # --- Statistics Canada Table IDs ---
 STATCAN_TABLES = {
@@ -136,7 +137,9 @@ OECD_MAX_REQUESTS_PER_HOUR = 60
 OECD_REQUEST_DELAY_SECONDS = 2  # Conservative delay between requests
 
 # --- Chart Styling ---
-CANADA_COLOR = "#d62728"  # Red for Canada
+CANADA_COLOR = "#7A263A"  # Brand maroon — Canada the entity, every chart (LOCKED 2026-06-22).
+#                           Retires chart-red #d62728 for the entity; valence reds (e.g. CPI
+#                           above-target bars) stay their own literals in the pages.
 PEER_COLOR = "#bdbdbd"    # Light grey for non-highlighted peers
 OECD_AVG_COLOR = "#555555"  # Dark grey for OECD average (blue is now the US)
 HIGHLIGHT_WIDTH = 3
@@ -148,6 +151,37 @@ PEER_ACTIVE_WIDTH = 2.6  # a grey peer's width once activated from the legend
 # Site attribution appended beneath every chart's source note (see the Figure.show
 # interceptor in charts.py). Change here to update it everywhere.
 BRAND = "Canada Observatory"
+
+# --- Provincial / territorial identity colours (LOCKED 2026-06-22) ---
+# Fixed identity per province, to replace cycling SERIES_PALETTE on provincial charts.
+# THREE tonal registers of the SAME hue identity, chosen by medium: MUTED = default for
+# LINES (most distinct), DEEP = a moodier/unified line option, PASTEL = large MAP fills.
+# Mutually distinct in normal vision + adjacency-clean on the map; province colour is
+# label/shape-supported (named regions on maps, dropdown on charts). Keyed by the StatCan
+# 2-letter code (PROVINCE_NAMES = the labels charts use). Wiring each province chart to
+# pass the chosen register to the builders is the remaining step — see
+# _strategy/colour-system-story.md.
+PROVINCE_NAMES = {
+    "ON": "Ontario", "QC": "Quebec", "BC": "British Columbia", "AB": "Alberta",
+    "NS": "Nova Scotia", "NB": "New Brunswick", "MB": "Manitoba", "SK": "Saskatchewan",
+    "NL": "Newfoundland and Labrador", "PE": "Prince Edward Island",
+    "YT": "Yukon", "NT": "Northwest Territories", "NU": "Nunavut",
+}
+PROVINCE_COLORS = {  # MUTED — default register for province LINES
+    "ON": "#A0543F", "QC": "#225490", "BC": "#27613F", "AB": "#C0923C", "NS": "#2C7C8E",
+    "NB": "#31A182", "MB": "#788741", "SK": "#6F79C2", "NL": "#8C3A57", "PE": "#EAB196",
+    "YT": "#7C949C", "NT": "#9E92B0", "NU": "#7C5A74",
+}
+PROVINCE_COLORS_DEEP = {  # moodier / unified line register
+    "ON": "#912D20", "QC": "#1E58AA", "BC": "#3F7B56", "AB": "#9E7621", "NS": "#1DA0B5",
+    "NB": "#3EA38B", "MB": "#8D9655", "SK": "#6E92EB", "NL": "#D1798D", "PE": "#A05829",
+    "YT": "#0089A9", "NT": "#62447A", "NU": "#915A89",
+}
+PROVINCE_COLORS_PASTEL = {  # large MAP fills
+    "ON": "#FBC0AE", "QC": "#7FB4F8", "BC": "#48B686", "AB": "#E0AC6B", "NS": "#64E1F7",
+    "NB": "#99E1CA", "MB": "#BCDA87", "SK": "#A4ABDD", "NL": "#ED879E", "PE": "#DE8C6D",
+    "YT": "#54ADC1", "NT": "#D4BAE7", "NU": "#D68DC8",
+}
 
 
 # ============================================================================

@@ -337,17 +337,30 @@ Netherlands, Sweden, Switzerland, Norway, Denmark, Finland, Israel, New Zealand.
 (Dropped 2026-05: Belgium & Austria as redundant; Ireland because multinational
 accounting distorts its GDP/productivity figures.)
 
-Canada is always red. A named **comparator set** gets distinct colours
-(`COMPARATOR_COLORS`): US blue, Australia orange, Germany green, UK purple, Sweden
-brown. The peer average is dark-grey dashed. Changing the highlighted set or peer
-list is a one-line edit in config.py. **The other 11 peers are NOT permanently grey
-(2026-06-12): each owns a fixed identity colour too (`PEER_EXTRA_COLORS`, tab20-based
-— cyan/pink/olive + 8 light tints), but their lines DRAW grey + legend-hidden until
-the reader activates one from the legend, then it snaps to its colour (and back to
-grey when toggled off).** So the default view stays calm (only Canada + the 5
-comparators + average in colour) yet every country has a distinct, CONSISTENT colour
-the instant it is shown — and because inactive peers are grey, a colour clash can
-only appear between two countries the reader deliberately shows together. The swap is
+Canada is always **brand maroon `#7A263A`** (LOCKED 2026-06-22 — replaced chart-red
+`#d62728` for the *entity*; valence reds like the CPI above-target bars stay their own
+literals in the pages). A **focal comparator set** gets distinct colours
+(`COMPARATOR_COLORS`): US deep-blue, Australia gold, Germany deep-forest, UK rose-mauve,
+Sweden sky-blue, and **Japan bronze (promoted to a focal comparator 2026-06-22 — owner:
+frequently of interest)**. The peer average is dark-grey dashed. **The other 10 peers**
+each own a fixed identity colour (`PEER_EXTRA_COLORS`) but DRAW grey + legend-hidden
+until the reader activates one, then it snaps to its colour. So the default view stays
+calm (only Canada + the focal comparators + average in colour) yet every country has a
+distinct, CONSISTENT colour the instant it is shown — and because inactive peers are
+grey, a clash can only appear between two countries the reader deliberately co-shows.
+**The whole 17-country set was redesigned 2026-06-21→22 as a deliberate data-ink palette**
+(separate from the brand *chrome* palette): a deterministic max-min search over CIEDE2000
++ Machado deuteranopia/protanopia, achieving **global normal-vision min ΔE 15.7**,
+line-legible on white, in a restrained "civic" register (mostly muted; Japan/Germany
+deep), with the tails spread across a wide lightness range (lightness = the
+colour-blind-robust separation axis). 17 > the ~8–12 distinct-colour ceiling, so the
+worst colour-blind pair (~ΔE 6) is irreducible — handled by grey-until-active. Rationale +
+full journey: **`_strategy/colour-system-story.md`**; locked values + province registers:
+**`_strategy/colour-registers.json`**; background research: `colour-theory-overview.md`.
+**Provinces/territories** now have fixed identities too (`PROVINCE_COLORS` muted /
+`PROVINCE_COLORS_DEEP` / `PROVINCE_COLORS_PASTEL` registers in config.py — same hue
+identity, register chosen by medium); wiring them into the province charts (replacing the
+cycled `SERIES_PALETTE`) is the remaining step. The swap is
 wired site-wide in **`_includes/peer-legend-colours.html`** (`include-after-body`),
 which reads each grey trace's colour from its Plotly `meta.fixedColor` (stashed by the
 chart builders) and toggles it on `plotly_legendclick`; it resolves Plotly via

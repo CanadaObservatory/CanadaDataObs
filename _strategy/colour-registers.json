@@ -1,5 +1,5 @@
 {
-  "_status": "WORKING colour system (2026-06-21). Identities finessed with owner; registers = tonal variants of the SAME hue identity, chosen by context. Not yet wired into config.py.",
+  "_status": "LOCKED 2026-06-22. COUNTRIES wired into pipeline/config.py (COMPARATOR_COLORS incl Japan, PEER_EXTRA_COLORS, CANADA_COLOR=maroon, DEFAULT_VISIBLE_COMPARATORS+JPN). Province MUTED/DEEP/PASTEL added to config.py as constants; per-chart province wiring pending. Rationale: _strategy/colour-system-story.md.",
   "_system": {
     "country_lines": "deep-muted (CVD-safe, focal-7 min 16.8/15.2)",
     "province_lines": "BOTH kept \u2014 muted (most distinct, dense charts) + deep (moody/unified). Same hue identity, register by context.",

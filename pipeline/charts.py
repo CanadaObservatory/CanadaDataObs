@@ -2437,26 +2437,43 @@ def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=Tru
 def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
                  group_order=None, source_note=None, height=480,
                  ytickprefix="", yticksuffix="", hover_decimals=0, value_scale=1.0,
-                 legend_orientation="v", rangeslider=False):
+                 legend_orientation="v", rangeslider=False, measures=None):
     """Stacked area over time — the composition of a total by category
     (public-sector sectors, federal expense by type, government spending by
     function). `df` is long: (x_col, group_col, value_col). `value_scale` divides
     values for display (e.g. 1000 to show $millions as $billions). Bands are
-    ordered largest-total first unless `group_order` is given."""
+    ordered largest-total first unless `group_order` is given.
+
+    `measures` (optional): a list of dicts adding a dropdown that switches the
+    plotted value across columns of `df` — each {col, label, yaxis_title, and
+    optionally value_scale / hover_decimals / ytickprefix / yticksuffix}; the
+    first is shown on load. Default (None) keeps the single value_col behaviour."""
     import pandas as pd
     d = df.copy()
-    d["_v"] = pd.to_numeric(d[value_col], errors="coerce") / value_scale
+    xs = sorted(d[x_col].unique())
+
+    def _opts(m):   # a measure's display options, falling back to the call's defaults
+        return (m["col"], m.get("value_scale", value_scale), m.get("hover_decimals", hover_decimals),
+                m.get("ytickprefix", ytickprefix), m.get("yticksuffix", yticksuffix), m["yaxis_title"])
+
+    bcol, bscale, bhd, bpre, bsuf, btitle = (
+        _opts(measures[0]) if measures
+        else (value_col, value_scale, hover_decimals, ytickprefix, yticksuffix, yaxis_title))
+
+    def _series(col, scale, g):
+        s = pd.to_numeric(d[d[group_col] == g].set_index(x_col)[col], errors="coerce") / scale
+        return [s.get(x) for x in xs]
+
+    d["_v"] = pd.to_numeric(d[bcol], errors="coerce") / bscale
     groups = group_order or list(
         d.groupby(group_col)["_v"].sum().sort_values(ascending=False).index)
     cmap = _series_colors(groups, colors)
-    xs = sorted(d[x_col].unique())
     fig = go.Figure()
     for g in groups:
-        s = d[d[group_col] == g].set_index(x_col)["_v"]
         fig.add_trace(go.Scatter(
-            x=xs, y=[s.get(x) for x in xs], name=str(g), mode="lines",
+            x=xs, y=_series(bcol, bscale, g), name=str(g), mode="lines",
             stackgroup="one", line=dict(width=0.5, color=cmap[g]), fillcolor=cmap[g],
-            hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
+            hovertemplate=f"{g}: {bpre}%{{y:,.{bhd}f}}{bsuf}<extra></extra>"))
     if legend_orientation == "h" and not rangeslider:
         # Legend ABOVE the plot → the x-axis uses full width AND the bottom stays free for
         # the source note (a bottom h-legend with many bands wraps and collides with it).
@@ -2476,12 +2493,24 @@ def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
     xaxis = dict(title="", gridcolor="#e0e0e0")
     if rangeslider:
         xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
+    if measures and len(measures) > 1:
+        margin = {**margin, "t": max(margin.get("t", 30), 64)}   # room for the dropdown
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=xaxis,
-        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0",
-                   tickprefix=ytickprefix, ticksuffix=yticksuffix),
+        yaxis=dict(title=btitle, gridcolor="#e0e0e0", tickprefix=bpre, ticksuffix=bsuf),
         legend=legend, margin=margin)
+    if measures and len(measures) > 1:
+        buttons = []
+        for m in measures:
+            col, scale, hd, pre, suf, title = _opts(m)
+            buttons.append(dict(label=m["label"], method="update",
+                args=[{"y": [_series(col, scale, g) for g in groups],
+                       "hovertemplate": [f"{g}: {pre}%{{y:,.{hd}f}}{suf}<extra></extra>" for g in groups]},
+                      {"yaxis.title.text": title, "yaxis.tickprefix": pre, "yaxis.ticksuffix": suf}]))
+        fig.update_layout(updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left",
+            y=1.0, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1,
+            showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
                            xanchor="left", y=src_y, showarrow=False,

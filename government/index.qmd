@@ -84,6 +84,8 @@ and **public health care and social services** (nurses, hospital and long-term-c
 staff) — each employing *more* people than **public administration**, the core
 bureaucracy across all three levels of government combined. Crown corporations and
 other public services (utilities, public transit, and the like) make up the rest.
+**Use the dropdown** to switch between the total headcount and employees per 1,000
+people, which adjusts for Canada's population growth.
 
 ```{python}
 #| echo: false
@@ -98,12 +100,25 @@ if os.path.exists(comp_path):
     area = df.groupby(["year", "bucket"], as_index=False)["employment"].sum()
     order = ["Educational services", "Health care & social assistance",
              "Public administration (the bureaucracy)", OTHER]
+    measures = None
+    if os.path.exists(canpop_path):                 # add a per-capita view (§286)
+        cp = pd.read_csv(canpop_path)
+        cp = cp[cp["geography"] == "Canada"].copy()
+        cp["year"] = pd.to_datetime(cp["date"]).dt.year
+        popyr = cp.groupby("year")["population"].mean()
+        area["per_1000"] = [e / popyr[y] * 1000 if y in popyr.index else None
+                            for e, y in zip(area["employment"], area["year"])]
+        measures = [
+            dict(col="employment", label="Total (thousands)", value_scale=1000,
+                 hover_decimals=0, yaxis_title="Public-sector employees (thousands)"),
+            dict(col="per_1000", label="Per 1,000 people", value_scale=1,
+                 hover_decimals=1, yaxis_title="Public-sector employees per 1,000 people")]
     fig = stacked_area(area, "year", "employment", "bucket",
         yaxis_title="Public-sector employees (thousands)", value_scale=1000, hover_decimals=0,
-        group_order=order, height=620, rangeslider=True, legend_orientation="h",
+        group_order=order, height=620, rangeslider=True, legend_orientation="h", measures=measures,
         colors={"Educational services": "#4e79a7", "Health care & social assistance": "#59a14f",
                 "Public administration (the bureaucracy)": "#f28e2b", OTHER: "#bab0ac"},
-        source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey, public-sector employees by industry) | Data as of: {get_data_date(comp_path)}")
+        source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey, public-sector employees by industry); population from 17-10-0009-01 | Data as of: {get_data_date(comp_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")

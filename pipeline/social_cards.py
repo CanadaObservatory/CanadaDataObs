@@ -117,7 +117,7 @@ def _cpi_card_svg(window, W, H):
     works square, portrait (taller chart) and the wide landscape/OG banners."""
     x0, x1 = 150, W - 70
     title_y, sub_y, ctop = 130, 178, 235
-    cbot, foot_y = H - 110, H - 42
+    cbot, foot_y = H - 132, H - 42   # extra gap between the x-axis/ticks and the footer line
     leaf_sz = 132
     vals = window["yoy"].tolist()
     maxv = max(3.0, max(vals) + 0.6)   # modest headroom above the tallest bar for its label

@@ -224,28 +224,44 @@ else:
 
 ## Which parts of the public service grew
 
-The public service grew by roughly **100,000 people between 2015 and 2025**. The
-increase was concentrated in **benefits and service delivery** — Employment and
-Social Development Canada, which runs Service Canada, and the Canada Revenue Agency
-— together with immigration (Immigration, Refugees and Citizenship Canada and
-the Immigration and Refugee Board) and **procurement, border, and security**
-organizations.
+The federal public service stood at about **358,000 people in 2025** — up roughly
+**100,000 since 2015**, after a decline earlier in the decade. Stacking the largest
+departments over time shows where the workforce sits and how it has shifted: the
+**Canada Revenue Agency** and **Employment and Social Development Canada** (which runs
+Service Canada) are the two biggest, alongside defence, corrections, border services,
+procurement, fisheries and immigration. The 100‑plus smaller departments and agencies
+are grouped as **Other**. Departmental names and boundaries shift with reorganizations,
+so read the broad trends rather than single‑year wiggles.
 
 ```{python}
 #| echo: false
 dgrow_path = "data/government/tbs_fps_by_department.csv"
 if os.path.exists(dgrow_path):
     dep = pd.read_csv(dgrow_path)
-    y0, y1 = 2015, int(dep["year"].max())   # a decade, from the 2015 change in government
-    a = dep[dep["year"] == y0].set_index("department")["employees"]
-    b = dep[dep["year"] == y1].set_index("department")["employees"]
-    common = a.index.intersection(b.index)
-    chg = (b.reindex(common) - a.reindex(common)).reset_index()
-    chg.columns = ["department", "change"]
-    chg = chg[chg["change"] > 0]
-    fig = category_bar(chg, "department", "change", top_n=12,
-        xaxis_title=f"Increase in employees, {y0}→{y1}", value_fmt=",.0f",
-        source_note=f"Source: Treasury Board of Canada Secretariat — Federal public service statistics | Data as of: {get_data_date(dgrow_path)}")
+    latest = int(dep["year"].max())
+    # Name the largest departments reported in EVERY year (so bands don't jump when a
+    # department is renamed or newly broken out); everything else → "Other departments".
+    full = dep.groupby("department")["year"].nunique()
+    full = set(full[full == dep["year"].nunique()].index)
+    named = (dep[(dep["year"] == latest) & (dep["department"].isin(full))]
+             .nlargest(8, "employees")["department"].tolist())
+    SHORT = {"Employment and Social Development Canada": "Employment & Social Dev.",
+             "Public Services and Procurement Canada": "Public Services & Procurement",
+             "Correctional Service Canada": "Correctional Service",
+             "Canada Border Services Agency": "Canada Border Services",
+             "Fisheries and Oceans Canada": "Fisheries & Oceans",
+             "Immigration, Refugees and Citizenship Canada": "Immigration (IRCC)"}
+    dep["band"] = dep["department"].apply(
+        lambda x: SHORT.get(x, x) if x in named else "Other departments")
+    area = dep.groupby(["year", "band"], as_index=False)["employees"].sum()
+    order = [SHORT.get(n, n) for n in named] + ["Other departments"]
+    fig = stacked_area(area, "year", "employees", "band",
+        yaxis_title="Federal public servants", group_order=order, height=600,
+        rangeslider=True, legend_orientation="h", hover_decimals=0,
+        source_note=f"Source: Treasury Board of Canada Secretariat — federal public service employment by department (open.canada.ca) | Data as of: {get_data_date(dgrow_path)}")
+    # the 9-band legend wraps to ~3 rows; drop the source below it + widen the margin
+    fig.update_layout(margin=dict(b=255))
+    fig.layout.annotations[-1].update(y=-0.62)
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")

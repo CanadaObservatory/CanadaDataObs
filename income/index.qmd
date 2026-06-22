@@ -161,13 +161,18 @@ if os.path.exists(disp_path):
 
 The Gini coefficient of disposable (after-tax, after-transfer) income runs from 0
 (everyone has the same income) to 1 (one person has all of it). Lower values
-indicate a more even distribution.
+indicate a more even distribution. The OECD collects these figures on each
+country's own survey cycle, so some report only every few years; the chart shows
+the countries that report regularly enough to trace a line.
 
 ```{python}
 #| echo: false
 gini_path = "data/income/oecd_gini.csv"
 if os.path.exists(gini_path):
     df = pd.read_csv(gini_path)
+    # Drop sparsely-reporting countries (review §246) so the chart isn't cluttered
+    # with 1–5-point lines: keep only those reporting in ≥8 years.
+    df = df.groupby("country_code").filter(lambda g: g["gini"].notna().sum() >= 8)
     fig = peer_comparison_line(df, "year", "gini",
         title="", yaxis_title="Gini coefficient (0–1)", show_average=True)
     fig.update_layout(annotations=[dict(
@@ -316,6 +321,8 @@ national standard of living rather than an absolute threshold.
 pov_path = "data/income/oecd_poverty.csv"
 if os.path.exists(pov_path):
     df = pd.read_csv(pov_path)
+    # Drop sparsely-reporting countries (review §249), as on the Gini chart above.
+    df = df.groupby("country_code").filter(lambda g: g["poverty_rate"].notna().sum() >= 8)
     fig = peer_comparison_line(df, "year", "poverty_rate",
         title="", yaxis_title="% below 50% of median income", show_average=True)
     fig.update_layout(annotations=[dict(

@@ -9,6 +9,7 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, OECD_AVG_COLOR,
     HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
     PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS, DEFAULT_VISIBLE_COMPARATORS,
+    PROVINCE_NAMES, PROVINCE_COLORS, PROVINCE_COLORS_DEEP, PROVINCE_COLORS_PASTEL,
     SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
@@ -2103,6 +2104,36 @@ def _series_colors(groups, colors):
     if colors:
         return {g: colors.get(g, "#888") for g in groups}
     return {g: SERIES_PALETTE[i % len(SERIES_PALETTE)] for i, g in enumerate(groups)}
+
+
+import unicodedata as _ud
+def _norm_prov(s):
+    s = str(s).replace("<br>", " ").replace("&", "and")
+    s = "".join(c for c in _ud.normalize("NFKD", s) if not _ud.combining(c))
+    return " ".join(s.lower().split())
+_PROV_NAME2CODE = {_norm_prov(v): k for k, v in PROVINCE_NAMES.items()}
+
+def province_colors(labels, register="muted"):
+    """Locked provincial/territorial identity colours keyed to `labels`.
+
+    Accepts any of the names in PROVINCE_NAMES, plus 'Canada', and is tolerant of
+    '<br>' line-breaks, accents (Québec), and '&'. `register`: 'muted' (default —
+    province LINES) | 'deep' | 'pastel' (large map fills). Canada -> brand maroon.
+    Unrecognised labels fall back to SERIES_PALETTE so a call never breaks. Pass the
+    result as `colors=` to lines_over_time / stacked_area (single source of truth =
+    config.py PROVINCE_COLORS*)."""
+    pal = {"muted": PROVINCE_COLORS, "deep": PROVINCE_COLORS_DEEP,
+           "pastel": PROVINCE_COLORS_PASTEL}.get(register, PROVINCE_COLORS)
+    out, spi = {}, 0
+    for lab in labels:
+        n = _norm_prov(lab)
+        if n in ("canada", "can"):
+            out[lab] = CANADA_COLOR
+        elif n in _PROV_NAME2CODE:
+            out[lab] = pal[_PROV_NAME2CODE[n]]
+        else:
+            out[lab] = SERIES_PALETTE[spi % len(SERIES_PALETTE)]; spi += 1
+    return out
 
 
 def lines_over_time(df, x_col, value_col, group_col, *, yaxis_title,

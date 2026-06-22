@@ -15,7 +15,7 @@ from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import category_bar, lines_over_time
+from pipeline.charts import category_bar, lines_over_time, province_colors
 ```
 
 ## Inflation (CPI, year-over-year)
@@ -228,8 +228,7 @@ try:
     m = m.dropna(subset=["real"])
     fig = lines_over_time(m, "year", "min_wage", "jurisdiction",
         yaxis_title="$ per hour", group_order=PROVS,
-        colors={"Ontario": "#4e79a7", "Quebec": "#59a14f",
-                "British Columbia": "#f28e2b", "Alberta": "#e15759"},
+        colors=province_colors(PROVS),
         measures=[
             {"col": "min_wage", "label": "Nominal", "yaxis_title": "$ per hour (nominal)",
              "ytickprefix": "$", "hover_decimals": 2},

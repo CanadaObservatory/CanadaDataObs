@@ -10,7 +10,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import get_data_date
-from pipeline.charts import category_bar, lines_over_time
+from pipeline.charts import category_bar, lines_over_time, province_colors
 
 SHOW = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 prov_path = "data/government/statcan_provincial_finance.csv"
@@ -18,8 +18,7 @@ prov_path = "data/government/statcan_provincial_finance.csv"
 PROV_ORDER = ["British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario",
               "Quebec", "New Brunswick", "Nova Scotia", "Prince Edward Island",
               "Newfoundland and Labrador"]
-PROV_COLORS = dict(zip(PROV_ORDER, ["#4e79a7", "#f28e2b", "#59a14f", "#e15759",
-                   "#76b7b2", "#edc948", "#b07aa1", "#ff9da7", "#9c755f", "#8c6d31"]))
+PROV_COLORS = province_colors(PROV_ORDER)  # locked identities (config PROVINCE_COLORS)
 ```
 
 The federal government is only half of Canada's public finances: the provinces deliver health care, education, and most social services, and they raise and borrow accordingly. This page compares the ten provinces on a **consistent basis** — Statistics Canada's Canadian Government Finance Statistics (CGFS) — rather than each province's own public accounts, which use differing conventions. **Because of that, the figures here will not match a province's own budget documents**; they are built for comparison, not for a province's bottom line. Everything is shown as a share of each province's GDP. (The three territories are left out: they are small and largely federally funded, which would distort a share-of-GDP comparison.)

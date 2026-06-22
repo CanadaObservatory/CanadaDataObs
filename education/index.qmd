@@ -15,7 +15,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import lines_over_time, category_bar
+from pipeline.charts import lines_over_time, category_bar, province_colors
 
 # Load tuition and deflate to constant dollars of the latest year, using the
 # all-items CPI (annual average) — so the trend charts show *real* tuition.
@@ -46,9 +46,8 @@ if tu is not None:
     ug["geography"] = ug["geography"].replace({"Newfoundland and Labrador": "Newfoundland<br>and Labrador"})
     fig = lines_over_time(ug, "year", "real", "geography",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
-        colors={"Canada": CANADA_COLOR, "Ontario": "#4e79a7", "Quebec": "#59a14f",
-                "British Columbia": "#b07aa1", "Alberta": "#e15759",
-                "Nova Scotia": "#76b7b2", "Newfoundland<br>and Labrador": "#edc948"},
+        colors=province_colors(["Canada", "Ontario", "Quebec", "British Columbia",
+                                "Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"]),
         group_order=["Canada", "Ontario", "Quebec", "British Columbia",
                      "Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"],
         legendonly_groups=["Alberta", "Nova Scotia", "Newfoundland<br>and Labrador"], x_pad=True,

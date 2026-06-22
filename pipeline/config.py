@@ -304,6 +304,13 @@ INDICATORS = [
               statcan_filters={"GEO": "Canada",
                                "Non-permanent resident types": "Total, non-permanent residents"},
               source_table="Statistics Canada 17-10-0121-01"),
+    # NPR broken out by permit type (work / study / asylum / other) for the stacked
+    # composition on the Population page — the five types tile to the total above.
+    Indicator("npr_by_type", "population", "custom",
+              "Non-permanent residents by type", "persons", "quarterly",
+              fetch_fn="fetch_npr_by_type",
+              output_subpath="statcan_npr_by_type.csv",
+              source_table="Statistics Canada 17-10-0121-01"),
     # Age & aging (2026-06 Branch-1 demographics expansion)
     Indicator("age_structure", "population", "custom",
               "Population by age and gender", "persons", "annual",

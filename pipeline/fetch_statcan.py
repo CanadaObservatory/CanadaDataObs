@@ -260,6 +260,51 @@ def fetch_cpi():
     return df
 
 
+# Non-permanent residents by permit type (17-10-0121-01). These five categories
+# sum exactly to the published "Total, non-permanent residents" (verified): the
+# permit-holder subrows + asylum total + the family-member residual ("Other").
+NPR_TYPES = {
+    "Work permit holders only": "Work permits",
+    "Study permit holders only": "Study permits",
+    "Work and study permit holders": "Work + study permits",
+    "Total, asylum claimants, protected persons and related groups": "Asylum claimants",
+    "Other": "Other",
+}
+
+
+def fetch_npr_by_type():
+    """Non-permanent residents by permit type, Canada (StatCan 17-10-0121-01,
+    quarterly from 2021) -> data/population/statcan_npr_by_type.csv [date, type,
+    count]. The five categories sum to the published NPR total."""
+    logger.info("Fetching StatCan non-permanent residents by type (17-10-0121-01)...")
+    try:
+        df = _get_table("17-10-0121-01")
+    except Exception as e:
+        logger.error(f"  Failed to fetch StatCan table 17-10-0121-01: {e}")
+        return None
+    col = "Non-permanent resident types"
+    validate_columns(df, ["REF_DATE", "GEO", col, "VALUE"], "npr_by_type")
+    df = df[(df["GEO"] == "Canada") & (df[col].isin(NPR_TYPES))].copy()
+    df["type"] = df[col].map(NPR_TYPES)
+    df["date"] = pd.to_datetime(df["REF_DATE"].astype(str), format="%Y-%m", errors="coerce")
+    df["count"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df = (df.dropna(subset=["date", "count"])[["date", "type", "count"]]
+            .sort_values(["type", "date"]).reset_index(drop=True))
+    if df.empty:
+        logger.warning("  npr_by_type: no rows after filtering — check type labels")
+        return None
+    out_path = DATA_DIR / "population" / "statcan_npr_by_type.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="date",
+        source="Statistics Canada", source_table="17-10-0121-01",
+        frequency="quarterly", unit="persons",
+        transformations=["Canada; non-permanent residents by permit type "
+                         "(5 categories summing to the published total)"])
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
+    return df
+
+
 MINWAGE_URL = ("https://open.canada.ca/data/dataset/390ee890-59bb-4f34-a37c-9732781ef8a0/"
                "resource/2ddfbfd4-8347-467d-b6d5-797c5421f4fb/download/"
                "general-historical-minimum-wage.csv")

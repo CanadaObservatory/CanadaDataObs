@@ -99,35 +99,61 @@ vehicle** has fallen sharply over the decade even as **vehicle theft itself** an
 
 Overall crime is well below its 1990s–2000s levels, but that headline hides very
 different trajectories underneath it. This shows each offence's change in rate over
-the last decade for Canada. Colour indicates direction only.
+the last decade. **Use the dropdown to switch between Canada, the provinces, and the
+ten largest cities.** Colour indicates direction only.
 
 ```{python}
 #| echo: false
-nat = d[d["geo_level"] == "national"].pivot_table(index="violation", columns="year", values="rate")
 Y0, Y1 = 2014, LATEST
 CHANGE_SET = ["Identity theft", "Fraud", "Shoplifting", "Assault with a weapon or injury",
               "Motor vehicle theft", "Common assault", "Violent crime (total)",
               "Aggravated assault", "Homicide", "Robbery", "Property crime (total)",
               "Mischief", "Theft under $5,000", "Breaking & entering", "Theft from a vehicle"]
-rows = []
-for v in CHANGE_SET:
-    if v in nat.index and Y0 in nat.columns and Y1 in nat.columns:
-        a, b = nat.loc[v, Y0], nat.loc[v, Y1]
-        if pd.notna(a) and pd.notna(b) and a > 0:
-            rows.append((v, (b / a - 1) * 100))
-rows.sort(key=lambda r: r[1])
-labels = [r[0] for r in rows]
-vals = [r[1] for r in rows]
-colors = ["#d4763a" if v >= 0 else "#5a8fc2" for v in vals]
-fig = go.Figure(go.Bar(
-    x=vals, y=labels, orientation="h", marker_color=colors,
-    text=[f"{v:+.0f}%" for v in vals], textposition="auto", cliponaxis=False,
+# Top 10 CMAs by 2021-census population (stable ordering; exact data labels)
+TOP_CMA = ["Toronto, Ontario [35535]", "Montréal, Quebec [24462]",
+           "Vancouver, British Columbia [59933]", "Ottawa-Gatineau, Ontario/Quebec [24505/35505]",
+           "Calgary, Alberta [48825]", "Edmonton, Alberta [48835]", "Québec, Quebec [24421]",
+           "Winnipeg, Manitoba [46602]", "Hamilton, Ontario [35537]",
+           "Kitchener-Cambridge-Waterloo, Ontario [35541]"]
+_TERR = ("Yukon", "Northwest Territories", "Nunavut")
+_provs = sorted(g for g in d[d["geo_level"] == "province"]["geography"].unique()
+                if not any(t in g for t in _TERR))
+_prov_label = lambda g: g.split(" [")[0]   # "Ontario [35]" -> "Ontario"
+_city_label = lambda g: g.split(",")[0]    # "Toronto, Ontario [35535]" -> "Toronto"
+GEOS = ([("Canada", "Canada")]
+        + [(_prov_label(g), g) for g in _provs]
+        + [(_city_label(g), g) for g in TOP_CMA])
+
+def _change(geo):
+    piv = d[d["geography"] == geo].pivot_table(index="violation", columns="year", values="rate")
+    rows = []
+    for v in CHANGE_SET:
+        if v in piv.index and Y0 in piv.columns and Y1 in piv.columns:
+            a, b = piv.loc[v, Y0], piv.loc[v, Y1]
+            if pd.notna(a) and pd.notna(b) and a > 0:
+                rows.append((v, (b / a - 1) * 100))
+    rows.sort(key=lambda r: r[1])
+    lbls = [r[0] for r in rows]; vls = [r[1] for r in rows]
+    return lbls, vls, [f"{v:+.0f}%" for v in vls], ["#d4763a" if v >= 0 else "#5a8fc2" for v in vls]
+
+l0, v0, t0, c0 = _change("Canada")
+fig = go.Figure(go.Bar(x=v0, y=l0, orientation="h", marker_color=c0,
+    text=t0, textposition="auto", cliponaxis=False,
     hovertemplate="%{y}: %{x:+.0f}%<extra></extra>"))
+buttons = []
+for disp, geo in GEOS:
+    lbls, vls, txt, cols = _change(geo)
+    buttons.append(dict(label=disp, method="update",
+        args=[{"x": [vls], "y": [lbls], "text": [txt], "marker.color": [cols]},
+              {"yaxis.categoryorder": "array", "yaxis.categoryarray": lbls}]))
 fig.update_layout(
     plot_bgcolor="white", height=560, showlegend=False,
     xaxis=dict(title=f"Change in rate per 100,000, {Y0}→{Y1}", gridcolor="#e0e0e0",
                ticksuffix="%", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5),
-    yaxis=dict(title=""), margin=dict(l=10, r=30, t=55, b=100))
+    yaxis=dict(title="", categoryorder="array", categoryarray=l0),
+    margin=dict(l=10, r=30, t=72, b=100),
+    updatemenus=[dict(buttons=buttons, x=0, xanchor="left", y=1.13, yanchor="top",
+                      direction="down", showactive=True)])
 fig.add_annotation(text=SRC(), xref="paper", yref="paper", x=1, xanchor="right",
                    y=-0.28, showarrow=False, font=dict(size=10, color="#999"), align="right")
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

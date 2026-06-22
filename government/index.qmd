@@ -65,8 +65,6 @@ if os.path.exists(lvl_path):
     fig = lines_over_time(
         df, "year", "jobs", "level",
         yaxis_title="Number of jobs", measures=measures,
-        colors={"Federal": "#d62728", "Provincial / territorial": "#4e79a7",
-                "Local & Indigenous": "#59a14f"},
         group_order=keep, rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0489-01 (SNA jobs) — public administration (NAICS 91); federal includes the military; population from StatCan 17-10-0009-01 | Data as of: {get_data_date(lvl_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -116,8 +114,6 @@ if os.path.exists(comp_path):
     fig = stacked_area(area, "year", "employment", "bucket",
         yaxis_title="Public-sector employees (thousands)", value_scale=1000, hover_decimals=0,
         group_order=order, height=620, rangeslider=True, legend_orientation="h", measures=measures,
-        colors={"Educational services": "#4e79a7", "Health care & social assistance": "#59a14f",
-                "Public administration (the bureaucracy)": "#f28e2b", OTHER: "#bab0ac"},
         source_note=f"Source: Statistics Canada 14-10-0027-01 (Labour Force Survey, public-sector employees by industry); population from 17-10-0009-01 | Data as of: {get_data_date(comp_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

@@ -196,9 +196,13 @@ PROVINCE_NAMES = {
 }
 PROVINCE_COLORS = {  # MUTED — default register for province LINES
     "ON": "#A0543F", "QC": "#225490", "BC": "#27613F", "AB": "#C0923C", "NS": "#2C7C8E",
-    "NB": "#31A182", "MB": "#788741", "SK": "#6F79C2", "NL": "#8C3A57", "PE": "#EAB196",
+    "NB": "#31A182", "MB": "#788741", "SK": "#6F79C2", "NL": "#C96580", "PE": "#EAB196",
     "YT": "#7C949C", "NT": "#9E92B0", "NU": "#7C5A74",
 }
+# NL muted moved #8C3A57 → #C96580 (2026-06-22): the old dark maroon-rose sat ΔE 7.5
+# from Canada's maroon (CANADA_COLOR), so on province charts carrying a Canada line the
+# two were hard to tell apart. The dusty rose keeps NL's identity, is ΔE 24 from maroon,
+# and matches the muted register's lightness. Deep/pastel NL were already clear of maroon.
 PROVINCE_COLORS_DEEP = {  # moodier / unified line register
     "ON": "#912D20", "QC": "#1E58AA", "BC": "#3F7B56", "AB": "#9E7621", "NS": "#1DA0B5",
     "NB": "#3EA38B", "MB": "#8D9655", "SK": "#6E92EB", "NL": "#D1798D", "PE": "#A05829",
@@ -209,6 +213,30 @@ PROVINCE_COLORS_PASTEL = {  # large MAP fills
     "NB": "#99E1CA", "MB": "#BCDA87", "SK": "#A4ABDD", "NL": "#ED879E", "PE": "#DE8C6D",
     "YT": "#54ADC1", "NT": "#D4BAE7", "NU": "#D68DC8",
 }
+
+# The CATEGORICAL register — for multi-series charts whose categories carry NO identity
+# meaning (departments, age bands, spending objects, factor decompositions). The fourth
+# governed colour set, beside country / province / chrome (the others are bespoke too).
+# LOCKED 2026-06-22. Anchored on two owner-chosen brand-leaning hues — steel #3D6585 and
+# terracotta #C77B3A — with the other six derived by the SAME max-min CIEDE2000 + Machado
+# deuteranopia/protanopia search that produced the country palette (global normal-vision
+# min ΔE 17.1; colour-blind worst pair 10.2). Ordered dark→light so line charts (usually
+# ≤5 series) draw the legible head; ALL eight clear the line-contrast gate (no fills-only
+# pales). Sits in the muted-civic register between province (calmer) and country (punchier),
+# and each colour rhymes with a country cousin (steel↔US, terracotta↔Australia…) so the
+# four sets read as one family. Grey (CATEGORICAL_OTHER) is reserved for an "Other"/residual
+# band so it visually recedes — never one of the eight.
+CATEGORICAL_COLORS = [
+    "#3D6585",  # steel (owner anchor)
+    "#726229",  # bronze
+    "#217466",  # pine
+    "#8465B9",  # violet
+    "#AA708E",  # mauve
+    "#C77B3A",  # terracotta (owner anchor)
+    "#D07D74",  # coral
+    "#7390E8",  # periwinkle
+]
+CATEGORICAL_OTHER = "#AEB4BB"  # reserved grey for an "Other"/residual series
 
 
 # ============================================================================

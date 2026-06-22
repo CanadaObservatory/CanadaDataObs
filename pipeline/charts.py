@@ -10,6 +10,7 @@ from pipeline.config import (
     HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
     PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS, DEFAULT_VISIBLE_COMPARATORS,
     PROVINCE_NAMES, PROVINCE_COLORS, PROVINCE_COLORS_DEEP, PROVINCE_COLORS_PASTEL,
+    CATEGORICAL_COLORS, CATEGORICAL_OTHER,
     SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
@@ -2127,9 +2128,22 @@ SERIES_PALETTE = [
 
 
 def _series_colors(groups, colors):
+    """Map series/category labels → colours for lines_over_time / stacked_area.
+    Explicit `colors` (a dict) wins — that's how the semantic palettes and province
+    register are passed. Otherwise the default is the governed CATEGORICAL register:
+    an "Other"/residual group takes the reserved grey so it recedes; every other group
+    cycles CATEGORICAL_COLORS in order (the cycle index advances only for non-Other
+    groups, so the first real category is always steel)."""
     if colors:
         return {g: colors.get(g, "#888") for g in groups}
-    return {g: SERIES_PALETTE[i % len(SERIES_PALETTE)] for i, g in enumerate(groups)}
+    out, i = {}, 0
+    for g in groups:
+        if str(g).lower().startswith("other"):
+            out[g] = CATEGORICAL_OTHER
+        else:
+            out[g] = CATEGORICAL_COLORS[i % len(CATEGORICAL_COLORS)]
+            i += 1
+    return out
 
 
 import unicodedata as _ud

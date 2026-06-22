@@ -126,19 +126,15 @@ public debt in recent years.
 ```{python}
 #| echo: false
 exp_path = "data/government/statcan_federal_expense_by_type.csv"
-EXP_COLORS = {
-    "Grants": "#f28e2b", "Social benefits": "#4e79a7",
-    "Salaries": "#d62728", "Interest on debt": "#59a14f",
-    "Other expense": "#b07aa1", "Goods & services": "#76b7b2",
-    "Capital consumption": "#edc948", "Subsidies": "#9c755f",
-}
+EXP_ORDER = ["Grants", "Social benefits", "Salaries", "Interest on debt",
+             "Other expense", "Goods & services", "Capital consumption", "Subsidies"]
 if os.path.exists(exp_path):
     df = pd.read_csv(exp_path)
     df["category"] = df["category"].replace({"Compensation of employees": "Salaries"})
-    d = df[df["category"].isin(EXP_COLORS)]
+    d = df[df["category"].isin(EXP_ORDER)]
     fig = stacked_area(d, "year", "value_millions", "category",
         yaxis_title="$ billions", value_scale=1000.0, ytickprefix="$", hover_decimals=1,
-        colors=EXP_COLORS, group_order=list(EXP_COLORS.keys()), rangeslider=True,
+        group_order=EXP_ORDER, rangeslider=True,
         source_note=f"Source: Statistics Canada 10-10-0016-01 (federal government, statement of operations) | Data as of: {get_data_date(exp_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

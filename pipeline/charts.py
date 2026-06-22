@@ -2569,27 +2569,31 @@ def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
 def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=None,
                        color="#4e79a7", value_scale=1.0, value_fmt=",.0f",
                        tickprefix="", ticksuffix="", text_col=None, text_fmt="{}",
-                       bar_px=24, base_px=170):
+                       bar_px=24, base_px=170, highlight=None, highlight_color=CANADA_COLOR):
     """Horizontal ranked bar with a dropdown to switch among `views`, each a
     (label, dataframe) pair — e.g. size views (top 25 / 50) and thematic groups
     (science, security, regional agencies). Each view's frame is sorted by value;
     selecting a view restyles the bar's x/y/text, resizes the chart to that view's
     bar count, and rescales the x-axis to its range. `text_col` (formatted with
     `text_fmt`) labels each bar — e.g. a share-of-total computed on the full set,
-    carried in each view's frame so the labels stay comparable across views."""
+    carried in each view's frame so the labels stay comparable across views.
+    `highlight` (a set of labels) recolours those bars to `highlight_color` in
+    every view — e.g. keeping Canada maroon across a mode selector."""
     import pandas as pd
+    hl = {str(v) for v in (highlight or [])}
 
     def prep(sub):
         s = sub.copy()
         s["_v"] = pd.to_numeric(s[value_col], errors="coerce") / value_scale
         s = s.dropna(subset=["_v"]).sort_values("_v")     # ascending → largest on top
         y = [_wrap(str(v), 32) for v in s[label_col]]      # wrap long category names to 2 lines
+        c = [highlight_color if str(v) in hl else color for v in s[label_col]]
         t = ([text_fmt.format(v) for v in s[text_col]]
              if text_col and text_col in s.columns else None)
-        return s["_v"].tolist(), y, t
+        return s["_v"].tolist(), y, t, c
 
     prepped = [(lab, prep(sub)) for lab, sub in views]
-    x0, y0, t0 = prepped[0][1]
+    x0, y0, t0, c0 = prepped[0][1]
     def height(n):
         return base_px + bar_px * n
     h0 = height(len(y0))
@@ -2601,14 +2605,14 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
     else:
         b_margin = 70
     fig = go.Figure(go.Bar(
-        x=x0, y=y0, orientation="h", marker_color=color,
+        x=x0, y=y0, orientation="h", marker_color=c0,
         text=t0, textposition="auto", cliponaxis=False,
         hovertemplate=f"%{{y}}: {tickprefix}%{{x:{value_fmt}}}{ticksuffix}<extra></extra>"))
     buttons = [dict(method="update", label=lab,
-                    args=[{"x": [x], "y": [y], "text": [t]},
+                    args=[{"x": [x], "y": [y], "text": [t], "marker.color": [c]},
                           {"height": height(len(y)), "yaxis.categoryarray": y,
                            "yaxis.categoryorder": "array", "xaxis.autorange": True}])
-               for lab, (x, y, t) in prepped]
+               for lab, (x, y, t, c) in prepped]
     fig.update_layout(
         plot_bgcolor="white", showlegend=False, height=h0,
         xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",

@@ -1,6 +1,6 @@
 ---
 title: "Commuting"
-description: "How Canadians get to work, and how long it takes — by city, 2021 Census"
+description: "How Canadians get to work, and how long it takes — by city and by mode"
 ---
 
 ```{python}
@@ -8,7 +8,7 @@ description: "How Canadians get to work, and how long it takes — by city, 2021
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.charts import category_bar
+from pipeline.charts import category_bar, category_bar_views
 
 MAJOR = ["Canada", "Toronto", "Montréal", "Vancouver", "Ottawa - Gatineau", "Calgary",
          "Edmonton", "Winnipeg", "Québec", "Hamilton", "Kitchener - Cambridge - Waterloo",
@@ -49,25 +49,48 @@ else:
 
 ## How long the commute takes
 
-The average one-way commute is about **24 minutes nationally** — highlighted in maroon below — but it is far longer in the big-city regions, and longest of all across the Greater Toronto Area, where many commute between suburbs and the core.
+These are **one-way** times, so a round trip is roughly double. How long that trip takes is longest across the Greater Toronto Area, where many travel between the suburbs and the core. Commuting times dipped when the pandemic kept people home in 2021 and have climbed back since, so these — the most recent figures Statistics Canada publishes — sit above that low. The maroon bar marks the national average.
 
 ```{python}
 #| echo: false
-dur_path = "data/population/commute_duration.csv"
+dur_path = "data/population/commute_duration_lfs.csv"
 if os.path.exists(dur_path):
     d = pd.read_csv(dur_path)
-    d = d[d["geo"].isin(MAJOR)]
-    fig = category_bar(d, "geo", "avg_min", xaxis_title="Average one-way commute (minutes)",
-        value_fmt=".0f", ticksuffix=" min",
-        highlight={"Canada"},
+    latest = int(d["year"].max())
+    d = d[d["year"] == latest]
+    fig = category_bar(d, "geo", "avg_min",
+        xaxis_title=f"Average one-way commute (minutes), May {latest}",
+        value_fmt=".0f", ticksuffix=" min", highlight={"Canada"},
         hovertemplate="%{y}: %{x:.1f} min<extra></extra>",
+        source_note=f"Source: Statistics Canada, Labour Force Survey commuting supplement, May {latest}.")
+    fig.show(config=SHOW)
+else:
+    print("Commute-duration data not yet available — run `python -m pipeline.build_commute_lfs`.")
+```
+
+## How long the commute takes, by mode
+
+That all-modes average blends very different journeys. Public-transit riders spend far longer getting to work than drivers — in Toronto, about **48 minutes each way versus 28 by car** — while people who walk or cycle have the shortest trips of all. Use the selector to switch between modes; the maroon bar is the national figure for each. (By-mode commute times are measured by city only in the 2021 Census, so these are one-way 2021 figures; the gap between modes is structural and changes little year to year.)
+
+```{python}
+#| echo: false
+mode_path = "data/population/commute_duration_by_mode.csv"
+if os.path.exists(mode_path):
+    dm = pd.read_csv(mode_path)
+    dm = dm[dm["geo"].isin(MAJOR)]
+    MODE_ORDER = ["All modes", "Car", "Public transit", "Walked", "Bicycle"]
+    views = [(m, dm[dm["mode"] == m]) for m in MODE_ORDER]
+    fig = category_bar_views(views, "geo", "avg_min",
+        xaxis_title="Average one-way commute (minutes), 2021",
+        value_fmt=".0f", ticksuffix=" min", highlight={"Canada"},
         source_note="Source: Statistics Canada, 2021 Census, Table 98-10-0457-01.")
     fig.show(config=SHOW)
 else:
-    print("Commute-duration data not yet available — run `python -m pipeline.build_commute`.")
+    print("Commute-by-mode data not yet available — run `python -m pipeline.build_commute`.")
 ```
 
 ## Download data
 
 - [Commute mode by city (CSV)](../data/population/commute_mode.csv) — 2021 Census, Table 98-10-0457-01
-- [Average commute duration by city (CSV)](../data/population/commute_duration.csv) — 2021 Census, Table 98-10-0457-01
+- [Average commute duration by city — current (CSV)](../data/population/commute_duration_lfs.csv) — Statistics Canada, Labour Force Survey commuting supplement
+- [Average commute duration by city and mode (CSV)](../data/population/commute_duration_by_mode.csv) — 2021 Census, Table 98-10-0457-01

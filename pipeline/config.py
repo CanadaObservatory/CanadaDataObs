@@ -723,6 +723,13 @@ INDICATORS = [
                                    "Economic families and persons not in an economic family",
                                "UOM": "2024 constant dollars"},
               source_table="Statistics Canada 11-10-0190-01"),
+    # Same table, split by recipient type (all / economic families / unattached
+    # individuals) for the income-page family-type dropdown (review §228).
+    Indicator("median_income_by_family", "income", "custom",
+              "Median after-tax income by recipient type", "2024 constant dollars", "annual",
+              fetch_fn="fetch_median_income_by_family",
+              output_subpath="statcan_median_income_by_family.csv",
+              source_table="Statistics Canada 11-10-0190-01"),
     Indicator("low_income", "income", "statcan",
               "Low-income rate (LIM-AT)", "% of persons", "annual",
               value_col="low_income_rate", date_format="%Y",

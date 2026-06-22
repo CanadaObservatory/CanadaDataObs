@@ -30,31 +30,48 @@ page_snapshot("income").show(config={"displaylogo": False, "modeBarButtonsToRemo
 
 ## Median after-tax income in Canada
 
-Median after-tax income of **economic families and unattached individuals**
-(Statistics Canada's income unit — *not* equivalized per person), in 2024 constant
-(inflation-adjusted) dollars. The median is the midpoint: half of these family units
-and unattached individuals are above it, half below. Because it combines multi-person
-families with single people, read it as a *typical income unit* — not a per-person or
-per-household figure.
+Median after-tax income, in 2024 constant (inflation-adjusted) dollars — the
+midpoint, where half are above and half below. **Use the dropdown to switch between
+all recipients, economic families, and unattached individuals.** These are Statistics
+Canada's income units, *not* equivalized per person: an *economic family* pools the
+income of related people in a household, so family income runs well above that of
+unattached individuals, with the combined figure in between. Read each as a typical
+income for that unit.
 
 ```{python}
 #| echo: false
-mi_path = "data/income/statcan_median_income.csv"
+mi_path = "data/income/statcan_median_income_by_family.csv"
 if os.path.exists(mi_path):
-    df = pd.read_csv(mi_path, parse_dates=["date"])
-    latest_year = int(df["date"].dt.year.max())
-    fig = single_line(df, "date", "median_income", title="",
-                      yaxis_title="Median after-tax income (2024 constant $)",
-                      rangeslider=True, yaxis_tickformat="$,.0f",
-                      source_note=(f"Source: Statistics Canada, Table 11-10-0190-01 — economic families & "
-                                   f"unattached individuals, 2024 constant dollars.<br>"
-                                   f"Latest year {latest_year}; accessed {get_retrieved_date(mi_path)}."))
-    # interpret the 2020 bump directly on the chart
-    v2020 = df[df["date"].dt.year == 2020]["median_income"]
-    if len(v2020):
-        fig.add_annotation(x="2020-01-01", y=float(v2020.iloc[0]),
-            text="2020: temporary<br>pandemic supports", showarrow=True, arrowhead=2,
-            ax=-25, ay=-45, font=dict(size=10, color="#777"), arrowcolor="#999")
+    mi = pd.read_csv(mi_path, parse_dates=["date"])
+    latest_year = int(mi["date"].dt.year.max())
+    FAM = [("all", "All — families & individuals"), ("families", "Economic families"),
+           ("individuals", "Unattached individuals")]
+    SRC = (f"Source: Statistics Canada, Table 11-10-0190-01 — median after-tax income, "
+           f"2024 constant dollars.<br>Latest year {latest_year}; "
+           f"accessed {get_retrieved_date(mi_path)}.")
+    def _anns(col):
+        # 2020 pandemic-supports callout (on the selected line) + the source note
+        a = [dict(text=SRC, xref="paper", yref="paper", x=0, y=-0.20, yanchor="top",
+                  showarrow=False, font=dict(size=10, color="#999"))]
+        v = mi[mi["date"].dt.year == 2020][col]
+        if len(v):
+            a.append(dict(x="2020-01-01", y=float(v.iloc[0]),
+                text="2020: temporary<br>pandemic supports", showarrow=True, arrowhead=2,
+                ax=-25, ay=-45, font=dict(size=10, color="#777"), arrowcolor="#999"))
+        return a
+    fig = go.Figure(go.Scatter(x=mi["date"], y=mi["all"], mode="lines+markers",
+        line=dict(color=CANADA_COLOR, width=3), marker=dict(size=4),
+        hovertemplate="%{x|%Y}: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(
+        plot_bgcolor="white", height=460,
+        yaxis=dict(title="Median after-tax income (2024 constant $)", gridcolor="#e0e0e0",
+                   tickformat="$,.0f"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        margin=dict(t=64, b=96, r=30),
+        updatemenus=[dict(buttons=[dict(label=lbl, method="update",
+            args=[{"y": [mi[col]]}, {"annotations": _anns(col)}]) for col, lbl in FAM],
+            x=0, xanchor="left", y=1.14, yanchor="top", direction="down", showactive=True)],
+        annotations=_anns("all"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Median income data not yet available. Run the data pipeline.")

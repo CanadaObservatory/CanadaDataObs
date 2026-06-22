@@ -260,6 +260,47 @@ def fetch_cpi():
     return df
 
 
+# Median after-tax income by recipient type (11-10-0190-01), Canada, 2024 constant $.
+# A WIDE CSV [date, all, families, individuals] for the income-page family-type
+# dropdown (review §228). Kept separate from statcan_median_income.csv (which crea.py
+# and the combined series still read) so nothing downstream changes.
+MEDIAN_INCOME_FAMILY = {
+    "Economic families and persons not in an economic family": "all",
+    "Economic families": "families",
+    "Persons not in an economic family": "individuals",
+}
+
+
+def fetch_median_income_by_family():
+    """Median after-tax income (Canada, 2024 constant $) by recipient type — all /
+    economic families / unattached individuals — for the income-page dropdown.
+    Wide CSV; the 'all' column mirrors statcan_median_income.csv."""
+    logger.info("Fetching StatCan median income by family type (11-10-0190-01)...")
+    try:
+        df = _get_table("11-10-0190-01")
+    except Exception as e:
+        logger.error(f"  Failed to fetch StatCan table 11-10-0190-01: {e}")
+        return None
+    df = df[(df["GEO"] == "Canada")
+            & (df["Income concept"] == "Median after-tax income")
+            & (df["UOM"] == "2024 constant dollars")
+            & (df["Economic family type"].isin(MEDIAN_INCOME_FAMILY))].copy()
+    df["col"] = df["Economic family type"].map(MEDIAN_INCOME_FAMILY)
+    df["date"] = pd.to_datetime(df["REF_DATE"].astype(str), format="%Y", errors="coerce")
+    df["VALUE"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    wide = (df.pivot_table(index="date", columns="col", values="VALUE")
+              .reset_index().sort_values("date").dropna(subset=["all"]).reset_index(drop=True))
+    out_path = DATA_DIR / "income" / "statcan_median_income_by_family.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wide.to_csv(out_path, index=False)
+    save_metadata(out_path, df=wide, date_column="date", source="Statistics Canada",
+        source_table="11-10-0190-01", frequency="annual", unit="2024 constant dollars",
+        transformations=["Canada; median after-tax income by recipient type "
+                         "(all / economic families / unattached individuals)"])
+    logger.info(f"  saved {len(wide)} rows -> {out_path.name}")
+    return wide
+
+
 # Non-permanent residents by permit type (17-10-0121-01). These five categories
 # sum exactly to the published "Total, non-permanent residents" (verified): the
 # permit-holder subrows + asylum total + the family-member residual ("Other").

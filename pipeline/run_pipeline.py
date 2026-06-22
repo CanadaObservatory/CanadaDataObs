@@ -28,6 +28,7 @@ from pipeline.fetch_statcan import (
     fetch_age_structure, fetch_interprovincial_migration, fetch_minimum_wage,
     fetch_voter_turnout, fetch_cma_vacancy, fetch_income_distribution,
     fetch_debt_service_ratio, fetch_provincial_finance, fetch_npr_by_type,
+    fetch_median_income_by_family,
 )
 from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
                                   fetch_co2_per_gdp, fetch_co2_global_context)
@@ -67,6 +68,7 @@ CUSTOM_FETCHERS = {
     "fetch_debt_service_ratio": fetch_debt_service_ratio,
     "fetch_provincial_finance": fetch_provincial_finance,
     "fetch_npr_by_type": fetch_npr_by_type,
+    "fetch_median_income_by_family": fetch_median_income_by_family,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,
     "fetch_co2_per_gdp": fetch_co2_per_gdp,

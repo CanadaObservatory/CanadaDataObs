@@ -569,7 +569,7 @@ The exchange rate against the **US dollar** — Canada's dominant trading partne
 ```{python}
 #| echo: false
 from pipeline.charts import single_line
-fx_path = "data/economics/boc_usdcad.csv"
+fx_path = "data/economics/boc_exchange_rates.csv"
 if os.path.exists(fx_path):
     fx = pd.read_csv(fx_path, parse_dates=["date"])
     fig = single_line(fx, "date", "usdcad", title="",
@@ -580,6 +580,32 @@ if os.path.exists(fx_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Exchange-rate data not yet available. Run the data pipeline.")
+```
+
+The loonie doesn't move in lockstep against every currency. Indexed to 2017, this compares its value against the **US dollar**, the **euro** — the currency of many of Canada's peer economies and its second-largest export market — and the **Japanese yen**. A *rising* line means the loonie has *weakened* against that currency.
+
+```{python}
+#| echo: false
+if os.path.exists(fx_path):
+    fxc = pd.read_csv(fx_path, parse_dates=["date"])
+    cur = {"usdcad": ("US dollar", "#0650A3"), "eurcad": ("Euro", "#1F6E8C"),
+           "jpycad": ("Japanese yen", "#A8842F")}
+    figx = go.Figure()
+    for col, (nm, clr) in cur.items():
+        s = fxc[["date", col]].dropna()
+        figx.add_trace(go.Scatter(x=s["date"], y=s[col] / s[col].iloc[0] * 100, mode="lines",
+            name=nm, line=dict(color=clr, width=2),
+            hovertemplate=nm + ": %{y:.0f} (2017 = 100)<extra></extra>"))
+    figx.add_hline(y=100, line_dash="dot", line_color="#888", opacity=0.6)
+    figx.update_layout(plot_bgcolor="white", height=440,
+        yaxis=dict(title="Index (2017 = 100; higher = weaker loonie)", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", x=0, y=-0.16, yanchor="top"),
+        margin=dict(b=120, t=30, r=30),
+        annotations=[dict(text=f"Source: Bank of Canada (daily average exchange rates) | Data as of: {get_data_date(fx_path)}",
+            xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False,
+            font=dict(size=10, color="#999"))])
+    figx.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
 ## Download data
@@ -594,4 +620,4 @@ else:
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts
 - [Current Account Balance (CSV)](../data/economics/oecd_current_account.csv) — OECD Economic Outlook
 - [Merchandise Trade with the US (CSV)](../data/economics/statcan_trade_us.csv) — Statistics Canada 12-10-0011-01
-- [CAD/US dollar exchange rate (CSV)](../data/economics/boc_usdcad.csv) — Bank of Canada
+- [Exchange rates: CAD per US dollar, euro, yen (CSV)](../data/economics/boc_exchange_rates.csv) — Bank of Canada

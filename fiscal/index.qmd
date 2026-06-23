@@ -14,7 +14,7 @@ rather than final figures.
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import get_data_date, CATEGORICAL_COLORS, CATEGORICAL_OTHER
+from pipeline.config import get_data_date, CATEGORICAL_COLORS, CATEGORICAL_OTHER, CANADA_COLOR
 from pipeline.charts import peer_comparison_line, ranked_bar, ranked_bar_select
 ```
 
@@ -165,7 +165,7 @@ if os.path.exists(tax_path):
     for cn, tv in zip(tot["country_name"], tot["pct_gdp"]):
         is_ca = cn == "Canada"
         figt.add_annotation(x=tv, y=cn, text=f"{tv:.0f}%", xanchor="left", xshift=4,
-            showarrow=False, font=dict(size=10, color="#d62728" if is_ca else "#777"))
+            showarrow=False, font=dict(size=10, color=CANADA_COLOR if is_ca else "#777"))
     figt.update_layout(barmode="stack", plot_bgcolor="white", height=600,
         xaxis=dict(title="% of GDP", gridcolor="#e0e0e0", ticksuffix="%"),
         yaxis=dict(title=""),

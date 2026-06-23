@@ -306,7 +306,7 @@ if os.path.exists(prod_path) and os.path.exists(util_path):
     base_year = int(d["year"].min())
     base = d[d["year"] == base_year].iloc[0]
     series = [
-        ("gdp_per_capita", "GDP per capita", "#d62728", 3),
+        ("gdp_per_capita", "GDP per capita", CANADA_COLOR, 3),
         ("gdp_per_hour", "Labour productivity (GDP per hour)", "#1f77b4", 2),
         ("hours_per_capita", "Labour utilisation (hours per capita)", "#f28e2b", 2),
     ]

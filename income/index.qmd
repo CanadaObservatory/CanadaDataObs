@@ -233,18 +233,18 @@ if os.path.exists(gini_path) and os.path.exists(gm_path):
     # connecting lines (one trace, Canada's drawn red so its row stands out)
     for _, r in j.iterrows():
         figr.add_trace(go.Scatter(x=[r["gini_market"], r["gini"]], y=[r["country_name"]] * 2,
-            mode="lines", line=dict(color="#d62728" if r["country_name"] == "Canada" else "#cfcfcf",
+            mode="lines", line=dict(color=CANADA_COLOR if r["country_name"] == "Canada" else "#cfcfcf",
                                     width=3 if r["country_name"] == "Canada" else 2),
             showlegend=False, hoverinfo="skip"))
     figr.add_trace(go.Scatter(x=j["gini_market"], y=j["country_name"], mode="markers",
         name="Market income (before taxes & transfers)",
         marker=dict(color="#e07b39", size=[12 if c else 9 for c in is_ca],
-                    line=dict(color="#d62728", width=[2 if c else 0 for c in is_ca])),
+                    line=dict(color=CANADA_COLOR, width=[2 if c else 0 for c in is_ca])),
         hovertemplate="Market: %{x:.3f}<extra>%{y}</extra>"))
     figr.add_trace(go.Scatter(x=j["gini"], y=j["country_name"], mode="markers",
         name="Disposable income (after taxes & transfers)",
         marker=dict(color="#1f6e8c", size=[12 if c else 9 for c in is_ca],
-                    line=dict(color="#d62728", width=[2 if c else 0 for c in is_ca])),
+                    line=dict(color=CANADA_COLOR, width=[2 if c else 0 for c in is_ca])),
         hovertemplate="Disposable: %{x:.3f}<extra>%{y}</extra>"))
     yr = int(j["year"].max()) if "year" in j else None
     figr.update_layout(plot_bgcolor="white", height=600,

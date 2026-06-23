@@ -18,6 +18,7 @@ import zipfile
 import requests
 import pandas as pd
 import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR
 
 ATTRIB = ("Source: CREA MLS® Home Price Index, © The Canadian Real Estate Association. "
           "Used with permission for educational purposes.")
@@ -185,7 +186,7 @@ def fig_price_to_income(agg, root="."):
     default_col = RATIO_TYPES[0][0]
     xs0, ys0 = series[default_col]
     fig = go.Figure(go.Scatter(x=xs0, y=ys0, mode="lines+markers",
-                               line=dict(color="#d62728", width=3),
+                               line=dict(color=CANADA_COLOR, width=3),
                                hovertemplate="%{y:.1f}× income<extra>%{x}</extra>"))
     # The selector restyles the single trace's x/y to the chosen dwelling type.
     buttons = [dict(method="update", label=label,

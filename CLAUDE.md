@@ -108,9 +108,9 @@ DataCan/
 ├── geography/wildfire.qmd ← **Wildfire** (split from the former "Fire & Ice" 2026-06-19): national 1959– area-burned bar + **2023 fire locations** (every NFDB fire point sized by area burned)
 ├── geography/ice.qmd ← **Ice** (split from "Fire & Ice"): permafrost zones (categorical) + Arctic sea-ice extent (March max / September min). Nav: Wildfire + Ice replace the single Fire & Ice item under "Climate & Atmosphere"
 ├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate (unemployment + employment have an **age-bracket dropdown**: youth/prime/older/total), current account
-├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
+├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, **"Who is buying" (FTHB/repeat/investor share of mortgaged purchases — BoC Valet FVI `homebuyer_types`; §2026-06-23)**, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
 ├── housing/neighbourhoods.qmd ← census-tract dwelling-value choropleth (heavy ~3MB; own page)
-├── income/index.qmd       ← median income, wages, disposable income, Gini, poverty, LIM-AT, food insecurity, income map (city) + link to neighbourhood-detail page
+├── income/index.qmd       ← median income, wages, **wages-by-province ranked bar (14-10-0064)**, disposable income, Gini, **income distribution by decile (before-tax + after-tax grouped bars, year slider; 11-10-0193)**, **"Income, mobility & the life cycle" (career-arc median-income-by-age 11-10-0239 + low-income-persistence 11-10-0025 — counters the "fixed-club" misreading; intergenerational = prose note only, study-only)**, **"Who poverty affects most" (MBM by group, 11-10-0135+0093)**, poverty, LIM-AT, food insecurity (steel bar, not maroon), income map (city) + link to neighbourhood-detail page
 ├── income/neighbourhoods.qmd ← census-tract income choropleth (heavy ~3MB; its own page so the index stays light)
 ├── fiscal/index.qmd       ← **Government Finances** (Government-&-Public-Finances dropdown): govt gross debt, budget balance, revenue, interest costs, defence (all vs OECD peers)
 ├── government/index.qmd   ← **Government Employment** (Government-&-Public-Finances dropdown): employment by level of government, full public-sector composition (archived), OECD peer comparison, federal public-service headcount/by-department/demographics/executives, + sourced occupational note
@@ -186,7 +186,7 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (115 indicators / 12 sections)
+## Data sources (120 indicators / 12 sections) — incl. the 2026-06-23 cost-of-living/affordability buildout (branch `content-cost-of-living`, NOT yet deployed): BoC buyer-type, MBM poverty-by-group, income mobility (age-income + low-income persistence), regional wages, cumulative price level §151. Cost-of-Living page (economics/cost-of-living.qmd) also gained "How much prices have risen" (CPI level since 2019) + "Has pay kept up?" (wage vs CPI). **Remaining (next session): rent-$ by city (CMHC 34-10-0133), entry-level price-to-income (CREA-apt÷income), wealth-by-age (DHEA 36-10-0660).**
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   population by age & gender 17-10-0005-01 (bespoke `fetch_age_structure` — Canada,

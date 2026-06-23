@@ -18,7 +18,7 @@ import zipfile
 import requests
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR
+from pipeline.config import CANADA_COLOR, CATEGORICAL_COLORS
 
 ATTRIB = ("Source: CREA MLS® Home Price Index, © The Canadian Real Estate Association. "
           "Used with permission for educational purposes.")
@@ -50,6 +50,12 @@ RATIO_TYPES = [
 ]
 CITY_PALETTE = ["#B5403A", "#1f77b4", "#2ca02c", "#9467bd", "#ff7f0e",
                 "#8c564b", "#17becf", "#bcbd22"]
+# CREA market sheet -> 2021-Census CMA code, for the entry-level income join.
+ENTRY_CMAUID = {
+    "GREATER_VANCOUVER": "933", "GREATER_TORONTO": "535", "OTTAWA": "505",
+    "MONTREAL_CMA": "462", "CALGARY": "825", "EDMONTON": "835",
+    "WINNIPEG": "602", "HALIFAX_DARTMOUTH": "205",
+}
 
 
 def _zip_bytes(cache_dir):
@@ -199,4 +205,42 @@ def fig_price_to_income(agg, root="."):
         updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.07,
             yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)])
     _src(fig, f"{ATTRIB} Benchmark deflated to 2024 $ via CPI; income: StatCan 11-10-0190-01.", y=-0.16)
+    return fig
+
+
+def fig_entry_level_affordability(sheets, month, root="."):
+    """Starter-home (apartment / condo) affordability by city: the latest CREA
+    apartment benchmark ÷ a typical local household income, as a ranked bar of
+    "years of income". No clean entry-level price feed exists, so the apartment
+    tier stands in for the starter home (the affordability companion to the
+    value-to-income map, which uses the *typical* dwelling). Income is the
+    2021-Census median household income by metro, grown to the benchmark year by
+    national average weekly earnings — a single factor, so the cross-city ranking
+    is unaffected by the income vintage."""
+    from pipeline.charts import category_bar
+    cma = pd.read_csv(os.path.join(root, "data/geo/statcan_cma_indicators.csv"),
+                      dtype={"cmauid": str}).set_index("cmauid")["median_income"]
+    wage = pd.read_csv(os.path.join(root, "data/income/statcan_wages_by_province.csv"))
+    awe = wage[wage["geo"] == "Canada"].set_index("year")["avg_weekly_wage"]
+    rows, byear = [], None
+    for sheet, label in MARKETS:
+        uid = ENTRY_CMAUID.get(sheet)
+        if uid is None or uid not in cma.index or pd.isna(cma.get(uid)):
+            continue
+        s = sheets[sheet][["Date", "Apartment_Benchmark_SA"]].dropna()
+        if s.empty:
+            continue
+        last = s.iloc[-1]
+        byear = pd.Timestamp(last["Date"]).year
+        wyear = min(byear, int(awe.index.max()))
+        income = float(cma.loc[uid]) * (awe.get(wyear, awe.iloc[-1]) / awe.loc[2020])
+        rows.append({"city": label, "ratio": float(last["Apartment_Benchmark_SA"]) / income})
+    table = pd.DataFrame(rows)
+    fig = category_bar(table, "city", "ratio",
+        xaxis_title="Years of a typical household's income (apartment / condo)",
+        value_fmt=".1f", color=CATEGORICAL_COLORS[0],
+        text_col="ratio", text_fmt="{:.1f}",
+        hovertemplate="%{y}: %{x:.1f} years of household income<extra></extra>",
+        source_note=f"{ATTRIB} Apartment/condo benchmark ({month}) ÷ 2021-Census median "
+                    f"household income by metro, grown to {byear} by average weekly earnings.")
     return fig

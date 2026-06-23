@@ -742,12 +742,27 @@ INDICATORS = [
               value_col="vacancy_rate", chart_recipe="bar",
               fetch_fn="fetch_cma_vacancy", output_subpath="statcan_cma_vacancy.csv",
               source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
+    # Average rent in dollars by city and bedroom type — the level behind the rent
+    # CPI (a trend index) and the vacancy spread; "what's typical rent in my city".
+    Indicator("cma_rent", "housing", "custom",
+              "Average rent by city and bedroom type", "$ per month", "annual",
+              value_col="avg_rent", chart_recipe="bar",
+              fetch_fn="fetch_cma_rent", output_subpath="statcan_cma_rent.csv",
+              source_table="Statistics Canada 34-10-0133-01 (CMHC)"),
     Indicator("debt_service_ratio", "housing", "custom",
               "Household debt service ratio", "% of disposable income", "quarterly",
               value_col="dsr_total", chart_recipe="line",
               fetch_fn="fetch_debt_service_ratio",
               output_subpath="statcan_debt_service_ratio.csv",
               source_table="Statistics Canada 11-10-0065-01"),
+    # Wealth, real-estate assets and mortgage debt per household by age group —
+    # the millennial-stress anchor (younger households: least net worth, most
+    # mortgage debt). DHEA modelled experimental estimates, flagged on the page.
+    Indicator("wealth_by_age", "housing", "custom",
+              "Wealth and mortgage debt by age (per household)", "$ per household", "quarterly",
+              value_col="net_worth", chart_recipe="line",
+              fetch_fn="fetch_wealth_by_age", output_subpath="statcan_wealth_by_age.csv",
+              source_table="Statistics Canada 36-10-0660-01 (DHEA)"),
     Indicator("provincial_finance", "government", "custom",
               "Provincial government finances (CGFS, % of GDP)", "% of provincial GDP",
               "annual", value_col="net_debt_pct_gdp", chart_recipe="bar",

@@ -1322,3 +1322,119 @@ def fetch_wages_by_province():
         transformations=["Canada + provinces; all industries; both genders; 15+; both full/part-time; average weekly wage"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
+
+
+# Average rent by city and bedroom type (CMHC Rental Market Survey via StatCan
+# 34-10-0133-01) — the dollar-level companion to the rent CPI (a trend index) and
+# the by-city vacancy spread; answers "what's typical rent in my city". The
+# comprehensive "row and apartment structures of three units and over" universe;
+# there is no "Total" unit, so the 2-bedroom (CMHC's reference unit) anchors the
+# page and all four sizes are kept.
+RENT_STRUCT = "Row and apartment structures of three units and over"
+RENT_UNITS = {
+    "Bachelor units": "Bachelor",
+    "One bedroom units": "1 bedroom",
+    "Two bedroom units": "2 bedroom",
+    "Three bedroom units": "3 bedroom +",
+}
+
+
+def fetch_cma_rent():
+    """Average monthly rent by city and bedroom type, latest survey year (CMHC
+    Rental Market Survey via StatCan 34-10-0133-01). Tidy: cma, year, bedroom,
+    avg_rent. CMA/centre rows only; the Ottawa-Gatineau "part" rows are dropped in
+    favour of the combined whole-CMA row (same dup-geography trap as the vacancy and
+    crime joins)."""
+    logger.info("Fetching CMA average rent (34-10-0133-01)...")
+    try:
+        df = _get_table("34-10-0133-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch rent table: {e}")
+        return None
+    STRUCT, UNIT = "Type of structure", "Type of unit"
+    validate_columns(df, ["REF_DATE", "GEO", STRUCT, UNIT, "VALUE"], "cma_rent")
+    df = df[(df[STRUCT] == RENT_STRUCT) & (df[UNIT].isin(RENT_UNITS))
+            & ~df["GEO"].str.contains(" part,", na=False)].copy()
+    df["year"] = pd.to_numeric(df["REF_DATE"], errors="coerce")
+    df["avg_rent"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df = df.dropna(subset=["year", "avg_rent"])
+    if df.empty:
+        return None
+    latest_year = int(df["year"].max())
+    df = df[df["year"] == latest_year].copy()
+    df["cma"] = df["GEO"].str.split(",").str[0].str.strip()
+    df["bedroom"] = df[UNIT].map(RENT_UNITS)
+    out = (df[["cma", "year", "bedroom", "avg_rent"]]
+           .drop_duplicates(["cma", "bedroom"])
+           .sort_values(["bedroom", "avg_rent"]).reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    out_path = DATA_DIR / "housing" / "statcan_cma_rent.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Statistics Canada / CMHC", source_table="34-10-0133-01",
+        frequency="annual", unit="average monthly rent ($)",
+        transformations=[f"row + apartment structures of three units and over; "
+                         f"CMA/centre rows (Ottawa-Gatineau parts dropped); "
+                         f"latest year ({latest_year}); four bedroom types"])
+    logger.info(f"  saved {len(out)} rows ({out.cma.nunique()} centres, {latest_year}) -> {out_path.name}")
+    return out
+
+
+# Wealth, real-estate assets and mortgage debt per household by age group (StatCan
+# Distributions of Household Economic Accounts, 36-10-0660-01). The DHEA are
+# MODELLED, EXPERIMENTAL distributions of the national balance sheet — flagged as
+# such on the page. "Value per household" in dollars, Canada, quarterly. The
+# millennial-stress trio (younger households hold the least net worth and carry the
+# most mortgage debt).
+WEALTH_AGES = ["Less than 35 years", "35 to 44 years", "45 to 54 years",
+               "55 to 64 years", "65 years and over"]
+WEALTH_AGE_LABELS = {"Less than 35 years": "Under 35", "35 to 44 years": "35–44",
+                     "45 to 54 years": "45–54", "55 to 64 years": "55–64",
+                     "65 years and over": "65+"}
+WEALTH_MEASURES = {"Net worth (wealth)": "net_worth", "Real estate": "real_estate",
+                   "Mortgage liabilities": "mortgage"}
+
+
+def fetch_wealth_by_age():
+    """Net worth, real-estate wealth and mortgage debt per household by age group,
+    Canada (StatCan DHEA 36-10-0660-01, quarterly). Wide CSV: date, age_group,
+    net_worth, real_estate, mortgage. The DHEA are modelled experimental estimates
+    (a distribution of the national balance sheet), labelled as such on the page."""
+    logger.info("Fetching wealth by age (DHEA 36-10-0660-01)...")
+    try:
+        df = _get_table("36-10-0660-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch DHEA table: {e}")
+        return None
+    validate_columns(df, ["REF_DATE", "GEO", "Statistics", "Characteristics",
+                          "Wealth", "UOM", "VALUE"], "wealth_by_age")
+    d = df[(df["GEO"] == "Canada") & (df["Statistics"] == "Value per household")
+           & (df["UOM"] == "Dollars") & (df["Characteristics"].isin(WEALTH_AGES))
+           & (df["Wealth"].isin(WEALTH_MEASURES))].copy()
+    d["date"] = pd.to_datetime(d["REF_DATE"], format="%Y-%m", errors="coerce")
+    d["value"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    d["age_group"] = d["Characteristics"].map(WEALTH_AGE_LABELS)
+    d["measure"] = d["Wealth"].map(WEALTH_MEASURES)
+    wide = (d.dropna(subset=["date", "value"])
+            .pivot_table(index=["date", "age_group"], columns="measure", values="value")
+            .reset_index())
+    order = {lab: i for i, lab in enumerate(WEALTH_AGE_LABELS.values())}
+    wide = (wide.assign(_o=wide["age_group"].map(order))
+            .sort_values(["date", "_o"]).drop(columns="_o")
+            .dropna(subset=["net_worth"]).reset_index(drop=True))
+    if wide.empty:
+        return None
+    cols = ["date", "age_group"] + [c for c in ("net_worth", "real_estate", "mortgage")
+                                    if c in wide.columns]
+    out_path = DATA_DIR / "housing" / "statcan_wealth_by_age.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wide[cols].to_csv(out_path, index=False)
+    save_metadata(out_path, df=wide, date_column="date",
+        source="Statistics Canada", source_table="36-10-0660-01",
+        frequency="quarterly", unit="dollars per household (modelled, DHEA)",
+        transformations=["Canada; value per household; five age groups; "
+                         "net worth / real estate / mortgage liabilities; "
+                         "DHEA modelled experimental estimates"])
+    logger.info(f"  saved {len(wide)} rows -> {out_path.name}")
+    return wide[cols]

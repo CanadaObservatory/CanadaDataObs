@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.charts import category_bar, category_bar_views
+from pipeline.config import CATEGORICAL_COLORS, CATEGORICAL_OTHER
 
 MAJOR = ["Canada", "Toronto", "Montréal", "Vancouver", "Ottawa - Gatineau", "Calgary",
          "Edmonton", "Winnipeg", "Québec", "Hamilton", "Kitchener - Cambridge - Waterloo",
@@ -25,10 +26,11 @@ How Canadians get to work says a lot about a city's shape. The car dominates alm
 mode_path = "data/population/commute_mode.csv"
 if os.path.exists(mode_path):
     m = pd.read_csv(mode_path)
-    m = m[m["geo"].isin(MAJOR)]
+    m = m[m["geo"].isin(MAJOR)].copy()
+    m["geo"] = m["geo"].str.replace(" - ", "–", regex=False)  # display: en-dash like the rest of the site
     MODE_ORDER = ["Car, truck or van", "Public transit", "Walked", "Bicycle", "Other"]
-    MODE_COLOR = {"Car, truck or van": "#9aa0a6", "Public transit": "#1f77b4",
-                  "Walked": "#2ca02c", "Bicycle": "#ff7f0e", "Other": "#cbb9ad"}
+    MODE_COLOR = {"Car, truck or van": CATEGORICAL_OTHER, "Public transit": CATEGORICAL_COLORS[0],
+                  "Walked": CATEGORICAL_COLORS[1], "Bicycle": CATEGORICAL_COLORS[2], "Other": CATEGORICAL_COLORS[3]}
     piv = m.pivot(index="geo", columns="mode", values="share")
     order = piv.sort_values("Public transit", ascending=True).index.tolist()  # most transit at top
     fig = go.Figure()
@@ -77,7 +79,8 @@ That all-modes average blends very different journeys. Public-transit riders spe
 mode_path = "data/population/commute_duration_by_mode.csv"
 if os.path.exists(mode_path):
     dm = pd.read_csv(mode_path)
-    dm = dm[dm["geo"].isin(MAJOR)]
+    dm = dm[dm["geo"].isin(MAJOR)].copy()
+    dm["geo"] = dm["geo"].str.replace(" - ", "–", regex=False)  # display: en-dash like the rest of the site
     MODE_ORDER = ["All modes", "Car", "Public transit", "Walked", "Bicycle"]
     views = [(m, dm[dm["mode"] == m]) for m in MODE_ORDER]
     fig = category_bar_views(views, "geo", "avg_min",

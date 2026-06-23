@@ -218,7 +218,7 @@ if os.path.exists(wf_path) and os.path.exists(cesi_path):
         legend=dict(orientation="h", yanchor="top", y=-0.12, xanchor="center", x=0.5),
         margin=dict(t=30, b=120, r=70),
         annotations=[dict(
-            text=f"Sources: NRCan Canadian National Fire Database (area burned); ECCC CESI / NAPS (PM2.5 peak) | as of {get_data_date(wf_path)}",
+            text=f"Sources: NRCan Canadian National Fire Database (area burned); ECCC CESI / NAPS (PM2.5 peak) | Data as of: {get_data_date(wf_path)}",
             xref="paper", yref="paper", x=0, y=-0.30, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

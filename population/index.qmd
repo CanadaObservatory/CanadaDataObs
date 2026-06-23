@@ -10,7 +10,7 @@ import re
 import math
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.config import CANADA_COLOR, CATEGORICAL_COLORS, CATEGORICAL_OTHER, get_data_date
 from pipeline.charts import (single_line, single_bar, peer_comparison_line,
                              ranked_bar, population_pyramid, province_colors)
 ```
@@ -103,7 +103,7 @@ pcolors["Northwest Territories including Nunavut"] = \
 # Shorten the two longest legend labels (Newfoundland wraps to two lines so the full
 # name is kept; the hover still shows each geography's full name).
 LEGEND_NAME = {
-    "Northwest Territories including Nunavut": "NWT & Nunavut",
+    "Northwest Territories including Nunavut": "NWT & Nunavut<br>(pre-1999)",
     "Newfoundland and Labrador": "Newfoundland<br>and Labrador",
 }
 
@@ -196,9 +196,9 @@ if os.path.exists(components_path):
     temporary = piv["Net non-permanent residents"]
     yrs = piv.index.year
     # Plot in thousands of persons for readability.
-    cats = [("Natural increase (births − deaths)", natural / 1e3, "#59a14f"),
-            ("Net permanent immigration", permanent / 1e3, "#4e79a7"),
-            ("Net temporary residents", temporary / 1e3, "#f28e2b")]
+    cats = [("Natural increase (births − deaths)", natural / 1e3, CATEGORICAL_COLORS[0]),
+            ("Net permanent immigration", permanent / 1e3, CATEGORICAL_COLORS[1]),
+            ("Net temporary residents", temporary / 1e3, CATEGORICAL_COLORS[2])]
     figp = go.Figure()
     for name, series, col in cats:
         figp.add_trace(go.Bar(x=yrs, y=series.values, name=name, marker_color=col,
@@ -239,9 +239,9 @@ if os.path.exists(npr_path):
     nb = pd.read_csv(npr_path, parse_dates=["date"])
     order = ["Work permits", "Study permits", "Work + study permits",
              "Asylum claimants", "Other"]
-    colors = {"Work permits": "#17324D", "Study permits": "#2A7F9E",
-              "Work + study permits": "#8FB0C4", "Asylum claimants": "#C2972F",
-              "Other": "#A9AEB4"}
+    colors = {"Work permits": CATEGORICAL_COLORS[0], "Study permits": CATEGORICAL_COLORS[1],
+              "Work + study permits": CATEGORICAL_COLORS[2], "Asylum claimants": CATEGORICAL_COLORS[3],
+              "Other": CATEGORICAL_OTHER}
     full = {"Work permits": "Work-permit holders",
             "Study permits": "Study-permit holders",
             "Work + study permits": "Work and study permit holders",

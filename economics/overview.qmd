@@ -14,7 +14,7 @@ How fast the economy is growing, what it costs to live and borrow, and whether i
 :::{.column .area-card .area-economy width="32%"}
 ![](../visual_assets/brand/motifs/banner-economy.svg){.area-banner}
 
-### [Growth & Jobs](index.qmd)
+### [Economy & Jobs](index.qmd)
 GDP and GDP per capita, productivity, employment and unemployment, business
 investment, trade, and the dollar.
 :::

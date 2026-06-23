@@ -14,7 +14,7 @@ does not publish tuition for individual institutions.)
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.config import CANADA_COLOR, CATEGORICAL_COLORS, get_data_date
 from pipeline.charts import lines_over_time, category_bar, province_colors
 
 # Load tuition and deflate to constant dollars of the latest year, using the
@@ -70,8 +70,8 @@ if tu is not None:
     ca["level"] = ca["level"].str.replace(" ", "<br>", regex=False)   # two-line legend entries
     fig = lines_over_time(ca, "year", "real", "level",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
-        colors={"International<br>undergraduate": "#C77B3A", "International<br>graduate": "#D07D74",
-                "Canadian<br>undergraduate": "#3D6585", "Canadian<br>graduate": "#217466"},
+        colors={"International<br>undergraduate": CATEGORICAL_COLORS[5], "International<br>graduate": CATEGORICAL_COLORS[6],
+                "Canadian<br>undergraduate": CATEGORICAL_COLORS[0], "Canadian<br>graduate": CATEGORICAL_COLORS[2]},
         group_order=["International<br>undergraduate", "International<br>graduate",
                      "Canadian<br>undergraduate", "Canadian<br>graduate"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},

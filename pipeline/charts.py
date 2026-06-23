@@ -226,7 +226,12 @@ def _apply_peer_line_layout(fig, df, x_col, yaxis_title, source_note,
         xaxis["range"] = [_s, _e + (_e - _s) * 0.02]
     fig.update_layout(
         xaxis=xaxis,
-        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0"),
+        # Visible grey zero line (matches the single-series sign charts) — the template
+        # default is a WHITE zeroline, invisible on the white plot, which erased the zero
+        # threshold on the sign-crossing peer charts (real GDP growth, budget balance,
+        # current account). Only renders when 0 is in range, so level charts are untouched.
+        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0",
+                   zeroline=True, zerolinecolor="#888", zerolinewidth=1.5),
         # 600px tall so all 18 peer entries (17 + average) FIT the plot area with a
         # ~20px buffer — an overflowing Plotly legend grows an internal scrollbar that
         # captures the mouse wheel and fights the page scroll (owner-reported). The

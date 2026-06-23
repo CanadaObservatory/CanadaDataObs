@@ -378,7 +378,7 @@ if os.path.exists(prov_elec_path):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
         height=560, margin=dict(b=120, t=90, l=140),
         annotations=[dict(
-            text=f"Source: Statistics Canada 25-10-0015-01 & 25-10-0084-01 | as of {get_data_date(prov_elec_path)}",
+            text=f"Source: Statistics Canada 25-10-0015-01 & 25-10-0084-01 | Data as of: {get_data_date(prov_elec_path)}",
             xref="paper", yref="paper", x=0, y=-0.18, xanchor="left",
             showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

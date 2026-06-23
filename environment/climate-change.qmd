@@ -226,7 +226,7 @@ if os.path.exists(city_path):
                           borderwidth=1, showactive=True)],
         margin=dict(t=50, b=120, r=180),
         annotations=[dict(
-            text=f"Source: ECCC AHCCD (homogenized) + MSC daily observations | as of {get_data_date(city_path)}",
+            text=f"Source: ECCC AHCCD (homogenized) + MSC daily observations | Data as of: {get_data_date(city_path)}",
             xref="paper", yref="paper", x=0, y=-0.42, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -305,7 +305,7 @@ if os.path.exists(seas_path):
                           borderwidth=1, showactive=True)],
         margin=dict(t=85, b=120, r=205),
         annotations=[dict(
-            text=f"Source: ECCC AHCCD seasonal (homogenized, to 2020), via the GeoMet API | as of {get_data_date(seas_path)}",
+            text=f"Source: ECCC AHCCD seasonal (homogenized, to 2020), via the GeoMet API | Data as of: {get_data_date(seas_path)}",
             xref="paper", yref="paper", x=0, y=-0.42, showarrow=False,
             font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

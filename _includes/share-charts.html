@@ -8,39 +8,37 @@
   permalink target; anchor navigation is handled natively by the browser.
 -->
 <style>
+  /* Subtle icon-only permalink affordance: a faint link glyph beside each chart
+     heading (no "Share" text). The tooltip / aria-label carries the meaning, and
+     it stays tappable on touch devices (no hover-only reveal). */
   .chart-share {
     display: inline-flex;
     align-items: center;
-    gap: 0.3em;
-    margin-left: 0.6rem;
-    padding: 0.12em 0.6em;
-    font-size: 0.62em;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1.5;
+    margin-left: 0.4rem;
+    padding: 0.15em;
+    font-size: 0.6em;
+    line-height: 1;
     vertical-align: middle;
-    color: #6c757d;
+    color: #adb5bd;
     background: transparent;
-    border: 1px solid #ced4da;
-    border-radius: 999px;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
-    opacity: 0.6;
-    white-space: nowrap;
+    opacity: 0.5;
     -webkit-user-select: none;
     user-select: none;
-    transition: opacity .15s ease, color .15s ease, border-color .15s ease, background-color .15s ease;
+    transition: opacity .15s ease, color .15s ease, background-color .15s ease;
   }
   .chart-share:hover,
   .chart-share:focus-visible {
     opacity: 1;
     color: #2c3e50;
-    border-color: #adb5bd;
     background-color: #f1f3f5;
     outline: none;
   }
   .chart-share:focus-visible { box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.25); }
-  .chart-share svg { width: 1em; height: 1em; flex: 0 0 auto; }
-  .chart-share.copied { color: #1e7e34; border-color: #1e7e34; background-color: #eafaef; opacity: 1; }
+  .chart-share svg { width: 1.05em; height: 1.05em; flex: 0 0 auto; display: block; }
+  .chart-share.copied { color: #1e7e34; opacity: 1; }
   @media print { .chart-share { display: none !important; } }
 </style>
 <script>
@@ -82,7 +80,7 @@
   function flash(btn) {
     var original = btn.innerHTML;
     btn.classList.add('copied');
-    btn.innerHTML = CHECK_SVG + '<span>Copied</span>';
+    btn.innerHTML = CHECK_SVG;
     clearTimeout(btn._resetTimer);
     btn._resetTimer = setTimeout(function () {
       btn.classList.remove('copied');
@@ -111,7 +109,7 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'chart-share';
-    btn.innerHTML = LINK_SVG + '<span>Share</span>';
+    btn.innerHTML = LINK_SVG;
     var label = 'Copy a link to this chart' + (title ? ': ' + title : '');
     btn.setAttribute('aria-label', label);
     btn.title = label;

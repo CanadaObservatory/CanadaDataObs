@@ -9,7 +9,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import (
-    CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
+    CANADA_COLOR, CATEGORICAL_COLORS, COMPARATOR_COLORS, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date, get_next_release,
 )
 from pipeline.charts import (
@@ -227,7 +227,7 @@ if os.path.exists(gdppc_path):
     fig = lines_over_time(
         rel, "year", "value", "comparator",
         yaxis_title="Canada's GDP per capita (% of comparator)",
-        colors={"vs. the United States": "#1f77b4",
+        colors={"vs. the United States": COMPARATOR_COLORS["USA"],
                 "vs. the peer-group average": "#555555"},
         group_order=["vs. the United States", "vs. the peer-group average"],
         yticksuffix="%", hover_decimals=1, rangemode="normal",
@@ -307,8 +307,8 @@ if os.path.exists(prod_path) and os.path.exists(util_path):
     base = d[d["year"] == base_year].iloc[0]
     series = [
         ("gdp_per_capita", "GDP per capita", CANADA_COLOR, 3),
-        ("gdp_per_hour", "Labour productivity (GDP per hour)", "#1f77b4", 2),
-        ("hours_per_capita", "Labour utilisation (hours per capita)", "#f28e2b", 2),
+        ("gdp_per_hour", "Labour productivity (GDP per hour)", CATEGORICAL_COLORS[0], 2),
+        ("hours_per_capita", "Labour utilisation (hours per capita)", CATEGORICAL_COLORS[1], 2),
     ]
     figd = go.Figure()
     for col, name, clr, w in series:
@@ -506,7 +506,7 @@ if os.path.exists(trade_path):
     tr = pd.read_csv(trade_path, parse_dates=["date"])
     fige = go.Figure()
     for col, name, clr, w in [
-        ("exports_us_share", "United States", "#1f77b4", 3),
+        ("exports_us_share", "United States", COMPARATOR_COLORS["USA"], 3),
         ("exports_eu_share", "European Union", "#59a14f", 2),
         ("exports_china_share", "China", "#f28e2b", 2)]:
         fige.add_trace(go.Scatter(x=tr["date"], y=tr[col], name=name, mode="lines",
@@ -542,7 +542,7 @@ if os.path.exists(trade_path):
     figb = go.Figure()
     figb.add_hline(y=0, line_color="#888", line_width=1)
     figb.add_trace(go.Scatter(x=tr["date"], y=tr["balance_us"] / 1000, name="With the United States",
-        mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="US: $%{y:.1f}B<extra></extra>"))
+        mode="lines", line=dict(color=COMPARATOR_COLORS["USA"], width=2), hovertemplate="US: $%{y:.1f}B<extra></extra>"))
     figb.add_trace(go.Scatter(x=tr["date"], y=tr["balance_row"] / 1000, name="With the rest of the world",
         mode="lines", line=dict(color="#888888", width=2), hovertemplate="Rest of world: $%{y:.1f}B<extra></extra>"))
     figb.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",

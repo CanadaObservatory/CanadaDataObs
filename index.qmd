@@ -1,6 +1,6 @@
 ---
 title: "Canada Observatory"
-subtitle: "Interactive metrics for informed civic conversation"
+subtitle: "Interactive metrics for informed civic conversations"
 ---
 
 ![](visual_assets/brand/botanical/leaf-botanical-cells.svg){.hero-leaf fig-alt="The Canada Observatory mark: a sugar-maple leaf divided into six colour cells"}

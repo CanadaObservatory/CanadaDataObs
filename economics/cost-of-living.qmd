@@ -14,7 +14,7 @@ import math
 from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date, get_next_release
+from pipeline.config import CANADA_COLOR, CATEGORICAL_COLORS, get_data_date, get_next_release
 from pipeline.charts import category_bar, category_bar_views, lines_over_time, province_colors
 ```
 
@@ -112,9 +112,9 @@ try:
     figc.add_trace(go.Scatter(x=ai["date"], y=ai["yoy"], name="All-items", mode="lines",
         line=dict(color=CANADA_COLOR, width=3), hovertemplate="All-items: %{y:.1f}%<extra></extra>"))
     figc.add_trace(go.Scatter(x=tr["date"], y=tr["cpi_trim_yoy"], name="CPI-trim (core)", mode="lines",
-        line=dict(color="#4e79a7", width=2), hovertemplate="CPI-trim: %{y:.1f}%<extra></extra>"))
+        line=dict(color=CATEGORICAL_COLORS[0], width=2), hovertemplate="CPI-trim: %{y:.1f}%<extra></extra>"))
     figc.add_trace(go.Scatter(x=fd["date"], y=fd["yoy"], name="Food", mode="lines",
-        line=dict(color="#f28e2b", width=2), hovertemplate="Food: %{y:.1f}%<extra></extra>"))
+        line=dict(color=CATEGORICAL_COLORS[1], width=2), hovertemplate="Food: %{y:.1f}%<extra></extra>"))
     latest = ai["date"].max()
     figc.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
         meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
@@ -192,7 +192,7 @@ if os.path.exists(food_path):
     fig = category_bar_views(
         [("Past 5 years", _food_chg(60)), ("Past 12 months", _food_chg(12))],
         "food_group", "chg", xaxis_title="Price change (%)",
-        value_fmt=".1f", ticksuffix="%", color="#f28e2b",
+        value_fmt=".1f", ticksuffix="%", color=CATEGORICAL_COLORS[1],
         text_col="lbl", text_fmt="{}",
         source_note=f"Source: Statistics Canada, Table 18-10-0004-01 | {flatest:%B %Y}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

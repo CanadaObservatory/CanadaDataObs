@@ -9,7 +9,7 @@ body-classes: area-government
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import get_data_date
+from pipeline.config import CATEGORICAL_COLORS, get_data_date
 from pipeline.charts import category_bar, lines_over_time, province_colors
 
 SHOW = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
@@ -35,7 +35,7 @@ if os.path.exists(prov_path):
     yr = int(pf["year"].max())
     fig = category_bar(latest, "province", "net_debt_pct_gdp",
         xaxis_title="Net debt (% of provincial GDP)", value_fmt=".1f", ticksuffix="%",
-        color="#17324D", hovertemplate="%{y}: %{x:.1f}% of GDP<extra></extra>",
+        color=CATEGORICAL_COLORS[0], hovertemplate="%{y}: %{x:.1f}% of GDP<extra></extra>",
         source_note=f"Source: Statistics Canada CGFS 10-10-0017-01 + GDP 36-10-0222-01 (net financial worth basis) | {yr}")
     fig.show(config=SHOW)
 else:
@@ -87,6 +87,7 @@ if os.path.exists(prov_path):
         yaxis_title="Net debt (% of provincial GDP)", colors=PROV_COLORS,
         group_order=PROV_ORDER, yticksuffix="%", hover_decimals=1, rangemode="normal",
         source_note=f"Source: Statistics Canada CGFS 10-10-0017-01 + GDP 36-10-0222-01 | Data as of: {get_data_date(prov_path)}")
+    fig.add_hline(y=0, line_color="#888", line_width=1.5)
     fig.show(config=SHOW)
 ```
 

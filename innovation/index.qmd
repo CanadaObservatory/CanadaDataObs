@@ -12,8 +12,8 @@ The charts below place Canada against the 17-peer group across the innovation pi
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import get_data_date, CANADA_COLOR, CATEGORICAL_COLORS
-from pipeline.charts import peer_comparison_line, ranked_bar
+from pipeline.config import get_data_date, CANADA_COLOR, CATEGORICAL_COLORS, CATEGORICAL_OTHER
+from pipeline.charts import peer_comparison_line, ranked_bar, category_bar, lines_over_time
 
 
 def _peer_line(path, value_col, yaxis_title, source, **kw):
@@ -150,6 +150,72 @@ else:
     print("R&D support data not yet available. Run the data pipeline.")
 ```
 
+## The economy behind the gap
+
+Part of the explanation is structural. Canada's economy leans toward resource extraction, finance, and real estate more than the R&D-intensive manufacturing that drives most private research in peer economies — and a large share of the innovation Canada does produce is owned or performed from outside the country.
+
+### Canada's economy, by industry
+
+Real estate is the largest sector, followed by manufacturing, health and social services, finance, and professional services. Mining, oil and gas (highlighted alongside finance) is a significant share, concentrated in a few provinces. Together, finance, real estate and resource industries make up a substantial part of the economy — more than manufacturing and the knowledge-intensive professional and information services that perform most private R&D.
+
+```{python}
+#| echo: false
+is_path = "data/science/statcan_industry_structure.csv"
+if os.path.exists(is_path):
+    isd = pd.read_csv(is_path)
+    isd["lbl"] = [f"{v:.1f}%" for v in isd["share"]]
+    per = isd["period"].iloc[0]
+    category_bar(isd, "sector", "share", xaxis_title="Share of GDP (%)",
+        ticksuffix="%", value_fmt=".1f", height=600, color=CATEGORICAL_OTHER,
+        highlight={"Mining, oil & gas", "Finance & insurance"}, highlight_color=CATEGORICAL_COLORS[1],
+        text_col="lbl", text_fmt="{}",
+        hovertemplate="%{y}: %{x:.1f}% of GDP<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 36-10-0434-01 (GDP by industry, chained 2017 $) | {per}").show(config=_CFG)
+else:
+    print("Industry-structure data not yet available. Run the data pipeline.")
+```
+
+### Who performs Canada's business R&D
+
+More than a third of the research and development performed by businesses in Canada is carried out by **foreign-controlled firms** — a share that has held around 37–39% for a decade. Foreign investment brings real R&D activity to Canada, but it also means a large part of the country's business research is performed by firms headquartered elsewhere.
+
+```{python}
+#| echo: false
+fc_path = "data/science/statcan_foreign_rd_control.csv"
+if os.path.exists(fc_path):
+    fc = pd.read_csv(fc_path)
+    fc["series"] = "Foreign-controlled firms"
+    lines_over_time(fc, "year", "foreign_share", "series",
+        yaxis_title="% of business in-house R&D", group_order=["Foreign-controlled firms"],
+        yticksuffix="%", hover_decimals=1,
+        source_note=f"Source: Statistics Canada, Table 27-10-0333-01 | Data as of: {get_data_date(fc_path)}").show(config=_CFG)
+else:
+    print("Foreign-control data not yet available. Run the data pipeline.")
+```
+
+### Where invention value goes
+
+Inventions made in one country are often owned by companies in another. About a quarter of the patents invented in Canada are owned by **US entities — the highest share of any peer country** — a concrete measure of how closely Canadian invention is tied to firms south of the border.
+
+```{python}
+#| echo: false
+po_path = "data/science/oecd_patents_us_owned.csv"
+if os.path.exists(po_path):
+    _peer_line(po_path, "pct_us_owned", "Patents owned by US entities (%)",
+               "Source: OECD, Foreign ownership of domestic inventions").show(config=_CFG)
+else:
+    print("Patent-ownership data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(po_path):
+    df = pd.read_csv(po_path)
+    ranked_bar(df, "pct_us_owned", "Domestic inventions owned by US entities (%)",
+        f"Source: OECD, Foreign ownership of domestic inventions | Data as of: {get_data_date(po_path)}",
+        min_countries=12, hover_template="%{y}: %{x:.1f}%<extra></extra>").show(config=_CFG)
+```
+
 ## Download data
 
 - [Business R&D, BERD (CSV)](../data/science/oecd_berd.csv) — OECD MSTI
@@ -157,3 +223,6 @@ else:
 - [Triadic patent families per million (CSV)](../data/science/oecd_triadic_patents.csv) — OECD MSTI
 - [High-technology exports (CSV)](../data/science/worldbank_hightech_exports.csv) — World Bank, World Development Indicators
 - [Government support for business R&D, direct vs tax (CSV)](../data/science/oecd_rd_support.csv) — OECD R&D Tax Incentive indicators
+- [Canada's GDP by industry (CSV)](../data/science/statcan_industry_structure.csv) — Statistics Canada 36-10-0434-01
+- [Foreign-controlled share of business R&D (CSV)](../data/science/statcan_foreign_rd_control.csv) — Statistics Canada 27-10-0333-01
+- [Domestic inventions owned by US entities (CSV)](../data/science/oecd_patents_us_owned.csv) — OECD, Foreign ownership of domestic inventions

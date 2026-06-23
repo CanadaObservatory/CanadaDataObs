@@ -1026,6 +1026,19 @@ INDICATORS = [
               "Government support for business R&D (direct vs tax)", "% of GDP", "annual",
               fetch_fn="fetch_rd_tax_support", output_subpath="oecd_rd_support.csv",
               source_table="OECD R&D Tax Incentive indicators"),
+    # Structural / ownership backbone (the "why the gap" context).
+    Indicator("industry_structure", "science", "custom",
+              "Canada's GDP by industry", "% of GDP", "monthly",
+              fetch_fn="fetch_industry_structure", output_subpath="statcan_industry_structure.csv",
+              source_table="Statistics Canada 36-10-0434-01"),
+    Indicator("foreign_rd_control", "science", "custom",
+              "Foreign-controlled share of business R&D", "%", "annual",
+              fetch_fn="fetch_foreign_rd_control", output_subpath="statcan_foreign_rd_control.csv",
+              source_table="Statistics Canada 27-10-0333-01"),
+    Indicator("patents_us_owned", "science", "custom",
+              "Domestic inventions owned by US entities", "%", "annual",
+              fetch_fn="fetch_patents_us_owned", output_subpath="oecd_patents_us_owned.csv",
+              source_table="OECD, Foreign ownership of domestic inventions"),
 
     # ----- Education (university tuition; StatCan TLAC — bespoke multi-series) -----
     Indicator("tuition", "education", "custom",

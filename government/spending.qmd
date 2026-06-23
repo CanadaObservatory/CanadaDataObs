@@ -42,7 +42,7 @@ if os.path.exists(fin_path):
                                    "expenditure_pct_gdp": "Total spending"})
     fig = lines_over_time(m, "year", "pct", "metric", yaxis_title="% of GDP",
         yticksuffix="%", hover_decimals=1,
-        colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
+        colors={"Total spending": "#B5403A", "Revenue": "#4e79a7"},
         group_order=["Total spending", "Revenue"], rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0477-01 (federal) and 36-10-0222-01 (GDP) | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -64,7 +64,7 @@ if os.path.exists(fin_path):
     m["metric"] = m["metric"].map({"revenue": "Revenue", "expenditure": "Total spending"})
     fig = lines_over_time(m, "year", "valb", "metric", yaxis_title="$ billions (nominal)",
         ytickprefix="$", hover_decimals=1,
-        colors={"Total spending": "#d62728", "Revenue": "#4e79a7"},
+        colors={"Total spending": "#B5403A", "Revenue": "#4e79a7"},
         group_order=["Total spending", "Revenue"], rangeslider=True,
         source_note=f"Source: Statistics Canada 36-10-0477-01 (federal general government, nominal dollars) | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -82,7 +82,7 @@ if os.path.exists(fin_path):
     b = fin.dropna(subset=["revenue_pct_gdp", "expenditure_pct_gdp"]).copy()
     b["balance"] = b["revenue_pct_gdp"] - b["expenditure_pct_gdp"]
     b = b.sort_values("year")
-    bal_colors = ["#4e79a7" if v >= 0 else "#d62728" for v in b["balance"]]
+    bal_colors = ["#4e79a7" if v >= 0 else "#C0392B" for v in b["balance"]]
     # Pre-format the hover in Python: Quarto's bundled Plotly drops the '+' sign-format
     # in hovertemplate (see the economics quarterly-GDP chart), and the surplus/deficit
     # sign is the point here. <0.05 rounds to a clean "0.0%" (no "-0.0%").

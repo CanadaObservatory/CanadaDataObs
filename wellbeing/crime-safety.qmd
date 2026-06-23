@@ -393,7 +393,7 @@ sea = pd.read_csv("data/geo/toronto_crime_seasonality.csv")
 piv = sea.pivot_table(index="month", columns="crime", values="count", aggfunc="sum")
 pct = piv.div(piv.sum(axis=0), axis=1) * 100      # each crime's 12 months sum to 100%
 MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-SEA_COLORS = {"Bike theft": "#d62728", "Assault": "#4e79a7", "Theft from vehicle": "#76b7b2",
+SEA_COLORS = {"Bike theft": "#C0392B", "Assault": "#4e79a7", "Theft from vehicle": "#76b7b2",
               "Auto theft": "#9c755f", "Break & enter": "#b07aa1", "Robbery": "#edc948"}
 fig = go.Figure()
 for c in ["Bike theft", "Assault", "Theft from vehicle", "Auto theft", "Break & enter", "Robbery"]:

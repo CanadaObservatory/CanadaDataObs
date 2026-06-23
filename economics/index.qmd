@@ -97,7 +97,7 @@ if os.path.exists(gdpq_path):
     # (avoids a "-0.0%" for near-flat quarters).
     q["hover"] = [f"{lbl}: {'0.0' if abs(g) < 0.05 else format(g, '+.1f')}%"
                   for lbl, g in zip(q["qlabel"], q["growth"])]
-    bar_colors = ["#d62728" if v < 0 else "#4e79a7" for v in q["growth"]]
+    bar_colors = ["#C0392B" if v < 0 else "#4e79a7" for v in q["growth"]]
     import math
     from pipeline.charts import add_recession_bands
     # Clip the y-axis to normal quarters so past recessions stay legible; the

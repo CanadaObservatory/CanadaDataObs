@@ -48,7 +48,7 @@ RATIO_TYPES = [
     ("Townhouse_Benchmark_SA",     "Townhouse"),
     ("Apartment_Benchmark_SA",     "Apartment / condo"),
 ]
-CITY_PALETTE = ["#d62728", "#1f77b4", "#2ca02c", "#9467bd", "#ff7f0e",
+CITY_PALETTE = ["#B5403A", "#1f77b4", "#2ca02c", "#9467bd", "#ff7f0e",
                 "#8c564b", "#17becf", "#bcbd22"]
 
 

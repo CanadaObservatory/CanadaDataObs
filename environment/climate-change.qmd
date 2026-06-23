@@ -255,7 +255,7 @@ if os.path.exists(seas_path):
     cities = [c for c in ["Toronto", "Vancouver", "Winnipeg", "Calgary", "Alert", "Eureka"]
               if c in set(cs["city"])]
     SEASON_COLORS = {"Winter": "#1f77b4", "Spring": "#2ca02c",
-                     "Summer": "#d62728", "Autumn": "#ff7f0e"}
+                     "Summer": "#C0392B", "Autumn": "#ff7f0e"}
     SEASONS = ["Winter", "Spring", "Summer", "Autumn"]
     # Two metrics share one chart via a second dropdown: the seasonal average
     # temperature and the seasonal average of daily-high temperatures.

@@ -260,6 +260,23 @@ FUEL_COLORS = {
     "solar": "#E0B53C", "biomass": "#5E7548",
 }
 
+# SEMANTIC per-topic palettes — colour = a specific group, so it must read the same
+# wherever the topic appears. The CROSS-PAGE ones (used by several .qmd) are centralized
+# here; single-page palettes (air quality, season, crime) stay in their .qmd. The retired
+# chart-red #d62728 is swapped out of these for a brick #B5403A.
+VM_GROUP_COLORS = {  # visible-minority groups (diversity maps + over-time)
+    "All visible minorities": "#111111",   # headline (thick)
+    "Not a visible minority": "#9e9e9e",
+    "South Asian": "#1f77b4", "Chinese": "#B5403A", "Black": "#2ca02c",
+    "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
+}
+RELIGION_HISTORY_COLORS = {  # religious affiliation (history lines + change/composition bars)
+    "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
+    "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#B5403A",
+    "Buddhist": "#9467bd", "Jewish": "#8c564b",
+    "Indigenous": "#e377c2", "Other religions": "#17becf",
+}
+
 
 # ============================================================================
 # Indicator registry

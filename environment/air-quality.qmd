@@ -15,7 +15,7 @@ from pipeline.charts import lines_over_time, peer_comparison_line, ranked_bar
 # wrong way (wildfire smoke), so it is the one to draw the eye.
 AQ_COLORS = {
     "SOx": "#1f77b4", "SO2": "#1f77b4", "NOX": "#ff7f0e", "NO2": "#ff7f0e",
-    "VOC": "#2ca02c", "CO": "#9467bd", "O3": "#8c564b", "PM2.5": "#d62728",
+    "VOC": "#2ca02c", "CO": "#9467bd", "O3": "#8c564b", "PM2.5": "#C0392B",
 }
 ```
 

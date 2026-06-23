@@ -10,7 +10,7 @@ from pipeline.config import (
     HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
     PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS, DEFAULT_VISIBLE_COMPARATORS,
     PROVINCE_NAMES, PROVINCE_COLORS, PROVINCE_COLORS_DEEP, PROVINCE_COLORS_PASTEL,
-    CATEGORICAL_COLORS, CATEGORICAL_OTHER,
+    CATEGORICAL_COLORS, CATEGORICAL_OTHER, VM_GROUP_COLORS, RELIGION_HISTORY_COLORS,
     SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
@@ -1777,12 +1777,8 @@ DIVERSITY_MAP_GROUPS = [
     ("korean", "Korean"), ("japanese", "Japanese"),
 ]
 
-VM_GROUP_COLORS = {
-    "All visible minorities": "#111111",   # headline (thick)
-    "Not a visible minority": "#9e9e9e",
-    "South Asian": "#1f77b4", "Chinese": "#d62728", "Black": "#2ca02c",
-    "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
-}
+#  VM_GROUP_COLORS + RELIGION_HISTORY_COLORS moved to config.py (centralized semantic
+#  palettes); re-exported via the config import above so existing references still resolve.
 
 # Dropdown order for the religion ("religious affiliation") share maps — CMA,
 # census-tract and dissemination-area. Shared by every religion .qmd so the layers
@@ -1798,14 +1794,6 @@ RELIGION_MAP_GROUPS = [
     ("indigenous_spirituality", "Indigenous"),
     ("other_religion", "Other religions & spiritual traditions"),
 ]
-
-RELIGION_HISTORY_COLORS = {
-    "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
-    "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#d62728",
-    "Buddhist": "#9467bd", "Jewish": "#8c564b",
-    "Indigenous": "#e377c2", "Other religions": "#17becf",
-}
-
 
 def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                   value_col="share", default_geo="Canada", source_note=None,
@@ -2045,7 +2033,7 @@ def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
     fig = go.Figure()
 
     default_colors = [
-        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#e15759", "#9467bd",
         "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
         "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5",
     ]

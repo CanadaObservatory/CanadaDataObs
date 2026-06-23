@@ -252,12 +252,16 @@ if os.path.exists(dgrow_path):
     area = dep.groupby(["year", "band"], as_index=False)["employees"].sum()
     order = [SHORT.get(n, n) for n in named] + ["Other departments"]
     fig = stacked_area(area, "year", "employees", "band",
-        yaxis_title="Federal public servants", group_order=order, height=600,
+        yaxis_title="Federal public servants", group_order=order, height=680,
         rangeslider=True, legend_orientation="h", hover_decimals=0,
         source_note=f"Source: Treasury Board of Canada Secretariat — federal public service employment by department (open.canada.ca) | Data as of: {get_data_date(dgrow_path)}")
-    # the 9-band legend wraps to ~3 rows; drop the source below it + widen the margin
-    fig.update_layout(margin=dict(b=255))
-    fig.layout.annotations[-1].update(y=-0.62)
+    # The 9-band legend wraps to ~5 rows in the article column. Sit it between the range
+    # slider and the source note so it clears both: pulled up snug under the slider
+    # (legend.y) with the source dropped below it (verified in-browser: ~6px above the
+    # slider, ~17px below to the source).
+    fig.update_layout(margin=dict(b=250))
+    fig.layout.legend.update(y=-0.205)
+    fig.layout.annotations[-1].update(y=-0.56)
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")

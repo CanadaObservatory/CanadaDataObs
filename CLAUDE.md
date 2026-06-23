@@ -346,11 +346,15 @@ Canada is always **brand maroon `#7A263A`** (LOCKED 2026-06-22 — replaced char
 `#d62728` for the *entity*; valence reds like the CPI above-target bars stay their own
 literals in the pages). A **focal comparator set** gets distinct colours
 (`COMPARATOR_COLORS`): US deep-blue, Australia gold, Germany deep-forest, UK rose-mauve,
-Sweden sky-blue, and **Japan bronze (promoted to a focal comparator 2026-06-22 — owner:
-frequently of interest)**. The peer average is dark-grey dashed. **The other 10 peers**
-each own a fixed identity colour (`PEER_EXTRA_COLORS`) but DRAW grey + legend-hidden
-until the reader activates one, then it snaps to its colour. So the default view stays
-calm (only Canada + the focal comparators + average in colour) yet every country has a
+Sweden sky-blue, and **Japan bronze**. Of these six focal comparators, only
+**US / Australia / Germany load by default** (`DEFAULT_VISIBLE_COMPARATORS`, with Canada +
+the average); **Sweden, UK and Japan keep their distinct colour, their top-of-legend
+priority rank, and their colour on the ranking bars, but start `legendonly`** — one click
+away (Japan was moved out of the default-load set 2026-06-23 at owner request; it had been
+auto-loaded since its 2026-06-22 promotion). The peer average is dark-grey dashed.
+**The other 10 peers** each own a fixed identity colour (`PEER_EXTRA_COLORS`) but DRAW grey
++ legend-hidden until the reader activates one, then it snaps to its colour. So the default
+view stays calm (only Canada + the default comparators + average drawn at load) yet every country has a
 distinct, CONSISTENT colour the instant it is shown — and because inactive peers are
 grey, a clash can only appear between two countries the reader deliberately co-shows.
 **The whole 17-country set was redesigned 2026-06-21→22 as a deliberate data-ink palette**

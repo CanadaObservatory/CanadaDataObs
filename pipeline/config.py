@@ -145,12 +145,14 @@ PEER_EXTRA_COLORS = {
 }
 
 # Comparators shown ON LOAD for the peer line charts: Canada + US + Australia + Germany
-# + Japan + the peer average (Japan added 2026-06-22 with its promotion to a focal
-# comparator). Sweden + UK keep their colour + top-of-legend rank but start hidden
-# (legendonly), and the 10 grey peers stay hidden too, so a busy 17-line chart opens
-# legible. Global default for peer_comparison_line / _by_age; a chart passes
-# initial_visible=[...] to override (e.g. ["USA"] on fertility).
-DEFAULT_VISIBLE_COMPARATORS = ["USA", "AUS", "DEU", "JPN"]
+# + the peer average. Sweden, UK and Japan keep their distinct colour + top-of-legend
+# rank (and their colour on the ranking bar charts) but start hidden (legendonly) — so a
+# busy 17-line chart opens legible while those three stay one priority click away. Japan
+# was moved out of the default-load set 2026-06-23 (owner: prioritise it in the legend
+# like Sweden/UK, but don't auto-load it). The 10 grey peers stay hidden too. Global
+# default for peer_comparison_line / _by_age; a chart passes initial_visible=[...] to
+# override (e.g. ["USA"] on fertility), or topical=[...] to feature a peer its prose discusses.
+DEFAULT_VISIBLE_COMPARATORS = ["USA", "AUS", "DEU"]
 
 # --- Statistics Canada Table IDs ---
 STATCAN_TABLES = {

@@ -262,7 +262,7 @@ else:
 
 ## Income distribution over time
 
-A single inequality number hides how income is actually shared. The chart below shows the average income of each tenth (**decile**) of Canadians — **before tax** and **after tax** — in constant 2024 dollars. Slide through the years to watch real incomes rise, with the top decile pulling furthest ahead; the gap between the two bars is what taxes and transfers take, and it widens sharply toward the top.
+A single inequality number hides how income is actually shared. The chart below shows the average income of each tenth (**decile**) of Canadians — **before tax** and **after tax** — in constant 2024 dollars. Slide through the years to watch real incomes rise, with the top decile pulling furthest ahead; the gap between the two bars is what taxes and transfers take, and it widens sharply toward the top. (These are snapshots of each decile in a given year — *not* a fixed set of people. Incomes move across the ladder over a lifetime, as the [life-cycle section below](#income-mobility-and-the-life-cycle) shows.)
 
 ```{python}
 #| echo: false
@@ -331,6 +331,64 @@ if os.path.exists(sh_path):
 else:
     print("Income-share data not yet available. Run the data pipeline.")
 ```
+
+## Income, mobility and the life cycle
+
+The charts above show how income is *distributed* in a given year — but a decile is a **position, not a fixed group of people**. Individuals move across the income ladder over their lives and careers: a graduate student earning $25,000 becomes a professional earning $100,000; a peak earner in their fifties later retires onto a pension. So a snapshot of the distribution is not a photograph of permanent winners and losers. Two patterns make this concrete.
+
+**Income tracks age.** Median income rises steeply through early adulthood, peaks in the mid-forties to mid-fifties, and steps down in retirement. Much of the bottom of the income ladder is the young and the old — often the *same people* at a different life stage, not a permanent class.
+
+```{python}
+#| echo: false
+ia_path = "data/income/statcan_income_by_age.csv"
+if os.path.exists(ia_path):
+    ia = pd.read_csv(ia_path)
+    AGE_ORDER = ["15–24", "25–34", "35–44", "45–54", "55–64", "65+"]
+    iyr = int(ia["year"].max())
+    cur = ia[ia["year"] == iyr].set_index("age_group").reindex(AGE_ORDER).reset_index()
+    fig = go.Figure(go.Scatter(x=cur["age_group"], y=cur["median_income"], mode="lines+markers+text",
+        line=dict(color=CATEGORICAL_COLORS[0], width=3), marker=dict(size=9),
+        text=[f"${v/1000:.0f}k" for v in cur["median_income"]], textposition="top center",
+        cliponaxis=False, hovertemplate="Age %{x}: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=440,
+        yaxis=dict(title="Median total income ($)", tickprefix="$", tickformat=",",
+                   rangemode="tozero", gridcolor="#e0e0e0"),
+        xaxis=dict(title="Age group"), margin=dict(t=40, b=80, r=25, l=10),
+        annotations=[dict(text=f"Source: Statistics Canada, Table 11-10-0239-01 (median total income, {iyr}).",
+            xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Income-by-age data not yet available. Run the data pipeline.")
+```
+
+**Most low income is temporary.** Following the same tax filers over eight years, most who experience low income are there only briefly — far more spend one or two years in it than are stuck there long-term. Low income is more often a spell than a settled state.
+
+```{python}
+#| echo: false
+lp_path = "data/income/statcan_low_income_persistence.csv"
+if os.path.exists(lp_path):
+    lp = pd.read_csv(lp_path)
+    window = str(lp["window"].iloc[0])
+    never = float(lp.loc[lp["years"] == 0, "pct_of_filers"].iloc[0])
+    ever = lp[lp["years"] >= 1].copy()
+    ever["share"] = ever["pct_of_filers"] / ever["pct_of_filers"].sum() * 100
+    ever["lbl"] = ever["years"].map(lambda y: f"{y} years" if y > 1 else "1 year")
+    ever.loc[ever["years"] == 8, "lbl"] = "8 (all)"
+    fig = go.Figure(go.Bar(x=ever["lbl"], y=ever["share"], marker_color=CATEGORICAL_COLORS[0],
+        text=[f"{v:.0f}%" for v in ever["share"]], textposition="outside",
+        hovertemplate="%{x} in low income: %{y:.0f}% of those who experienced it<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=400,
+        yaxis=dict(title="% of those ever in low income", ticksuffix="%", gridcolor="#e0e0e0"),
+        xaxis=dict(title=f"Years spent in low income over the {window.replace('/', '–')} window"),
+        margin=dict(t=40, b=95, r=20, l=10),
+        annotations=[dict(text=f"Source: Statistics Canada, Table 11-10-0025-01 (variable low income measure). Over this window {never:.0f}% of tax filers were never in low income.",
+            xref="paper", yref="paper", x=0, y=-0.24, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Low-income persistence data not yet available. Run the data pipeline.")
+```
+
+Mobility is real but not unlimited, and it has its own debates — chief among them how much a child's eventual income depends on their parents'. Statistics Canada research using its Intergenerational Income Database finds the link is modest but has strengthened somewhat for Canadians born in the 1980s compared with the 1960s (implying slightly less mobility). That long-run question aside, the life-cycle and persistence patterns above are a reminder that the income distribution is a set of positions people move through, not a fixed ranking of people.
 
 ## Relative poverty rate
 

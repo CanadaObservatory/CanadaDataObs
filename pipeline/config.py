@@ -837,6 +837,16 @@ INDICATORS = [
               value_col="avg_income", chart_recipe="line",
               fetch_fn="fetch_income_distribution", output_subpath="income_deciles_avg.csv",
               source_table="Statistics Canada 11-10-0193-01"),
+    # Mobility & the life cycle (income is a position, not a fixed group of people):
+    # the age-income career arc + low-income persistence (most spells are temporary).
+    Indicator("income_by_age", "income", "custom",
+              "Median income by age group", "current $", "annual",
+              fetch_fn="fetch_income_by_age", output_subpath="statcan_income_by_age.csv",
+              source_table="Statistics Canada 11-10-0239-01"),
+    Indicator("low_income_persistence", "income", "custom",
+              "Low-income persistence (years in low income)", "% of tax filers", "annual",
+              fetch_fn="fetch_low_income_persistence", output_subpath="statcan_low_income_persistence.csv",
+              source_table="Statistics Canada 11-10-0025-01"),
 
     # ----- Health -----
     Indicator("life_expectancy", "health", "oecd",

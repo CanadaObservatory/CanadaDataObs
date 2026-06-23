@@ -1213,3 +1213,77 @@ def fetch_poverty_by_group():
         transformations=["Canada; Market basket measure 2023 base; percentage; selected groups from age/family + population-group tables"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
+
+
+def fetch_income_by_age():
+    """Median total income by age group, Canada — the age-income (life-course)
+    profile. StatCan 11-10-0239-01 (Total income; Median excluding zeros; both
+    genders). Income rises steeply in early career, peaks at 45-54, then steps
+    down in retirement — the structural reason an income decile is not a fixed
+    group of people (the same person occupies different deciles over a lifetime)."""
+    logger.info("fetch_income_by_age (11-10-0239-01)")
+    try:
+        d = _get_table("11-10-0239-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    AGES = {"15 to 24 years": "15–24", "25 to 34 years": "25–34", "35 to 44 years": "35–44",
+            "45 to 54 years": "45–54", "55 to 64 years": "55–64", "65 years and over": "65+"}
+    gcol = next(c for c in d.columns if "ender" in c)
+    d = d[(d["GEO"] == "Canada") & (d[gcol] == "Total - Gender")
+          & (d["Income source"] == "Total income")
+          & (d["Statistics"] == "Median income (excluding zeros)")
+          & (d["Age group"].isin(AGES))].copy()
+    d["year"] = pd.to_numeric(d["REF_DATE"], errors="coerce")
+    d["median_income"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    d["age_group"] = d["Age group"].map(AGES)
+    out = (d[["year", "age_group", "median_income"]]
+           .dropna(subset=["year", "median_income"]))
+    out["year"] = out["year"].astype(int)
+    out = out.sort_values(["year", "age_group"]).reset_index(drop=True)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_income_by_age.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 11-10-0239-01",
+        frequency="annual", unit="median total income (current $)",
+        transformations=["Canada; both genders; Total income; median (excl. zeros); by age group"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
+def fetch_low_income_persistence():
+    """How long low income lasts — over an 8-year window, the share of tax filers
+    by the number of years spent in low income. Most who experience it are there
+    only briefly: low income is more often a temporary spell than a permanent
+    state, the flip side of income mobility. StatCan 11-10-0025-01 (Canada, both
+    sexes, variable low income measure), latest window."""
+    logger.info("fetch_low_income_persistence (11-10-0025-01)")
+    try:
+        d = _get_table("11-10-0025-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    d = d[(d["GEO"] == "Canada") & (d["Selected characteristics"] == "Both sexes")
+          & (d["Low income threshold"] == "Variable low income measure")
+          & (d["Statistics"] == "Percentage of tax filers in low income")].copy()
+    d["pct_of_filers"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    window = sorted(d["REF_DATE"].dropna().unique())[-1]
+    w = d[d["REF_DATE"] == window].copy()
+    w["years"] = w["Years in low income"].str.extract(r"(\d+)").astype(int)
+    out = (w[["years", "pct_of_filers"]].dropna(subset=["pct_of_filers"])
+           .sort_values("years").reset_index(drop=True))
+    out["window"] = window
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_low_income_persistence.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="window", source="Statistics Canada",
+        source_table="Statistics Canada 11-10-0025-01",
+        frequency="annual", unit="% of tax filers (8-year window)",
+        transformations=[f"Canada; both sexes; variable LIM; years in low income over the {window} window"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out

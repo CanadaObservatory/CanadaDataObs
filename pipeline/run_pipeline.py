@@ -52,6 +52,7 @@ from pipeline.fetch_government import (
     fetch_govt_spending_by_function, fetch_federal_spending_by_object,
     fetch_federal_spending_by_dept,
 )
+from pipeline.fetch_science import fetch_science_funding
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -111,6 +112,8 @@ CUSTOM_FETCHERS = {
     "fetch_govt_spending_by_function": fetch_govt_spending_by_function,
     "fetch_federal_spending_by_object": fetch_federal_spending_by_object,
     "fetch_federal_spending_by_dept": fetch_federal_spending_by_dept,
+    # Science (government science funding)
+    "fetch_science_funding": fetch_science_funding,
 }
 
 

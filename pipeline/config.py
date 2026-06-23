@@ -986,6 +986,15 @@ INDICATORS = [
               dataflow="OECD.STI.STP,DSD_MSTI@DF_MSTI,1.3",
               key=f"{_C}.A.T_RS.10P3EMP.._Z",
               source_table="OECD MSTI"),
+    # Federal granting-council funding (NSERC/SSHRC/CIHR) over time — bespoke
+    # multi-series reshape of StatCan 27-10-0026-01 (the councils are members of
+    # the agency dimension), deflated with 27-10-0005-01. Fiscal years, 2000/01–.
+    Indicator("science_funding", "science", "custom",
+              "Federal granting-council funding (NSERC, SSHRC, CIHR)",
+              "$ millions", "annual",
+              fetch_fn="fetch_science_funding",
+              output_subpath="statcan_science_funding.csv",
+              source_table="Statistics Canada 27-10-0026-01"),
 
     # ----- Education (university tuition; StatCan TLAC — bespoke multi-series) -----
     Indicator("tuition", "education", "custom",

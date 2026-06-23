@@ -4,8 +4,9 @@
   "source_table": "11-10-0193-01",
   "frequency": "annual",
   "unit": "% share of income",
-  "retrieved_at": "2026-06-22T18:17:51.980976+00:00",
+  "retrieved_at": "2026-06-23T16:33:27.439372+00:00",
   "latest_observation_date": "2024",
+  "next_release_date": null,
   "transformations": [
     "Canada; top-10% (highest decile) and bottom-40% (4 lowest) shares; market + after-tax"
   ],

@@ -4,8 +4,9 @@
   "source_table": "17-10-0020-01",
   "frequency": "annual",
   "unit": "persons (net)",
-  "retrieved_at": "2026-06-22T18:14:46.606531+00:00",
+  "retrieved_at": "2026-06-23T16:28:49.402078+00:00",
   "latest_observation_date": "2025",
+  "next_release_date": null,
   "transformations": [
     "net = in-migrants \u2212 out-migrants",
     "quarters summed to July\u2013June years labelled by ending year",

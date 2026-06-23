@@ -4,8 +4,9 @@
   "source_table": "11-10-0065-01",
   "frequency": "quarterly",
   "unit": "% of disposable income (seasonally adjusted)",
-  "retrieved_at": "2026-06-22T18:17:23.993132+00:00",
+  "retrieved_at": "2026-06-23T16:32:43.152137+00:00",
   "latest_observation_date": "2026-01-01",
+  "next_release_date": null,
   "transformations": [
     "Seasonally adjusted at annual rates",
     "total / mortgage / non-mortgage debt service ratio"

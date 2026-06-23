@@ -4,8 +4,9 @@
   "source_table": "17-10-0005-01",
   "frequency": "annual",
   "unit": "persons (median/average age rows in years)",
-  "retrieved_at": "2026-06-22T18:14:46.398665+00:00",
+  "retrieved_at": "2026-06-23T16:28:49.160921+00:00",
   "latest_observation_date": "2025",
+  "next_release_date": null,
   "transformations": [
     "Canada only; gender labels simplified",
     "single-year ages + broad groups + median/average age kept"

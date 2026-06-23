@@ -4,8 +4,9 @@
   "source_table": "Statistics Canada 36-10-0489-01",
   "frequency": "annual",
   "unit": "jobs",
-  "retrieved_at": "2026-06-22T18:16:57.895761+00:00",
+  "retrieved_at": "2026-06-23T16:32:19.052562+00:00",
   "latest_observation_date": "2024",
+  "next_release_date": null,
   "transformations": [
     "GEO=Canada, Total number of jobs, NAICS public-administration levels"
   ],

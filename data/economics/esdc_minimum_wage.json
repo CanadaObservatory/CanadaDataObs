@@ -4,8 +4,9 @@
   "source_table": "open.canada.ca 390ee890",
   "frequency": "annual",
   "unit": "nominal CAD per hour",
-  "retrieved_at": "2026-06-22T18:16:05.233167+00:00",
+  "retrieved_at": "2026-06-23T16:31:31.119666+00:00",
   "latest_observation_date": "2026",
+  "next_release_date": null,
   "transformations": [
     "rate in effect at year-end, forward-filled per jurisdiction; 14 jurisdictions"
   ],

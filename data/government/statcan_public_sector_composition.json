@@ -4,8 +4,9 @@
   "source_table": "Statistics Canada 14-10-0027-01 (Labour Force Survey)",
   "frequency": "annual",
   "unit": "persons employed",
-  "retrieved_at": "2026-06-22T18:16:58.931965+00:00",
+  "retrieved_at": "2026-06-23T16:32:20.069624+00:00",
   "latest_observation_date": "2025",
+  "next_release_date": null,
   "transformations": [
     "GEO=Canada, Public sector employees, by NAICS industry (aggregate rows dropped); thousands\u2192persons"
   ],

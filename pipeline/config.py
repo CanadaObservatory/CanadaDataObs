@@ -566,6 +566,15 @@ INDICATORS = [
                           "y10": "BD.CDN.10YR.DQ.YLD", "ylong": "BD.CDN.LONG.DQ.YLD"},
               start_period=2001, output_subpath="boc_bond_yields.csv",
               source_table="Bank of Canada (Government of Canada benchmark bond yields)"),
+    # Who is buying: share of mortgaged home purchases by buyer type — first-time
+    # buyers vs repeat buyers vs investors (BoC Financial Vulnerability Indicators,
+    # quarterly 2014–). The "investors vs first-time buyers" series.
+    Indicator("homebuyer_types", "housing", "boc",
+              "Mortgaged home purchases by buyer type", "% of mortgaged purchases", "quarterly",
+              boc_series={"fthb": "FVI_VOL_MTG_FTHB", "repeat": "FVI_VOL_MTG_REPEAT",
+                          "investor": "FVI_VOL_MTG_INVESTORS"},
+              start_period=2014, output_subpath="boc_homebuyer_types.csv",
+              source_table="Bank of Canada, Financial Vulnerability Indicators (mortgaged homebuyers)"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",

@@ -14,7 +14,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import (
-    CANADA_COLOR, CATEGORICAL_COLORS, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
+    CANADA_COLOR, CATEGORICAL_COLORS, CATEGORICAL_OTHER, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
 )
 from pipeline.charts import peer_comparison_line, ranked_bar, single_line, category_bar
@@ -260,6 +260,35 @@ else:
     print("Affordability map not yet available — run `python -m pipeline.build_census_geo`.")
 ```
 
+## Who is buying: first-time buyers vs investors
+
+Behind the price story is a question of *who* is buying. The Bank of Canada tracks the share of mortgaged home purchases made by **first-time buyers**, **repeat buyers**, and **investors** (buyers acquiring a property they don't intend to occupy). Since 2014 the investor share has climbed from about a fifth to roughly **three in ten** purchases, while the first-time-buyer share has slipped — a shift at the centre of recent debate about housing demand. (Cash purchases aren't captured, and the most recent quarters lag.)
+
+```{python}
+#| echo: false
+hb_path = "data/housing/boc_homebuyer_types.csv"
+if os.path.exists(hb_path):
+    hb = pd.read_csv(hb_path, parse_dates=["date"])
+    series = [("First-time buyers", "fthb", CATEGORICAL_COLORS[0], 2.8),
+              ("Repeat buyers", "repeat", CATEGORICAL_OTHER, 2.0),
+              ("Investors", "investor", CATEGORICAL_COLORS[1], 2.8)]
+    figb = go.Figure()
+    for name, col, color, w in series:
+        figb.add_trace(go.Scatter(x=hb["date"], y=hb[col], name=name, mode="lines",
+            line=dict(color=color, width=w), hovertemplate=name + ": %{y:.1f}%<extra></extra>"))
+    figb.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="Share of mortgaged home purchases (%)", ticksuffix="%", gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=80, r=20))
+    figb.add_annotation(
+        text=f"Source: Bank of Canada, Financial Vulnerability Indicators | Data as of: {get_data_date(hb_path)}",
+        xref="paper", yref="paper", x=0, y=-0.18, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+    figb.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Homebuyer-type data not yet available. Run the data pipeline.")
+```
+
 ## Rent in Canada
 
 The Consumer Price Index for rent — what renters pay over time. Renters are roughly a third of Canadian households, so rent is a central part of the cost-of-living picture that owner-focused house-price indices miss.
@@ -416,6 +445,7 @@ else:
 
 ## Download data
 
+- [Mortgaged home purchases by buyer type (CSV)](../data/housing/boc_homebuyer_types.csv) — Bank of Canada, Financial Vulnerability Indicators
 - [Real House Price Index (CSV)](../data/housing/oecd_house_price_real.csv) — OECD Analytical House Prices
 - [Price-to-Income Ratio (CSV)](../data/housing/oecd_house_price_income.csv) — OECD Analytical House Prices
 - [New Housing Price Index (CSV)](../data/housing/statcan_nhpi.csv) — Statistics Canada Table 18-10-0205-01

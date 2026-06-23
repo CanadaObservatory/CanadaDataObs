@@ -996,6 +996,37 @@ INDICATORS = [
               output_subpath="statcan_science_funding.csv",
               source_table="Statistics Canada 27-10-0026-01"),
 
+    # ----- Innovation (the Innovation page; data lands in data/science/) -----
+    # Venture-capital investment as a share of GDP — financing for young, high-growth
+    # firms (OECD compiles from national VC associations). `_T` is on the development-
+    # stage dimension, not MEASURE.
+    Indicator("venture_capital", "science", "oecd",
+              "Venture capital investment", "% of GDP", "annual",
+              value_col="vc_pct_gdp", chart_recipe="ranked_bar",
+              dataflow="OECD.SDD.TPS,DSD_VC@DF_VC_INV,1.0",
+              key="{countries}.VC_INV_MKT._T.PT_B1GQ.A",
+              start_period=2006,
+              source_table="OECD, Venture Capital Investments"),
+    # High-technology exports as a share of manufactured exports — an innovation
+    # *output* measure (aerospace, pharma, electronics, scientific instruments).
+    Indicator("hightech_exports", "science", "worldbank",
+              "High-technology exports", "% of manufactured exports", "annual",
+              value_col="hightech_exports_pct", chart_recipe="ranked_bar",
+              wb_indicator="TX.VAL.TECH.MF.ZS",
+              source_table="World Bank, World Development Indicators"),
+    # Triadic patent families per million — a quality-controlled innovation-output
+    # measure (filed at EPO+USPTO+JPO; screens out low-value domestic-only filings).
+    Indicator("triadic_patents", "science", "custom",
+              "Triadic patent families per million", "per million population", "annual",
+              fetch_fn="fetch_triadic_patents", output_subpath="oecd_triadic_patents.csv",
+              source_table="OECD MSTI"),
+    # Government support for business R&D, % of GDP — direct funding vs tax incentives
+    # (Canada leans on SR&ED tax credits more than direct grants).
+    Indicator("rd_support", "science", "custom",
+              "Government support for business R&D (direct vs tax)", "% of GDP", "annual",
+              fetch_fn="fetch_rd_tax_support", output_subpath="oecd_rd_support.csv",
+              source_table="OECD R&D Tax Incentive indicators"),
+
     # ----- Education (university tuition; StatCan TLAC — bespoke multi-series) -----
     Indicator("tuition", "education", "custom",
               "University tuition by level & province", "current $", "annual",

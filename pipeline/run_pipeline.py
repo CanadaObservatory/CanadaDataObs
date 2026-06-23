@@ -28,7 +28,7 @@ from pipeline.fetch_statcan import (
     fetch_age_structure, fetch_interprovincial_migration, fetch_minimum_wage,
     fetch_voter_turnout, fetch_cma_vacancy, fetch_income_distribution,
     fetch_debt_service_ratio, fetch_provincial_finance, fetch_npr_by_type,
-    fetch_median_income_by_family,
+    fetch_median_income_by_family, fetch_tertiary_attainment,
 )
 from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
                                   fetch_co2_per_gdp, fetch_co2_global_context)
@@ -52,6 +52,11 @@ from pipeline.fetch_government import (
     fetch_govt_spending_by_function, fetch_federal_spending_by_object,
     fetch_federal_spending_by_dept,
 )
+from pipeline.fetch_science import fetch_science_funding
+from pipeline.fetch_innovation import (
+    fetch_triadic_patents, fetch_rd_tax_support,
+    fetch_industry_structure, fetch_foreign_rd_control, fetch_patents_us_owned,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -69,6 +74,7 @@ CUSTOM_FETCHERS = {
     "fetch_provincial_finance": fetch_provincial_finance,
     "fetch_npr_by_type": fetch_npr_by_type,
     "fetch_median_income_by_family": fetch_median_income_by_family,
+    "fetch_tertiary_attainment": fetch_tertiary_attainment,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,
     "fetch_co2_per_gdp": fetch_co2_per_gdp,
@@ -111,6 +117,14 @@ CUSTOM_FETCHERS = {
     "fetch_govt_spending_by_function": fetch_govt_spending_by_function,
     "fetch_federal_spending_by_object": fetch_federal_spending_by_object,
     "fetch_federal_spending_by_dept": fetch_federal_spending_by_dept,
+    # Science (government science funding)
+    "fetch_science_funding": fetch_science_funding,
+    # Innovation
+    "fetch_triadic_patents": fetch_triadic_patents,
+    "fetch_rd_tax_support": fetch_rd_tax_support,
+    "fetch_industry_structure": fetch_industry_structure,
+    "fetch_foreign_rd_control": fetch_foreign_rd_control,
+    "fetch_patents_us_owned": fetch_patents_us_owned,
 }
 
 

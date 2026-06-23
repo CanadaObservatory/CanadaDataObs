@@ -700,13 +700,17 @@ def fetch_income_distribution():
     ca["year"] = pd.to_numeric(ca["REF_DATE"], errors="coerce")
     ca["VALUE"] = pd.to_numeric(ca["VALUE"], errors="coerce")
 
-    # 1. Average after-tax income by decile (real) — for the slider
-    avg = ca[(ca["Statistics"] == "Average income")
-             & (ca["Income concept"] == "Adjusted after-tax income")
-             & (ca["Income decile"].isin(_INCOME_DECILES))]
-    avg = (avg[["year", "Income decile", "VALUE"]]
-           .rename(columns={"Income decile": "decile", "VALUE": "avg_income"})
-           .dropna(subset=["year", "avg_income"]))
+    # 1. Average income by decile (real, constant 2024 $) — before tax (total
+    #    income) and after tax — for the year-slider distribution chart.
+    _CONCEPTS = {"Adjusted total income": "before_tax",
+                 "Adjusted after-tax income": "after_tax"}
+    a = ca[(ca["Statistics"] == "Average income")
+           & (ca["Income concept"].isin(_CONCEPTS))
+           & (ca["Income decile"].isin(_INCOME_DECILES))].copy()
+    a["concept"] = a["Income concept"].map(_CONCEPTS)
+    avg = (a.pivot_table(index=["year", "Income decile"], columns="concept", values="VALUE")
+           .reset_index().rename(columns={"Income decile": "decile"}))
+    avg = avg.dropna(subset=["after_tax"])
     avg["year"] = avg["year"].astype(int)
     if avg.empty:
         return None
@@ -715,8 +719,8 @@ def fetch_income_distribution():
     avg.sort_values(["year", "decile"]).to_csv(avg_path, index=False)
     save_metadata(avg_path, df=avg, date_column="year",
         source="Statistics Canada", source_table="11-10-0193-01",
-        frequency="annual", unit="average after-tax income (constant dollars)",
-        transformations=["Canada, average after-tax income by decile, real $"])
+        frequency="annual", unit="average income by decile (constant 2024 $)",
+        transformations=["Canada; average before-tax (total) and after-tax income by decile, real $"])
     logger.info(f"  saved {len(avg)} rows -> {avg_path.name}")
 
     # 2. Top-10% vs bottom-40% income share, market + after-tax — for the share line

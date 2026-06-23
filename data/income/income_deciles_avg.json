@@ -3,12 +3,12 @@
   "source": "Statistics Canada",
   "source_table": "11-10-0193-01",
   "frequency": "annual",
-  "unit": "average after-tax income (constant dollars)",
-  "retrieved_at": "2026-06-23T16:33:27.408870+00:00",
+  "unit": "average income by decile (constant 2024 $)",
+  "retrieved_at": "2026-06-23T22:39:57.380724+00:00",
   "latest_observation_date": "2024",
   "next_release_date": null,
   "transformations": [
-    "Canada, average after-tax income by decile, real $"
+    "Canada; average before-tax (total) and after-tax income by decile, real $"
   ],
   "notes": null,
   "row_count": 490

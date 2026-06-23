@@ -262,7 +262,7 @@ else:
 
 ## Income distribution over time
 
-A single inequality number hides how income is actually shared. The chart below shows the **average after-tax income of each tenth (decile)** of Canadians, in constant 2024 dollars — slide through the years to watch real incomes rise, with the top decile pulling furthest ahead.
+A single inequality number hides how income is actually shared. The chart below shows the average income of each tenth (**decile**) of Canadians — **before tax** and **after tax** — in constant 2024 dollars. Slide through the years to watch real incomes rise, with the top decile pulling furthest ahead; the gap between the two bars is what taxes and transfers take, and it widens sharply toward the top.
 
 ```{python}
 #| echo: false
@@ -273,22 +273,27 @@ if os.path.exists(adf_path):
                  "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
                  "Ninth decile", "Highest decile"]
     LABELS = ["Lowest", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "Highest"]
-    piv = adf.pivot(index="year", columns="decile", values="avg_income")[DEC_ORDER]
-    years = piv.index.tolist()
-    ymax = float(piv.values.max())
-    steps = [dict(method="restyle", label=str(int(yr)), args=[{"y": [piv.loc[yr].tolist()]}])
-             for yr in years]
-    fig = go.Figure(go.Bar(x=LABELS, y=piv.loc[years[-1]].tolist(), marker_color="#4e79a7",
-        hovertemplate="%{x} decile: $%{y:,.0f}<extra></extra>"))
-    fig.update_layout(plot_bgcolor="white", height=470,
-        yaxis=dict(title="Average after-tax income (2024 $)", tickprefix="$", tickformat=",",
+    pb = adf.pivot(index="year", columns="decile", values="before_tax")[DEC_ORDER]
+    pa = adf.pivot(index="year", columns="decile", values="after_tax")[DEC_ORDER]
+    years = pb.index.tolist()
+    ymax = float(pb.values.max())
+    steps = [dict(method="restyle", label=str(int(yr)),
+                  args=[{"y": [pb.loc[yr].tolist(), pa.loc[yr].tolist()]}]) for yr in years]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=LABELS, y=pb.loc[years[-1]].tolist(), name="Before tax",
+        marker_color=CATEGORICAL_COLORS[0], hovertemplate="%{x} decile — before tax: $%{y:,.0f}<extra></extra>"))
+    fig.add_trace(go.Bar(x=LABELS, y=pa.loc[years[-1]].tolist(), name="After tax",
+        marker_color=CATEGORICAL_COLORS[1], hovertemplate="%{x} decile — after tax: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=500, barmode="group",
+        yaxis=dict(title="Average income (constant 2024 $)", tickprefix="$", tickformat=",",
                    range=[0, ymax * 1.05], gridcolor="#e0e0e0"),
         xaxis=dict(title="Income decile (lowest to highest tenth)"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
         sliders=[dict(active=len(years) - 1, currentvalue=dict(prefix="Year: ", font=dict(size=14)),
-                      pad=dict(t=50), steps=steps)],
-        margin=dict(t=30, b=150),
-        annotations=[dict(text="Source: Statistics Canada, Table 11-10-0193-01 (average after-tax income, constant 2024 $).",
-            xref="paper", yref="paper", x=0, y=-0.42, showarrow=False, font=dict(size=10, color="#999"))])
+                      pad=dict(t=30), steps=steps)],
+        margin=dict(t=50, b=175, r=30, l=10),
+        annotations=[dict(text="Source: Statistics Canada, Table 11-10-0193-01 (average income by decile, constant 2024 $).",
+            xref="paper", yref="paper", x=0, y=-0.46, yanchor="top", showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Income-distribution data not yet available. Run the data pipeline.")

@@ -238,6 +238,28 @@ CATEGORICAL_COLORS = [
 ]
 CATEGORICAL_OTHER = "#AEB4BB"  # reserved grey for an "Other"/residual series
 
+# Global-context countries — for the two CO2 / PM2.5 charts that widen the lens beyond
+# the OECD peer group (China, India, World). USA reuses the country-system blue and
+# Canada uses CANADA_COLOR, so the global view stays consistent with the peer charts;
+# China/India get their own governed identities (distinct from maroon, US-blue, grey).
+GLOBAL_CONTEXT_COLORS = {
+    "USA": "#0650A3",   # = COMPARATOR_COLORS["USA"]
+    "CHN": "#C46A1B",   # deep amber
+    "IND": "#2E7D52",   # deep green
+    "WLD": "#888888",   # world average (drawn dotted)
+}
+
+# FUEL / energy-source colours — a SEMANTIC register (colour carries meaning), shared
+# across the electricity-mix and energy-mix charts so a fuel reads the same everywhere.
+# Brand-tuned: coal near-black, oil brown, gas = Prairie Gold, nuclear a brand violet,
+# renewables/biomass the Boreal green family, hydro = Lake blue (water), wind a light
+# sky tint, solar a bright gold. Keyed by a lowercase fuel token.
+FUEL_COLORS = {
+    "coal": "#2B2B2B", "oil": "#7A5A48", "gas": "#C2972F", "nuclear": "#6A4C93",
+    "renewables": "#3F6F5E", "hydro": "#2A7F9E", "wind": "#7FB0C4",
+    "solar": "#E0B53C", "biomass": "#5E7548",
+}
+
 
 # ============================================================================
 # Indicator registry

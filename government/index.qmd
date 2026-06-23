@@ -374,9 +374,14 @@ share of employees in their 40s and 50s.
 ```{python}
 #| echo: false
 if demo is not None:
-    order = ['<20', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49',
-             '50-54', '55-59', '60-64', '65+']
-    age = demo[(demo["dimension"] == "Age band") & (demo["category"] != "Unknown")]
+    # Merge the sparse young/old tails so the 8 bands map 1:1 to the categorical palette
+    # (no repeated colours); the 30–59 five-year detail — where the workforce sits — is kept.
+    AGE_MERGE = {'<20': 'Under 30', '20-24': 'Under 30', '25-29': 'Under 30',
+                 '60-64': '60 and over', '65+': '60 and over'}
+    order = ['Under 30', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60 and over']
+    age = demo[(demo["dimension"] == "Age band") & (demo["category"] != "Unknown")].copy()
+    age["category"] = age["category"].replace(AGE_MERGE)
+    age = age.groupby(["year", "category"], as_index=False)["employees"].sum()
     fig = stacked_area(age, "year", "employees", "category",
         yaxis_title="Employees (thousands)", value_scale=1000, group_order=order,
         legend_orientation="h", source_note=demo_src)

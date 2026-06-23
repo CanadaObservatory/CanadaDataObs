@@ -1,0 +1,320 @@
+year,geo,avg_weekly_wage
+1997,Alberta,562.58
+1997,British Columbia,612.55
+1997,Canada,573.47
+1997,Manitoba,509.66
+1997,New Brunswick,489.12
+1997,Newfoundland and Labrador,495.12
+1997,Nova Scotia,479.88
+1997,Ontario,605.82
+1997,Prince Edward Island,440.93
+1997,Quebec,548.85
+1997,Saskatchewan,504.05
+1998,Alberta,575.2
+1998,British Columbia,620.99
+1998,Canada,581.68
+1998,Manitoba,518.03
+1998,New Brunswick,498.52
+1998,Newfoundland and Labrador,492.86
+1998,Nova Scotia,494.76
+1998,Ontario,612.62
+1998,Prince Edward Island,447.86
+1998,Quebec,557.6
+1998,Saskatchewan,510.84
+1999,Alberta,595.41
+1999,British Columbia,628.12
+1999,Canada,597.14
+1999,Manitoba,532.98
+1999,New Brunswick,506.83
+1999,Newfoundland and Labrador,497.16
+1999,Nova Scotia,505.43
+1999,Ontario,634.16
+1999,Prince Edward Island,464.24
+1999,Quebec,566.66
+1999,Saskatchewan,527.22
+2000,Alberta,617.18
+2000,British Columbia,639.18
+2000,Canada,616.0
+2000,Manitoba,551.93
+2000,New Brunswick,533.63
+2000,Newfoundland and Labrador,526.21
+2000,Nova Scotia,524.43
+2000,Ontario,656.69
+2000,Prince Edward Island,473.82
+2000,Quebec,580.02
+2000,Saskatchewan,547.02
+2001,Alberta,653.13
+2001,British Columbia,648.27
+2001,Canada,635.65
+2001,Manitoba,561.84
+2001,New Brunswick,537.96
+2001,Newfoundland and Labrador,549.93
+2001,Nova Scotia,543.16
+2001,Ontario,678.55
+2001,Prince Edward Island,495.29
+2001,Quebec,596.15
+2001,Saskatchewan,572.21
+2002,Alberta,684.27
+2002,British Columbia,668.48
+2002,Canada,650.12
+2002,Manitoba,574.75
+2002,New Brunswick,548.06
+2002,Newfoundland and Labrador,567.79
+2002,Nova Scotia,558.32
+2002,Ontario,690.04
+2002,Prince Edward Island,508.62
+2002,Quebec,606.12
+2002,Saskatchewan,586.0
+2003,Alberta,687.72
+2003,British Columbia,683.79
+2003,Canada,662.54
+2003,Manitoba,588.99
+2003,New Brunswick,561.34
+2003,Newfoundland and Labrador,589.28
+2003,Nova Scotia,573.31
+2003,Ontario,701.52
+2003,Prince Edward Island,538.59
+2003,Quebec,619.15
+2003,Saskatchewan,605.72
+2004,Alberta,704.57
+2004,British Columbia,687.32
+2004,Canada,679.79
+2004,Manitoba,613.7
+2004,New Brunswick,572.91
+2004,Newfoundland and Labrador,588.34
+2004,Nova Scotia,588.81
+2004,Ontario,720.26
+2004,Prince Edward Island,563.34
+2004,Quebec,641.26
+2004,Saskatchewan,627.95
+2005,Alberta,758.56
+2005,British Columbia,704.05
+2005,Canada,703.14
+2005,Manitoba,625.93
+2005,New Brunswick,591.2
+2005,Newfoundland and Labrador,617.83
+2005,Nova Scotia,608.23
+2005,Ontario,743.63
+2005,Prince Edward Island,561.75
+2005,Quebec,656.66
+2005,Saskatchewan,642.87
+2006,Alberta,839.81
+2006,British Columbia,738.96
+2006,Canada,743.85
+2006,Manitoba,654.37
+2006,New Brunswick,623.53
+2006,Newfoundland and Labrador,661.86
+2006,Nova Scotia,631.87
+2006,Ontario,783.44
+2006,Prince Edward Island,595.21
+2006,Quebec,684.18
+2006,Saskatchewan,691.21
+2007,Alberta,892.57
+2007,British Columbia,771.37
+2007,Canada,773.24
+2007,Manitoba,687.73
+2007,New Brunswick,656.82
+2007,Newfoundland and Labrador,699.42
+2007,Nova Scotia,665.57
+2007,Ontario,807.28
+2007,Prince Edward Island,610.06
+2007,Quebec,707.21
+2007,Saskatchewan,721.19
+2008,Alberta,938.04
+2008,British Columbia,806.27
+2008,Canada,803.03
+2008,Manitoba,719.78
+2008,New Brunswick,686.43
+2008,Newfoundland and Labrador,753.14
+2008,Nova Scotia,692.13
+2008,Ontario,833.74
+2008,Prince Edward Island,653.47
+2008,Quebec,725.3
+2008,Saskatchewan,782.75
+2009,Alberta,955.43
+2009,British Columbia,827.37
+2009,Canada,825.58
+2009,Manitoba,745.77
+2009,New Brunswick,717.62
+2009,Newfoundland and Labrador,777.56
+2009,Nova Scotia,724.75
+2009,Ontario,853.8
+2009,Prince Edward Island,673.96
+2009,Quebec,753.72
+2009,Saskatchewan,812.79
+2010,Alberta,973.12
+2010,British Columbia,843.22
+2010,Canada,841.56
+2010,Manitoba,764.43
+2010,New Brunswick,741.8
+2010,Newfoundland and Labrador,821.45
+2010,Nova Scotia,748.31
+2010,Ontario,867.17
+2010,Prince Edward Island,705.73
+2010,Quebec,767.25
+2010,Saskatchewan,848.67
+2011,Alberta,1000.84
+2011,British Columbia,858.58
+2011,Canada,862.79
+2011,Manitoba,783.16
+2011,New Brunswick,748.69
+2011,Newfoundland and Labrador,857.17
+2011,Nova Scotia,757.64
+2011,Ontario,890.81
+2011,Prince Edward Island,723.19
+2011,Quebec,784.27
+2011,Saskatchewan,872.87
+2012,Alberta,1060.4
+2012,British Columbia,877.26
+2012,Canada,888.49
+2012,Manitoba,802.08
+2012,New Brunswick,767.07
+2012,Newfoundland and Labrador,921.68
+2012,Nova Scotia,777.78
+2012,Ontario,906.37
+2012,Prince Edward Island,755.01
+2012,Quebec,807.87
+2012,Saskatchewan,917.43
+2013,Alberta,1091.68
+2013,British Columbia,909.73
+2013,Canada,907.72
+2013,Manitoba,815.39
+2013,New Brunswick,795.3
+2013,Newfoundland and Labrador,965.01
+2013,Nova Scotia,808.67
+2013,Ontario,916.83
+2013,Prince Edward Island,757.69
+2013,Quebec,822.37
+2013,Saskatchewan,949.7
+2014,Alberta,1121.18
+2014,British Columbia,910.02
+2014,Canada,923.9
+2014,Manitoba,839.03
+2014,New Brunswick,805.68
+2014,Newfoundland and Labrador,1009.18
+2014,Nova Scotia,831.14
+2014,Ontario,931.35
+2014,Prince Edward Island,782.61
+2014,Quebec,836.03
+2014,Saskatchewan,978.52
+2015,Alberta,1136.63
+2015,British Columbia,950.73
+2015,Canada,947.96
+2015,Manitoba,864.76
+2015,New Brunswick,823.85
+2015,Newfoundland and Labrador,975.44
+2015,Nova Scotia,834.19
+2015,Ontario,959.34
+2015,Prince Edward Island,801.41
+2015,Quebec,856.14
+2015,Saskatchewan,995.21
+2016,Alberta,1143.21
+2016,British Columbia,953.5
+2016,Canada,965.19
+2016,Manitoba,878.82
+2016,New Brunswick,844.24
+2016,Newfoundland and Labrador,974.97
+2016,Nova Scotia,867.64
+2016,Ontario,984.76
+2016,Prince Edward Island,807.77
+2016,Quebec,876.14
+2016,Saskatchewan,1017.88
+2017,Alberta,1157.97
+2017,British Columbia,970.57
+2017,Canada,979.92
+2017,Manitoba,901.17
+2017,New Brunswick,858.1
+2017,Newfoundland and Labrador,994.31
+2017,Nova Scotia,874.76
+2017,Ontario,992.85
+2017,Prince Edward Island,830.5
+2017,Quebec,903.88
+2017,Saskatchewan,1016.8
+2018,Alberta,1182.19
+2018,British Columbia,999.6
+2018,Canada,1007.33
+2018,Manitoba,912.86
+2018,New Brunswick,878.64
+2018,Newfoundland and Labrador,1016.26
+2018,Nova Scotia,890.31
+2018,Ontario,1030.78
+2018,Prince Edward Island,839.51
+2018,Quebec,919.93
+2018,Saskatchewan,1039.02
+2019,Alberta,1202.95
+2019,British Columbia,1020.1
+2019,Canada,1033.57
+2019,Manitoba,936.2
+2019,New Brunswick,894.06
+2019,Newfoundland and Labrador,1027.27
+2019,Nova Scotia,891.28
+2019,Ontario,1059.89
+2019,Prince Edward Island,859.33
+2019,Quebec,953.93
+2019,Saskatchewan,1044.65
+2020,Alberta,1262.15
+2020,British Columbia,1092.88
+2020,Canada,1101.12
+2020,Manitoba,979.06
+2020,New Brunswick,935.87
+2020,Newfoundland and Labrador,1071.77
+2020,Nova Scotia,950.88
+2020,Ontario,1138.0
+2020,Prince Edward Island,910.86
+2020,Quebec,1017.92
+2020,Saskatchewan,1106.87
+2021,Alberta,1246.09
+2021,British Columbia,1138.63
+2021,Canada,1123.94
+2021,Manitoba,998.05
+2021,New Brunswick,955.25
+2021,Newfoundland and Labrador,1098.63
+2021,Nova Scotia,960.85
+2021,Ontario,1164.85
+2021,Prince Edward Island,945.77
+2021,Quebec,1043.59
+2021,Saskatchewan,1106.53
+2022,Alberta,1267.97
+2022,British Columbia,1194.34
+2022,Canada,1175.84
+2022,Manitoba,1029.93
+2022,New Brunswick,1032.77
+2022,Newfoundland and Labrador,1146.26
+2022,Nova Scotia,1017.19
+2022,Ontario,1218.08
+2022,Prince Edward Island,1004.73
+2022,Quebec,1107.01
+2022,Saskatchewan,1139.77
+2023,Alberta,1323.61
+2023,British Columbia,1270.38
+2023,Canada,1233.4
+2023,Manitoba,1082.38
+2023,New Brunswick,1077.4
+2023,Newfoundland and Labrador,1221.7
+2023,Nova Scotia,1071.13
+2023,Ontario,1279.16
+2023,Prince Edward Island,1044.18
+2023,Quebec,1152.27
+2023,Saskatchewan,1178.72
+2024,Alberta,1377.29
+2024,British Columbia,1336.98
+2024,Canada,1290.3
+2024,Manitoba,1112.32
+2024,New Brunswick,1128.91
+2024,Newfoundland and Labrador,1273.83
+2024,Nova Scotia,1139.62
+2024,Ontario,1339.01
+2024,Prince Edward Island,1110.08
+2024,Quebec,1205.41
+2024,Saskatchewan,1216.29
+2025,Alberta,1407.16
+2025,British Columbia,1378.69
+2025,Canada,1329.77
+2025,Manitoba,1155.71
+2025,New Brunswick,1167.31
+2025,Newfoundland and Labrador,1295.09
+2025,Nova Scotia,1198.05
+2025,Ontario,1381.64
+2025,Prince Edward Island,1128.34
+2025,Quebec,1242.71
+2025,Saskatchewan,1246.05

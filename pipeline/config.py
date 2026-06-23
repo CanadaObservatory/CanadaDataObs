@@ -847,6 +847,11 @@ INDICATORS = [
               "Low-income persistence (years in low income)", "% of tax filers", "annual",
               fetch_fn="fetch_low_income_persistence", output_subpath="statcan_low_income_persistence.csv",
               source_table="Statistics Canada 11-10-0025-01"),
+    # Average weekly wage by province — regional pay + the pay-vs-prices view.
+    Indicator("wages_by_province", "income", "custom",
+              "Average weekly wage by province", "$ per week", "annual",
+              fetch_fn="fetch_wages_by_province", output_subpath="statcan_wages_by_province.csv",
+              source_table="Statistics Canada 14-10-0064-01"),
 
     # ----- Health -----
     Indicator("life_expectancy", "health", "oecd",

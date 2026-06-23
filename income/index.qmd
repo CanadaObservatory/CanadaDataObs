@@ -142,6 +142,28 @@ if os.path.exists(wage_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Where wages are highest
+
+Pay varies a lot across the country. This shows the **average weekly wage** of employees by province — highest in Alberta, Ontario and British Columbia (where high-paying resource, finance and tech work concentrates) and lowest in the Atlantic provinces. The national average is highlighted for reference.
+
+```{python}
+#| echo: false
+wp_path = "data/income/statcan_wages_by_province.csv"
+if os.path.exists(wp_path):
+    wp = pd.read_csv(wp_path)
+    wyr = int(wp["year"].max())
+    cur = wp[wp["year"] == wyr].copy()
+    cur["lbl"] = [f"${v:,.0f}" for v in cur["avg_weekly_wage"]]
+    category_bar(cur, "geo", "avg_weekly_wage",
+        xaxis_title=f"Average weekly wage, {wyr} ($)", tickprefix="$", value_fmt=",.0f",
+        color=CATEGORICAL_COLORS[0], highlight={"Canada"}, highlight_color=CANADA_COLOR,
+        text_col="lbl", text_fmt="{}", hovertemplate="%{y}: $%{x:,.0f}/week<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 14-10-0064-01 (all industries) | {wyr}").show(
+        config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Provincial wage data not yet available. Run the data pipeline.")
+```
+
 ## Real household disposable income per capita
 
 Real (inflation-adjusted) household disposable income per person, indexed to 2007 = 100. Disposable income is what households actually have to spend or save after taxes and transfers — a more direct gauge of household living standards than GDP per capita, which can rise without households feeling better off. Because it is indexed, the lines show *growth* since 2007 rather than dollar levels.

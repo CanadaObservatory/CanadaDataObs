@@ -1287,3 +1287,38 @@ def fetch_low_income_persistence():
         transformations=[f"Canada; both sexes; variable LIM; years in low income over the {window} window"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
+
+
+def fetch_wages_by_province():
+    """Average weekly wage by province over time (all industries, both genders,
+    age 15+, full- and part-time employees). StatCan 14-10-0064-01 — drives the
+    regional-wage comparison and the pay-vs-prices view on the cost-of-living page."""
+    logger.info("fetch_wages_by_province (14-10-0064-01)")
+    try:
+        d = _get_table("14-10-0064-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    naics = next(c for c in d.columns if "NAICS" in c)
+    d = d[(d["Wages"] == "Average weekly wage rate")
+          & (d["Type of work"] == "Both full- and part-time employees")
+          & (d[naics] == "Total employees, all industries")
+          & (d["Gender"] == "Total - Gender")
+          & (d["Age group"] == "15 years and over")].copy()
+    d["year"] = pd.to_numeric(d["REF_DATE"], errors="coerce")
+    d["avg_weekly_wage"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    out = (d[["year", "GEO", "avg_weekly_wage"]].rename(columns={"GEO": "geo"})
+           .dropna(subset=["year", "avg_weekly_wage"]))
+    out["year"] = out["year"].astype(int)
+    out = out.sort_values(["year", "geo"]).reset_index(drop=True)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_wages_by_province.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 14-10-0064-01",
+        frequency="annual", unit="average weekly wage ($)",
+        transformations=["Canada + provinces; all industries; both genders; 15+; both full/part-time; average weekly wage"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out

@@ -52,14 +52,14 @@ if os.path.exists(berd_path):
 
 ## Venture capital
 
-Young, research-intensive firms need risk capital to grow. Venture-capital investment, as a share of GDP, shows how much of that financing an economy mobilizes. Canada has built a larger venture market than most peers but remains far below the United States and Israel — the two countries that turn research into fast-scaling companies most readily.
+Young, research-intensive firms need risk capital to grow. Venture-capital investment, as a share of GDP, shows how much of that financing an economy mobilizes. Canada has built a larger venture market than most peers, but it remains well below the United States, the natural benchmark among large economies. (A few small economies, notably Israel, mobilize even more relative to GDP, but their specialised startup ecosystems make them outliers rather than like-for-like comparisons.)
 
 ```{python}
 #| echo: false
 vc_path = "data/science/oecd_venture_capital.csv"
 if os.path.exists(vc_path):
     _peer_line(vc_path, "vc_pct_gdp", "Venture capital (% of GDP)",
-               "Source: OECD, Venture Capital Investments", topical=["ISR"]).show(config=_CFG)
+               "Source: OECD, Venture Capital Investments").show(config=_CFG)
 else:
     print("Venture-capital data not yet available. Run the data pipeline.")
 ```
@@ -105,7 +105,7 @@ Innovation shows up in what a country sells. High-technology exports — aerospa
 hte_path = "data/science/worldbank_hightech_exports.csv"
 if os.path.exists(hte_path):
     _peer_line(hte_path, "hightech_exports_pct", "High-tech exports (% of manufactured exports)",
-               "Source: World Bank, World Development Indicators", topical=["KOR", "ISR"]).show(config=_CFG)
+               "Source: World Bank, World Development Indicators", topical=["KOR"]).show(config=_CFG)
 else:
     print("High-tech exports data not yet available. Run the data pipeline.")
 ```

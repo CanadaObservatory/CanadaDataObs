@@ -1,0 +1,144 @@
+<!--
+  Phase-1 mobile chart layout (branch mobile-prototype). VIEWPORT-GATED at <=600px:
+  on desktop nothing runs, so the desktop experience is byte-identical. Mirrors
+  _includes/peer-legend-colours.html (resolve Plotly via requirejs; window.Plotly is
+  undefined under Quarto's AMD bundle; bounded-poll for async-rendered charts). Every
+  change is cached and RESTORED when the viewport widens, and deleting this file + its
+  include-after-body line reverts everything.
+
+  Two transforms on narrow screens:
+   1. Right-side legends (the 17-country peer charts, province lines) move BELOW the
+      plot so the plot reclaims the full width; the range slider is hidden (the range
+      buttons remain); margin is sized to the legend's measured height.
+   2. The Plotly source-note annotation (which can't wrap and clips on the right) is
+      hidden and re-rendered as an HTML caption under the chart that wraps via CSS.
+      This is universal — it fixes the clip on every chart type (lines, bars, maps).
+-->
+<style>
+  .mobile-source {
+    display: none;
+    font-size: 0.7rem;
+    color: #8a8f96;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    margin: 0.15rem 0 1.4rem;
+    padding: 0 0.2rem;
+  }
+</style>
+<script>
+(function () {
+  "use strict";
+  var MOBILE = window.matchMedia("(max-width: 600px)");
+
+  function plotly() {
+    if (window.Plotly) return window.Plotly;
+    try { if (window.requirejs) return window.requirejs("plotly"); } catch (e) {}
+    return null;
+  }
+
+  function findSource(L) {
+    var anns = L.annotations || [];
+    for (var i = 0; i < anns.length; i++) {
+      if (anns[i] && typeof anns[i].text === "string" &&
+          /Source|Canada Observatory/.test(anns[i].text)) return i;
+    }
+    return -1;
+  }
+
+  function snap(gd) {
+    if (gd._mSnap) return;
+    var L = gd._fullLayout || {};
+    var si = findSource(L);
+    gd._mSnap = {
+      rightLegend: !!(L.legend && L.legend.x != null && L.legend.x > 1),
+      legend: L.legend ? { orientation: L.legend.orientation, x: L.legend.x, y: L.legend.y,
+                           xanchor: L.legend.xanchor, yanchor: L.legend.yanchor,
+                           fs: (L.legend.font && L.legend.font.size) || null } : null,
+      mr: L.margin ? L.margin.r : null,
+      mb: L.margin ? L.margin.b : null,
+      slider: (L.xaxis && L.xaxis.rangeslider) ? (L.xaxis.rangeslider.visible !== false) : null,
+      si: si,
+      srcText: si >= 0 ? L.annotations[si].text : null
+    };
+  }
+
+  function ensureCaption(gd) {
+    var s = gd._mSnap;
+    if (gd._mCap || !s || s.si < 0) return gd._mCap;
+    var div = document.createElement("div");
+    div.className = "mobile-source";
+    div.textContent = (s.srcText || "").replace(/<br\s*\/?>/gi, "\n");
+    gd.parentNode.insertBefore(div, gd.nextSibling);
+    gd._mCap = div;
+    return div;
+  }
+
+  function toMobile(Plotly, gd) {
+    snap(gd);
+    var s = gd._mSnap, up = {};
+    if (s.rightLegend) {
+      up["legend.orientation"] = "h";
+      up["legend.x"] = 0; up["legend.xanchor"] = "left";
+      up["legend.y"] = -0.04; up["legend.yanchor"] = "top";
+      up["legend.font.size"] = 9;
+      up["margin.r"] = 8;
+      if (s.slider !== null) up["xaxis.rangeslider.visible"] = false;
+    }
+    if (s.si >= 0) {                          // source note -> HTML caption below the chart
+      up["annotations[" + s.si + "].visible"] = false;
+      var cap = ensureCaption(gd);
+      if (cap) cap.style.display = "block";
+    }
+    // First pass: with the slider gone and the source out of the plot, start the bottom
+    // margin small; if a legend moved below, the second pass sizes it to the legend.
+    up["margin.b"] = s.rightLegend ? 24 : Math.min(s.mb || 40, 40);
+    var p;
+    try { p = Plotly.relayout(gd, up); } catch (e) { return; }
+    if (s.rightLegend && p && p.then) {
+      p.then(function () {
+        var leg = gd.querySelector("g.legend");
+        var h = leg ? leg.getBoundingClientRect().height : 0;
+        if (h > 0) { try { Plotly.relayout(gd, { "margin.b": Math.ceil(h) + 22 }); } catch (e) {} }
+      });
+    }
+  }
+
+  function toDesktop(Plotly, gd) {
+    var s = gd._mSnap; if (!s) return;
+    var up = {};
+    if (s.legend) {
+      up["legend.orientation"] = s.legend.orientation;
+      up["legend.x"] = s.legend.x; up["legend.xanchor"] = s.legend.xanchor;
+      up["legend.y"] = s.legend.y; up["legend.yanchor"] = s.legend.yanchor;
+      up["legend.font.size"] = s.legend.fs;
+    }
+    up["margin.r"] = s.mr; up["margin.b"] = s.mb;
+    if (s.slider !== null) up["xaxis.rangeslider.visible"] = s.slider;
+    if (s.si >= 0) up["annotations[" + s.si + "].visible"] = true;
+    if (gd._mCap) gd._mCap.style.display = "none";
+    try { Plotly.relayout(gd, up); } catch (e) {}
+  }
+
+  function apply() {
+    var Plotly = plotly();
+    if (!Plotly) return false;
+    var gds = document.querySelectorAll(".plotly-graph-div");
+    if (!gds.length) return false;
+    var any = false;
+    Array.prototype.forEach.call(gds, function (gd) {
+      if (!gd._fullLayout) return;
+      any = true;
+      (MOBILE.matches ? toMobile : toDesktop)(Plotly, gd);
+    });
+    return any;
+  }
+
+  var tries = 0;
+  (function poll() { if (!apply() && tries++ < 40) setTimeout(poll, 150); })();
+
+  var t;
+  function onChange() { clearTimeout(t); t = setTimeout(apply, 200); }
+  if (MOBILE.addEventListener) MOBILE.addEventListener("change", onChange);
+  else if (MOBILE.addListener) MOBILE.addListener(onChange);
+})();
+</script>

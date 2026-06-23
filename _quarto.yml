@@ -165,3 +165,4 @@ format:
       - _includes/share-charts.html
       - _includes/peer-legend-colours.html
       - _includes/yaxis-autoscale.html
+      - _includes/mobile-layout.html

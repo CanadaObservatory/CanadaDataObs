@@ -9,8 +9,8 @@ body-classes: area-people   # nav-grouped under People & Society (not the Health
 import os, json
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import get_data_date, BRAND
-from pipeline.charts import (choropleth_groups_map, category_bar, single_line,
+from pipeline.config import get_data_date, BRAND, CANADA_COLOR
+from pipeline.charts import (choropleth_groups_map, category_bar, single_line, single_bar,
                              single_line_multi, lines_over_time_geo_select)
 
 CRIME = "data/wellbeing/statcan_crime_by_type.csv"
@@ -177,8 +177,8 @@ faster than crime overall. It roughly **tripled since 2014**, with sharp jumps i
 hc_path = "data/wellbeing/statcan_hate_crime.csv"
 hc = pd.read_csv(hc_path)
 hc["date"] = pd.to_datetime(hc["year"], format="%Y")
-fig = single_line(hc, "date", "rate", title="",
-    yaxis_title="Hate-crime incidents per 100,000",
+fig = single_bar(hc, "date", "rate", title="",
+    yaxis_title="Hate-crime incidents per 100,000", color=CANADA_COLOR,
     hovertemplate="%{y:.1f} per 100k<extra></extra>",
     source_note=f"Source: Statistics Canada, Table 35-10-0191-01 | Data as of: {get_data_date(hc_path)}")
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

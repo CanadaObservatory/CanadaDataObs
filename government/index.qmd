@@ -27,8 +27,8 @@ with OECD peers.
 #| echo: false
 import os
 import pandas as pd
-from pipeline.config import get_data_date
-from pipeline.charts import (peer_comparison_line, ranked_bar, single_line,
+from pipeline.config import get_data_date, CANADA_COLOR
+from pipeline.charts import (peer_comparison_line, ranked_bar, single_line, single_bar,
                              single_line_multi, lines_over_time, stacked_area, category_bar)
 ```
 
@@ -211,7 +211,8 @@ if os.path.exists(pop_path):
         opts.append(dict(col="per_1000", label="Per 1,000 population",
                          yaxis_title="Federal public servants per 1,000 people",
                          hovertemplate="%{y:.2f} per 1,000 people<extra></extra>"))
-    fig = single_line_multi(t, "date", opts, rangeslider=True,
+    fig = single_bar(t, "date", opts[0]["col"], title="", yaxis_title=opts[0]["yaxis_title"],
+        color=CANADA_COLOR, rangeslider=True, measures=opts,
         source_note=f"Source: Treasury Board of Canada Secretariat — Federal public service statistics (core public administration + separate agencies); population from Statistics Canada 17-10-0009-01 | Data as of: {get_data_date(pop_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -318,8 +319,8 @@ if os.path.exists(exe_path):
     piv["total"] = piv["Executive"] + piv["Non-executive"]
     piv["share"] = piv["Executive"] / piv["total"] * 100
     piv["date"] = pd.to_datetime(piv["year"], format="%Y")
-    fig = single_line(piv, "date", "share", title="",
-        yaxis_title="Executives (% of employees)",
+    fig = single_bar(piv, "date", "share", title="",
+        yaxis_title="Executives (% of employees)", color=CANADA_COLOR, yticksuffix="%",
         customdata=piv[["Executive", "total"]].to_numpy(),
         hovertemplate="%{x|%Y}: %{y:.2f}% — %{customdata[0]:,.0f} executives of %{customdata[1]:,.0f} employees<extra></extra>",
         source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase), employee population by executive level | Data as of: {get_data_date(exe_path)}")

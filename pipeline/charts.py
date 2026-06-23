@@ -1003,7 +1003,7 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
                neg_color="#ee8866", rangeslider=False, source_note=None,
                hover_fmt=",.0f", yticksuffix="", select_col=None,
                default_option=None, height=440,
-               hovertemplate=None, customdata=None):
+               hovertemplate=None, customdata=None, measures=None):
     """Single-series bar chart for rate/flow series where the **zero baseline and
     sign** carry the meaning (growth rates, net flows) — bars force an honest zero
     base where a cropped line can mislead. Positive bars are muted blue, negative
@@ -1017,6 +1017,14 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
     builder places `source_note` beneath it like `single_line` does."""
     import numpy as np
     import pandas as pd
+
+    # `measures` adds a dropdown that switches the plotted COLUMN (+ its y-axis title and
+    # hover), each {col, label, yaxis_title, hovertemplate} — e.g. a count vs a per-capita
+    # view. The first shows on load. (Distinct from select_col, which switches categories.)
+    if measures:
+        y_col = measures[0]["col"]
+        yaxis_title = measures[0].get("yaxis_title", yaxis_title)
+        hovertemplate = measures[0].get("hovertemplate", hovertemplate)
 
     def _colors(vals):
         return [neg_color if (v == v and v < 0) else color for v in vals]
@@ -1053,7 +1061,7 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
         plot_bgcolor="white", height=height, showlegend=False, xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0", ticksuffix=yticksuffix,
                    zeroline=True, zerolinecolor="#bbb"),
-        margin=dict(l=10, r=20, t=(64 if select_col else 36),
+        margin=dict(l=10, r=20, t=(64 if (select_col or measures) else 36),
                     b=(110 if rangeslider else 70)),
     )
     if options is not None:
@@ -1067,6 +1075,15 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
             x=0, xanchor="left", y=1.16, yanchor="top",
             bgcolor="white", bordercolor="#ccc", font=dict(size=12),
         )]
+    if measures and len(measures) > 1:
+        layout["updatemenus"] = [dict(buttons=[
+            dict(method="update", label=m["label"],
+                 args=[{"y": [df[m["col"]].to_numpy(dtype=float)],
+                        "marker.color": [_colors(df[m["col"]].to_numpy(dtype=float))],
+                        "hovertemplate": [m.get("hovertemplate", _hover(None))]},
+                       {"yaxis.title.text": m.get("yaxis_title", yaxis_title)}])
+            for m in measures], active=0, x=0, xanchor="left", y=1.16, yanchor="top",
+            bgcolor="white", bordercolor="#ccc", font=dict(size=12))]
     fig.update_layout(**layout)
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,

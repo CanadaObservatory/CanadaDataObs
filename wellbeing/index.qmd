@@ -14,7 +14,7 @@ from pipeline.config import (
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
     CATEGORICAL_COLORS, CATEGORICAL_OTHER,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar
 ```
 
 Data from the [World Happiness Report](https://worldhappiness.report/), based on
@@ -118,11 +118,10 @@ isn't collected on a comparable basis across the peer group.
 mh_path = "data/health/statcan_mental_health.csv"
 if os.path.exists(mh_path):
     mh = pd.read_csv(mh_path, parse_dates=["date"])
-    fig = single_line(mh, "date", "pct_mh_very_good", title="",
-        yaxis_title="% rating mental health very good or excellent",
-        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+    fig = single_bar(mh, "date", "pct_mh_very_good", title="",
+        yaxis_title="% rating mental health very good or excellent", color=CANADA_COLOR,
+        yticksuffix="%", hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
         source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(mh_path)}")
-    fig.update_yaxes(ticksuffix="%")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Mental-health data not yet available. Run the data pipeline.")

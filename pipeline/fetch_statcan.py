@@ -1108,3 +1108,53 @@ if __name__ == "__main__":
     fetch_population_quarterly()
     fetch_population_components()
     fetch_cpi()
+
+
+def fetch_tertiary_attainment():
+    """Tertiary educational attainment (% of the population), Canada vs the OECD
+    average, over time and by age group. StatCan 37-10-0130-01 (Tertiary
+    education, both genders).
+
+    The OECD-average benchmark is built into the table's geography dimension, so
+    Canada is directly comparable here — unlike the OECD Education-at-a-Glance
+    attainment flow, which mixed methodologies and excluded Canada from a clean key.
+    """
+    logger.info("fetch_tertiary_attainment (37-10-0130-01)")
+    try:
+        d = _get_table("37-10-0130-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    OECD = "Organisation for Economic Co-operation and Development (OECD) - average"
+    age_map = {
+        "Total, 25 to 64 years": "25–64 (all)",
+        "25 to 34 years": "25–34",
+        "35 to 44 years": "35–44",
+        "45 to 54 years": "45–54",
+        "55 to 64 years": "55–64",
+    }
+    d = d[(d["Education attainment level"] == "Tertiary education")
+          & (d["Gender"] == "Total - Gender")
+          & (d["GEO"].isin(["Canada", OECD]))
+          & (d["Age group"].isin(age_map))].copy()
+    if d.empty:
+        return None
+    d["geo"] = d["GEO"].replace({OECD: "OECD average"})
+    d["age_group"] = d["Age group"].map(age_map)
+    d["year"] = d["REF_DATE"].astype(str).str[:4].astype(int)
+    d["tertiary_pct"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    out = (d[["year", "geo", "age_group", "tertiary_pct"]]
+           .dropna(subset=["tertiary_pct"])
+           .sort_values(["geo", "age_group", "year"]).reset_index(drop=True))
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "education" / "statcan_tertiary_attainment.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+                  source="Statistics Canada",
+                  source_table="Statistics Canada 37-10-0130-01",
+                  frequency="annual", unit="% of population (tertiary education)",
+                  transformations=["Tertiary education, both genders; Canada + OECD-average geographies; by age group"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out

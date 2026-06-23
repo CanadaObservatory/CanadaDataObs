@@ -1,13 +1,9 @@
 ---
 title: "Education"
-description: "University tuition and the affordability of higher education in Canada"
+description: "Educational attainment and the cost of higher education in Canada"
 ---
 
-The cost of a university education is a growing part of the affordability story. These
-charts track average tuition fees from Statistics Canada's annual survey — over time and
-in real (inflation-adjusted) terms, by province, for domestic and international students,
-and by field of study. (Fees are reported by province and nationally; Statistics Canada
-does not publish tuition for individual institutions.)
+Education shapes both individual opportunity and the wider economy. This page looks at two questions: how educated Canadians are — by international standards, among the most credentialed populations in the OECD — and what a university education costs. (Tuition is reported by province and nationally; Statistics Canada does not publish fees for individual institutions.)
 
 ```{python}
 #| echo: false
@@ -31,6 +27,35 @@ if os.path.exists(tuition_path):
     tu["real"] = [row.tuition * cpi_annual[base_year] / cpi_annual[row.year]
                   if row.year in cpi_annual.index else float("nan")
                   for row in tu.itertuples()]
+```
+
+## How educated is Canada?
+
+By international standards Canada has one of the most highly educated populations in the world. About **64%** of Canadians aged 25–64 have completed some form of **tertiary education** — university, college or CEGEP — well above the **OECD average of roughly 41%**, a lead that has held and widened since 2000. Younger Canadians are more educated still: about **68%** of 25-to-34-year-olds hold a tertiary credential. Much of Canada's standing reflects its large college and CEGEP system, not universities alone.
+
+```{python}
+#| echo: false
+ta_path = "data/education/statcan_tertiary_attainment.csv"
+if os.path.exists(ta_path):
+    ta = pd.read_csv(ta_path)
+    t = ta[ta["age_group"] == "25–64 (all)"]
+    ca = t[t["geo"] == "Canada"].sort_values("year")
+    oe = t[t["geo"] == "OECD average"].sort_values("year")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=oe["year"], y=oe["tertiary_pct"], name="OECD average", mode="lines",
+        line=dict(color="#555555", width=2, dash="dash"), hovertemplate="OECD average: %{y:.0f}%<extra></extra>"))
+    fig.add_trace(go.Scatter(x=ca["year"], y=ca["tertiary_pct"], name="Canada", mode="lines+markers",
+        line=dict(color=CANADA_COLOR, width=3), marker=dict(size=5), hovertemplate="Canada: %{y:.0f}%<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="Adults 25–64 with tertiary education (%)", ticksuffix="%", gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=80, r=20))
+    fig.add_annotation(text=f"Source: Statistics Canada, Table 37-10-0130-01 | Data as of: {get_data_date(ta_path)}",
+        xref="paper", yref="paper", x=0, y=-0.18, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Attainment data not yet available. Run the data pipeline.")
 ```
 
 ## Undergraduate tuition
@@ -113,5 +138,6 @@ else:
 
 ## Download data
 
+- [Tertiary educational attainment, Canada vs OECD (CSV)](../data/education/statcan_tertiary_attainment.csv) — Statistics Canada 37-10-0130-01
 - [University tuition by level & province (CSV)](../data/education/statcan_tuition.csv) — Statistics Canada 37-10-0045-01
 - [Undergraduate tuition by field of study (CSV)](../data/education/statcan_tuition_by_field.csv) — Statistics Canada 37-10-0003-01

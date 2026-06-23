@@ -1051,6 +1051,12 @@ INDICATORS = [
               "Undergraduate tuition by field of study", "current $", "annual",
               fetch_fn="fetch_tuition_by_field", output_subpath="statcan_tuition_by_field.csv",
               source_table="Statistics Canada 37-10-0003-01"),
+    # Tertiary educational attainment, Canada vs the OECD-average benchmark (built
+    # into the table's geography dim, so Canada is cleanly comparable — §535).
+    Indicator("tertiary_attainment", "education", "custom",
+              "Tertiary educational attainment", "% of population", "annual",
+              fetch_fn="fetch_tertiary_attainment", output_subpath="statcan_tertiary_attainment.csv",
+              source_table="Statistics Canada 37-10-0130-01"),
 
     # ----- Environment (OECD Green Growth) -----
     Indicator("co2_per_capita", "environment", "oecd",

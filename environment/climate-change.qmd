@@ -255,7 +255,7 @@ if os.path.exists(seas_path):
     cities = [c for c in ["Toronto", "Vancouver", "Winnipeg", "Calgary", "Alert", "Eureka"]
               if c in set(cs["city"])]
     SEASON_COLORS = {"Winter": "#1f77b4", "Spring": "#2ca02c",
-                     "Summer": "#d62728", "Autumn": "#ff7f0e"}
+                     "Summer": "#C0392B", "Autumn": "#ff7f0e"}
     SEASONS = ["Winter", "Spring", "Summer", "Autumn"]
     # Two metrics share one chart via a second dropdown: the seasonal average
     # temperature and the seasonal average of daily-high temperatures.
@@ -391,21 +391,29 @@ def show_spiral(city, title):
     if fyears and fyears[-1] != years[-1]:
         fyears.append(years[-1])
 
-    # green "normal" ring at 0 °C (the 1961–1990 baseline) — kept as the LAST trace
-    # so the year-only frames (which address traces 0..N-1) never overwrite it
+    # green "normal" ring at 0 °C (the 1961–1990 baseline) + a semi-opaque wedge behind
+    # the radial °C labels (review §484) — both kept AFTER the year traces so the
+    # year-only frames (which address traces 0..N-1) never overwrite them. The wedge sits
+    # over the lines so the ticks read (radial axis at angle=0 → horizontal labels on the
+    # right spoke, off the January tick), while staying a touch transparent.
     _th = list(range(0, 361, 6))
     ring = go.Scatterpolar(r=[0] * len(_th), theta=_th, mode="lines",
                            line=dict(color="#2ca02c", width=1.5), hoverinfo="skip")
+    wedge = go.Scatterpolar(
+        r=[_RR[0], _RR[0], _RR[1], _RR[1]], theta=[79, 101, 101, 79],
+        fill="toself", fillcolor="rgba(255,255,255,0.82)", line=dict(width=0),
+        mode="lines", hoverinfo="skip")
     fig = go.Figure(
-        data=[yseg(y) for y in years] + [ring],              # year loops + green baseline ring
+        data=[yseg(y) for y in years] + [ring, wedge],       # year loops + baseline ring + label wedge
         frames=[go.Frame(name=str(Y), data=[yseg(y, visible=(y <= Y)) for y in years])
                 for Y in fyears])
     fig.update_layout(
         height=440, showlegend=False, margin=dict(t=52, b=44, l=22, r=22),
         title=dict(text=title, x=0.5, xanchor="center", y=0.97, font=dict(size=13)),
         polar=dict(
-            radialaxis=dict(range=_RR, tickvals=_TICKS, ticktext=_TTXT, angle=90,
-                            tickfont=dict(size=8), gridcolor="#e0e0e0"),
+            radialaxis=dict(range=_RR, tickvals=_TICKS, ticktext=_TTXT, angle=0,
+                            layer="above traces", tickfont=dict(size=11, color="#1a1a1a"),
+                            gridcolor="#e0e0e0"),
             angularaxis=dict(direction="clockwise", rotation=90, gridcolor="#eeeeee",
                              tickfont=dict(size=8), tickmode="array", ticktext=MON_S,
                              tickvals=[(m - 1) / 12 * 360 for m in range(1, 13)])),

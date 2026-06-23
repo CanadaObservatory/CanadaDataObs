@@ -960,6 +960,30 @@ def build_treeline():
     print(f"Wrote tree line ({km:,} km, taiga-tundra ecozone boundary) -> {GEO_DIR}/treeline.geojson")
 
 
+LANDFORM_URL = ("https://ws.lioservices.lrc.gov.on.ca/arcgis1071a/rest/services/"
+                "LIO_OPEN_DATA/LIO_Open06/MapServer")
+
+
+def build_landforms():
+    """Notable southern-Ontario landforms for the elevation map (review §437): the
+    Niagara Escarpment Plan boundary (layer 25) and the Oak Ridges Moraine planning
+    area (layer 29), from Land Information Ontario (OGL-Ontario). Each feature is
+    tagged with `name`; written as one FeatureCollection (outlines, server-simplified)."""
+    feats = []
+    for lid, name in [(25, "Niagara Escarpment"), (29, "Oak Ridges Moraine")]:
+        r = requests.get(f"{LANDFORM_URL}/{lid}/query",
+            params={"where": "1=1", "outFields": "OGF_ID", "returnGeometry": "true",
+                    "maxAllowableOffset": "0.002", "outSR": "4326", "f": "geojson"}, timeout=120)
+        r.raise_for_status()
+        for f in r.json().get("features", []):
+            f["properties"] = {"name": name}
+            feats.append(f)
+    os.makedirs(GEO_DIR, exist_ok=True)
+    _write_geojson({"type": "FeatureCollection", "features": feats}, f"{GEO_DIR}/landforms.geojson")
+    print(f"  wrote landforms.geojson: {len(feats)} features, "
+          f"{round(os.path.getsize(GEO_DIR + '/landforms.geojson') / 1e3)} KB")
+
+
 if __name__ == "__main__":
     build_provinces()
     build_cma_density()
@@ -976,4 +1000,5 @@ if __name__ == "__main__":
     build_elevation_relief()
     build_peaks()
     build_treeline()
+    build_landforms()
     print("build_geography complete.")

@@ -6,6 +6,7 @@ Uses the stats_can library for simplified API access.
 import pandas as pd
 from pipeline.config import DATA_DIR, STATCAN_TABLES
 from pipeline.metadata import save_metadata, validate_columns, SchemaError
+from pipeline.release_schedule import next_release_date, SCHEDULE_TITLES
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -76,7 +77,9 @@ def fetch_statcan_indicator(ind):
     out_path = ind.out_path
     out_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(out_path, index=False)
-    save_metadata(out_path, df=df, date_column="date",
+    next_rel = (next_release_date(SCHEDULE_TITLES[ind.release_key])
+                if ind.release_key else None)
+    save_metadata(out_path, df=df, date_column="date", next_release_date=next_rel,
         source="Statistics Canada",
         source_table=ind.source_table,
         frequency=ind.frequency,
@@ -224,6 +227,7 @@ def fetch_cpi():
         source_table="18-10-0004-01",
         frequency="monthly",
         unit="index (2002=100)",
+        next_release_date=next_release_date(SCHEDULE_TITLES["cpi"]),
         transformations=[
             "filtered to All-items CPI, Canada only",
             "computed year-over-year inflation rate (12-month pct_change)",
@@ -253,6 +257,120 @@ def fetch_cpi():
         transformations=["filtered to the 8 major CPI components + All-items, Canada only"])
     logger.info(f"Saved {len(comp)} rows to {comp_path}")
 
+    # Side output: the major FOOD sub-components (Canada) — the grocery categories +
+    # restaurants under "Food" — for the food-breakdown figure (review §160). Monthly
+    # index; the price change over various windows is computed at render time.
+    food_sub = {
+        "Meat": "Meat",
+        "Fish, seafood and other marine products": "Fish & seafood",
+        "Dairy products and eggs": "Dairy & eggs",
+        "Bakery and cereal products (excluding baby food)": "Bakery & cereals",
+        "Fruit, fruit preparations and nuts": "Fruit & nuts",
+        "Vegetables and vegetable preparations": "Vegetables",
+        "Other food products and non-alcoholic beverages": "Other foods & beverages",
+        "Food purchased from restaurants": "Restaurant meals",
+    }
+    food = df_all[(df_all["geography"] == "Canada")
+                  & (df_all["product_group"].isin(food_sub))].copy()
+    food["food_group"] = food["product_group"].map(food_sub)
+    food["date"] = pd.to_datetime(food["date"])
+    food["cpi_value"] = pd.to_numeric(food["cpi_value"], errors="coerce")
+    food = (food.dropna(subset=["cpi_value"])[["date", "food_group", "cpi_value"]]
+            .sort_values(["food_group", "date"]).reset_index(drop=True))
+    food_path = DATA_DIR / "economics" / "statcan_cpi_food_components.csv"
+    food.to_csv(food_path, index=False)
+    save_metadata(food_path, df=food, date_column="date",
+        source="Statistics Canada", source_table="18-10-0004-01",
+        frequency="monthly", unit="index (2002=100)",
+        transformations=["Canada; major food sub-components (grocery categories + restaurants)"])
+    logger.info(f"Saved {len(food)} rows to {food_path}")
+
+    return df
+
+
+# Median after-tax income by recipient type (11-10-0190-01), Canada, 2024 constant $.
+# A WIDE CSV [date, all, families, individuals] for the income-page family-type
+# dropdown (review §228). Kept separate from statcan_median_income.csv (which crea.py
+# and the combined series still read) so nothing downstream changes.
+MEDIAN_INCOME_FAMILY = {
+    "Economic families and persons not in an economic family": "all",
+    "Economic families": "families",
+    "Persons not in an economic family": "individuals",
+}
+
+
+def fetch_median_income_by_family():
+    """Median after-tax income (Canada, 2024 constant $) by recipient type — all /
+    economic families / unattached individuals — for the income-page dropdown.
+    Wide CSV; the 'all' column mirrors statcan_median_income.csv."""
+    logger.info("Fetching StatCan median income by family type (11-10-0190-01)...")
+    try:
+        df = _get_table("11-10-0190-01")
+    except Exception as e:
+        logger.error(f"  Failed to fetch StatCan table 11-10-0190-01: {e}")
+        return None
+    df = df[(df["GEO"] == "Canada")
+            & (df["Income concept"] == "Median after-tax income")
+            & (df["UOM"] == "2024 constant dollars")
+            & (df["Economic family type"].isin(MEDIAN_INCOME_FAMILY))].copy()
+    df["col"] = df["Economic family type"].map(MEDIAN_INCOME_FAMILY)
+    df["date"] = pd.to_datetime(df["REF_DATE"].astype(str), format="%Y", errors="coerce")
+    df["VALUE"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    wide = (df.pivot_table(index="date", columns="col", values="VALUE")
+              .reset_index().sort_values("date").dropna(subset=["all"]).reset_index(drop=True))
+    out_path = DATA_DIR / "income" / "statcan_median_income_by_family.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wide.to_csv(out_path, index=False)
+    save_metadata(out_path, df=wide, date_column="date", source="Statistics Canada",
+        source_table="11-10-0190-01", frequency="annual", unit="2024 constant dollars",
+        transformations=["Canada; median after-tax income by recipient type "
+                         "(all / economic families / unattached individuals)"])
+    logger.info(f"  saved {len(wide)} rows -> {out_path.name}")
+    return wide
+
+
+# Non-permanent residents by permit type (17-10-0121-01). These five categories
+# sum exactly to the published "Total, non-permanent residents" (verified): the
+# permit-holder subrows + asylum total + the family-member residual ("Other").
+NPR_TYPES = {
+    "Work permit holders only": "Work permits",
+    "Study permit holders only": "Study permits",
+    "Work and study permit holders": "Work + study permits",
+    "Total, asylum claimants, protected persons and related groups": "Asylum claimants",
+    "Other": "Other",
+}
+
+
+def fetch_npr_by_type():
+    """Non-permanent residents by permit type, Canada (StatCan 17-10-0121-01,
+    quarterly from 2021) -> data/population/statcan_npr_by_type.csv [date, type,
+    count]. The five categories sum to the published NPR total."""
+    logger.info("Fetching StatCan non-permanent residents by type (17-10-0121-01)...")
+    try:
+        df = _get_table("17-10-0121-01")
+    except Exception as e:
+        logger.error(f"  Failed to fetch StatCan table 17-10-0121-01: {e}")
+        return None
+    col = "Non-permanent resident types"
+    validate_columns(df, ["REF_DATE", "GEO", col, "VALUE"], "npr_by_type")
+    df = df[(df["GEO"] == "Canada") & (df[col].isin(NPR_TYPES))].copy()
+    df["type"] = df[col].map(NPR_TYPES)
+    df["date"] = pd.to_datetime(df["REF_DATE"].astype(str), format="%Y-%m", errors="coerce")
+    df["count"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df = (df.dropna(subset=["date", "count"])[["date", "type", "count"]]
+            .sort_values(["type", "date"]).reset_index(drop=True))
+    if df.empty:
+        logger.warning("  npr_by_type: no rows after filtering — check type labels")
+        return None
+    out_path = DATA_DIR / "population" / "statcan_npr_by_type.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    save_metadata(out_path, df=df, date_column="date",
+        source="Statistics Canada", source_table="17-10-0121-01",
+        frequency="quarterly", unit="persons",
+        transformations=["Canada; non-permanent residents by permit type "
+                         "(5 categories summing to the published total)"])
+    logger.info(f"  saved {len(df)} rows -> {out_path.name}")
     return df
 
 
@@ -856,6 +974,7 @@ def fetch_cma_unemployment():
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(out_path, index=False)
     save_metadata(out_path, df=out, source="Statistics Canada",
+        next_release_date=next_release_date(SCHEDULE_TITLES["lfs"]),
         source_table="Statistics Canada 14-10-0459-01 (Labour Force Survey)",
         frequency="monthly", unit="unemployment rate (%), 3-month moving average, SA",
         transformations=["LFS unemployment rate by CMA, latest 3-month moving average; "

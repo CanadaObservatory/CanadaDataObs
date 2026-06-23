@@ -54,6 +54,20 @@ across every province and territory; the comprehensive land-claim settlement lan
 vast areas of the North. The boundaries reflect the current legal record and are updated
 as new surveys are registered.
 
+**A note on Haida Gwaii and Aboriginal title.** Haida Gwaii is widely understood to belong
+to the Haida Nation, and in a legal sense its status is now distinct: in 2024 both British
+Columbia (through the *Haida Nation Recognition Amendment Act*) and Canada (through the
+"Big Tide" / *Chiix̲uujin* Haida Title Lands Agreement) recognized the Haida Nation's
+**Aboriginal title over the whole archipelago** — among the first agreements of their kind
+in Canada, and ones the governments note do not affect private property or local
+governments. Recognized Aboriginal title is a different kind of thing from what this map
+shows: it applies to an entire land base rather than a surveyed parcel, and recognized or
+asserted title exists in a number of places across the country without a single
+authoritative boundary to draw. This map is therefore limited to the surveyed legal
+parcels — reserves and land-claim settlement lands — and does not attempt to map title or
+traditional territories. The Haida Nation's reserves on Haida Gwaii do appear here, as
+reserves.
+
 ## Download data
 
 - [Indigenous lands of Canada (GeoJSON)](../data/geo/indigenous_lands.geojson) — Natural Resources Canada, Canada Lands Survey System (Aboriginal Lands of Canada Legislative Boundaries), Open Government Licence – Canada

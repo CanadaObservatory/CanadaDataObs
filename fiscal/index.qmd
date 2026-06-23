@@ -14,7 +14,7 @@ rather than final figures.
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import get_data_date
+from pipeline.config import get_data_date, CATEGORICAL_COLORS, CATEGORICAL_OTHER, CANADA_COLOR
 from pipeline.charts import peer_comparison_line, ranked_bar, ranked_bar_select
 ```
 
@@ -147,9 +147,8 @@ if os.path.exists(tax_path):
     t = pd.read_csv(tax_path)
     TAX_ORDER = ["Income & profits", "Social security", "Goods & services",
                  "Property", "Payroll", "Other"]
-    TAX_COLORS = {"Income & profits": "#4e79a7", "Social security": "#59a14f",
-                  "Goods & services": "#f28e2b", "Property": "#b07aa1",
-                  "Payroll": "#edc948", "Other": "#bab0ac"}
+    TAX_COLORS = {t: CATEGORICAL_COLORS[i] for i, t in enumerate(TAX_ORDER[:-1])}
+    TAX_COLORS["Other"] = CATEGORICAL_OTHER   # residual recedes to the reserved grey
     latest = t.sort_values("year").groupby(["country_code", "tax_type"]).tail(1)
     yr_lo, yr_hi = int(latest["year"].min()), int(latest["year"].max())
     tot = (latest.groupby(["country_code", "country_name"])["pct_gdp"].sum()
@@ -166,7 +165,7 @@ if os.path.exists(tax_path):
     for cn, tv in zip(tot["country_name"], tot["pct_gdp"]):
         is_ca = cn == "Canada"
         figt.add_annotation(x=tv, y=cn, text=f"{tv:.0f}%", xanchor="left", xshift=4,
-            showarrow=False, font=dict(size=10, color="#d62728" if is_ca else "#777"))
+            showarrow=False, font=dict(size=10, color=CANADA_COLOR if is_ca else "#777"))
     figt.update_layout(barmode="stack", plot_bgcolor="white", height=600,
         xaxis=dict(title="% of GDP", gridcolor="#e0e0e0", ticksuffix="%"),
         yaxis=dict(title=""),

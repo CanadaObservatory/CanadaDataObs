@@ -11,8 +11,8 @@ from pathlib import Path
 
 
 def save_metadata(csv_path, *, source, source_table, frequency, unit,
-                  latest_observation_date=None, transformations=None,
-                  notes=None, df=None, date_column="date"):
+                  latest_observation_date=None, next_release_date=None,
+                  transformations=None, notes=None, df=None, date_column="date"):
     """
     Save a metadata JSON sidecar next to a CSV file.
 
@@ -30,6 +30,12 @@ def save_metadata(csv_path, *, source, source_table, frequency, unit,
         Unit of measurement (e.g., "persons", "index", "% of GDP")
     latest_observation_date : str, optional
         Latest date in the data. Auto-detected from df if not provided.
+    next_release_date : str, optional
+        Next scheduled release date ("YYYY-MM-DD") for this series, sourced (not
+        hardcoded) from Statistics Canada's release calendar — see
+        pipeline/release_schedule.py. Used by config.get_next_release() to show a
+        "Next update: <date>" note beside a chart's source line. Omit (None) for
+        series with no published schedule.
     transformations : list of str, optional
         List of transformations applied
     notes : str, optional
@@ -58,6 +64,7 @@ def save_metadata(csv_path, *, source, source_table, frequency, unit,
         "unit": unit,
         "retrieved_at": datetime.now(timezone.utc).isoformat(),
         "latest_observation_date": latest_observation_date,
+        "next_release_date": next_release_date,
         "transformations": transformations or [],
         "notes": notes,
         "row_count": len(df) if df is not None else None,

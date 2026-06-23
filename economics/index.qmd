@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
-    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
+    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date, get_next_release,
 )
 from pipeline.charts import (
     peer_comparison_line, ranked_bar,
@@ -97,7 +97,7 @@ if os.path.exists(gdpq_path):
     # (avoids a "-0.0%" for near-flat quarters).
     q["hover"] = [f"{lbl}: {'0.0' if abs(g) < 0.05 else format(g, '+.1f')}%"
                   for lbl, g in zip(q["qlabel"], q["growth"])]
-    bar_colors = ["#d62728" if v < 0 else "#4e79a7" for v in q["growth"]]
+    bar_colors = ["#C0392B" if v < 0 else "#4e79a7" for v in q["growth"]]
     import math
     from pipeline.charts import add_recession_bands
     # Clip the y-axis to normal quarters so past recessions stay legible; the
@@ -131,8 +131,14 @@ if os.path.exists(gdpq_path):
                        dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
                    rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
         margin=dict(t=40, b=120))
+    _gdpq_src = (f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted); "
+                 f"recession bands: C.D. Howe Institute Business Cycle Council | "
+                 f"Data as of: {q['qlabel'].iloc[-1]}")
+    _gdpq_next = get_next_release(gdpq_path)
+    if _gdpq_next:
+        _gdpq_src += f" | Next update: {_gdpq_next}"
     figq.add_annotation(
-        text=f"Source: Statistics Canada 36-10-0104-01 (real GDP, seasonally adjusted); recession bands: C.D. Howe Institute Business Cycle Council | Data as of: {q['qlabel'].iloc[-1]}",
+        text=_gdpq_src,
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False,
         font=dict(size=10, color="#999"))
     if (q["growth"].abs() > 5).any():
@@ -300,7 +306,7 @@ if os.path.exists(prod_path) and os.path.exists(util_path):
     base_year = int(d["year"].min())
     base = d[d["year"] == base_year].iloc[0]
     series = [
-        ("gdp_per_capita", "GDP per capita", "#d62728", 3),
+        ("gdp_per_capita", "GDP per capita", CANADA_COLOR, 3),
         ("gdp_per_hour", "Labour productivity (GDP per hour)", "#1f77b4", 2),
         ("hours_per_capita", "Labour utilisation (hours per capita)", "#f28e2b", 2),
     ]
@@ -372,10 +378,15 @@ if os.path.exists(cma_geo_path) and os.path.exists(cma_unemp_path):
     cma_geo = json.load(open(cma_geo_path))
     sub = pd.read_csv(cma_unemp_path, dtype={"cmauid": str}).dropna(subset=["unemployment"])
     period = pd.to_datetime(str(sub["period"].iloc[0]) + "-01").strftime("%b %Y")
+    _cma_src = (f"Source: Statistics Canada Labour Force Survey 14-10-0459-01 "
+                f"(3-month moving average, seasonally adjusted) | 3 months ending {period}")
+    _cma_next = get_next_release(cma_unemp_path)
+    if _cma_next:
+        _cma_src += f" | Next update: {_cma_next}"
     fig = choropleth_map(cma_geo, sub, "cmauid", "unemployment", name_col="name",
         colorbar_title="Unemployment<br>rate", value_suffix="%", value_fmt=".1f", colorscale="YlOrRd",
         zmin=float(sub["unemployment"].quantile(0.05)), zmax=float(sub["unemployment"].quantile(0.95)),
-        source_note=f"Source: Statistics Canada Labour Force Survey 14-10-0459-01 (3-month moving average, seasonally adjusted) | 3 months ending {period}")
+        source_note=_cma_src)
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("City unemployment map not yet available. Run the data pipeline.")
@@ -558,7 +569,7 @@ The exchange rate against the **US dollar** — Canada's dominant trading partne
 ```{python}
 #| echo: false
 from pipeline.charts import single_line
-fx_path = "data/economics/boc_usdcad.csv"
+fx_path = "data/economics/boc_exchange_rates.csv"
 if os.path.exists(fx_path):
     fx = pd.read_csv(fx_path, parse_dates=["date"])
     fig = single_line(fx, "date", "usdcad", title="",
@@ -569,6 +580,32 @@ if os.path.exists(fx_path):
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Exchange-rate data not yet available. Run the data pipeline.")
+```
+
+The loonie doesn't move in lockstep against every currency. Indexed to 2017, this compares its value against the **US dollar**, the **euro** — the currency of many of Canada's peer economies and its second-largest export market — and the **Japanese yen**. A *rising* line means the loonie has *weakened* against that currency.
+
+```{python}
+#| echo: false
+if os.path.exists(fx_path):
+    fxc = pd.read_csv(fx_path, parse_dates=["date"])
+    cur = {"usdcad": ("US dollar", "#0650A3"), "eurcad": ("Euro", "#1F6E8C"),
+           "jpycad": ("Japanese yen", "#A8842F")}
+    figx = go.Figure()
+    for col, (nm, clr) in cur.items():
+        s = fxc[["date", col]].dropna()
+        figx.add_trace(go.Scatter(x=s["date"], y=s[col] / s[col].iloc[0] * 100, mode="lines",
+            name=nm, line=dict(color=clr, width=2),
+            hovertemplate=nm + ": %{y:.0f} (2017 = 100)<extra></extra>"))
+    figx.add_hline(y=100, line_dash="dot", line_color="#888", opacity=0.6)
+    figx.update_layout(plot_bgcolor="white", height=440,
+        yaxis=dict(title="Index (2017 = 100; higher = weaker loonie)", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", x=0, y=-0.16, yanchor="top"),
+        margin=dict(b=120, t=30, r=30),
+        annotations=[dict(text=f"Source: Bank of Canada (daily average exchange rates) | Data as of: {get_data_date(fx_path)}",
+            xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False,
+            font=dict(size=10, color="#999"))])
+    figx.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
 ## Download data
@@ -583,4 +620,4 @@ else:
 - [Business Investment (CSV)](../data/economics/worldbank_business_investment.csv) — World Bank / OECD National Accounts
 - [Current Account Balance (CSV)](../data/economics/oecd_current_account.csv) — OECD Economic Outlook
 - [Merchandise Trade with the US (CSV)](../data/economics/statcan_trade_us.csv) — Statistics Canada 12-10-0011-01
-- [CAD/US dollar exchange rate (CSV)](../data/economics/boc_usdcad.csv) — Bank of Canada
+- [Exchange rates: CAD per US dollar, euro, yen (CSV)](../data/economics/boc_exchange_rates.csv) — Bank of Canada

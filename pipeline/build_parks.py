@@ -504,6 +504,40 @@ def build_greenbelt(simplify_tol=0.0006, server_offset=0.0004):
     _write_layer(g, f"{GEO_DIR}/greenbelt_ncc.geojson")
 
 
+# --- Ontario Greenbelt: Land Information Ontario --------------------------
+GREENBELT_ON_URL = ("https://ws.lioservices.lrc.gov.on.ca/arcgis1071a/rest/services/"
+                    "LIO_OPEN_DATA/LIO_Open06/MapServer/17/query")
+GREENBELT_ON_DATASET = "Greenbelt Outer Boundary (Land Information Ontario)"
+
+
+def build_ontario_greenbelt(simplify_tol=0.0005, server_offset=0.0004):
+    """Ontario Greenbelt → data/geo/greenbelt_on.geojson. NOT a park — the ~810,000 ha
+    band of permanently protected countryside, farmland and natural areas across the
+    Greater Golden Horseshoe (the Niagara Escarpment and Oak Ridges Moraine plan areas,
+    specialty-crop land and urban river valleys), established under Ontario's Greenbelt
+    Act, 2005. Drawn on the page as its own overlay, distinct from both the parks and
+    the federal Ottawa Greenbelt. The LIO layer is already ONE assembled outer boundary
+    whose interior rings cut out the excluded towns — so NO dissolve (that would fill
+    the holes); just repair + simplify, which preserve the rings."""
+    print("Building Ontario Greenbelt (LIO outer boundary) ...")
+    g = _fetch_arcgis_geojson(GREENBELT_ON_URL, "1=1", "OGF_ID", server_offset)
+    g = _repair(g, simplify_tol)
+    g["park_id"] = "ON-greenbelt"
+    g["name"] = "Ontario Greenbelt"
+    g["name_fr"] = "Ceinture de verdure de l'Ontario"
+    g["park_type"] = "Greenbelt (land-use designation)"
+    g["province"] = "Ontario"
+    g["jurisdiction"] = "Ontario"
+    g["admin_level"] = "provincial"
+    g["admin_agency"] = "Government of Ontario"
+    g["boundary_kind"] = "protected countryside"
+    g["source_agency"] = "Land Information Ontario"
+    g["source_dataset"] = GREENBELT_ON_DATASET
+    g["geometry_quality"] = "official boundary (Greenbelt Act, 2005)"
+    g["display_status"] = "include"
+    _write_layer(g, f"{GEO_DIR}/greenbelt_on.geojson")
+
+
 # --- provenance -----------------------------------------------------------
 _SOURCES = {
     "Canada": dict(admin_level="federal",
@@ -560,6 +594,12 @@ _SOURCES = {
         source_agency="National Capital Commission (NCC)", source_dataset=GREENBELT_DATASET,
         source_url="https://open.canada.ca/data/en/dataset/420259e4-304f-4b46-a7f8-ffc76a66c2fa",
         licence="Open Government Licence – Canada", boundary_type="conservation land (not a park)"),
+    "Ontario Greenbelt": dict(admin_level="provincial",
+        source_agency="Land Information Ontario / Government of Ontario",
+        source_dataset=GREENBELT_ON_DATASET,
+        source_url="https://geohub.lio.gov.on.ca/datasets/lio::greenbelt-outer-boundary",
+        licence="Open Government Licence – Ontario",
+        boundary_type="protected countryside (land-use designation, not a park)"),
 }
 
 # Jurisdictions with NO usable authoritative open boundary (documented gaps; these
@@ -594,4 +634,5 @@ if __name__ == "__main__":
     build_yukon_parks()
     build_ncc_parks()
     build_greenbelt()
+    build_ontario_greenbelt()
     write_sources()

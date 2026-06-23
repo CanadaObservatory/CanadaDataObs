@@ -10,6 +10,7 @@ from pipeline.config import (
     HIGHLIGHT_WIDTH, PEER_WIDTH, PEER_ACTIVE_WIDTH, HIGHLIGHT_COUNTRY,
     PEER_COUNTRIES, COMPARATOR_COLORS, PEER_EXTRA_COLORS, DEFAULT_VISIBLE_COMPARATORS,
     PROVINCE_NAMES, PROVINCE_COLORS, PROVINCE_COLORS_DEEP, PROVINCE_COLORS_PASTEL,
+    CATEGORICAL_COLORS, CATEGORICAL_OTHER, VM_GROUP_COLORS, RELIGION_HISTORY_COLORS,
     SNAPSHOT_SPECS, DATA_DATE, get_data_date, BRAND,
 )
 
@@ -1002,7 +1003,7 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
                neg_color="#ee8866", rangeslider=False, source_note=None,
                hover_fmt=",.0f", yticksuffix="", select_col=None,
                default_option=None, height=440,
-               hovertemplate=None, customdata=None):
+               hovertemplate=None, customdata=None, measures=None):
     """Single-series bar chart for rate/flow series where the **zero baseline and
     sign** carry the meaning (growth rates, net flows) — bars force an honest zero
     base where a cropped line can mislead. Positive bars are muted blue, negative
@@ -1016,6 +1017,14 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
     builder places `source_note` beneath it like `single_line` does."""
     import numpy as np
     import pandas as pd
+
+    # `measures` adds a dropdown that switches the plotted COLUMN (+ its y-axis title and
+    # hover), each {col, label, yaxis_title, hovertemplate} — e.g. a count vs a per-capita
+    # view. The first shows on load. (Distinct from select_col, which switches categories.)
+    if measures:
+        y_col = measures[0]["col"]
+        yaxis_title = measures[0].get("yaxis_title", yaxis_title)
+        hovertemplate = measures[0].get("hovertemplate", hovertemplate)
 
     def _colors(vals):
         return [neg_color if (v == v and v < 0) else color for v in vals]
@@ -1052,7 +1061,7 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
         plot_bgcolor="white", height=height, showlegend=False, xaxis=xaxis,
         yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0", ticksuffix=yticksuffix,
                    zeroline=True, zerolinecolor="#bbb"),
-        margin=dict(l=10, r=20, t=(64 if select_col else 36),
+        margin=dict(l=10, r=20, t=(64 if (select_col or measures) else 36),
                     b=(110 if rangeslider else 70)),
     )
     if options is not None:
@@ -1066,6 +1075,15 @@ def single_bar(df, x_col, y_col, title, yaxis_title, *, color="#4477aa",
             x=0, xanchor="left", y=1.16, yanchor="top",
             bgcolor="white", bordercolor="#ccc", font=dict(size=12),
         )]
+    if measures and len(measures) > 1:
+        layout["updatemenus"] = [dict(buttons=[
+            dict(method="update", label=m["label"],
+                 args=[{"y": [df[m["col"]].to_numpy(dtype=float)],
+                        "marker.color": [_colors(df[m["col"]].to_numpy(dtype=float))],
+                        "hovertemplate": [m.get("hovertemplate", _hover(None))]},
+                       {"yaxis.title.text": m.get("yaxis_title", yaxis_title)}])
+            for m in measures], active=0, x=0, xanchor="left", y=1.16, yanchor="top",
+            bgcolor="white", bordercolor="#ccc", font=dict(size=12))]
     fig.update_layout(**layout)
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
@@ -1759,12 +1777,8 @@ DIVERSITY_MAP_GROUPS = [
     ("korean", "Korean"), ("japanese", "Japanese"),
 ]
 
-VM_GROUP_COLORS = {
-    "All visible minorities": "#111111",   # headline (thick)
-    "Not a visible minority": "#9e9e9e",
-    "South Asian": "#1f77b4", "Chinese": "#d62728", "Black": "#2ca02c",
-    "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
-}
+#  VM_GROUP_COLORS + RELIGION_HISTORY_COLORS moved to config.py (centralized semantic
+#  palettes); re-exported via the config import above so existing references still resolve.
 
 # Dropdown order for the religion ("religious affiliation") share maps — CMA,
 # census-tract and dissemination-area. Shared by every religion .qmd so the layers
@@ -1780,14 +1794,6 @@ RELIGION_MAP_GROUPS = [
     ("indigenous_spirituality", "Indigenous"),
     ("other_religion", "Other religions & spiritual traditions"),
 ]
-
-RELIGION_HISTORY_COLORS = {
-    "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
-    "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#d62728",
-    "Buddhist": "#9467bd", "Jewish": "#8c564b",
-    "Indigenous": "#e377c2", "Other religions": "#17becf",
-}
-
 
 def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
                   value_col="share", default_geo="Canada", source_note=None,
@@ -1895,31 +1901,45 @@ def history_lines(df, *, group_colors, hidden_groups=(), thick_group=None,
     return fig
 
 
-def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
-                geography="Canada", geo_col="geography", source_note=None, height=460):
-    """Diverging horizontal bars of each group's change in <value_col> between two years
-    for one geography — the 'scale of change' view that quantifies what the long-run line
-    chart shows. Bars are coloured by group (same palette as the lines), diverge around
-    zero, and are sorted by signed change (largest decline at the bottom, largest gain at
-    the top); each y-label carries the group's start→end values."""
+def change_bars(df, *, group_colors, year_end, year_start=None, year_starts=None,
+                value_col="share", geography="Canada", geo_col="geography",
+                source_note=None, height=460):
+    """Diverging horizontal bars of each group's change in <value_col> between a baseline
+    year and `year_end` for one geography — the 'scale of change' view that quantifies
+    what the long-run line chart shows. Bars are coloured by group (same palette as the
+    lines), diverge around zero, and are sorted by signed change (largest decline at the
+    bottom, largest gain at the top); each y-label carries the group's start→end values.
+
+    Pass `year_start` for a single fixed baseline, or `year_starts` (a list) to add a
+    baseline-year dropdown (each option recomputes the bars + x-axis title/range);
+    `year_start` then selects the default option."""
     d = df[df[geo_col] == geography].copy()
     d["year"] = d["year"].astype(int)
-    rows = []
-    for g in group_colors:                       # palette order; skip groups absent in either year
-        sub = d[d["group"] == g]
-        s0, s1 = sub[sub["year"] == year_start][value_col], sub[sub["year"] == year_end][value_col]
-        if len(s0) and len(s1):
-            a, b = float(s0.iloc[0]), float(s1.iloc[0])
-            rows.append((g, a, b, b - a))
-    rows.sort(key=lambda r: r[3])                 # ascending → most-negative first (bottom)
-    deltas = [round(r[3], 1) for r in rows]        # round for display (avoids float noise like 4.4799…)
-    labels = [f"{g}<br>{a:.0f}% → {b:.0f}%" for g, a, b, _ in rows]
+
+    def _compute(ys):
+        rows = []
+        for g in group_colors:                   # palette order; skip groups absent in either year
+            sub = d[d["group"] == g]
+            s0 = sub[sub["year"] == ys][value_col]
+            s1 = sub[sub["year"] == year_end][value_col]
+            if len(s0) and len(s1):
+                a, b = float(s0.iloc[0]), float(s1.iloc[0])
+                rows.append((g, a, b, b - a))
+        rows.sort(key=lambda r: r[3])             # ascending → most-negative first (bottom)
+        deltas = [round(r[3], 1) for r in rows]    # round for display (avoids float noise)
+        labels = [f"{g}<br>{a:.0f}% → {b:.0f}%" for g, a, b, _ in rows]
+        colors = [group_colors.get(g, "#888") for g, *_ in rows]
+        text = [f"{dl:+.1f} pp" for dl in deltas]
+        pad = (max(abs(min(deltas)), abs(max(deltas))) * 0.15) if deltas else 1.0
+        return deltas, labels, colors, text, [min(deltas) - pad, max(deltas) + pad]
+
+    starts = year_starts or [year_start]
+    default_start = year_start if year_start in starts else starts[0]
+    has_menu = bool(year_starts) and len(year_starts) > 1
+    d0, l0, c0, t0, r0 = _compute(default_start)
     fig = go.Figure(go.Bar(
-        x=deltas, y=labels, orientation="h",
-        marker_color=[group_colors.get(g, "#888") for g, *_ in rows],
-        text=[f"{dl:+.1f} pp" for dl in deltas], textposition="auto",
-        cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
-    pad = max(abs(min(deltas)), abs(max(deltas))) * 0.15
+        x=d0, y=l0, orientation="h", marker_color=c0,
+        text=t0, textposition="auto", cliponaxis=False, hovertemplate="%{text}<extra></extra>"))
     # Source note hangs below the plot (yanchor=top); size the bottom margin to the
     # wrapped line count (+1 for the brand line the show() interceptor appends) so it
     # clears the x-axis title and never clips.
@@ -1928,17 +1948,29 @@ def change_bars(df, *, group_colors, year_start, year_end, value_col="share",
         b_margin = 58 + (src_wrapped.count("<br>") + 2) * 16 + 12
     else:
         b_margin = 70
+    t_margin = 56 if has_menu else 20
     fig.update_layout(
         plot_bgcolor="white", height=height, showlegend=False,
-        xaxis=dict(title=f"Change in share, {year_start}→{year_end} (percentage points)",
+        xaxis=dict(title=f"Change in share, {default_start}→{year_end} (percentage points)",
                    gridcolor="#e0e0e0", zeroline=True, zerolinecolor="#888", zerolinewidth=1.5,
-                   range=[min(deltas) - pad, max(deltas) + pad]),
-        yaxis=dict(gridcolor="white"),
-        margin=dict(l=160, r=40, t=20, b=b_margin),
+                   range=r0),
+        yaxis=dict(gridcolor="white", categoryorder="array", categoryarray=l0),
+        margin=dict(l=160, r=40, t=t_margin, b=b_margin),
     )
+    if has_menu:
+        buttons = []
+        for ys in year_starts:
+            dd, ll, cc, tt, rr = _compute(ys)
+            buttons.append(dict(label=str(ys), method="update",
+                args=[{"x": [dd], "y": [ll], "text": [tt], "marker.color": [cc]},
+                      {"xaxis.title.text": f"Change in share, {ys}→{year_end} (percentage points)",
+                       "xaxis.range": rr, "yaxis.categoryarray": ll}]))
+        fig.update_layout(updatemenus=[dict(buttons=buttons, x=0, xanchor="left", y=1.14,
+            yanchor="top", direction="down", showactive=True,
+            active=year_starts.index(default_start))])
     if source_note:
         fig.add_annotation(text=src_wrapped, xref="paper", yref="paper", x=0, xanchor="left",
-                           y=-58 / (height - 20 - b_margin), yanchor="top", align="left",
+                           y=-58 / (height - t_margin - b_margin), yanchor="top", align="left",
                            showarrow=False, font=dict(size=10, color="#999"))
     return fig
 
@@ -2001,7 +2033,7 @@ def time_series_multi(df, x_col, y_col, group_col, title, yaxis_title,
     fig = go.Figure()
 
     default_colors = [
-        "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+        "#1f77b4", "#ff7f0e", "#2ca02c", "#e15759", "#9467bd",
         "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
         "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", "#c5b0d5",
     ]
@@ -2101,9 +2133,22 @@ SERIES_PALETTE = [
 
 
 def _series_colors(groups, colors):
+    """Map series/category labels → colours for lines_over_time / stacked_area.
+    Explicit `colors` (a dict) wins — that's how the semantic palettes and province
+    register are passed. Otherwise the default is the governed CATEGORICAL register:
+    an "Other"/residual group takes the reserved grey so it recedes; every other group
+    cycles CATEGORICAL_COLORS in order (the cycle index advances only for non-Other
+    groups, so the first real category is always steel)."""
     if colors:
         return {g: colors.get(g, "#888") for g in groups}
-    return {g: SERIES_PALETTE[i % len(SERIES_PALETTE)] for i, g in enumerate(groups)}
+    out, i = {}, 0
+    for g in groups:
+        if str(g).lower().startswith("other"):
+            out[g] = CATEGORICAL_OTHER
+        else:
+            out[g] = CATEGORICAL_COLORS[i % len(CATEGORICAL_COLORS)]
+            i += 1
+    return out
 
 
 import unicodedata as _ud
@@ -2411,26 +2456,43 @@ def single_line_multi(df, x_col, options, *, color=CANADA_COLOR, rangeslider=Tru
 def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
                  group_order=None, source_note=None, height=480,
                  ytickprefix="", yticksuffix="", hover_decimals=0, value_scale=1.0,
-                 legend_orientation="v", rangeslider=False):
+                 legend_orientation="v", rangeslider=False, measures=None):
     """Stacked area over time — the composition of a total by category
     (public-sector sectors, federal expense by type, government spending by
     function). `df` is long: (x_col, group_col, value_col). `value_scale` divides
     values for display (e.g. 1000 to show $millions as $billions). Bands are
-    ordered largest-total first unless `group_order` is given."""
+    ordered largest-total first unless `group_order` is given.
+
+    `measures` (optional): a list of dicts adding a dropdown that switches the
+    plotted value across columns of `df` — each {col, label, yaxis_title, and
+    optionally value_scale / hover_decimals / ytickprefix / yticksuffix}; the
+    first is shown on load. Default (None) keeps the single value_col behaviour."""
     import pandas as pd
     d = df.copy()
-    d["_v"] = pd.to_numeric(d[value_col], errors="coerce") / value_scale
+    xs = sorted(d[x_col].unique())
+
+    def _opts(m):   # a measure's display options, falling back to the call's defaults
+        return (m["col"], m.get("value_scale", value_scale), m.get("hover_decimals", hover_decimals),
+                m.get("ytickprefix", ytickprefix), m.get("yticksuffix", yticksuffix), m["yaxis_title"])
+
+    bcol, bscale, bhd, bpre, bsuf, btitle = (
+        _opts(measures[0]) if measures
+        else (value_col, value_scale, hover_decimals, ytickprefix, yticksuffix, yaxis_title))
+
+    def _series(col, scale, g):
+        s = pd.to_numeric(d[d[group_col] == g].set_index(x_col)[col], errors="coerce") / scale
+        return [s.get(x) for x in xs]
+
+    d["_v"] = pd.to_numeric(d[bcol], errors="coerce") / bscale
     groups = group_order or list(
         d.groupby(group_col)["_v"].sum().sort_values(ascending=False).index)
     cmap = _series_colors(groups, colors)
-    xs = sorted(d[x_col].unique())
     fig = go.Figure()
     for g in groups:
-        s = d[d[group_col] == g].set_index(x_col)["_v"]
         fig.add_trace(go.Scatter(
-            x=xs, y=[s.get(x) for x in xs], name=str(g), mode="lines",
+            x=xs, y=_series(bcol, bscale, g), name=str(g), mode="lines",
             stackgroup="one", line=dict(width=0.5, color=cmap[g]), fillcolor=cmap[g],
-            hovertemplate=f"{g}: {ytickprefix}%{{y:,.{hover_decimals}f}}{yticksuffix}<extra></extra>"))
+            hovertemplate=f"{g}: {bpre}%{{y:,.{bhd}f}}{bsuf}<extra></extra>"))
     if legend_orientation == "h" and not rangeslider:
         # Legend ABOVE the plot → the x-axis uses full width AND the bottom stays free for
         # the source note (a bottom h-legend with many bands wraps and collides with it).
@@ -2450,12 +2512,24 @@ def stacked_area(df, x_col, value_col, group_col, *, yaxis_title, colors=None,
     xaxis = dict(title="", gridcolor="#e0e0e0")
     if rangeslider:
         xaxis["rangeslider"] = dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")
+    if measures and len(measures) > 1:
+        margin = {**margin, "t": max(margin.get("t", 30), 64)}   # room for the dropdown
     fig.update_layout(
         plot_bgcolor="white", height=height, hovermode="x unified",
         xaxis=xaxis,
-        yaxis=dict(title=yaxis_title, gridcolor="#e0e0e0",
-                   tickprefix=ytickprefix, ticksuffix=yticksuffix),
+        yaxis=dict(title=btitle, gridcolor="#e0e0e0", tickprefix=bpre, ticksuffix=bsuf),
         legend=legend, margin=margin)
+    if measures and len(measures) > 1:
+        buttons = []
+        for m in measures:
+            col, scale, hd, pre, suf, title = _opts(m)
+            buttons.append(dict(label=m["label"], method="update",
+                args=[{"y": [_series(col, scale, g) for g in groups],
+                       "hovertemplate": [f"{g}: {pre}%{{y:,.{hd}f}}{suf}<extra></extra>" for g in groups]},
+                      {"yaxis.title.text": title, "yaxis.tickprefix": pre, "yaxis.ticksuffix": suf}]))
+        fig.update_layout(updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left",
+            y=1.0, yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1,
+            showactive=True)])
     if source_note:
         fig.add_annotation(text=source_note, xref="paper", yref="paper", x=0,
                            xanchor="left", y=src_y, showarrow=False,
@@ -2514,27 +2588,31 @@ def category_bar(df, label_col, value_col, *, xaxis_title, source_note=None,
 def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=None,
                        color="#4e79a7", value_scale=1.0, value_fmt=",.0f",
                        tickprefix="", ticksuffix="", text_col=None, text_fmt="{}",
-                       bar_px=24, base_px=170):
+                       bar_px=24, base_px=170, highlight=None, highlight_color=CANADA_COLOR):
     """Horizontal ranked bar with a dropdown to switch among `views`, each a
     (label, dataframe) pair — e.g. size views (top 25 / 50) and thematic groups
     (science, security, regional agencies). Each view's frame is sorted by value;
     selecting a view restyles the bar's x/y/text, resizes the chart to that view's
     bar count, and rescales the x-axis to its range. `text_col` (formatted with
     `text_fmt`) labels each bar — e.g. a share-of-total computed on the full set,
-    carried in each view's frame so the labels stay comparable across views."""
+    carried in each view's frame so the labels stay comparable across views.
+    `highlight` (a set of labels) recolours those bars to `highlight_color` in
+    every view — e.g. keeping Canada maroon across a mode selector."""
     import pandas as pd
+    hl = {str(v) for v in (highlight or [])}
 
     def prep(sub):
         s = sub.copy()
         s["_v"] = pd.to_numeric(s[value_col], errors="coerce") / value_scale
         s = s.dropna(subset=["_v"]).sort_values("_v")     # ascending → largest on top
         y = [_wrap(str(v), 32) for v in s[label_col]]      # wrap long category names to 2 lines
+        c = [highlight_color if str(v) in hl else color for v in s[label_col]]
         t = ([text_fmt.format(v) for v in s[text_col]]
              if text_col and text_col in s.columns else None)
-        return s["_v"].tolist(), y, t
+        return s["_v"].tolist(), y, t, c
 
     prepped = [(lab, prep(sub)) for lab, sub in views]
-    x0, y0, t0 = prepped[0][1]
+    x0, y0, t0, c0 = prepped[0][1]
     def height(n):
         return base_px + bar_px * n
     h0 = height(len(y0))
@@ -2546,14 +2624,14 @@ def category_bar_views(views, label_col, value_col, *, xaxis_title, source_note=
     else:
         b_margin = 70
     fig = go.Figure(go.Bar(
-        x=x0, y=y0, orientation="h", marker_color=color,
+        x=x0, y=y0, orientation="h", marker_color=c0,
         text=t0, textposition="auto", cliponaxis=False,
         hovertemplate=f"%{{y}}: {tickprefix}%{{x:{value_fmt}}}{ticksuffix}<extra></extra>"))
     buttons = [dict(method="update", label=lab,
-                    args=[{"x": [x], "y": [y], "text": [t]},
+                    args=[{"x": [x], "y": [y], "text": [t], "marker.color": [c]},
                           {"height": height(len(y)), "yaxis.categoryarray": y,
                            "yaxis.categoryorder": "array", "xaxis.autorange": True}])
-               for lab, (x, y, t) in prepped]
+               for lab, (x, y, t, c) in prepped]
     fig.update_layout(
         plot_bgcolor="white", showlegend=False, height=h0,
         xaxis=dict(title=xaxis_title, gridcolor="#e0e0e0",

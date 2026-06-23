@@ -63,9 +63,9 @@ else:
 
 Religion is recorded once a decade (years ending in 1) on a total-population basis, and "Christian" sums all Christian denominations. This deep series is **Canada only**, and methods differ by era — **1981–2001** used the mandatory long form, **2011** the *voluntary* National Household Survey (flagged on the chart), and **2021** the mandatory census. **"Other religions" is shown only through 1971**: in that era it was the catch-all for all smaller faiths (including the then-tiny Muslim, Hindu, Sikh and Buddhist populations), but once those were counted separately from 1981 it would mean something narrower — so the line stops rather than imply continuity.
 
-### The scale of the shift, 1981–2021
+### The scale of the shift
 
-The lines above show *direction*; this ranks *magnitude*. Over four decades the Christian share fell significantly, while "No religion / secular" rose almost as much. The Muslim, Hindu and Sikh shares quadrupled since 1981.
+The lines above show *direction*; this ranks *magnitude*. Over four decades (since 1981) the Christian share fell significantly, while "No religion / secular" rose almost as much. The Muslim, Hindu and Sikh shares quadrupled since 1981. **Use the menu to change the baseline year** — comparing 2021 against 1991, 2001 or 2011 shows how much of the shift is recent.
 
 ```{python}
 #| echo: false
@@ -73,8 +73,8 @@ from pipeline.charts import change_bars
 rellr_path = "data/geo/statcan_religion_canada_longrun.csv"
 if os.path.exists(rellr_path):
     fig = change_bars(pd.read_csv(rellr_path), group_colors=RELIGION_HISTORY_COLORS,
-        year_start=1981, year_end=2021,
-        source_note="Source: Censuses of Canada, 1981 & 2021 (Statistics Canada).")
+        year_end=2021, year_start=1981, year_starts=[1981, 1991, 2001, 2011],
+        source_note="Source: Censuses of Canada, 1981–2021 (Statistics Canada).")
     fig.show(config={"displaylogo": False, "displayModeBar": False})
 else:
     print("Long-run religion data not yet available — run `python -m pipeline.build_census_geo`.")

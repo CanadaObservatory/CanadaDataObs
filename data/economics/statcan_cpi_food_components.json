@@ -1,0 +1,15 @@
+{
+  "dataset_id": "statcan_cpi_food_components",
+  "source": "Statistics Canada",
+  "source_table": "18-10-0004-01",
+  "frequency": "monthly",
+  "unit": "index (2002=100)",
+  "retrieved_at": "2026-06-22T19:25:34.751995+00:00",
+  "latest_observation_date": "2026-05-01",
+  "next_release_date": null,
+  "transformations": [
+    "Canada; major food sub-components (grocery categories + restaurants)"
+  ],
+  "notes": null,
+  "row_count": 5092
+}

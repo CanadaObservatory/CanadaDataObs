@@ -15,7 +15,7 @@ from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date, get_retrieved_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar
 ```
 
 ## Where Canada stands
@@ -30,31 +30,48 @@ page_snapshot("income").show(config={"displaylogo": False, "modeBarButtonsToRemo
 
 ## Median after-tax income in Canada
 
-Median after-tax income of **economic families and unattached individuals**
-(Statistics Canada's income unit — *not* equivalized per person), in 2024 constant
-(inflation-adjusted) dollars. The median is the midpoint: half of these family units
-and unattached individuals are above it, half below. Because it combines multi-person
-families with single people, read it as a *typical income unit* — not a per-person or
-per-household figure.
+Median after-tax income, in 2024 constant (inflation-adjusted) dollars — the
+midpoint, where half are above and half below. **Use the dropdown to switch between
+all recipients, economic families, and unattached individuals.** These are Statistics
+Canada's income units, *not* equivalized per person: an *economic family* pools the
+income of related people in a household, so family income runs well above that of
+unattached individuals, with the combined figure in between. Read each as a typical
+income for that unit.
 
 ```{python}
 #| echo: false
-mi_path = "data/income/statcan_median_income.csv"
+mi_path = "data/income/statcan_median_income_by_family.csv"
 if os.path.exists(mi_path):
-    df = pd.read_csv(mi_path, parse_dates=["date"])
-    latest_year = int(df["date"].dt.year.max())
-    fig = single_line(df, "date", "median_income", title="",
-                      yaxis_title="Median after-tax income (2024 constant $)",
-                      rangeslider=True, yaxis_tickformat="$,.0f",
-                      source_note=(f"Source: Statistics Canada, Table 11-10-0190-01 — economic families & "
-                                   f"unattached individuals, 2024 constant dollars.<br>"
-                                   f"Latest year {latest_year}; accessed {get_retrieved_date(mi_path)}."))
-    # interpret the 2020 bump directly on the chart
-    v2020 = df[df["date"].dt.year == 2020]["median_income"]
-    if len(v2020):
-        fig.add_annotation(x="2020-01-01", y=float(v2020.iloc[0]),
-            text="2020: temporary<br>pandemic supports", showarrow=True, arrowhead=2,
-            ax=-25, ay=-45, font=dict(size=10, color="#777"), arrowcolor="#999")
+    mi = pd.read_csv(mi_path, parse_dates=["date"])
+    latest_year = int(mi["date"].dt.year.max())
+    FAM = [("all", "All — families & individuals"), ("families", "Economic families"),
+           ("individuals", "Unattached individuals")]
+    SRC = (f"Source: Statistics Canada, Table 11-10-0190-01 — median after-tax income, "
+           f"2024 constant dollars.<br>Latest year {latest_year}; "
+           f"accessed {get_retrieved_date(mi_path)}.")
+    def _anns(col):
+        # 2020 pandemic-supports callout (on the selected line) + the source note
+        a = [dict(text=SRC, xref="paper", yref="paper", x=0, y=-0.20, yanchor="top",
+                  showarrow=False, font=dict(size=10, color="#999"))]
+        v = mi[mi["date"].dt.year == 2020][col]
+        if len(v):
+            a.append(dict(x="2020-01-01", y=float(v.iloc[0]),
+                text="2020: temporary<br>pandemic supports", showarrow=True, arrowhead=2,
+                ax=-25, ay=-45, font=dict(size=10, color="#777"), arrowcolor="#999"))
+        return a
+    fig = go.Figure(go.Scatter(x=mi["date"], y=mi["all"], mode="lines+markers",
+        line=dict(color=CANADA_COLOR, width=3), marker=dict(size=4),
+        hovertemplate="%{x|%Y}: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(
+        plot_bgcolor="white", height=460,
+        yaxis=dict(title="Median after-tax income (2024 constant $)", gridcolor="#e0e0e0",
+                   tickformat="$,.0f"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        margin=dict(t=64, b=96, r=30),
+        updatemenus=[dict(buttons=[dict(label=lbl, method="update",
+            args=[{"y": [mi[col]]}, {"annotations": _anns(col)}]) for col, lbl in FAM],
+            x=0, xanchor="left", y=1.14, yanchor="top", direction="down", showactive=True)],
+        annotations=_anns("all"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Median income data not yet available. Run the data pipeline.")
@@ -161,13 +178,18 @@ if os.path.exists(disp_path):
 
 The Gini coefficient of disposable (after-tax, after-transfer) income runs from 0
 (everyone has the same income) to 1 (one person has all of it). Lower values
-indicate a more even distribution.
+indicate a more even distribution. The OECD collects these figures on each
+country's own survey cycle, so some report only every few years; the chart shows
+the countries that report regularly enough to trace a line.
 
 ```{python}
 #| echo: false
 gini_path = "data/income/oecd_gini.csv"
 if os.path.exists(gini_path):
     df = pd.read_csv(gini_path)
+    # Drop sparsely-reporting countries (review §246) so the chart isn't cluttered
+    # with 1–5-point lines: keep only those reporting in ≥8 years.
+    df = df.groupby("country_code").filter(lambda g: g["gini"].notna().sum() >= 8)
     fig = peer_comparison_line(df, "year", "gini",
         title="", yaxis_title="Gini coefficient (0–1)", show_average=True)
     fig.update_layout(annotations=[dict(
@@ -211,18 +233,18 @@ if os.path.exists(gini_path) and os.path.exists(gm_path):
     # connecting lines (one trace, Canada's drawn red so its row stands out)
     for _, r in j.iterrows():
         figr.add_trace(go.Scatter(x=[r["gini_market"], r["gini"]], y=[r["country_name"]] * 2,
-            mode="lines", line=dict(color="#d62728" if r["country_name"] == "Canada" else "#cfcfcf",
+            mode="lines", line=dict(color=CANADA_COLOR if r["country_name"] == "Canada" else "#cfcfcf",
                                     width=3 if r["country_name"] == "Canada" else 2),
             showlegend=False, hoverinfo="skip"))
     figr.add_trace(go.Scatter(x=j["gini_market"], y=j["country_name"], mode="markers",
         name="Market income (before taxes & transfers)",
         marker=dict(color="#e07b39", size=[12 if c else 9 for c in is_ca],
-                    line=dict(color="#d62728", width=[2 if c else 0 for c in is_ca])),
+                    line=dict(color=CANADA_COLOR, width=[2 if c else 0 for c in is_ca])),
         hovertemplate="Market: %{x:.3f}<extra>%{y}</extra>"))
     figr.add_trace(go.Scatter(x=j["gini"], y=j["country_name"], mode="markers",
         name="Disposable income (after taxes & transfers)",
         marker=dict(color="#1f6e8c", size=[12 if c else 9 for c in is_ca],
-                    line=dict(color="#d62728", width=[2 if c else 0 for c in is_ca])),
+                    line=dict(color=CANADA_COLOR, width=[2 if c else 0 for c in is_ca])),
         hovertemplate="Disposable: %{x:.3f}<extra>%{y}</extra>"))
     yr = int(j["year"].max()) if "year" in j else None
     figr.update_layout(plot_bgcolor="white", height=600,
@@ -282,7 +304,7 @@ if os.path.exists(sh_path):
     d0 = sdf[sdf["concept"] == "After-tax income"].sort_values("year")
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=d0["year"], y=d0["top10"], name="Top 10%", mode="lines",
-        line=dict(color="#d62728", width=2.5), hovertemplate="Top 10%: %{y:.1f}%<extra></extra>"))
+        line=dict(color="#B5403A", width=2.5), hovertemplate="Top 10%: %{y:.1f}%<extra></extra>"))
     fig2.add_trace(go.Scatter(x=d0["year"], y=d0["bottom40"], name="Bottom 40%", mode="lines",
         line=dict(color="#4e79a7", width=2.5), hovertemplate="Bottom 40%: %{y:.1f}%<extra></extra>"))
     buttons = []
@@ -316,6 +338,8 @@ national standard of living rather than an absolute threshold.
 pov_path = "data/income/oecd_poverty.csv"
 if os.path.exists(pov_path):
     df = pd.read_csv(pov_path)
+    # Drop sparsely-reporting countries (review §249), as on the Gini chart above.
+    df = df.groupby("country_code").filter(lambda g: g["poverty_rate"].notna().sum() >= 8)
     fig = peer_comparison_line(df, "year", "poverty_rate",
         title="", yaxis_title="% below 50% of median income", show_average=True)
     fig.update_layout(annotations=[dict(
@@ -356,9 +380,10 @@ The share of people in households that experienced food insecurity in the past y
 fi_path = "data/income/statcan_food_insecurity.csv"
 if os.path.exists(fi_path):
     df = pd.read_csv(fi_path, parse_dates=["date"])
-    fig = single_line(df, "date", "food_insecurity_rate", title="",
-                      yaxis_title="% of persons in food-insecure households", rangeslider=True,
-                      source_note=f"Source: Statistics Canada, Table 13-10-0835-01 (Canadian Income Survey) | Data as of: {get_data_date(fi_path)}")
+    fig = single_bar(df, "date", "food_insecurity_rate", title="",
+                     yaxis_title="% of persons in food-insecure households",
+                     color=CANADA_COLOR, yticksuffix="%", hover_fmt=".1f", rangeslider=True,
+                     source_note=f"Source: Statistics Canada, Table 13-10-0835-01 (Canadian Income Survey) | Data as of: {get_data_date(fi_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Food insecurity data not yet available. Run the data pipeline.")

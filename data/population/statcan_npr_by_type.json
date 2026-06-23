@@ -1,0 +1,15 @@
+{
+  "dataset_id": "statcan_npr_by_type",
+  "source": "Statistics Canada",
+  "source_table": "17-10-0121-01",
+  "frequency": "quarterly",
+  "unit": "persons",
+  "retrieved_at": "2026-06-22T18:11:58.155346+00:00",
+  "latest_observation_date": "2026-04-01",
+  "next_release_date": null,
+  "transformations": [
+    "Canada; non-permanent residents by permit type (5 categories summing to the published total)"
+  ],
+  "notes": null,
+  "row_count": 100
+}

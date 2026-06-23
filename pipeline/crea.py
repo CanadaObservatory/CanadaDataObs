@@ -18,6 +18,7 @@ import zipfile
 import requests
 import pandas as pd
 import plotly.graph_objects as go
+from pipeline.config import CANADA_COLOR
 
 ATTRIB = ("Source: CREA MLS® Home Price Index, © The Canadian Real Estate Association. "
           "Used with permission for educational purposes.")
@@ -40,7 +41,14 @@ TYPES = [
     ("Townhouse_Benchmark_SA",     "Townhouse",                "#ff7f0e"),
     ("Apartment_Benchmark_SA",     "Apartment / condo",        "#2ca02c"),
 ]
-CITY_PALETTE = ["#d62728", "#1f77b4", "#2ca02c", "#9467bd", "#ff7f0e",
+# Years-of-income selector: the composite "typical home" leads, then each type.
+RATIO_TYPES = [
+    ("Composite_Benchmark_SA",     "Typical home"),
+    ("Single_Family_Benchmark_SA", "Detached (single-family)"),
+    ("Townhouse_Benchmark_SA",     "Townhouse"),
+    ("Apartment_Benchmark_SA",     "Apartment / condo"),
+]
+CITY_PALETTE = ["#B5403A", "#1f77b4", "#2ca02c", "#9467bd", "#ff7f0e",
                 "#8c564b", "#17becf", "#bcbd22"]
 
 
@@ -145,10 +153,24 @@ def fig_price_time_series(sheets):
     return fig
 
 
-def fig_price_to_income(agg, root="."):
-    """National composite benchmark ÷ median after-tax income, over time.
+def _years_of_income(bench_annual, inc, cpi, cpi2024):
+    """Annual-mean benchmark (nominal $) → years of 2024-real median income.
+    Deflate each year's benchmark to 2024 $ via CPI, then divide by median income."""
+    xs, ys = [], []
+    for yr in sorted(set(bench_annual.index) & set(inc.index)):
+        if pd.isna(bench_annual.loc[yr]):
+            continue
+        bench_real = bench_annual.loc[yr] * (cpi2024 / cpi.loc[yr])
+        xs.append(yr)
+        ys.append(bench_real / inc.loc[yr])
+    return xs, ys
 
-    CREA composite is nominal $; median income is in 2024 constant $. Deflate the
+
+def fig_price_to_income(agg, root="."):
+    """National benchmark ÷ median after-tax income, over time, with a dwelling-type
+    selector (typical home / detached / townhouse / apartment).
+
+    CREA benchmark is nominal $; median income is in 2024 constant $. Deflate the
     benchmark to 2024 $ via CPI, then divide → "years of median after-tax income"."""
     inc = pd.read_csv(os.path.join(root, "data/income/statcan_median_income.csv"),
                       parse_dates=["date"])
@@ -157,19 +179,24 @@ def fig_price_to_income(agg, root="."):
                       parse_dates=["date"])
     cpi = cpi.assign(year=cpi["date"].dt.year).groupby("year")["cpi_value"].mean()
     cpi2024 = cpi.loc[2024]
-    agg_a = (agg.assign(year=agg["Date"].dt.year)
-                .groupby("year")["Composite_Benchmark_SA"].mean())
-    rows = []
-    for yr in sorted(set(agg_a.index) & set(inc.index)):
-        bench_real = agg_a.loc[yr] * (cpi2024 / cpi.loc[yr])
-        rows.append({"year": yr, "ratio": bench_real / inc.loc[yr]})
-    ratio = pd.DataFrame(rows)
-    fig = go.Figure(go.Scatter(x=ratio["year"], y=ratio["ratio"], mode="lines+markers",
-                               line=dict(color="#d62728", width=3),
+    agg = agg.assign(year=agg["Date"].dt.year)
+    series = {col: _years_of_income(agg.groupby("year")[col].mean(), inc, cpi, cpi2024)
+              for col, _ in RATIO_TYPES}
+
+    default_col = RATIO_TYPES[0][0]
+    xs0, ys0 = series[default_col]
+    fig = go.Figure(go.Scatter(x=xs0, y=ys0, mode="lines+markers",
+                               line=dict(color=CANADA_COLOR, width=3),
                                hovertemplate="%{y:.1f}× income<extra>%{x}</extra>"))
+    # The selector restyles the single trace's x/y to the chosen dwelling type.
+    buttons = [dict(method="update", label=label,
+                    args=[{"x": [series[col][0]], "y": [series[col][1]]}])
+               for col, label in RATIO_TYPES]
     fig.update_layout(plot_bgcolor="white",
         yaxis=dict(title="Years of median after-tax income", gridcolor="#e0e0e0", rangemode="tozero"),
-        xaxis=dict(title="", gridcolor="#e0e0e0"), height=480, margin=dict(b=155, t=30),
-        showlegend=False)
+        xaxis=dict(title="", gridcolor="#e0e0e0"), height=480, margin=dict(b=155, t=54),
+        showlegend=False,
+        updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.07,
+            yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1, showactive=True)])
     _src(fig, f"{ATTRIB} Benchmark deflated to 2024 $ via CPI; income: StatCan 11-10-0190-01.", y=-0.16)
     return fig

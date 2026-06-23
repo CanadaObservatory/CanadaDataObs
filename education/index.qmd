@@ -70,8 +70,8 @@ if tu is not None:
     ca["level"] = ca["level"].str.replace(" ", "<br>", regex=False)   # two-line legend entries
     fig = lines_over_time(ca, "year", "real", "level",
         yaxis_title=f"Real tuition (constant {base_year} $)", ytickprefix="$", hover_decimals=0,
-        colors={"International<br>undergraduate": "#e15759", "International<br>graduate": "#f28e2b",
-                "Canadian<br>undergraduate": "#4e79a7", "Canadian<br>graduate": "#76b7b2"},
+        colors={"International<br>undergraduate": "#C77B3A", "International<br>graduate": "#D07D74",
+                "Canadian<br>undergraduate": "#3D6585", "Canadian<br>graduate": "#217466"},
         group_order=["International<br>undergraduate", "International<br>graduate",
                      "Canadian<br>undergraduate", "Canadian<br>graduate"], x_pad=True,
         measures=[{"col": "real", "label": f"Real (constant {base_year} $)", "yaxis_title": f"Real tuition (constant {base_year} $)"},

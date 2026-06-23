@@ -14,8 +14,8 @@ import math
 from datetime import timedelta
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import category_bar, lines_over_time, province_colors
+from pipeline.config import CANADA_COLOR, get_data_date, get_next_release
+from pipeline.charts import category_bar, category_bar_views, lines_over_time, province_colors
 ```
 
 ## Inflation (CPI, year-over-year)
@@ -57,6 +57,12 @@ try:
     y_min = 0 if y_min_val >= 0 else math.floor(y_min_val * 2) / 2 - 0.5
     y_max = math.ceil(max(y_max_val, 3.5) * 2) / 2 + 1.0
 
+    _src = (f"Source: Statistics Canada, Table 18-10-0004-01 | "
+            f"Data as of: {get_data_date('data/economics/statcan_cpi.csv')}")
+    _next = get_next_release('data/economics/statcan_cpi.csv')
+    if _next:
+        _src += f" | Next update: {_next}"
+
     fig.update_layout(
         xaxis_title="", yaxis_title="Inflation (%)", plot_bgcolor="white",
         meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
@@ -76,7 +82,7 @@ try:
                  xanchor="left", showarrow=False, font=dict(size=11, color="#888")),
             dict(text="The Bank of Canada targets inflation of 2%, within a control range of 1–3%.",
                  xref="paper", yref="paper", x=0, y=-0.34, yanchor="top", showarrow=False, font=dict(size=10, color="#999")),
-            dict(text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi.csv')}",
+            dict(text=_src,
                  xref="paper", yref="paper", x=0, y=-0.42, yanchor="top", showarrow=False, font=dict(size=10, color="#999")),
         ])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -161,6 +167,37 @@ try:
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 except FileNotFoundError:
     print("CPI components data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Food prices, by category
+
+Food is the component households feel most — but "food" runs from meat to restaurant meals, and these have risen at very different rates. This breaks the food basket into its major grocery categories plus restaurant meals. **Use the dropdown** to switch between the change over the past year and over the past five years; the longer window captures the post-2021 surge that lifted most grocery categories by roughly a quarter to a third.
+
+```{python}
+#| echo: false
+food_path = "data/economics/statcan_cpi_food_components.csv"
+if os.path.exists(food_path):
+    fc = pd.read_csv(food_path, parse_dates=["date"]).sort_values(["food_group", "date"])
+    flatest = fc["date"].max()
+    def _food_chg(months):
+        rows = []
+        for g, s in fc.groupby("food_group"):
+            ser = s.set_index("date")["cpi_value"]
+            past = ser[ser.index <= flatest - pd.DateOffset(months=months)]
+            if flatest in ser.index and len(past) and past.iloc[-1] > 0:
+                rows.append({"food_group": g, "chg": (ser.loc[flatest] / past.iloc[-1] - 1) * 100})
+        d = pd.DataFrame(rows)
+        d["lbl"] = [f"{v:+.1f}%" for v in d["chg"]]
+        return d
+    fig = category_bar_views(
+        [("Past 5 years", _food_chg(60)), ("Past 12 months", _food_chg(12))],
+        "food_group", "chg", xaxis_title="Price change (%)",
+        value_fmt=".1f", ticksuffix="%", color="#f28e2b",
+        text_col="lbl", text_fmt="{}",
+        source_note=f"Source: Statistics Canada, Table 18-10-0004-01 | {flatest:%B %Y}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Food component data not yet available. Run the data pipeline.")
 ```
 
 ## The policy rate vs. inflation

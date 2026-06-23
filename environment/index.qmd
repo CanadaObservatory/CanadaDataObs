@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import os
 from pipeline.config import (
     CANADA_COLOR, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
-    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date,
+    HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date, GLOBAL_CONTEXT_COLORS, FUEL_COLORS,
 )
 from pipeline.charts import peer_comparison_line, ranked_bar
 ```
@@ -116,9 +116,9 @@ The comparison above is among wealthy countries, where Canada sits at the high e
 co2glob_path = "data/environment/owid_co2_global_context.csv"
 if os.path.exists(co2glob_path):
     g = pd.read_csv(co2glob_path)
-    STYLE = {"CAN": (CANADA_COLOR, 3, "solid"), "USA": ("#1f77b4", 2, "solid"),
-             "CHN": ("#ff7f0e", 2, "solid"), "IND": ("#2ca02c", 2, "solid"),
-             "WLD": ("#888888", 2, "dot")}
+    STYLE = {"CAN": (CANADA_COLOR, 3, "solid"), "USA": (GLOBAL_CONTEXT_COLORS["USA"], 2, "solid"),
+             "CHN": (GLOBAL_CONTEXT_COLORS["CHN"], 2, "solid"), "IND": (GLOBAL_CONTEXT_COLORS["IND"], 2, "solid"),
+             "WLD": (GLOBAL_CONTEXT_COLORS["WLD"], 2, "dot")}
     ORDER = [("CAN", "Canada"), ("USA", "United States"), ("CHN", "China"),
              ("IND", "India"), ("WLD", "World average")]
     fig = go.Figure()
@@ -272,11 +272,11 @@ How each country generates electricity, by source (latest available year). Fossi
 ```{python}
 #| echo: false
 elec_sources = [
-    ("coal_share_elec", "Coal", "#4a4a4a"),
-    ("oil_share_elec", "Oil", "#8c564b"),
-    ("gas_share_elec", "Natural Gas", "#ff7f0e"),
-    ("nuclear_share_elec", "Nuclear", "#9467bd"),
-    ("renewables_share_elec", "Renewables (incl. hydro)", "#2ca02c"),
+    ("coal_share_elec", "Coal", FUEL_COLORS["coal"]),
+    ("oil_share_elec", "Oil", FUEL_COLORS["oil"]),
+    ("gas_share_elec", "Natural Gas", FUEL_COLORS["gas"]),
+    ("nuclear_share_elec", "Nuclear", FUEL_COLORS["nuclear"]),
+    ("renewables_share_elec", "Renewables (incl. hydro)", FUEL_COLORS["renewables"]),
 ]
 if os.path.exists(emix_path):
     emix = pd.read_csv(emix_path)
@@ -346,14 +346,14 @@ Canada has no single national grid — electricity is a provincial responsibilit
 #| echo: false
 prov_elec_path = "data/environment/statcan_provincial_electricity.csv"
 prov_sources = [
-    ("Hydro", "#1f77b4"),
-    ("Nuclear", "#9467bd"),
-    ("Wind", "#17becf"),
-    ("Solar", "#e6b800"),
-    ("Biomass", "#2ca02c"),
-    ("Natural gas", "#ff7f0e"),
-    ("Oil", "#8c564b"),
-    ("Coal", "#333333"),
+    ("Hydro", FUEL_COLORS["hydro"]),
+    ("Nuclear", FUEL_COLORS["nuclear"]),
+    ("Wind", FUEL_COLORS["wind"]),
+    ("Solar", FUEL_COLORS["solar"]),
+    ("Biomass", FUEL_COLORS["biomass"]),
+    ("Natural gas", FUEL_COLORS["gas"]),
+    ("Oil", FUEL_COLORS["oil"]),
+    ("Coal", FUEL_COLORS["coal"]),
 ]
 if os.path.exists(prov_elec_path):
     pe = pd.read_csv(prov_elec_path)
@@ -393,11 +393,11 @@ Electricity is only part of the picture. This shows Canada's **total primary ene
 ```{python}
 #| echo: false
 energy_sources = [
-    ("coal_share_energy", "Coal", "#4a4a4a"),
-    ("oil_share_energy", "Oil", "#8c564b"),
-    ("gas_share_energy", "Natural Gas", "#ff7f0e"),
-    ("nuclear_share_energy", "Nuclear", "#9467bd"),
-    ("renewables_share_energy", "Renewables (incl. hydro)", "#2ca02c"),
+    ("coal_share_energy", "Coal", FUEL_COLORS["coal"]),
+    ("oil_share_energy", "Oil", FUEL_COLORS["oil"]),
+    ("gas_share_energy", "Natural Gas", FUEL_COLORS["gas"]),
+    ("nuclear_share_energy", "Nuclear", FUEL_COLORS["nuclear"]),
+    ("renewables_share_energy", "Renewables (incl. hydro)", FUEL_COLORS["renewables"]),
 ]
 if os.path.exists(emix_path):
     canada_emix = emix[emix["country_code"] == "CAN"].dropna(subset=["coal_share_energy"]).sort_values("year")

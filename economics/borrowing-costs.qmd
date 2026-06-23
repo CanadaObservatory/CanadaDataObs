@@ -25,7 +25,7 @@ if os.path.exists(rates_path):
     rt = pd.read_csv(rates_path, parse_dates=["date"])
     figm = go.Figure()
     figm.add_trace(go.Scatter(x=rt["date"], y=rt["mortgage_5yr"], name="Conventional 5-year mortgage",
-        mode="lines", line=dict(color="#d62728", width=2.5), hovertemplate="5-yr mortgage: %{y:.2f}%<extra></extra>"))
+        mode="lines", line=dict(color="#B5403A", width=2.5), hovertemplate="5-yr mortgage: %{y:.2f}%<extra></extra>"))
     figm.add_trace(go.Scatter(x=rt["date"], y=rt["prime"], name="Prime rate",
         mode="lines", line=dict(color="#1f77b4", width=2), hovertemplate="Prime: %{y:.2f}%<extra></extra>"))
     figm.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",

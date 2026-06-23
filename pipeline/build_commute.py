@@ -8,8 +8,13 @@ snapshot: re-run on the 2026 Census (bump nothing — the table id is stable).
     python -m pipeline.build_commute
 
 Outputs (committed; the weekly pipeline does not touch them):
-- data/population/commute_mode.csv     — geo, mode, share (% of commuters)
-- data/population/commute_duration.csv — geo, avg_minutes
+- data/population/commute_mode.csv          — geo, mode, share (% of commuters)
+- data/population/commute_duration.csv      — geo, avg_min (all modes)
+- data/population/commute_duration_by_mode.csv — geo, mode, avg_min (the mode
+  selector: All modes / Car / Public transit / Walked / Bicycle). The 2021 Census
+  is the only authoritative source that breaks commute time down by mode AND by
+  city; the Labour Force Survey series (build_commute_lfs.py) is more current but
+  national-only by mode.
 """
 import zipfile
 import io
@@ -28,6 +33,17 @@ MODE_LABEL = {"Car, truck or van": "Car, truck or van", "Public transit": "Publi
               "Walked": "Walked", "Bicycle": "Bicycle",
               "Motorcycle, scooter or moped": "Other", "Other method": "Other"}
 TOTAL_MODE = "Total - Main mode of commuting"
+# Modes carried into the by-mode duration selector (cube label -> display label).
+# These are the average-duration figures StatCan publishes for each mode; "All
+# modes" leads the selector. Walked/Bicycle are kept distinct (the cube also has
+# an "Active transportation" aggregate, but separate walk/cycle reads better).
+DURATION_MODES = {
+    "Total - Main mode of commuting": "All modes",
+    "Car, truck or van": "Car",
+    "Public transit": "Public transit",
+    "Walked": "Walked",
+    "Bicycle": "Bicycle",
+}
 
 
 def _clean_geo(g):
@@ -84,6 +100,14 @@ def build_commute():
     dur_path = DATA_DIR / "population" / "commute_duration.csv"
     dur.to_csv(dur_path, index=False)
     print(f"  saved {len(dur)} geos -> {dur_path.name}")
+
+    # --- average duration BY MODE (drives the mode selector) ---
+    dm = df[df["mode"].isin(DURATION_MODES)][["geo", "mode", "avg_min"]].dropna(subset=["avg_min"])
+    dm = (dm.assign(mode=dm["mode"].map(DURATION_MODES))
+            .drop_duplicates(["geo", "mode"]).sort_values(["geo", "mode"]).reset_index(drop=True))
+    dmode_path = DATA_DIR / "population" / "commute_duration_by_mode.csv"
+    dm.to_csv(dmode_path, index=False)
+    print(f"  saved {len(dm)} rows ({dm.geo.nunique()} geos) -> {dmode_path.name}")
     return mode_df, dur
 
 

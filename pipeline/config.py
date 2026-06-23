@@ -44,6 +44,33 @@ def get_retrieved_date(csv_path):
             return str(ra)[:10]
     return DATA_DATE
 
+
+def get_next_release(csv_path, *, on=None):
+    """Human-formatted next scheduled release date for a dataset, e.g.
+    "July 20, 2026", or "" if none is recorded or it has already passed.
+
+    The date is read from the metadata sidecar's `next_release_date`, which the
+    pipeline sources (non-hardcoded) from Statistics Canada's release calendar at
+    fetch time — see pipeline/release_schedule.py. A past date is suppressed (it
+    means the pipeline hasn't refreshed yet) so we never show a stale "Next
+    update". Returns "" when absent, so callers can append it conditionally."""
+    import json
+    from datetime import date, datetime
+    meta_path = Path(csv_path).with_suffix(".json")
+    if not meta_path.exists():
+        return ""
+    with open(meta_path) as f:
+        nr = json.load(f).get("next_release_date")
+    if not nr:
+        return ""
+    try:
+        dt = datetime.strptime(str(nr)[:10], "%Y-%m-%d").date()
+    except ValueError:
+        return ""
+    if dt < (on or date.today()):
+        return ""
+    return f"{dt:%B} {dt.day}, {dt.year}"
+
 # --- OECD Peer Group ---
 # Broader than G7: includes all comparable advanced economies
 
@@ -169,9 +196,13 @@ PROVINCE_NAMES = {
 }
 PROVINCE_COLORS = {  # MUTED — default register for province LINES
     "ON": "#A0543F", "QC": "#225490", "BC": "#27613F", "AB": "#C0923C", "NS": "#2C7C8E",
-    "NB": "#31A182", "MB": "#788741", "SK": "#6F79C2", "NL": "#8C3A57", "PE": "#EAB196",
+    "NB": "#31A182", "MB": "#788741", "SK": "#6F79C2", "NL": "#C96580", "PE": "#EAB196",
     "YT": "#7C949C", "NT": "#9E92B0", "NU": "#7C5A74",
 }
+# NL muted moved #8C3A57 → #C96580 (2026-06-22): the old dark maroon-rose sat ΔE 7.5
+# from Canada's maroon (CANADA_COLOR), so on province charts carrying a Canada line the
+# two were hard to tell apart. The dusty rose keeps NL's identity, is ΔE 24 from maroon,
+# and matches the muted register's lightness. Deep/pastel NL were already clear of maroon.
 PROVINCE_COLORS_DEEP = {  # moodier / unified line register
     "ON": "#912D20", "QC": "#1E58AA", "BC": "#3F7B56", "AB": "#9E7621", "NS": "#1DA0B5",
     "NB": "#3EA38B", "MB": "#8D9655", "SK": "#6E92EB", "NL": "#D1798D", "PE": "#A05829",
@@ -181,6 +212,69 @@ PROVINCE_COLORS_PASTEL = {  # large MAP fills
     "ON": "#FBC0AE", "QC": "#7FB4F8", "BC": "#48B686", "AB": "#E0AC6B", "NS": "#64E1F7",
     "NB": "#99E1CA", "MB": "#BCDA87", "SK": "#A4ABDD", "NL": "#ED879E", "PE": "#DE8C6D",
     "YT": "#54ADC1", "NT": "#D4BAE7", "NU": "#D68DC8",
+}
+
+# The CATEGORICAL register — for multi-series charts whose categories carry NO identity
+# meaning (departments, age bands, spending objects, factor decompositions). The fourth
+# governed colour set, beside country / province / chrome (the others are bespoke too).
+# LOCKED 2026-06-22. Anchored on two owner-chosen brand-leaning hues — steel #3D6585 and
+# terracotta #C77B3A — with the other six derived by the SAME max-min CIEDE2000 + Machado
+# deuteranopia/protanopia search that produced the country palette (global normal-vision
+# min ΔE 17.1; colour-blind worst pair 10.2). Ordered dark→light so line charts (usually
+# ≤5 series) draw the legible head; ALL eight clear the line-contrast gate (no fills-only
+# pales). Sits in the muted-civic register between province (calmer) and country (punchier),
+# and each colour rhymes with a country cousin (steel↔US, terracotta↔Australia…) so the
+# four sets read as one family. Grey (CATEGORICAL_OTHER) is reserved for an "Other"/residual
+# band so it visually recedes — never one of the eight.
+CATEGORICAL_COLORS = [
+    "#3D6585",  # steel (owner anchor)
+    "#726229",  # bronze
+    "#217466",  # pine
+    "#8465B9",  # violet
+    "#AA708E",  # mauve
+    "#C77B3A",  # terracotta (owner anchor)
+    "#D07D74",  # coral
+    "#7390E8",  # periwinkle
+]
+CATEGORICAL_OTHER = "#AEB4BB"  # reserved grey for an "Other"/residual series
+
+# Global-context countries — for the two CO2 / PM2.5 charts that widen the lens beyond
+# the OECD peer group (China, India, World). USA reuses the country-system blue and
+# Canada uses CANADA_COLOR, so the global view stays consistent with the peer charts;
+# China/India get their own governed identities (distinct from maroon, US-blue, grey).
+GLOBAL_CONTEXT_COLORS = {
+    "USA": "#0650A3",   # = COMPARATOR_COLORS["USA"]
+    "CHN": "#C46A1B",   # deep amber
+    "IND": "#2E7D52",   # deep green
+    "WLD": "#888888",   # world average (drawn dotted)
+}
+
+# FUEL / energy-source colours — a SEMANTIC register (colour carries meaning), shared
+# across the electricity-mix and energy-mix charts so a fuel reads the same everywhere.
+# Brand-tuned: coal near-black, oil brown, gas = Prairie Gold, nuclear a brand violet,
+# renewables/biomass the Boreal green family, hydro = Lake blue (water), wind a light
+# sky tint, solar a bright gold. Keyed by a lowercase fuel token.
+FUEL_COLORS = {
+    "coal": "#2B2B2B", "oil": "#7A5A48", "gas": "#C2972F", "nuclear": "#6A4C93",
+    "renewables": "#3F6F5E", "hydro": "#2A7F9E", "wind": "#7FB0C4",
+    "solar": "#E0B53C", "biomass": "#5E7548",
+}
+
+# SEMANTIC per-topic palettes — colour = a specific group, so it must read the same
+# wherever the topic appears. The CROSS-PAGE ones (used by several .qmd) are centralized
+# here; single-page palettes (air quality, season, crime) stay in their .qmd. The retired
+# chart-red #d62728 is swapped out of these for a brick #B5403A.
+VM_GROUP_COLORS = {  # visible-minority groups (diversity maps + over-time)
+    "All visible minorities": "#111111",   # headline (thick)
+    "Not a visible minority": "#9e9e9e",
+    "South Asian": "#1f77b4", "Chinese": "#B5403A", "Black": "#2ca02c",
+    "Filipino": "#9467bd", "Arab": "#ff7f0e", "Latin American": "#17becf",
+}
+RELIGION_HISTORY_COLORS = {  # religious affiliation (history lines + change/composition bars)
+    "Christian": "#1f77b4", "No religion / secular": "#7f7f7f",
+    "Muslim": "#2ca02c", "Hindu": "#ff7f0e", "Sikh": "#B5403A",
+    "Buddhist": "#9467bd", "Jewish": "#8c564b",
+    "Indigenous": "#e377c2", "Other religions": "#17becf",
 }
 
 
@@ -225,6 +319,10 @@ class Indicator:
     statcan_table: Optional[str] = None
     statcan_filters: dict = field(default_factory=dict)  # column -> exact value
     date_format: Optional[str] = None  # REF_DATE parse format, e.g. "%Y-%m" / "%Y"
+    # --- StatCan release calendar (optional) ---
+    release_key: Optional[str] = None  # key into release_schedule.SCHEDULE_TITLES
+    #   ("cpi"/"lfs"/"gdp"…): the generic StatCan fetcher records this series' NEXT
+    #   scheduled release date in the sidecar so a page can show "Next update: <date>".
     # --- bespoke fetchers (population, cpi, energy, happiness) ---
     fetch_fn: Optional[str] = None     # function name resolved in run_pipeline
     # --- optional post-clean hook: df -> df (e.g. cap EO projection years) ---
@@ -272,6 +370,13 @@ INDICATORS = [
               statcan_table="17-10-0121-01",
               statcan_filters={"GEO": "Canada",
                                "Non-permanent resident types": "Total, non-permanent residents"},
+              source_table="Statistics Canada 17-10-0121-01"),
+    # NPR broken out by permit type (work / study / asylum / other) for the stacked
+    # composition on the Population page — the five types tile to the total above.
+    Indicator("npr_by_type", "population", "custom",
+              "Non-permanent residents by type", "persons", "quarterly",
+              fetch_fn="fetch_npr_by_type",
+              output_subpath="statcan_npr_by_type.csv",
               source_table="Statistics Canada 17-10-0121-01"),
     # Age & aging (2026-06 Branch-1 demographics expansion)
     Indicator("age_structure", "population", "custom",
@@ -383,7 +488,7 @@ INDICATORS = [
                                "Estimates": "Gross domestic product at market prices",
                                "Prices": "Chained (2017) dollars",
                                "Seasonal adjustment": "Seasonally adjusted at annual rates"},
-              output_subpath="statcan_gdp_quarterly.csv",
+              output_subpath="statcan_gdp_quarterly.csv", release_key="gdp",
               source_table="Statistics Canada 36-10-0104-01"),
     # Food CPI (the most-felt cost-of-living component) as its own series, like
     # rent_cpi — kept separate from statcan_cpi.csv so the all-items deflator used
@@ -442,11 +547,11 @@ INDICATORS = [
               boc_series={"policy_rate": "V122530"}, start_period=1935,
               output_subpath="boc_policy_rate.csv",
               source_table="Bank of Canada (Bank Rate, V122530)"),
-    Indicator("boc_usdcad", "economics", "boc",
-              "CAD/US dollar exchange rate", "USD per CAD", "daily",
-              boc_series={"usdcad": "FXUSDCAD"}, start_period=2017,
-              output_subpath="boc_usdcad.csv",
-              source_table="Bank of Canada (daily average exchange rate)"),
+    Indicator("boc_fx", "economics", "boc",
+              "Exchange rates (CAD per USD / EUR / JPY)", "CAD per unit", "daily",
+              boc_series={"usdcad": "FXUSDCAD", "eurcad": "FXEURCAD", "jpycad": "FXJPYCAD"},
+              start_period=2017, output_subpath="boc_exchange_rates.csv",
+              source_table="Bank of Canada (daily average exchange rates)"),
     Indicator("boc_rates", "housing", "boc",
               "Prime & 5-year mortgage rate", "%", "weekly",
               boc_series={"prime": "V80691311", "mortgage_5yr": "V80691335"},
@@ -684,6 +789,13 @@ INDICATORS = [
                                "Economic family type":
                                    "Economic families and persons not in an economic family",
                                "UOM": "2024 constant dollars"},
+              source_table="Statistics Canada 11-10-0190-01"),
+    # Same table, split by recipient type (all / economic families / unattached
+    # individuals) for the income-page family-type dropdown (review §228).
+    Indicator("median_income_by_family", "income", "custom",
+              "Median after-tax income by recipient type", "2024 constant dollars", "annual",
+              fetch_fn="fetch_median_income_by_family",
+              output_subpath="statcan_median_income_by_family.csv",
               source_table="Statistics Canada 11-10-0190-01"),
     Indicator("low_income", "income", "statcan",
               "Low-income rate (LIM-AT)", "% of persons", "annual",

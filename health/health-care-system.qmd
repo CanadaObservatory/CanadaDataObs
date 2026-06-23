@@ -10,8 +10,8 @@ What Canada spends on health care, and what the system has to deliver it: spendi
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import get_data_date
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line, lines_over_time
+from pipeline.config import get_data_date, CANADA_COLOR
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar, lines_over_time
 
 def show_peer_line(path, value_col, yaxis_title, source, initial_start=None, topical=None,
                    initial_visible=None):
@@ -324,11 +324,10 @@ basis).
 fd_path = "data/health/statcan_family_doctor.csv"
 if os.path.exists(fd_path):
     fd = pd.read_csv(fd_path, parse_dates=["date"])
-    fig = single_line(fd, "date", "pct_regular_provider", title="",
-        yaxis_title="% with a regular health-care provider",
-        hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
+    fig = single_bar(fd, "date", "pct_regular_provider", title="",
+        yaxis_title="% with a regular health-care provider", color=CANADA_COLOR,
+        yticksuffix="%", hovertemplate="<b>%{x|%Y}</b>: %{y:.1f}%<extra></extra>",
         source_note=f"Source: Statistics Canada, Table 13-10-0096-01 (CCHS, age 12+) | Data as of: {get_data_date(fd_path)}")
-    fig.update_yaxes(ticksuffix="%")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Regular-provider data not yet available. Run the data pipeline.")

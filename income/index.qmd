@@ -405,7 +405,7 @@ if os.path.exists(fi_path):
     df = pd.read_csv(fi_path, parse_dates=["date"])
     fig = single_bar(df, "date", "food_insecurity_rate", title="",
                      yaxis_title="% of persons in food-insecure households",
-                     color=CANADA_COLOR, yticksuffix="%", hover_fmt=".1f", rangeslider=True,
+                     color=CATEGORICAL_COLORS[0], yticksuffix="%", hover_fmt=".1f", rangeslider=True,
                      source_note=f"Source: Statistics Canada, Table 13-10-0835-01 (Canadian Income Survey) | Data as of: {get_data_date(fi_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:

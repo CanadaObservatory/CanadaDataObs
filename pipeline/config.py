@@ -817,6 +817,13 @@ INDICATORS = [
                                "Low income lines": "Low income measure after tax",
                                "Statistics": "Percentage of persons in low income"},
               source_table="Statistics Canada 11-10-0135-01"),
+    # Poverty (official Market Basket Measure) by demographic group — the disparity
+    # behind the cost-of-living burden; combines 11-10-0135 (age/family) + 11-10-0093
+    # (population groups). Bespoke two-table reshape.
+    Indicator("poverty_by_group", "income", "custom",
+              "Poverty rate by demographic group (MBM)", "% of persons", "annual",
+              fetch_fn="fetch_poverty_by_group", output_subpath="statcan_poverty_by_group.csv",
+              source_table="Statistics Canada 11-10-0135-01 and 11-10-0093-01"),
     Indicator("food_insecurity", "income", "statcan",
               "Household food insecurity", "% of persons", "annual",
               value_col="food_insecurity_rate", date_format="%Y",

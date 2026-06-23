@@ -1158,3 +1158,54 @@ def fetch_tertiary_attainment():
                   transformations=["Tertiary education, both genders; Canada + OECD-average geographies; by age group"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
+
+
+def fetch_poverty_by_group():
+    """MBM poverty rate (the official poverty line) by selected demographic group,
+    Canada — the disparity behind the cost-of-living burden. Combines two StatCan
+    tables, both filtered to Canada / Market basket measure, 2023 base / Percentage:
+    11-10-0135-01 (age & family type) and 11-10-0093-01 (population groups).
+    Persons-with-disabilities is omitted (published from a separate source)."""
+    logger.info("fetch_poverty_by_group (11-10-0135-01 + 11-10-0093-01)")
+    MBM, PCT = "Market basket measure, 2023 base", "Percentage of persons in low income"
+    # (source member -> short label), per table; the order also sets a stable sort key.
+    g135 = {
+        "All persons": "All Canadians",
+        "Persons under 18 years": "Children",
+        "Persons 65 years and over": "Seniors (65+)",
+        "Persons not in an economic family": "Unattached individuals",
+    }
+    g093 = {
+        "Visible minority population": "Racialized groups",
+        "Recent immigrants (10 years or less) aged 15 years and over": "Recent immigrants",
+        "Indigenous population": "Indigenous population",
+    }
+    rows = []
+    for tid, dim, gmap in [("11-10-0135-01", "Persons in low income", g135),
+                           ("11-10-0093-01", "Demographic characteristics", g093)]:
+        try:
+            d = _get_table(tid)
+        except Exception as e:
+            logger.error(f"  {tid} failed: {e}")
+            continue
+        d = d[(d["GEO"] == "Canada") & (d["Low income lines"] == MBM)
+              & (d["Statistics"] == PCT) & (d[dim].isin(gmap))].copy()
+        d["year"] = d["REF_DATE"].astype(str).str[:4].astype(int)
+        d["rate"] = pd.to_numeric(d["VALUE"], errors="coerce")
+        d["group"] = d[dim].map(gmap)
+        rows.append(d[["year", "group", "rate"]].dropna(subset=["rate"]))
+    if not rows:
+        return None
+    out = (pd.concat(rows, ignore_index=True)
+           .sort_values(["year", "group"]).reset_index(drop=True))
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_poverty_by_group.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 11-10-0135-01 and 11-10-0093-01",
+        frequency="annual", unit="% in low income (MBM, 2023 base)",
+        transformations=["Canada; Market basket measure 2023 base; percentage; selected groups from age/family + population-group tables"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out

@@ -15,7 +15,7 @@ from pipeline.config import (
     CANADA_COLOR, CATEGORICAL_COLORS, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date, get_retrieved_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar, category_bar
 ```
 
 ## Where Canada stands
@@ -371,6 +371,29 @@ else:
     print("Low-income data not yet available. Run the data pipeline.")
 ```
 
+## Who poverty affects most
+
+The **Market Basket Measure (MBM)** is Canada's official poverty line — the income a family needs to afford a modest, specified basket of goods and services. About **11% of Canadians** live below it, but the rate varies sharply by group. People living alone, Indigenous people, recent immigrants, and racialized Canadians face poverty rates well above the national average, while seniors — supported by public pensions — are well below it. The national rate is highlighted for reference. (Latest year; figures for recent immigrants are for those aged 15 and over.)
+
+```{python}
+#| echo: false
+pg_path = "data/income/statcan_poverty_by_group.csv"
+if os.path.exists(pg_path):
+    pg = pd.read_csv(pg_path)
+    yr = int(pg["year"].max())
+    cur = pg[pg["year"] == yr].copy()
+    cur["lbl"] = [f"{v:.1f}%" for v in cur["rate"]]
+    category_bar(cur, "group", "rate", xaxis_title="Poverty rate, Market Basket Measure (%)",
+        ticksuffix="%", value_fmt=".1f", color=CATEGORICAL_COLORS[0],
+        highlight={"All Canadians"}, highlight_color=CANADA_COLOR,
+        text_col="lbl", text_fmt="{}",
+        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Tables 11-10-0135-01 and 11-10-0093-01 | {yr}").show(
+        config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Poverty-by-group data not yet available. Run the data pipeline.")
+```
+
 ## Food insecurity
 
 The share of people in households that experienced food insecurity in the past year — worrying about running out of food, compromising on quality or quantity, or going without. It is a direct measure of material hardship that income and poverty lines alone can miss, and has risen sharply in recent years.
@@ -392,6 +415,7 @@ else:
 ## Download data
 
 - [Median After-Tax Income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada Table 11-10-0190-01
+- [Poverty rate by demographic group, MBM (CSV)](../data/income/statcan_poverty_by_group.csv) — Statistics Canada 11-10-0135-01 & 11-10-0093-01
 - [Neighbourhood income, GeoJSON](../data/geo/ct_income_2021.geojson) — 2021 Census, median household income by census tract
 - [Food Insecurity (CSV)](../data/income/statcan_food_insecurity.csv) — Statistics Canada Table 13-10-0835-01
 - [Average Annual Wage (CSV)](../data/income/oecd_avg_wage.csv) — OECD Average Annual Wages

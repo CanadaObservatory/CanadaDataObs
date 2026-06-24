@@ -99,12 +99,13 @@ if os.path.exists(to_path):
     fig = go.Figure(go.Scatter(x=to["year"], y=to["turnout"], mode="lines+markers",
         line=dict(color=CANADA_COLOR, width=2), marker=dict(size=5),
         hovertemplate="%{x}: %{y:.1f}% turnout<extra></extra>"))
-    fig.update_layout(plot_bgcolor="white", height=420,
+    fig.update_layout(plot_bgcolor="white", height=440,
         yaxis=dict(title="Turnout (% of electors)", gridcolor="#e0e0e0", ticksuffix="%"),
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
-        margin=dict(t=30, b=90),
+        xaxis=dict(title="", gridcolor="#e0e0e0",
+                   rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+        margin=dict(t=30, b=120),
         annotations=[dict(text=f"Source: Elections Canada (federal general elections) | Data as of: {get_data_date(to_path)}",
-            xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))])
+            xref="paper", yref="paper", x=0, y=-0.30, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Voter-turnout data not yet available. Run the data pipeline.")

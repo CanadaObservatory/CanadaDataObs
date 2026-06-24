@@ -15,7 +15,7 @@ from pipeline.config import (
     CANADA_COLOR, CATEGORICAL_COLORS, PEER_COLOR, HIGHLIGHT_WIDTH, PEER_WIDTH,
     HIGHLIGHT_COUNTRY, PEER_COUNTRIES, get_data_date, get_retrieved_date,
 )
-from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line, single_bar, category_bar
 ```
 
 ## Where Canada stands
@@ -142,6 +142,28 @@ if os.path.exists(wage_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Where wages are highest
+
+Pay varies a lot across the country. This shows the **average weekly wage** of employees by province — highest in Alberta, Ontario and British Columbia (where high-paying resource, finance and tech work concentrates) and lowest in the Atlantic provinces. The national average is highlighted for reference.
+
+```{python}
+#| echo: false
+wp_path = "data/income/statcan_wages_by_province.csv"
+if os.path.exists(wp_path):
+    wp = pd.read_csv(wp_path)
+    wyr = int(wp["year"].max())
+    cur = wp[wp["year"] == wyr].copy()
+    cur["lbl"] = [f"${v:,.0f}" for v in cur["avg_weekly_wage"]]
+    category_bar(cur, "geo", "avg_weekly_wage",
+        xaxis_title=f"Average weekly wage, {wyr} ($)", tickprefix="$", value_fmt=",.0f",
+        color=CATEGORICAL_COLORS[0], highlight={"Canada"}, highlight_color=CANADA_COLOR,
+        text_col="lbl", text_fmt="{}", hovertemplate="%{y}: $%{x:,.0f}/week<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 14-10-0064-01 (all industries) | {wyr}").show(
+        config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Provincial wage data not yet available. Run the data pipeline.")
+```
+
 ## Real household disposable income per capita
 
 Real (inflation-adjusted) household disposable income per person, indexed to 2007 = 100. Disposable income is what households actually have to spend or save after taxes and transfers — a more direct gauge of household living standards than GDP per capita, which can rise without households feeling better off. Because it is indexed, the lines show *growth* since 2007 rather than dollar levels.
@@ -262,7 +284,7 @@ else:
 
 ## Income distribution over time
 
-A single inequality number hides how income is actually shared. The chart below shows the **average after-tax income of each tenth (decile)** of Canadians, in constant 2024 dollars — slide through the years to watch real incomes rise, with the top decile pulling furthest ahead.
+A single inequality number hides how income is actually shared. The chart below shows the average income of each tenth (**decile**) of Canadians — **before tax** and **after tax** — in constant 2024 dollars. Slide through the years to watch real incomes rise, with the top decile pulling furthest ahead; the gap between the two bars is what taxes and transfers take, and it widens sharply toward the top. (These are snapshots of each decile in a given year — *not* a fixed set of people. Incomes move across the ladder over a lifetime, as the [life-cycle section below](#income-mobility-and-the-life-cycle) shows.)
 
 ```{python}
 #| echo: false
@@ -273,22 +295,27 @@ if os.path.exists(adf_path):
                  "Fifth decile", "Sixth decile", "Seventh decile", "Eighth decile",
                  "Ninth decile", "Highest decile"]
     LABELS = ["Lowest", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "Highest"]
-    piv = adf.pivot(index="year", columns="decile", values="avg_income")[DEC_ORDER]
-    years = piv.index.tolist()
-    ymax = float(piv.values.max())
-    steps = [dict(method="restyle", label=str(int(yr)), args=[{"y": [piv.loc[yr].tolist()]}])
-             for yr in years]
-    fig = go.Figure(go.Bar(x=LABELS, y=piv.loc[years[-1]].tolist(), marker_color="#4e79a7",
-        hovertemplate="%{x} decile: $%{y:,.0f}<extra></extra>"))
-    fig.update_layout(plot_bgcolor="white", height=470,
-        yaxis=dict(title="Average after-tax income (2024 $)", tickprefix="$", tickformat=",",
+    pb = adf.pivot(index="year", columns="decile", values="before_tax")[DEC_ORDER]
+    pa = adf.pivot(index="year", columns="decile", values="after_tax")[DEC_ORDER]
+    years = pb.index.tolist()
+    ymax = float(pb.values.max())
+    steps = [dict(method="restyle", label=str(int(yr)),
+                  args=[{"y": [pb.loc[yr].tolist(), pa.loc[yr].tolist()]}]) for yr in years]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=LABELS, y=pb.loc[years[-1]].tolist(), name="Before tax",
+        marker_color=CATEGORICAL_COLORS[0], hovertemplate="%{x} decile — before tax: $%{y:,.0f}<extra></extra>"))
+    fig.add_trace(go.Bar(x=LABELS, y=pa.loc[years[-1]].tolist(), name="After tax",
+        marker_color=CATEGORICAL_COLORS[1], hovertemplate="%{x} decile — after tax: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=500, barmode="group",
+        yaxis=dict(title="Average income (constant 2024 $)", tickprefix="$", tickformat=",",
                    range=[0, ymax * 1.05], gridcolor="#e0e0e0"),
         xaxis=dict(title="Income decile (lowest to highest tenth)"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
         sliders=[dict(active=len(years) - 1, currentvalue=dict(prefix="Year: ", font=dict(size=14)),
-                      pad=dict(t=50), steps=steps)],
-        margin=dict(t=30, b=150),
-        annotations=[dict(text="Source: Statistics Canada, Table 11-10-0193-01 (average after-tax income, constant 2024 $).",
-            xref="paper", yref="paper", x=0, y=-0.42, showarrow=False, font=dict(size=10, color="#999"))])
+                      pad=dict(t=30), steps=steps)],
+        margin=dict(t=50, b=175, r=30, l=10),
+        annotations=[dict(text="Source: Statistics Canada, Table 11-10-0193-01 (average income by decile, constant 2024 $).",
+            xref="paper", yref="paper", x=0, y=-0.46, yanchor="top", showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Income-distribution data not yet available. Run the data pipeline.")
@@ -326,6 +353,64 @@ if os.path.exists(sh_path):
 else:
     print("Income-share data not yet available. Run the data pipeline.")
 ```
+
+## Income, mobility and the life cycle
+
+The charts above show how income is *distributed* in a given year — but a decile is a **position, not a fixed group of people**. Individuals move across the income ladder over their lives and careers: a graduate student earning $25,000 becomes a professional earning $100,000; a peak earner in their fifties later retires onto a pension. So a snapshot of the distribution is not a photograph of permanent winners and losers. Two patterns make this concrete.
+
+**Income tracks age.** Median income rises steeply through early adulthood, peaks in the mid-forties to mid-fifties, and steps down in retirement. Much of the bottom of the income ladder is the young and the old — often the *same people* at a different life stage, not a permanent class.
+
+```{python}
+#| echo: false
+ia_path = "data/income/statcan_income_by_age.csv"
+if os.path.exists(ia_path):
+    ia = pd.read_csv(ia_path)
+    AGE_ORDER = ["15–24", "25–34", "35–44", "45–54", "55–64", "65+"]
+    iyr = int(ia["year"].max())
+    cur = ia[ia["year"] == iyr].set_index("age_group").reindex(AGE_ORDER).reset_index()
+    fig = go.Figure(go.Scatter(x=cur["age_group"], y=cur["median_income"], mode="lines+markers+text",
+        line=dict(color=CATEGORICAL_COLORS[0], width=3), marker=dict(size=9),
+        text=[f"${v/1000:.0f}k" for v in cur["median_income"]], textposition="top center",
+        cliponaxis=False, hovertemplate="Age %{x}: $%{y:,.0f}<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=440,
+        yaxis=dict(title="Median total income ($)", tickprefix="$", tickformat=",",
+                   rangemode="tozero", gridcolor="#e0e0e0"),
+        xaxis=dict(title="Age group"), margin=dict(t=40, b=80, r=25, l=10),
+        annotations=[dict(text=f"Source: Statistics Canada, Table 11-10-0239-01 (median total income, {iyr}).",
+            xref="paper", yref="paper", x=0, y=-0.18, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Income-by-age data not yet available. Run the data pipeline.")
+```
+
+**Most low income is temporary.** Following the same tax filers over eight years, most who experience low income are there only briefly — far more spend one or two years in it than are stuck there long-term. Low income is more often a spell than a settled state.
+
+```{python}
+#| echo: false
+lp_path = "data/income/statcan_low_income_persistence.csv"
+if os.path.exists(lp_path):
+    lp = pd.read_csv(lp_path)
+    window = str(lp["window"].iloc[0])
+    never = float(lp.loc[lp["years"] == 0, "pct_of_filers"].iloc[0])
+    ever = lp[lp["years"] >= 1].copy()
+    ever["share"] = ever["pct_of_filers"] / ever["pct_of_filers"].sum() * 100
+    ever["lbl"] = ever["years"].map(lambda y: f"{y} years" if y > 1 else "1 year")
+    ever.loc[ever["years"] == 8, "lbl"] = "8 (all)"
+    fig = go.Figure(go.Bar(x=ever["lbl"], y=ever["share"], marker_color=CATEGORICAL_COLORS[0],
+        text=[f"{v:.0f}%" for v in ever["share"]], textposition="outside",
+        hovertemplate="%{x} in low income: %{y:.0f}% of those who experienced it<extra></extra>"))
+    fig.update_layout(plot_bgcolor="white", height=400,
+        yaxis=dict(title="% of those ever in low income", ticksuffix="%", gridcolor="#e0e0e0"),
+        xaxis=dict(title=f"Years spent in low income over the {window.replace('/', '–')} window"),
+        margin=dict(t=40, b=95, r=20, l=10),
+        annotations=[dict(text=f"Source: Statistics Canada, Table 11-10-0025-01 (variable low income measure). Over this window {never:.0f}% of tax filers were never in low income.",
+            xref="paper", yref="paper", x=0, y=-0.24, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Low-income persistence data not yet available. Run the data pipeline.")
+```
+
+Mobility is real but not unlimited, and it has its own debates — chief among them how much a child's eventual income depends on their parents'. Statistics Canada research using its Intergenerational Income Database finds the link is modest but has strengthened somewhat for Canadians born in the 1980s compared with the 1960s (implying slightly less mobility). That long-run question aside, the life-cycle and persistence patterns above are a reminder that the income distribution is a set of positions people move through, not a fixed ranking of people.
 
 ## Relative poverty rate
 
@@ -371,6 +456,29 @@ else:
     print("Low-income data not yet available. Run the data pipeline.")
 ```
 
+## Who poverty affects most
+
+The **Market Basket Measure (MBM)** is Canada's official poverty line — the income a family needs to afford a modest, specified basket of goods and services. About **11% of Canadians** live below it, but the rate varies sharply by group. People living alone, Indigenous people, recent immigrants, and racialized Canadians face poverty rates well above the national average, while seniors — supported by public pensions — are well below it. The national rate is highlighted for reference. (Latest year; figures for recent immigrants are for those aged 15 and over.)
+
+```{python}
+#| echo: false
+pg_path = "data/income/statcan_poverty_by_group.csv"
+if os.path.exists(pg_path):
+    pg = pd.read_csv(pg_path)
+    yr = int(pg["year"].max())
+    cur = pg[pg["year"] == yr].copy()
+    cur["lbl"] = [f"{v:.1f}%" for v in cur["rate"]]
+    category_bar(cur, "group", "rate", xaxis_title="Poverty rate, Market Basket Measure (%)",
+        ticksuffix="%", value_fmt=".1f", color=CATEGORICAL_COLORS[0],
+        highlight={"All Canadians"}, highlight_color=CANADA_COLOR,
+        text_col="lbl", text_fmt="{}",
+        hovertemplate="%{y}: %{x:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Tables 11-10-0135-01 and 11-10-0093-01 | {yr}").show(
+        config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Poverty-by-group data not yet available. Run the data pipeline.")
+```
+
 ## Food insecurity
 
 The share of people in households that experienced food insecurity in the past year — worrying about running out of food, compromising on quality or quantity, or going without. It is a direct measure of material hardship that income and poverty lines alone can miss, and has risen sharply in recent years.
@@ -382,7 +490,7 @@ if os.path.exists(fi_path):
     df = pd.read_csv(fi_path, parse_dates=["date"])
     fig = single_bar(df, "date", "food_insecurity_rate", title="",
                      yaxis_title="% of persons in food-insecure households",
-                     color=CANADA_COLOR, yticksuffix="%", hover_fmt=".1f", rangeslider=True,
+                     color=CATEGORICAL_COLORS[0], yticksuffix="%", hover_fmt=".1f", rangeslider=True,
                      source_note=f"Source: Statistics Canada, Table 13-10-0835-01 (Canadian Income Survey) | Data as of: {get_data_date(fi_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
@@ -392,6 +500,7 @@ else:
 ## Download data
 
 - [Median After-Tax Income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada Table 11-10-0190-01
+- [Poverty rate by demographic group, MBM (CSV)](../data/income/statcan_poverty_by_group.csv) — Statistics Canada 11-10-0135-01 & 11-10-0093-01
 - [Neighbourhood income, GeoJSON](../data/geo/ct_income_2021.geojson) — 2021 Census, median household income by census tract
 - [Food Insecurity (CSV)](../data/income/statcan_food_insecurity.csv) — Statistics Canada Table 13-10-0835-01
 - [Average Annual Wage (CSV)](../data/income/oecd_avg_wage.csv) — OECD Average Annual Wages

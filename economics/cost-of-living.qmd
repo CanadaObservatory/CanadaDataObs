@@ -90,6 +90,73 @@ except FileNotFoundError:
     print("CPI data not yet available. Run the data pipeline to fetch it.")
 ```
 
+## How much prices have risen
+
+Inflation — the *rate* at which prices rise — has cooled back toward the Bank of Canada's target. But a lower inflation rate does not mean prices have fallen; it means they are climbing more slowly from a much higher level. That gap is a big part of why budgets still feel stretched. Since 2019, **overall prices are about a quarter higher**, and the essentials households feel most have risen even more — **food and shelter are each up roughly a third**. This shows the price *level* of the all-items basket and the most-felt categories, rebased so 2019 = 100.
+
+```{python}
+#| echo: false
+try:
+    comp = pd.read_csv("data/economics/statcan_cpi_components.csv", parse_dates=["date"])
+    comp["cpi_value"] = pd.to_numeric(comp["cpi_value"], errors="coerce")
+    base = comp[comp["date"].dt.year == 2019].groupby("product_group")["cpi_value"].mean()
+    comp = comp[comp["date"] >= "2019-01-01"].copy()
+    comp["idx"] = [r.cpi_value / base[r.product_group] * 100 for r in comp.itertuples()]
+    series = [("All-items", "#555555", 3.2), ("Food", CATEGORICAL_COLORS[1], 2.5),
+              ("Shelter", CATEGORICAL_COLORS[0], 2.5), ("Transportation", CATEGORICAL_COLORS[3], 2.5)]
+    figl = go.Figure()
+    for name, color, w in series:
+        s = comp[comp["product_group"] == name].sort_values("date")
+        figl.add_trace(go.Scatter(x=s["date"], y=s["idx"], name=name, mode="lines",
+            line=dict(color=color, width=w), hovertemplate=name + ": %{y:.0f}<extra></extra>"))
+    figl.add_hline(y=100, line_dash="dot", line_color="#aaa")
+    figl.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+        yaxis=dict(title="Price level (2019 = 100)", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, bgcolor="rgba(255,255,255,0.6)"),
+        margin=dict(t=40, b=80, r=20))
+    figl.add_annotation(
+        text=f"Source: Statistics Canada, Table 18-10-0004-01 | Data as of: {get_data_date('data/economics/statcan_cpi_components.csv')}",
+        xref="paper", yref="paper", x=0, y=-0.18, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+    figl.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("CPI component data not yet available. Run the data pipeline to fetch it.")
+```
+
+## Has pay kept up?
+
+The other half of cost-of-living pressure is whether earnings keep pace. This compares the **average weekly wage** with the all-items price level, both rebased to 2019 = 100. On average, wages have slightly outpaced prices since the pandemic — but that average hides a lot: pay rose unevenly across workers, and it lagged behind the price surge of 2021–22 before catching up, which is much of why the squeeze felt acute even as the totals roughly balanced.
+
+```{python}
+#| echo: false
+try:
+    wp = pd.read_csv("data/income/statcan_wages_by_province.csv")
+    wp = wp[wp["geo"] == "Canada"].set_index("year")["avg_weekly_wage"]
+    ci = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
+    if "product_group" in ci.columns:
+        ci = ci[ci["product_group"] == "All-items"]
+    ci = ci.assign(yr=ci["date"].dt.year).groupby("yr")["cpi_value"].mean()
+    base = 2019
+    yrs = [y for y in wp.index if y >= base and y in ci.index]
+    figw = go.Figure()
+    figw.add_trace(go.Scatter(x=yrs, y=[ci[y] / ci[base] * 100 for y in yrs], name="Prices (all-items)",
+        mode="lines", line=dict(color=CATEGORICAL_COLORS[1], width=2.5), hovertemplate="Prices: %{y:.0f}<extra></extra>"))
+    figw.add_trace(go.Scatter(x=yrs, y=[wp[y] / wp[base] * 100 for y in yrs], name="Average weekly wage",
+        mode="lines+markers", line=dict(color=CATEGORICAL_COLORS[0], width=3), marker=dict(size=6),
+        hovertemplate="Wage: %{y:.0f}<extra></extra>"))
+    figw.add_hline(y=100, line_dash="dot", line_color="#aaa")
+    figw.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+        yaxis=dict(title="Index (2019 = 100)", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0", dtick=1),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(t=40, b=80, r=20))
+    figw.add_annotation(text=f"Source: Statistics Canada, Tables 14-10-0064-01 (wages) and 18-10-0004-01 (CPI) | Data as of: {get_data_date('data/income/statcan_wages_by_province.csv')}",
+        xref="paper", yref="paper", x=0, y=-0.2, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+    figw.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+except FileNotFoundError:
+    print("Wage/CPI data not yet available. Run the data pipeline.")
+```
+
 ## Headline, core, and food
 
 Three views of the same question. **All-items** is the headline rate; **CPI-trim** is the Bank of Canada's preferred *core* measure, which strips out the most volatile price movements to show the underlying trend; **food** is the most-felt component, and has generally run hotter than overall inflation.

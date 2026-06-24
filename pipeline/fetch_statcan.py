@@ -700,13 +700,17 @@ def fetch_income_distribution():
     ca["year"] = pd.to_numeric(ca["REF_DATE"], errors="coerce")
     ca["VALUE"] = pd.to_numeric(ca["VALUE"], errors="coerce")
 
-    # 1. Average after-tax income by decile (real) — for the slider
-    avg = ca[(ca["Statistics"] == "Average income")
-             & (ca["Income concept"] == "Adjusted after-tax income")
-             & (ca["Income decile"].isin(_INCOME_DECILES))]
-    avg = (avg[["year", "Income decile", "VALUE"]]
-           .rename(columns={"Income decile": "decile", "VALUE": "avg_income"})
-           .dropna(subset=["year", "avg_income"]))
+    # 1. Average income by decile (real, constant 2024 $) — before tax (total
+    #    income) and after tax — for the year-slider distribution chart.
+    _CONCEPTS = {"Adjusted total income": "before_tax",
+                 "Adjusted after-tax income": "after_tax"}
+    a = ca[(ca["Statistics"] == "Average income")
+           & (ca["Income concept"].isin(_CONCEPTS))
+           & (ca["Income decile"].isin(_INCOME_DECILES))].copy()
+    a["concept"] = a["Income concept"].map(_CONCEPTS)
+    avg = (a.pivot_table(index=["year", "Income decile"], columns="concept", values="VALUE")
+           .reset_index().rename(columns={"Income decile": "decile"}))
+    avg = avg.dropna(subset=["after_tax"])
     avg["year"] = avg["year"].astype(int)
     if avg.empty:
         return None
@@ -715,8 +719,8 @@ def fetch_income_distribution():
     avg.sort_values(["year", "decile"]).to_csv(avg_path, index=False)
     save_metadata(avg_path, df=avg, date_column="year",
         source="Statistics Canada", source_table="11-10-0193-01",
-        frequency="annual", unit="average after-tax income (constant dollars)",
-        transformations=["Canada, average after-tax income by decile, real $"])
+        frequency="annual", unit="average income by decile (constant 2024 $)",
+        transformations=["Canada; average before-tax (total) and after-tax income by decile, real $"])
     logger.info(f"  saved {len(avg)} rows -> {avg_path.name}")
 
     # 2. Top-10% vs bottom-40% income share, market + after-tax — for the share line
@@ -1158,3 +1162,279 @@ def fetch_tertiary_attainment():
                   transformations=["Tertiary education, both genders; Canada + OECD-average geographies; by age group"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
+
+
+def fetch_poverty_by_group():
+    """MBM poverty rate (the official poverty line) by selected demographic group,
+    Canada — the disparity behind the cost-of-living burden. Combines two StatCan
+    tables, both filtered to Canada / Market basket measure, 2023 base / Percentage:
+    11-10-0135-01 (age & family type) and 11-10-0093-01 (population groups).
+    Persons-with-disabilities is omitted (published from a separate source)."""
+    logger.info("fetch_poverty_by_group (11-10-0135-01 + 11-10-0093-01)")
+    MBM, PCT = "Market basket measure, 2023 base", "Percentage of persons in low income"
+    # (source member -> short label), per table; the order also sets a stable sort key.
+    g135 = {
+        "All persons": "All Canadians",
+        "Persons under 18 years": "Children",
+        "Persons 65 years and over": "Seniors (65+)",
+        "Persons not in an economic family": "Unattached individuals",
+    }
+    g093 = {
+        "Visible minority population": "Racialized groups",
+        "Recent immigrants (10 years or less) aged 15 years and over": "Recent immigrants",
+        "Indigenous population": "Indigenous population",
+    }
+    rows = []
+    for tid, dim, gmap in [("11-10-0135-01", "Persons in low income", g135),
+                           ("11-10-0093-01", "Demographic characteristics", g093)]:
+        try:
+            d = _get_table(tid)
+        except Exception as e:
+            logger.error(f"  {tid} failed: {e}")
+            continue
+        d = d[(d["GEO"] == "Canada") & (d["Low income lines"] == MBM)
+              & (d["Statistics"] == PCT) & (d[dim].isin(gmap))].copy()
+        d["year"] = d["REF_DATE"].astype(str).str[:4].astype(int)
+        d["rate"] = pd.to_numeric(d["VALUE"], errors="coerce")
+        d["group"] = d[dim].map(gmap)
+        rows.append(d[["year", "group", "rate"]].dropna(subset=["rate"]))
+    if not rows:
+        return None
+    out = (pd.concat(rows, ignore_index=True)
+           .sort_values(["year", "group"]).reset_index(drop=True))
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_poverty_by_group.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 11-10-0135-01 and 11-10-0093-01",
+        frequency="annual", unit="% in low income (MBM, 2023 base)",
+        transformations=["Canada; Market basket measure 2023 base; percentage; selected groups from age/family + population-group tables"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
+def fetch_income_by_age():
+    """Median total income by age group, Canada — the age-income (life-course)
+    profile. StatCan 11-10-0239-01 (Total income; Median excluding zeros; both
+    genders). Income rises steeply in early career, peaks at 45-54, then steps
+    down in retirement — the structural reason an income decile is not a fixed
+    group of people (the same person occupies different deciles over a lifetime)."""
+    logger.info("fetch_income_by_age (11-10-0239-01)")
+    try:
+        d = _get_table("11-10-0239-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    AGES = {"15 to 24 years": "15–24", "25 to 34 years": "25–34", "35 to 44 years": "35–44",
+            "45 to 54 years": "45–54", "55 to 64 years": "55–64", "65 years and over": "65+"}
+    gcol = next(c for c in d.columns if "ender" in c)
+    d = d[(d["GEO"] == "Canada") & (d[gcol] == "Total - Gender")
+          & (d["Income source"] == "Total income")
+          & (d["Statistics"] == "Median income (excluding zeros)")
+          & (d["Age group"].isin(AGES))].copy()
+    d["year"] = pd.to_numeric(d["REF_DATE"], errors="coerce")
+    d["median_income"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    d["age_group"] = d["Age group"].map(AGES)
+    out = (d[["year", "age_group", "median_income"]]
+           .dropna(subset=["year", "median_income"]))
+    out["year"] = out["year"].astype(int)
+    out = out.sort_values(["year", "age_group"]).reset_index(drop=True)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_income_by_age.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 11-10-0239-01",
+        frequency="annual", unit="median total income (current $)",
+        transformations=["Canada; both genders; Total income; median (excl. zeros); by age group"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
+def fetch_low_income_persistence():
+    """How long low income lasts — over an 8-year window, the share of tax filers
+    by the number of years spent in low income. Most who experience it are there
+    only briefly: low income is more often a temporary spell than a permanent
+    state, the flip side of income mobility. StatCan 11-10-0025-01 (Canada, both
+    sexes, variable low income measure), latest window."""
+    logger.info("fetch_low_income_persistence (11-10-0025-01)")
+    try:
+        d = _get_table("11-10-0025-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    d = d[(d["GEO"] == "Canada") & (d["Selected characteristics"] == "Both sexes")
+          & (d["Low income threshold"] == "Variable low income measure")
+          & (d["Statistics"] == "Percentage of tax filers in low income")].copy()
+    d["pct_of_filers"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    window = sorted(d["REF_DATE"].dropna().unique())[-1]
+    w = d[d["REF_DATE"] == window].copy()
+    w["years"] = w["Years in low income"].str.extract(r"(\d+)").astype(int)
+    out = (w[["years", "pct_of_filers"]].dropna(subset=["pct_of_filers"])
+           .sort_values("years").reset_index(drop=True))
+    out["window"] = window
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_low_income_persistence.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="window", source="Statistics Canada",
+        source_table="Statistics Canada 11-10-0025-01",
+        frequency="annual", unit="% of tax filers (8-year window)",
+        transformations=[f"Canada; both sexes; variable LIM; years in low income over the {window} window"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
+def fetch_wages_by_province():
+    """Average weekly wage by province over time (all industries, both genders,
+    age 15+, full- and part-time employees). StatCan 14-10-0064-01 — drives the
+    regional-wage comparison and the pay-vs-prices view on the cost-of-living page."""
+    logger.info("fetch_wages_by_province (14-10-0064-01)")
+    try:
+        d = _get_table("14-10-0064-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    naics = next(c for c in d.columns if "NAICS" in c)
+    d = d[(d["Wages"] == "Average weekly wage rate")
+          & (d["Type of work"] == "Both full- and part-time employees")
+          & (d[naics] == "Total employees, all industries")
+          & (d["Gender"] == "Total - Gender")
+          & (d["Age group"] == "15 years and over")].copy()
+    d["year"] = pd.to_numeric(d["REF_DATE"], errors="coerce")
+    d["avg_weekly_wage"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    out = (d[["year", "GEO", "avg_weekly_wage"]].rename(columns={"GEO": "geo"})
+           .dropna(subset=["year", "avg_weekly_wage"]))
+    out["year"] = out["year"].astype(int)
+    out = out.sort_values(["year", "geo"]).reset_index(drop=True)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "income" / "statcan_wages_by_province.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 14-10-0064-01",
+        frequency="annual", unit="average weekly wage ($)",
+        transformations=["Canada + provinces; all industries; both genders; 15+; both full/part-time; average weekly wage"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
+# Average rent by city and bedroom type (CMHC Rental Market Survey via StatCan
+# 34-10-0133-01) — the dollar-level companion to the rent CPI (a trend index) and
+# the by-city vacancy spread; answers "what's typical rent in my city". The
+# comprehensive "row and apartment structures of three units and over" universe;
+# there is no "Total" unit, so the 2-bedroom (CMHC's reference unit) anchors the
+# page and all four sizes are kept.
+RENT_STRUCT = "Row and apartment structures of three units and over"
+RENT_UNITS = {
+    "Bachelor units": "Bachelor",
+    "One bedroom units": "1 bedroom",
+    "Two bedroom units": "2 bedroom",
+    "Three bedroom units": "3 bedroom +",
+}
+
+
+def fetch_cma_rent():
+    """Average monthly rent by city and bedroom type, latest survey year (CMHC
+    Rental Market Survey via StatCan 34-10-0133-01). Tidy: cma, year, bedroom,
+    avg_rent. CMA/centre rows only; the Ottawa-Gatineau "part" rows are dropped in
+    favour of the combined whole-CMA row (same dup-geography trap as the vacancy and
+    crime joins)."""
+    logger.info("Fetching CMA average rent (34-10-0133-01)...")
+    try:
+        df = _get_table("34-10-0133-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch rent table: {e}")
+        return None
+    STRUCT, UNIT = "Type of structure", "Type of unit"
+    validate_columns(df, ["REF_DATE", "GEO", STRUCT, UNIT, "VALUE"], "cma_rent")
+    df = df[(df[STRUCT] == RENT_STRUCT) & (df[UNIT].isin(RENT_UNITS))
+            & ~df["GEO"].str.contains(" part,", na=False)].copy()
+    df["year"] = pd.to_numeric(df["REF_DATE"], errors="coerce")
+    df["avg_rent"] = pd.to_numeric(df["VALUE"], errors="coerce")
+    df = df.dropna(subset=["year", "avg_rent"])
+    if df.empty:
+        return None
+    latest_year = int(df["year"].max())
+    df = df[df["year"] == latest_year].copy()
+    df["cma"] = df["GEO"].str.split(",").str[0].str.strip()
+    df["bedroom"] = df[UNIT].map(RENT_UNITS)
+    out = (df[["cma", "year", "bedroom", "avg_rent"]]
+           .drop_duplicates(["cma", "bedroom"])
+           .sort_values(["bedroom", "avg_rent"]).reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    out_path = DATA_DIR / "housing" / "statcan_cma_rent.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Statistics Canada / CMHC", source_table="34-10-0133-01",
+        frequency="annual", unit="average monthly rent ($)",
+        transformations=[f"row + apartment structures of three units and over; "
+                         f"CMA/centre rows (Ottawa-Gatineau parts dropped); "
+                         f"latest year ({latest_year}); four bedroom types"])
+    logger.info(f"  saved {len(out)} rows ({out.cma.nunique()} centres, {latest_year}) -> {out_path.name}")
+    return out
+
+
+# Wealth, real-estate assets and mortgage debt per household by age group (StatCan
+# Distributions of Household Economic Accounts, 36-10-0660-01). The DHEA are
+# MODELLED, EXPERIMENTAL distributions of the national balance sheet — flagged as
+# such on the page. "Value per household" in dollars, Canada, quarterly. The
+# millennial-stress trio (younger households hold the least net worth and carry the
+# most mortgage debt).
+WEALTH_AGES = ["Less than 35 years", "35 to 44 years", "45 to 54 years",
+               "55 to 64 years", "65 years and over"]
+WEALTH_AGE_LABELS = {"Less than 35 years": "Under 35", "35 to 44 years": "35–44",
+                     "45 to 54 years": "45–54", "55 to 64 years": "55–64",
+                     "65 years and over": "65+"}
+WEALTH_MEASURES = {"Net worth (wealth)": "net_worth", "Real estate": "real_estate",
+                   "Mortgage liabilities": "mortgage"}
+
+
+def fetch_wealth_by_age():
+    """Net worth, real-estate wealth and mortgage debt per household by age group,
+    Canada (StatCan DHEA 36-10-0660-01, quarterly). Wide CSV: date, age_group,
+    net_worth, real_estate, mortgage. The DHEA are modelled experimental estimates
+    (a distribution of the national balance sheet), labelled as such on the page."""
+    logger.info("Fetching wealth by age (DHEA 36-10-0660-01)...")
+    try:
+        df = _get_table("36-10-0660-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch DHEA table: {e}")
+        return None
+    validate_columns(df, ["REF_DATE", "GEO", "Statistics", "Characteristics",
+                          "Wealth", "UOM", "VALUE"], "wealth_by_age")
+    d = df[(df["GEO"] == "Canada") & (df["Statistics"] == "Value per household")
+           & (df["UOM"] == "Dollars") & (df["Characteristics"].isin(WEALTH_AGES))
+           & (df["Wealth"].isin(WEALTH_MEASURES))].copy()
+    d["date"] = pd.to_datetime(d["REF_DATE"], format="%Y-%m", errors="coerce")
+    d["value"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    d["age_group"] = d["Characteristics"].map(WEALTH_AGE_LABELS)
+    d["measure"] = d["Wealth"].map(WEALTH_MEASURES)
+    wide = (d.dropna(subset=["date", "value"])
+            .pivot_table(index=["date", "age_group"], columns="measure", values="value")
+            .reset_index())
+    order = {lab: i for i, lab in enumerate(WEALTH_AGE_LABELS.values())}
+    wide = (wide.assign(_o=wide["age_group"].map(order))
+            .sort_values(["date", "_o"]).drop(columns="_o")
+            .dropna(subset=["net_worth"]).reset_index(drop=True))
+    if wide.empty:
+        return None
+    cols = ["date", "age_group"] + [c for c in ("net_worth", "real_estate", "mortgage")
+                                    if c in wide.columns]
+    out_path = DATA_DIR / "housing" / "statcan_wealth_by_age.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wide[cols].to_csv(out_path, index=False)
+    save_metadata(out_path, df=wide, date_column="date",
+        source="Statistics Canada", source_table="36-10-0660-01",
+        frequency="quarterly", unit="dollars per household (modelled, DHEA)",
+        transformations=["Canada; value per household; five age groups; "
+                         "net worth / real estate / mortgage liabilities; "
+                         "DHEA modelled experimental estimates"])
+    logger.info(f"  saved {len(wide)} rows -> {out_path.name}")
+    return wide[cols]

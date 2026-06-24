@@ -566,6 +566,15 @@ INDICATORS = [
                           "y10": "BD.CDN.10YR.DQ.YLD", "ylong": "BD.CDN.LONG.DQ.YLD"},
               start_period=2001, output_subpath="boc_bond_yields.csv",
               source_table="Bank of Canada (Government of Canada benchmark bond yields)"),
+    # Who is buying: share of mortgaged home purchases by buyer type — first-time
+    # buyers vs repeat buyers vs investors (BoC Financial Vulnerability Indicators,
+    # quarterly 2014–). The "investors vs first-time buyers" series.
+    Indicator("homebuyer_types", "housing", "boc",
+              "Mortgaged home purchases by buyer type", "% of mortgaged purchases", "quarterly",
+              boc_series={"fthb": "FVI_VOL_MTG_FTHB", "repeat": "FVI_VOL_MTG_REPEAT",
+                          "investor": "FVI_VOL_MTG_INVESTORS"},
+              start_period=2014, output_subpath="boc_homebuyer_types.csv",
+              source_table="Bank of Canada, Financial Vulnerability Indicators (mortgaged homebuyers)"),
 
     # ----- Government & Public Finances (OECD Economic Outlook) -----
     Indicator("govt_debt", "fiscal", "oecd",
@@ -733,12 +742,27 @@ INDICATORS = [
               value_col="vacancy_rate", chart_recipe="bar",
               fetch_fn="fetch_cma_vacancy", output_subpath="statcan_cma_vacancy.csv",
               source_table="Statistics Canada 34-10-0127-01 (CMHC)"),
+    # Average rent in dollars by city and bedroom type — the level behind the rent
+    # CPI (a trend index) and the vacancy spread; "what's typical rent in my city".
+    Indicator("cma_rent", "housing", "custom",
+              "Average rent by city and bedroom type", "$ per month", "annual",
+              value_col="avg_rent", chart_recipe="bar",
+              fetch_fn="fetch_cma_rent", output_subpath="statcan_cma_rent.csv",
+              source_table="Statistics Canada 34-10-0133-01 (CMHC)"),
     Indicator("debt_service_ratio", "housing", "custom",
               "Household debt service ratio", "% of disposable income", "quarterly",
               value_col="dsr_total", chart_recipe="line",
               fetch_fn="fetch_debt_service_ratio",
               output_subpath="statcan_debt_service_ratio.csv",
               source_table="Statistics Canada 11-10-0065-01"),
+    # Wealth, real-estate assets and mortgage debt per household by age group —
+    # the millennial-stress anchor (younger households: least net worth, most
+    # mortgage debt). DHEA modelled experimental estimates, flagged on the page.
+    Indicator("wealth_by_age", "housing", "custom",
+              "Wealth and mortgage debt by age (per household)", "$ per household", "quarterly",
+              value_col="net_worth", chart_recipe="line",
+              fetch_fn="fetch_wealth_by_age", output_subpath="statcan_wealth_by_age.csv",
+              source_table="Statistics Canada 36-10-0660-01 (DHEA)"),
     Indicator("provincial_finance", "government", "custom",
               "Provincial government finances (CGFS, % of GDP)", "% of provincial GDP",
               "annual", value_col="net_debt_pct_gdp", chart_recipe="bar",
@@ -808,6 +832,13 @@ INDICATORS = [
                                "Low income lines": "Low income measure after tax",
                                "Statistics": "Percentage of persons in low income"},
               source_table="Statistics Canada 11-10-0135-01"),
+    # Poverty (official Market Basket Measure) by demographic group — the disparity
+    # behind the cost-of-living burden; combines 11-10-0135 (age/family) + 11-10-0093
+    # (population groups). Bespoke two-table reshape.
+    Indicator("poverty_by_group", "income", "custom",
+              "Poverty rate by demographic group (MBM)", "% of persons", "annual",
+              fetch_fn="fetch_poverty_by_group", output_subpath="statcan_poverty_by_group.csv",
+              source_table="Statistics Canada 11-10-0135-01 and 11-10-0093-01"),
     Indicator("food_insecurity", "income", "statcan",
               "Household food insecurity", "% of persons", "annual",
               value_col="food_insecurity_rate", date_format="%Y",
@@ -821,6 +852,21 @@ INDICATORS = [
               value_col="avg_income", chart_recipe="line",
               fetch_fn="fetch_income_distribution", output_subpath="income_deciles_avg.csv",
               source_table="Statistics Canada 11-10-0193-01"),
+    # Mobility & the life cycle (income is a position, not a fixed group of people):
+    # the age-income career arc + low-income persistence (most spells are temporary).
+    Indicator("income_by_age", "income", "custom",
+              "Median income by age group", "current $", "annual",
+              fetch_fn="fetch_income_by_age", output_subpath="statcan_income_by_age.csv",
+              source_table="Statistics Canada 11-10-0239-01"),
+    Indicator("low_income_persistence", "income", "custom",
+              "Low-income persistence (years in low income)", "% of tax filers", "annual",
+              fetch_fn="fetch_low_income_persistence", output_subpath="statcan_low_income_persistence.csv",
+              source_table="Statistics Canada 11-10-0025-01"),
+    # Average weekly wage by province — regional pay + the pay-vs-prices view.
+    Indicator("wages_by_province", "income", "custom",
+              "Average weekly wage by province", "$ per week", "annual",
+              fetch_fn="fetch_wages_by_province", output_subpath="statcan_wages_by_province.csv",
+              source_table="Statistics Canada 14-10-0064-01"),
 
     # ----- Health -----
     Indicator("life_expectancy", "health", "oecd",

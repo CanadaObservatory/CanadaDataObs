@@ -298,3 +298,45 @@ def fetch_naturalisations():
                          "per 100k via World Bank population; Canada + OECD peers; 1995–"])
     logger.info(f"  saved {len(out)} rows ({out.country_code.nunique()} countries) -> {out_path.name}")
     return out
+
+
+def fetch_oda():
+    """Official development assistance (foreign aid) as a percentage of gross national
+    income, Canada vs the OECD-DAC peer group.
+
+    OECD DAC1 (DSD_DAC1), MEASURE=11002 — ODA on the **grant-equivalent** basis, the
+    current official headline — UNIT_MEASURE=PT_B5G (% of GNI). The key is wildcarded
+    on every dimension but the donor and filtered in pandas (the DAC1 key order is
+    brittle; this avoids guessing positions). Compared on the page against the
+    long-standing UN target of 0.7% of GNI. Non-DAC donors (e.g. Israel) are absent;
+    each figure is the donor's own reporting, and 2022–23 are lifted for several
+    countries by in-donor refugee costs."""
+    logger.info("Fetching ODA % of GNI (OECD DAC1, grant-equivalent)...")
+    donors = "+".join(c for c in PEER_CODES if c != "ISR")
+    d = _fetch_oecd_csv("OECD.DCD.FSD,DSD_DAC1@DF_DAC1,1.4", f"{donors}..........",
+                        start_period=2015)
+    if d is None or d.empty:
+        return None
+    validate_columns(d, ["DONOR", "MEASURE", "UNIT_MEASURE", "TIME_PERIOD", "OBS_VALUE"], "oda")
+    s = d[(d["MEASURE"].astype(str) == "11002") & (d["UNIT_MEASURE"] == "PT_B5G")].copy()
+    s["oda_gni"] = pd.to_numeric(s["OBS_VALUE"], errors="coerce")
+    s["year"] = pd.to_numeric(s["TIME_PERIOD"], errors="coerce")
+    s["country_name"] = s["DONOR"].map(PEER_COUNTRIES)
+    out = (s.dropna(subset=["oda_gni", "year", "country_name"])
+             .rename(columns={"DONOR": "country_code"})
+             .drop_duplicates(["country_code", "year"])
+             [["country_code", "country_name", "year", "oda_gni"]]
+             .sort_values(["country_code", "year"]).reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "fiscal" / "oecd_oda.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="OECD (Development Assistance Committee, DAC1)",
+        source_table="OECD.DCD.FSD,DSD_DAC1@DF_DAC1 (MEASURE 11002, grant-equivalent ODA, % of GNI)",
+        frequency="annual", unit="ODA as % of gross national income",
+        transformations=["grant-equivalent ODA / GNI; Canada + OECD-DAC peers; 2018–"])
+    logger.info(f"  saved {len(out)} rows ({out.country_code.nunique()} countries) -> {out_path.name}")
+    return out

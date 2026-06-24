@@ -251,6 +251,43 @@ if os.path.exists(def_path):
     fig.show(config={"displaylogo": False})
 ```
 
+## Foreign aid (official development assistance)
+
+How much a wealthy country gives in development assistance is, like defence, a distinct spending choice judged against an international benchmark. Official development assistance (ODA) as a share of gross national income is the standard comparison, set against the long-standing **UN target of 0.7% of GNI** (the dashed line). Canada gives about **0.38%** — below the peer-group middle, and well under the target that only the most generous donors (Norway, Sweden, Germany, Denmark) meet. Several countries' figures rose in 2022–23 because in-donor costs for Ukrainian and other refugees count as ODA. (DAC donors only; Israel is not a member.)
+
+```{python}
+#| echo: false
+oda_path = "data/fiscal/oecd_oda.csv"
+if os.path.exists(oda_path):
+    df = pd.read_csv(oda_path)
+    fig = peer_comparison_line(df, "year", "oda_gni", title="",
+        yaxis_title="% of GNI", show_average=True)
+    fig.add_hline(y=0.7, line_dash="dash", line_color="#888", opacity=0.6)
+    fig.update_layout(annotations=[
+        dict(text="UN 0.7% target", xref="paper", yref="y", x=0.01,
+             xanchor="left", y=0.7, yshift=9, showarrow=False, font=dict(size=10, color="#888")),
+        dict(text=f"Source: OECD (DAC1, grant-equivalent ODA) | Data as of: {get_data_date(oda_path)}",
+             xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("ODA data not yet available. Run the data pipeline.")
+```
+
+## Latest foreign aid: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(oda_path):
+    df = pd.read_csv(oda_path)
+    fig = ranked_bar(df, "oda_gni", "% of GNI",
+        f"Source: OECD (DAC1, grant-equivalent ODA) | Data as of: {get_data_date(oda_path)}",
+        hover_template="%{y}: %{x:.2f}% of GNI<extra></extra>")
+    fig.update_xaxes(range=[0, 1.2])
+    fig.add_vline(x=0.7, line_dash="dash", line_color="#888", opacity=0.6,
+                  annotation_text="0.7%", annotation_position="top")
+    fig.show(config={"displaylogo": False})
+```
+
 ## Download data
 
 - [Government Gross Debt (CSV)](../data/fiscal/oecd_govt_debt.csv) — OECD Economic Outlook
@@ -260,3 +297,4 @@ if os.path.exists(def_path):
 - [Tax Structure / Revenue Mix (CSV)](../data/fiscal/oecd_tax_structure.csv) — OECD Revenue Statistics
 - [Government Interest Costs (CSV)](../data/fiscal/oecd_govt_interest.csv) — OECD Economic Outlook
 - [Defence Spending (CSV)](../data/fiscal/worldbank_defence.csv) — World Bank (data from SIPRI)
+- [Official Development Assistance, % of GNI (CSV)](../data/fiscal/oecd_oda.csv) — OECD DAC1 (grant-equivalent ODA)

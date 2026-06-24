@@ -173,6 +173,15 @@ try:
     fd["yoy"] = pd.to_numeric(fd["food_index"], errors="coerce").pct_change(12) * 100
     tr = pd.read_csv("data/economics/statcan_cpi_trim.csv", parse_dates=["date"]).sort_values("date")
 
+    # Year-over-year is computed on the full series (so 2000 has its 12-month base),
+    # then trimmed to the modern era: the all-items/food CPI run back to 1914/1949,
+    # whose WWI/WWII-era swings (+22% / −18%) are irrelevant here and, left in, get
+    # clipped against the modern y-axis in the range-slider's overview.
+    _cut = pd.Timestamp("2000-01-01")
+    ai = ai[ai["date"] >= _cut]
+    fd = fd[fd["date"] >= _cut]
+    tr = tr[tr["date"] >= _cut]
+
     figc = go.Figure()
     figc.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.35, line_width=0, layer="below")
     figc.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.6)

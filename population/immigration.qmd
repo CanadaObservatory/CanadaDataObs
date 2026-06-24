@@ -1,0 +1,138 @@
+---
+title: "Immigration"
+description: "Who is arriving in Canada, from where, and through which door — permanent residents, students, temporary workers, and asylum claimants by source country and category"
+---
+
+Immigration is one of the forces most shaping Canada today. This page looks at **who arrives and from where** — the source countries and admission streams behind the headline numbers — using Immigration, Refugees and Citizenship Canada's monthly administrative data. It is descriptive: the counts, categories, and origins, without a verdict.
+
+It complements the [Population & Growth](index.qmd) page (the pace of population change and the non-permanent-resident share) and the [Citizenship](citizenship.qmd) page (how many become citizens). Figures are rounded to the nearest five, exclude the current partial year, and follow IRCC's small-count suppression.
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+from pipeline.config import get_data_date, CATEGORICAL_COLORS
+from pipeline.charts import stacked_area, category_bar, single_bar
+STEEL = CATEGORICAL_COLORS[0]
+```
+
+## New permanent residents, by category
+
+Canada admits permanent residents through several streams. The **economic** class — skilled workers and the families they bring, selected largely for labour-market reasons — is by far the largest, consistently around three-fifths of admissions. **Family** sponsorship (spouses, partners, children, and parents) is the next-largest, ahead of **refugees and protected persons**. Total admissions rose to a peak of about 470,000 in 2024, then stepped down in 2025 as the federal immigration-levels plan lowered the targets.
+
+```{python}
+#| echo: false
+prc_path = "data/population/ircc_pr_by_category.csv"
+if os.path.exists(prc_path):
+    prc = pd.read_csv(prc_path)
+    fig = stacked_area(prc, "year", "count", "category",
+        yaxis_title="Permanent residents admitted",
+        group_order=["Economic", "Family (sponsored)", "Refugee & protected", "Other"],
+        source_note=f"Source: IRCC, Permanent Residents – Monthly Updates (open data) | Data as of: {get_data_date(prc_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("PR-by-category data not yet available. Run the data pipeline.")
+```
+
+## Where new permanent residents come from
+
+The single largest source of new permanent residents, by a wide margin, is **India**, followed by the Philippines and China — a mix that reflects both the economic-class selection system and long-standing family and community ties. The chart shows the top source countries in the most recent complete year.
+
+```{python}
+#| echo: false
+prk_path = "data/population/ircc_pr_by_country.csv"
+if os.path.exists(prk_path):
+    prk = pd.read_csv(prk_path)
+    yr = int(prk["year"].max())
+    fig = category_bar(prk[prk["year"] == yr], "country", "count",
+        xaxis_title="Permanent residents admitted", value_fmt=",.0f", color=STEEL, top_n=15,
+        source_note=f"Source: IRCC, Permanent Residents – Monthly Updates (open data) — {yr}.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("PR-by-country data not yet available. Run the data pipeline.")
+```
+
+## International students, by origin
+
+Study-permit holders are counted separately — they are temporary residents, not permanent immigrants. **India** and **China** dominate the international-student intake, ahead of a long tail of other countries. (These are new permits taking effect each year, so the totals move with the federal study-permit caps introduced in 2024.)
+
+```{python}
+#| echo: false
+sk_path = "data/population/ircc_study_by_country.csv"
+if os.path.exists(sk_path):
+    sk = pd.read_csv(sk_path)
+    yr = int(sk["year"].max())
+    fig = category_bar(sk[sk["year"] == yr], "country", "count",
+        xaxis_title="Study-permit holders", value_fmt=",.0f", color=STEEL, top_n=12,
+        source_note=f"Source: IRCC, Temporary Residents: Study Permit Holders – Monthly Updates (open data) — {yr}.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Study-permit data not yet available. Run the data pipeline.")
+```
+
+## Temporary workers, by origin
+
+Work-permit holders come through two main routes — the International Mobility Program (open work permits, including post-graduation permits and the Canada–Ukraine measures) and the Temporary Foreign Worker Program (employer-specific permits). Combined, **India** is again the largest origin, followed by Ukraine, Mexico, and the Philippines.
+
+```{python}
+#| echo: false
+wk_path = "data/population/ircc_work_by_country.csv"
+if os.path.exists(wk_path):
+    wk = pd.read_csv(wk_path)
+    yr = int(wk["year"].max())
+    fig = category_bar(wk[wk["year"] == yr], "country", "count",
+        xaxis_title="Work-permit holders (IMP + TFWP)", value_fmt=",.0f", color=STEEL, top_n=12,
+        source_note=f"Source: IRCC, Temporary Residents: Work Permit Holders – Monthly Updates (open data) — {yr}.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Work-permit data not yet available. Run the data pipeline.")
+```
+
+## Asylum claims
+
+A person who reaches Canada and claims protection is an **asylum claimant** — a separate process from the resettlement of refugees selected abroad (counted in the permanent-resident totals above). Asylum claims rose steeply from 2022, peaking near **172,000 in 2024**, before easing in 2025. This flow is the source of the large pending caseload often cited in the news; that backlog — the *stock* of claims awaiting a decision at the Immigration and Refugee Board — is a different measure from the annual *flow* shown here, and is not published as a clean, regularly-updating series.
+
+```{python}
+#| echo: false
+at_path = "data/population/ircc_asylum_total.csv"
+if os.path.exists(at_path):
+    at = pd.read_csv(at_path)
+    fig = single_bar(at, "year", "count", title="", yaxis_title="Asylum claims",
+        color=STEEL, hover_fmt=",.0f",
+        source_note=f"Source: IRCC, Asylum Claimants – Monthly Updates (open data) | Data as of: {get_data_date(at_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Asylum-total data not yet available. Run the data pipeline.")
+```
+
+### Where asylum claimants come from
+
+The leading countries of citizenship for recent claimants are **Haiti** and **India**, followed by Iran, Nigeria, and Mexico. (IRCC reports the top 25 countries per province, so the very small origins are grouped out.)
+
+```{python}
+#| echo: false
+ak_path = "data/population/ircc_asylum_by_country.csv"
+if os.path.exists(ak_path):
+    ak = pd.read_csv(ak_path)
+    yr = int(ak["year"].max())
+    fig = category_bar(ak[ak["year"] == yr], "country", "count",
+        xaxis_title="Asylum claimants", value_fmt=",.0f", color=STEEL, top_n=12,
+        source_note=f"Source: IRCC, Asylum Claimants – Monthly Updates (open data) — {yr}.")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Asylum-by-country data not yet available. Run the data pipeline.")
+```
+
+## Download data
+
+- [Permanent residents by category (CSV)](../data/population/ircc_pr_by_category.csv) — IRCC Permanent Residents – Monthly Updates
+- [Permanent residents by source country (CSV)](../data/population/ircc_pr_by_country.csv) — IRCC Permanent Residents – Monthly Updates
+- [Study-permit holders by source country (CSV)](../data/population/ircc_study_by_country.csv) — IRCC Temporary Residents – Monthly Updates
+- [Work-permit holders by source country (CSV)](../data/population/ircc_work_by_country.csv) — IRCC Temporary Residents – Monthly Updates
+- [Asylum claims, total by year (CSV)](../data/population/ircc_asylum_total.csv) — IRCC Asylum Claimants – Monthly Updates
+- [Asylum claimants by source country (CSV)](../data/population/ircc_asylum_by_country.csv) — IRCC Asylum Claimants – Monthly Updates
+
+::: {.callout-note collapse="true"}
+## About this data
+All figures are from Immigration, Refugees and Citizenship Canada's monthly open-data releases (Open Government Licence – Canada). Counts are rounded to the nearest five and small values are suppressed, so totals may not add exactly. "Permanent residents" are people admitted for permanent residence; study- and work-permit holders and asylum claimants are temporary residents counted on a different basis. Source-country detail uses country of citizenship.
+:::

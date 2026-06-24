@@ -38,6 +38,8 @@ website:
             text: Overview
           - href: population/index.qmd
             text: Population & Growth
+          - href: population/immigration.qmd
+            text: Immigration
           - href: population/diversity.qmd
             text: Diversity
           - href: population/religion.qmd

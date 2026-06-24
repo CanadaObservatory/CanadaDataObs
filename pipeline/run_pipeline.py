@@ -59,6 +59,9 @@ from pipeline.fetch_innovation import (
     fetch_triadic_patents, fetch_rd_tax_support,
     fetch_industry_structure, fetch_foreign_rd_control, fetch_patents_us_owned,
 )
+from pipeline.fetch_immigration import (
+    fetch_pr_origins, fetch_permit_origins, fetch_asylum_origins,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -134,6 +137,10 @@ CUSTOM_FETCHERS = {
     "fetch_industry_structure": fetch_industry_structure,
     "fetch_foreign_rd_control": fetch_foreign_rd_control,
     "fetch_patents_us_owned": fetch_patents_us_owned,
+    # Immigration origins (IRCC open data)
+    "fetch_pr_origins": fetch_pr_origins,
+    "fetch_permit_origins": fetch_permit_origins,
+    "fetch_asylum_origins": fetch_asylum_origins,
 }
 
 

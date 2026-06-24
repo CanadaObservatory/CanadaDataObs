@@ -173,15 +173,6 @@ try:
     fd["yoy"] = pd.to_numeric(fd["food_index"], errors="coerce").pct_change(12) * 100
     tr = pd.read_csv("data/economics/statcan_cpi_trim.csv", parse_dates=["date"]).sort_values("date")
 
-    # Year-over-year is computed on the full series (so 2000 has its 12-month base),
-    # then trimmed to the modern era: the all-items/food CPI run back to 1914/1949,
-    # whose WWI/WWII-era swings (+22% / −18%) are irrelevant here and, left in, get
-    # clipped against the modern y-axis in the range-slider's overview.
-    _cut = pd.Timestamp("2000-01-01")
-    ai = ai[ai["date"] >= _cut]
-    fd = fd[fd["date"] >= _cut]
-    tr = tr[tr["date"] >= _cut]
-
     figc = go.Figure()
     figc.add_hrect(y0=1, y1=3, fillcolor="#e0e0e0", opacity=0.35, line_width=0, layer="below")
     figc.add_hline(y=2, line_dash="dash", line_color="#888", opacity=0.6)
@@ -196,12 +187,20 @@ try:
         meta=dict(autoscaleY=dict(include=[0, 3], padFrac=0.08)),
         yaxis=dict(title="Year-over-year change (%)", gridcolor="#e0e0e0", ticksuffix="%",
                    range=[-3, 13]),
-        xaxis=dict(title="", gridcolor="#e0e0e0", range=[pd.Timestamp("2015-01-01"), latest],
+        # The full series stays in the traces (all-items to 1914, food to 1949,
+        # CPI-trim to 1990) — the long view is the point — but the chart OPENS on a
+        # recent window for immediate context. The y-axis follows the visible window
+        # (meta.autoscaleY) as the reader widens it, and the range-slider's overview
+        # autoscales its own y (rangemode="auto") so the historical swings show
+        # uncllipped down there.
+        xaxis=dict(title="", gridcolor="#e0e0e0", range=[pd.Timestamp("2010-01-01"), latest],
             rangeselector=dict(buttons=[
                 dict(count=5, label="5Y", step="year", stepmode="backward"),
                 dict(count=10, label="10Y", step="year", stepmode="backward"),
+                dict(count=25, label="25Y", step="year", stepmode="backward"),
                 dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
-            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5")),
+            rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5",
+                             yaxis=dict(rangemode="auto"))),
         legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.6)"),
         margin=dict(t=40, b=120, r=20))
     figc.add_annotation(

@@ -9,7 +9,7 @@ import os, json
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, get_data_date
-from pipeline.charts import choropleth_groups_map
+from pipeline.charts import choropleth_groups_map, peer_comparison_line, ranked_bar
 ```
 
 ## Citizenship & nativity, by neighbourhood
@@ -56,6 +56,35 @@ if os.path.exists(geo_path) and os.path.exists(cit_path):
     fig.show(config={"displaylogo": False, "scrollZoom": True, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Citizenship map not yet available — run `python -m pipeline.build_census_geo`.")
+```
+
+## Becoming a citizen: how Canada compares
+
+The map shows who *is* a citizen; this shows how many people *become* citizens each year. Counting acquisitions of citizenship per 100,000 residents puts countries of very different sizes on the same footing. Canada naturalises new citizens at one of the highest rates in the peer group — typically alongside Australia and New Zealand, and far above the United States, France, and (lowest) Japan. The Canadian line is volatile because it tracks **processing throughput** as much as demand: grants fell sharply in 2020 when offices closed, then surged in 2022–23 as the pandemic backlog was cleared. Countries also count acquisitions differently (some include registration and declaration routes that others exclude), so this is best read as broad magnitudes, not an exact ranking.
+
+```{python}
+#| echo: false
+nat_path = "data/population/oecd_naturalisations.csv"
+if os.path.exists(nat_path):
+    nat = pd.read_csv(nat_path)
+    fig = peer_comparison_line(nat, "year", "nat_per_100k",
+        title="", yaxis_title="Naturalisations per 100,000 residents",
+        show_average=True, initial_start=2000,
+        source_note=f"Source: OECD International Migration Database (acquisitions of nationality); per 100k via World Bank population | Data as of: {get_data_date(nat_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Naturalisation data not yet available. Run the data pipeline.")
+```
+
+In the most recent year, ranked:
+
+```{python}
+#| echo: false
+if os.path.exists(nat_path):
+    fig = ranked_bar(nat, "nat_per_100k", "Naturalisations per 100,000 residents",
+        f"Source: OECD International Migration Database (acquisitions of nationality); per 100k via World Bank population | Data as of: {get_data_date(nat_path)}",
+        hover_template="%{y}: %{x:,.0f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
 ```
 
 ## Voting
@@ -109,5 +138,6 @@ else:
 ## Download data
 
 - [Citizenship & Nativity by Census Tract (CSV)](../data/geo/statcan_ct_citizenship_2021.csv) — 2021 Census of Population, Census Profile 98-401-X2021007
+- [Naturalisations per 100k, Canada vs OECD peers, 1995– (CSV)](../data/population/oecd_naturalisations.csv) — OECD International Migration Database + World Bank population
 - [Federal voter turnout, 1867– (CSV)](../data/population/voter_turnout.csv) — Elections Canada
 - [Voter turnout by age, 2004– (CSV)](../data/population/voter_turnout_by_age.csv) — Elections Canada

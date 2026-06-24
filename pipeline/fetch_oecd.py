@@ -236,3 +236,65 @@ def fetch_tax_structure():
                          "general government, OECD peer group"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
+
+
+def fetch_naturalisations():
+    """Acquisitions of nationality (naturalisations) per 100,000 residents, Canada
+    vs the OECD peer group, annual.
+
+    OECD International Migration Database (DSD_MIG@DF_MIG), MEASURE=B16 — acquisitions
+    of nationality, published only broken out by country of former nationality (there
+    is no all-origins total), so the bespoke step is to SUM across that dimension to
+    each country's annual total. Fixed coordinates: FREQ=A, SEX=_T, BIRTH_PLACE=_Z,
+    EDUCATION_LEV=_Z, UNIT_MEASURE=PS (persons). Divided by population (the World Bank
+    series already in the registry) for a per-capita rate comparable across countries
+    of different size. The OECD harmonises imperfectly — countries count acquisitions
+    differently (grant vs ceremony date; inclusion of registration/declaration routes)
+    — so the page reads it as broad magnitudes, not exact ranks."""
+    logger.info("Fetching naturalisations (OECD IMD, MEASURE=B16)...")
+    codes = "+".join(PEER_CODES)
+    # key dims: REF_AREA.CITIZENSHIP.FREQ.MEASURE.SEX.BIRTH_PLACE.EDUCATION_LEV.UNIT_MEASURE
+    key = f"{codes}..A.B16._T._Z._Z.PS"
+    df = _fetch_oecd_csv("OECD.ELS.IMD,DSD_MIG@DF_MIG,1.0", key, start_period=1995)
+    if df is None or df.empty:
+        return None
+    validate_columns(df, ["REF_AREA", "TIME_PERIOD", "OBS_VALUE"], "naturalisations")
+    df["OBS_VALUE"] = pd.to_numeric(df["OBS_VALUE"], errors="coerce")
+    tot = (df.dropna(subset=["OBS_VALUE"])
+             .groupby(["REF_AREA", "TIME_PERIOD"])["OBS_VALUE"].sum()
+             .reset_index()
+             .rename(columns={"REF_AREA": "country_code", "TIME_PERIOD": "year",
+                              "OBS_VALUE": "naturalisations"}))
+    tot["year"] = pd.to_numeric(tot["year"], errors="coerce").astype(int)
+    # per-capita denominator: World Bank total-population TIME SERIES (SP.POP.TOTL)
+    # for the peer countries (the registry's worldbank_population.csv is latest-year
+    # only, so pull the series directly here).
+    try:
+        wb = requests.get(
+            f"https://api.worldbank.org/v2/country/{';'.join(PEER_CODES)}/indicator/SP.POP.TOTL",
+            params={"format": "json", "per_page": "20000", "date": "1995:2025"}, timeout=60)
+        recs = wb.json()[1]
+        pop = pd.DataFrame([{"country_code": r["countryiso3code"], "year": int(r["date"]),
+                             "population": r["value"]} for r in recs if r.get("value") is not None])
+    except Exception as e:
+        logger.error(f"  population pull failed: {e}")
+        return None
+    out = tot.merge(pop, on=["country_code", "year"], how="left")
+    out["nat_per_100k"] = out["naturalisations"] / out["population"] * 100000
+    out["country_name"] = out["country_code"].map(PEER_COUNTRIES)
+    out = (out.dropna(subset=["nat_per_100k", "country_name"])
+              [["country_code", "country_name", "year", "naturalisations", "nat_per_100k"]]
+              .sort_values(["country_code", "year"]).reset_index(drop=True))
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "population" / "oecd_naturalisations.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="OECD International Migration Database",
+        source_table="OECD.ELS.IMD,DSD_MIG@DF_MIG (MEASURE=B16) + World Bank population",
+        frequency="annual", unit="naturalisations per 100,000 residents",
+        transformations=["B16 acquisitions of nationality summed over former-nationality; "
+                         "per 100k via World Bank population; Canada + OECD peers; 1995–"])
+    logger.info(f"  saved {len(out)} rows ({out.country_code.nunique()} countries) -> {out_path.name}")
+    return out

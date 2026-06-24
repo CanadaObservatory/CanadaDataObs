@@ -383,6 +383,16 @@ INDICATORS = [
               value_col="npr_share", chart_recipe="line",
               fetch_fn="fetch_npr_share", output_subpath="statcan_npr_share.csv",
               source_table="Statistics Canada 17-10-0121-01, 17-10-0040-01, 17-10-0009-01"),
+    # Naturalisations (acquisitions of citizenship) per 100k residents, Canada vs OECD
+    # peers — the Citizenship-page peer comparison (reframed off the viral "G7 per
+    # capita" chart to the broader 17-peer set; B16 counts summed over former
+    # nationality ÷ population). No scorecard (no uncontroversial "good" direction).
+    Indicator("naturalisations", "population", "custom",
+              "Naturalisations per 100,000 residents (vs OECD peers)",
+              "per 100,000 residents", "annual",
+              value_col="nat_per_100k", chart_recipe="line",
+              fetch_fn="fetch_naturalisations", output_subpath="oecd_naturalisations.csv",
+              source_table="OECD International Migration Database (DSD_MIG, MEASURE B16)"),
     Indicator("npr_by_type", "population", "custom",
               "Non-permanent residents by type", "persons", "quarterly",
               fetch_fn="fetch_npr_by_type",

@@ -123,6 +123,23 @@ else:
     print("Asylum-by-country data not yet available. Run the data pipeline.")
 ```
 
+### How claims are decided
+
+Of the claims the Immigration and Refugee Board finalizes each year, the share **accepted** — granted refugee protection — has risen markedly, from about **44% in 2013 to roughly 80%** in recent years. (The acceptance rate counts positive decisions as a share of positive plus negative; claims abandoned or withdrawn are excluded.)
+
+```{python}
+#| echo: false
+ao_path = "data/population/ircc_asylum_outcomes.csv"
+if os.path.exists(ao_path):
+    ao = pd.read_csv(ao_path)
+    fig = single_bar(ao, "year", "acceptance_rate", title="",
+        yaxis_title="Acceptance rate", color=STEEL, hover_fmt=".1f", yticksuffix="%",
+        source_note=f"Source: Immigration and Refugee Board, Refugee Protection Division decisions (open data) | Data as of: {get_data_date(ao_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Asylum-outcomes data not yet available. Run the data pipeline.")
+```
+
 ## Download data
 
 - [Permanent residents by category (CSV)](../data/population/ircc_pr_by_category.csv) — IRCC Permanent Residents – Monthly Updates
@@ -131,6 +148,7 @@ else:
 - [Work-permit holders by source country (CSV)](../data/population/ircc_work_by_country.csv) — IRCC Temporary Residents – Monthly Updates
 - [Asylum claims, total by year (CSV)](../data/population/ircc_asylum_total.csv) — IRCC Asylum Claimants – Monthly Updates
 - [Asylum claimants by source country (CSV)](../data/population/ircc_asylum_by_country.csv) — IRCC Asylum Claimants – Monthly Updates
+- [Asylum decision outcomes by year (CSV)](../data/population/ircc_asylum_outcomes.csv) — Immigration and Refugee Board, Refugee Protection Division
 
 ::: {.callout-note collapse="true"}
 ## About this data

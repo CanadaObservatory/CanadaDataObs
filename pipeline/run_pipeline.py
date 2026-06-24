@@ -60,7 +60,7 @@ from pipeline.fetch_innovation import (
     fetch_industry_structure, fetch_foreign_rd_control, fetch_patents_us_owned,
 )
 from pipeline.fetch_immigration import (
-    fetch_pr_origins, fetch_permit_origins, fetch_asylum_origins,
+    fetch_pr_origins, fetch_permit_origins, fetch_asylum_origins, fetch_asylum_outcomes,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -143,6 +143,7 @@ CUSTOM_FETCHERS = {
     "fetch_pr_origins": fetch_pr_origins,
     "fetch_permit_origins": fetch_permit_origins,
     "fetch_asylum_origins": fetch_asylum_origins,
+    "fetch_asylum_outcomes": fetch_asylum_outcomes,
 }
 
 

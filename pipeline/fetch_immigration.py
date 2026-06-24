@@ -185,3 +185,53 @@ def fetch_asylum_origins():
     _save(tt, "ircc_asylum_total.csv", "IRCC ODP-Asylum-PT_OfficeType",
           ["total asylum claims, annual (all provinces and claim-office types)"])
     return bc
+
+
+def fetch_asylum_outcomes():
+    """Refugee-protection decision outcomes over time — the share of finalized asylum
+    claims accepted (the IRB 'acceptance rate'). Immigration and Refugee Board, Refugee
+    Protection Division open data (open.canada.ca dataset 6e47f705); the latest year-end
+    revised file carries the full back-history (2013–). Acceptance rate = positive ÷
+    (positive + negative) decisions; 'Other' (abandoned/withdrawn) is reported but
+    excluded from the rate. Tidy: year, accepted, rejected, other, acceptance_rate."""
+    logger.info("Fetching IRB asylum decision outcomes (RPD)...")
+    try:
+        meta = requests.get("https://open.canada.ca/data/api/3/action/package_show",
+                            params={"id": "6e47f705-71ed-41f0-8fd5-d1a8508a3b63"},
+                            timeout=60).json()
+        cands = []
+        for x in meta["result"]["resources"]:
+            u = x.get("url", "")
+            import re as _re
+            m = _re.search(r"rpd-open-data-(20\d{2})-q4", u, _re.I)
+            if x.get("format", "").upper() == "CSV" and u.endswith("eng-revised.csv") and m:
+                cands.append((int(m.group(1)), u))
+        url = max(cands)[1]                      # latest year-end file = full history (2013–)
+        d = pd.read_csv(io.StringIO(requests.get(url, timeout=120).text), dtype=str)
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    d.columns = [c.strip() for c in d.columns]
+    if "Outcome" not in d.columns or "Total" not in d.columns:
+        logger.error(f"  unexpected IRB columns: {list(d.columns)}")
+        return None
+    d["n"] = pd.to_numeric(d["Total"].astype(str).str.replace(",", "", regex=False),
+                           errors="coerce").fillna(0)
+    g = d.groupby(["Year", "Outcome"])["n"].sum().unstack(fill_value=0).reset_index()
+    for c in ("Positive", "Negative", "Other"):
+        if c not in g.columns:
+            g[c] = 0
+    g["year"] = pd.to_numeric(g["Year"], errors="coerce")
+    g = g.dropna(subset=["year"])
+    decided = g["Positive"] + g["Negative"]
+    g["acceptance_rate"] = (g["Positive"] / decided.where(decided > 0) * 100).round(1)
+    out = (g.rename(columns={"Positive": "accepted", "Negative": "rejected", "Other": "other"})
+             [["year", "accepted", "rejected", "other", "acceptance_rate"]]
+             .dropna(subset=["acceptance_rate"]))
+    out["year"] = out["year"].astype(int)
+    out = out.sort_values("year").reset_index(drop=True)
+    if out.empty:
+        return None
+    _save(out, "ircc_asylum_outcomes.csv", "IRB Refugee Protection Division decisions (open.canada.ca 6e47f705)",
+          ["asylum decision outcomes by year; acceptance rate = positive / (positive + negative)"])
+    return out

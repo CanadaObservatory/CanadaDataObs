@@ -4,8 +4,9 @@
   "source_table": "World Bank / WHO Global Health Observatory",
   "frequency": "annual",
   "unit": "per 100,000",
-  "retrieved_at": "2026-06-22T18:18:56.753986+00:00",
+  "retrieved_at": "2026-06-24T16:28:57.971493+00:00",
   "latest_observation_date": "2021",
+  "next_release_date": null,
   "transformations": [
     "World Bank indicator SH.STA.SUIC.P5, filtered to 17 OECD peers"
   ],

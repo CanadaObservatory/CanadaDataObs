@@ -4,8 +4,9 @@
   "source_table": "OECD MSTI",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-06-21T16:01:49.670275+00:00",
+  "retrieved_at": "2026-06-24T16:29:27.135281+00:00",
   "latest_observation_date": "2025",
+  "next_release_date": null,
   "transformations": [
     "filtered to Business R&D (BERD) for OECD peer group"
   ],

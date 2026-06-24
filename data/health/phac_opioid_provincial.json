@@ -4,8 +4,9 @@
   "source_table": "Substance-Related Harms (opioid toxicity deaths by province/territory)",
   "frequency": "annual",
   "unit": "per 100,000",
-  "retrieved_at": "2026-06-22T18:19:55.045183+00:00",
+  "retrieved_at": "2026-06-24T16:29:15.646916+00:00",
   "latest_observation_date": "2025",
+  "next_release_date": null,
   "transformations": [
     "Apparent opioid toxicity death crude rate by PT, 2025"
   ],

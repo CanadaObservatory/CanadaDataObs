@@ -30,7 +30,7 @@ from pipeline.fetch_statcan import (
     fetch_debt_service_ratio, fetch_provincial_finance, fetch_npr_by_type,
     fetch_median_income_by_family, fetch_tertiary_attainment, fetch_poverty_by_group,
     fetch_income_by_age, fetch_low_income_persistence, fetch_wages_by_province,
-    fetch_cma_rent, fetch_wealth_by_age, fetch_npr_share,
+    fetch_cma_rent, fetch_wealth_by_age, fetch_npr_share, fetch_suicide_by_age,
 )
 from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
                                   fetch_co2_per_gdp, fetch_co2_global_context)
@@ -86,6 +86,7 @@ CUSTOM_FETCHERS = {
     "fetch_wages_by_province": fetch_wages_by_province,
     "fetch_cma_rent": fetch_cma_rent,
     "fetch_wealth_by_age": fetch_wealth_by_age,
+    "fetch_suicide_by_age": fetch_suicide_by_age,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,
     "fetch_co2_per_gdp": fetch_co2_per_gdp,

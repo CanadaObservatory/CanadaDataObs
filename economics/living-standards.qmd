@@ -1,0 +1,95 @@
+---
+title: "Living Standards"
+description: "How well-off are Canadians? Output per person, household incomes, and material well-being — compared with OECD peers and over time"
+---
+
+"Standard of living" has no single number, but a few measures get at the material side of it: how much an economy produces per person, how much households actually have to spend, and how the typical family is doing. This page pulls those threads together and points to the others — health, life satisfaction, and the day-to-day cost of living — that round out the picture.
+
+```{python}
+#| echo: false
+import os
+import pandas as pd
+from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.charts import peer_comparison_line, ranked_bar, single_line
+```
+
+## Output per person: GDP per capita
+
+GDP per capita — the value of everything an economy produces, divided by its population — is the standard headline measure. By it, Canada is prosperous but **middle-of-the-pack among its peers**, well behind the leaders (Norway, Switzerland, the United States) though far above the world as a whole. It is worth treating as a starting point rather than the last word: it measures *production*, not what households receive, and an average says nothing about how the gains are shared. The income measures below get closer to the lived experience.
+
+```{python}
+#| echo: false
+gdp_path = "data/economics/oecd_gdp_per_capita.csv"
+if os.path.exists(gdp_path):
+    df = pd.read_csv(gdp_path)
+    fig = peer_comparison_line(df, "year", "gdp_per_capita", title="",
+        yaxis_title="GDP per capita (USD, PPP)", show_average=True, initial_start=2000,
+        source_note=f"Source: OECD National Accounts (PPP, current prices) | Data as of: {get_data_date(gdp_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("GDP per capita data not yet available. Run the data pipeline.")
+```
+
+### Latest GDP per capita: ranked
+
+```{python}
+#| echo: false
+if os.path.exists(gdp_path):
+    df = pd.read_csv(gdp_path)
+    fig = ranked_bar(df, "gdp_per_capita", "GDP per capita (USD, PPP)",
+        f"Source: OECD National Accounts (PPP, current prices) | Data as of: {get_data_date(gdp_path)}",
+        hover_template="%{y}: $%{x:,.0f}<extra></extra>")
+    fig.show(config={"displaylogo": False})
+```
+
+## What households have: disposable income
+
+Production is not the same as prosperity at the kitchen table. **Real household disposable income per capita** — income after taxes and transfers, adjusted for inflation — is closer to what families can actually spend and save. Shown as an index (2007 = 100), it tracks how household purchasing power has grown over time across the peer group.
+
+```{python}
+#| echo: false
+di_path = "data/income/oecd_disposable_income.csv"
+if os.path.exists(di_path):
+    df = pd.read_csv(di_path)
+    fig = peer_comparison_line(df, "year", "disposable_income_index", title="",
+        yaxis_title="Real disposable income per capita (2007 = 100)", show_average=True,
+        source_note=f"Source: OECD Household Dashboard (real, per capita, index 2007=100) | Data as of: {get_data_date(di_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Disposable income data not yet available. Run the data pipeline.")
+```
+
+## The typical Canadian: median income
+
+Averages can be pulled up by high earners. The **median** — the income of the household right in the middle — is the better gauge of how a typical Canadian is doing. This is median after-tax income, in constant dollars, so it reflects real purchasing power over time.
+
+```{python}
+#| echo: false
+mi_path = "data/income/statcan_median_income.csv"
+if os.path.exists(mi_path):
+    df = pd.read_csv(mi_path, parse_dates=["date"])
+    fig = single_line(df, "date", "median_income", title="",
+        yaxis_title="Median after-tax income (2024 $)", rangeslider=True,
+        hovertemplate="%{x|%Y}: $%{y:,.0f}<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 11-10-0190-01 (constant 2024 dollars) | Data as of: {get_data_date(mi_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Median income data not yet available. Run the data pipeline.")
+```
+
+## Living standards are more than income
+
+Material measures are only part of how well people live. The rest of the site fills in the picture:
+
+- **Productivity** — output per hour worked, the engine of long-run living standards: [Economy & Jobs](index.qmd)
+- **How the gains are shared** — income distribution, inequality, and poverty: [Income & Inequality](../income/index.qmd)
+- **How long Canadians live** — life expectancy and health: [Health of Canadians](../health/index.qmd)
+- **How satisfied people feel** — self-reported life satisfaction: [Well-being](../wellbeing/index.qmd)
+- **What daily life costs** — prices, and whether pay keeps up: [Cost of Living](cost-of-living.qmd)
+- **Whether a home is within reach** — prices, rents, and affordability: [Housing](../housing/index.qmd)
+
+## Download data
+
+- [GDP per capita, PPP (CSV)](../data/economics/oecd_gdp_per_capita.csv) — OECD National Accounts
+- [Real household disposable income per capita (CSV)](../data/income/oecd_disposable_income.csv) — OECD Household Dashboard
+- [Median after-tax income (CSV)](../data/income/statcan_median_income.csv) — Statistics Canada, Table 11-10-0190-01

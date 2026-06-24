@@ -108,7 +108,7 @@ DataCan/
 ├── geography/wildfire.qmd ← **Wildfire** (split from the former "Fire & Ice" 2026-06-19): national 1959– area-burned bar + **2023 fire locations** (every NFDB fire point sized by area burned)
 ├── geography/ice.qmd ← **Ice** (split from "Fire & Ice"): permafrost zones (categorical) + Arctic sea-ice extent (March max / September min). Nav: Wildfire + Ice replace the single Fire & Ice item under "Climate & Atmosphere"
 ├── economics/index.qmd    ← real GDP growth, GDP/capita, productivity, business investment, unemployment (+by-city map), employment rate (unemployment + employment have an **age-bracket dropdown**: youth/prime/older/total), current account
-├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, **"Who is buying" (FTHB/repeat/investor share of mortgaged purchases — BoC Valet FVI `homebuyer_types`; §2026-06-23)**, home value + affordability maps (by city) + link to neighbourhood home-value page, rent, housing starts, vacancy rate, household debt
+├── housing/index.qmd      ← CPI inflation, real house prices, price-to-income, NHPI, prices-vs-incomes, **"Who is buying" (FTHB/repeat/investor share of mortgaged purchases — BoC Valet FVI `homebuyer_types`; §2026-06-23)**, home value + affordability maps (by city) + **"Starter-home affordability by city" (CREA apartment benchmark ÷ 2021-Census CMA median household income aged forward by national AWE; `crea.fig_entry_level_affordability`, render-time, charts-only — the apartment-tier companion to the value-to-income map; Vancouver 6.4× → Edmonton 1.7×)** + link to neighbourhood home-value page, rent (CPI index) + **"Typical rent by city" (avg $ rent by CMA × bedroom type — `fetch_cma_rent`, StatCan/CMHC 34-10-0133-01; `category_bar_views` bedroom dropdown, 2-bed default, 24 metros, major-metro orange highlight)**, housing starts, vacancy rate, household debt + debt-service ratio + **"Wealth and mortgage debt, by age" (net worth / real-estate / mortgage per household by age group — `fetch_wealth_by_age`, StatCan DHEA 36-10-0660-01 **modelled/experimental**, quarterly 2010–; `lines_over_time` 5 age lines + measure dropdown — the millennial-stress anchor: Under-35 lowest net worth, mortgage debt peaks 35-44)**
 ├── housing/neighbourhoods.qmd ← census-tract dwelling-value choropleth (heavy ~3MB; own page)
 ├── income/index.qmd       ← median income, wages, **wages-by-province ranked bar (14-10-0064)**, disposable income, Gini, **income distribution by decile (before-tax + after-tax grouped bars, year slider; 11-10-0193)**, **"Income, mobility & the life cycle" (career-arc median-income-by-age 11-10-0239 + low-income-persistence 11-10-0025 — counters the "fixed-club" misreading; intergenerational = prose note only, study-only)**, **"Who poverty affects most" (MBM by group, 11-10-0135+0093)**, poverty, LIM-AT, food insecurity (steel bar, not maroon), income map (city) + link to neighbourhood-detail page
 ├── income/neighbourhoods.qmd ← census-tract income choropleth (heavy ~3MB; its own page so the index stays light)
@@ -186,7 +186,7 @@ trusting one (probe the dataflow, find the all-total breakdown). Heavy interacti
 probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls <
 60/hr) does not.
 
-## Data sources (120 indicators / 12 sections) — incl. the 2026-06-23 cost-of-living/affordability buildout (branch `content-cost-of-living`, NOT yet deployed): BoC buyer-type, MBM poverty-by-group, income mobility (age-income + low-income persistence), regional wages, cumulative price level §151. Cost-of-Living page (economics/cost-of-living.qmd) also gained "How much prices have risen" (CPI level since 2019) + "Has pay kept up?" (wage vs CPI). **Remaining (next session): rent-$ by city (CMHC 34-10-0133), entry-level price-to-income (CREA-apt÷income), wealth-by-age (DHEA 36-10-0660).**
+## Data sources (122 indicators / 12 sections) — incl. the 2026-06-23 cost-of-living/affordability buildout (branch `content-cost-of-living`, NOT yet deployed): BoC buyer-type, MBM poverty-by-group, income mobility (age-income + low-income persistence), regional wages, cumulative price level §151. Cost-of-Living page (economics/cost-of-living.qmd) also gained "How much prices have risen" (CPI level since 2019) + "Has pay kept up?" (wage vs CPI). **Buildout COMPLETE (final 3 shipped 2026-06-23): rent-$ by city (`fetch_cma_rent`, CMHC 34-10-0133), starter-home affordability by city (CREA-apt÷CMA-income, `crea.fig_entry_level_affordability` — CREA-derived, not a registry indicator), wealth & mortgage debt by age (`fetch_wealth_by_age`, DHEA 36-10-0660). +2 registry indicators (120→122). Homeownership-by-age 2021 Census snapshot = OPTIONAL, not built (DHEA wealth/mortgage already anchors millennial-stress).**
 
 - **Statistics Canada** (bulk CSV-zip by table id): population 17-10-0009-01,
   population by age & gender 17-10-0005-01 (bespoke `fetch_age_structure` — Canada,
@@ -201,7 +201,13 @@ probing trips a burst HTTP 429; the weekly pipeline (2s spacing, ~25 OECD calls 
   housing starts 34-10-0143-01 + rental vacancy 34-10-0127-01 (CMHC), food insecurity
   13-10-0835-01, Crime Severity Index 35-10-0026-01, homicide rate 35-10-0068-01,
   non-permanent residents 17-10-0121-01 (all generic single-series `fetch_statcan_indicator`).
-  Bespoke multi-series StatCan fetchers: quarterly real GDP 36-10-0104-01 (recession
+  Bespoke multi-series StatCan fetchers: **average rent by CMA × bedroom type 34-10-0133-01**
+  (CMHC Rental Market Survey, `fetch_cma_rent` — the $-level companion to the rent CPI;
+  row+apartment 3+-unit structures, Ottawa-Gatineau "part" rows dropped for the combined CMA),
+  **wealth / real-estate / mortgage per household by age group, DHEA 36-10-0660-01**
+  (`fetch_wealth_by_age` — Distributions of Household Economic Accounts, **modelled/experimental**,
+  "Value per household" × 5 age groups; the millennial-stress anchor),
+  quarterly real GDP 36-10-0104-01 (recession
   chart), university tuition (TLAC 37-10-0045-01 by level + 37-10-0003-01 by field),
   food + CPI-trim core inflation (18-10-0004-01 / 18-10-0256-01), merchandise
   trade with the US 12-10-0011-01 (export shares for the US, EU and China — scaling
@@ -702,7 +708,11 @@ but **as charts only, not as a redistributable dataset**. Rules that preserve th
   © The Canadian Real Estate Association. Used with permission for educational purposes."
 - Housing page CREA charts: benchmark price by city × dwelling type; detached price
   over time by city; national price-to-income over time (≈5.7×→9.3×, 2005→2024 — CREA
-  composite deflated to 2024 $ via CPI ÷ real median income). `internal/crea_house_prices.py`
+  composite deflated to 2024 $ via CPI ÷ real median income); **starter-home affordability
+  by city (`fig_entry_level_affordability` — each city's latest apartment/condo benchmark ÷
+  its 2021-Census CMA median household income aged forward by national AWE; ranked bar of
+  "years of income", Vancouver 6.4× → Edmonton 1.7×; reuses `data/geo/statcan_cma_indicators.csv`
+  + `data/income/statcan_wages_by_province.csv`)**. `internal/crea_house_prices.py`
   stays as the original reference builder; `*MLS_HPI*` zips stay git-ignored.
 
 The open-data **"Home Prices vs. Incomes"** chart (OECD **real** house-price index vs.

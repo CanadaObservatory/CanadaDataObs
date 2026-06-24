@@ -18,8 +18,8 @@ social transfers to the provinces).
 #| echo: false
 import os
 import pandas as pd
-from pipeline.config import get_data_date
-from pipeline.charts import (single_line, lines_over_time, stacked_area,
+from pipeline.config import get_data_date, CATEGORICAL_COLORS
+from pipeline.charts import (single_line, single_bar, lines_over_time, stacked_area,
                              category_bar, category_bar_views)
 ```
 
@@ -155,6 +155,26 @@ if os.path.exists(obj_path):
         value_scale=1e9, value_fmt=",.1f", tickprefix="$",
         highlight={"Personnel"},
         source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase) / Public Accounts of Canada | Data as of: {get_data_date(obj_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Run the data pipeline to generate this chart.")
+```
+
+## Debt charges as a share of spending
+
+The "about a tenth" above is a recent figure — over the longer run, the share of the budget consumed by interest on the public debt has swung widely. Every dollar spent servicing past borrowing is a dollar unavailable for programs, so this ratio is one gauge of how much room a government has to act. It climbed through the high-interest-rate years of the 1980s and early 1990s, peaking at more than a quarter of all federal spending around 1990–91 — roughly **27 cents of every dollar** went to interest. It then fell steadily as interest rates declined and the debt shrank relative to a growing economy, bottoming out near **4%** in 2020. As interest rates rose again from 2022, the share has started climbing back, to around **9%** in the most recent year.
+
+```{python}
+#| echo: false
+if os.path.exists(fin_path):
+    fin = pd.read_csv(fin_path)
+    dc = fin.dropna(subset=["interest", "expenditure"]).copy()
+    dc = dc[dc["expenditure"] > 0]
+    dc["debt_share"] = dc["interest"] / dc["expenditure"] * 100
+    fig = single_bar(dc, "year", "debt_share", title="",
+        yaxis_title="% of total federal spending", color=CATEGORICAL_COLORS[0],
+        yticksuffix="%", hover_fmt=".1f", rangeslider=True,
+        source_note=f"Source: Statistics Canada 36-10-0477-01 (federal government revenue and expenditure); public debt charges ÷ total expenditure. | Data as of: {get_data_date(fin_path)}")
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Run the data pipeline to generate this chart.")

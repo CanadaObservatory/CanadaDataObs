@@ -1046,6 +1046,14 @@ INDICATORS = [
               "quarterly", fetch_fn="fetch_opioid_harms",
               output_subpath="phac_opioid_national.csv",
               source_table="Public Health Agency of Canada, Substance-Related Harms"),
+    # Suicide age-specific rate by age group and sex — the Canada-only "who is most
+    # affected" cut behind the OECD/WB headline suicide rate (men ~3x women, midlife
+    # peak). Descriptive; no scorecard row.
+    Indicator("suicide_by_age", "health", "custom",
+              "Suicide rate by age and sex", "per 100,000 population", "annual",
+              value_col="rate", chart_recipe="line",
+              fetch_fn="fetch_suicide_by_age", output_subpath="statcan_suicide_by_age.csv",
+              source_table="Statistics Canada 13-10-0392-01"),
 
     # ----- Education & Innovation (OECD MSTI reuses the R&D dataflow) -----
     Indicator("rd_expenditure", "science", "oecd",

@@ -1512,3 +1512,52 @@ def fetch_wealth_by_age():
                          "DHEA modelled experimental estimates"])
     logger.info(f"  saved {len(wide)} rows -> {out_path.name}")
     return wide[cols]
+
+
+_SUICIDE_AGES = {
+    "15 to 19 years": "15–19", "20 to 24 years": "20–24", "25 to 29 years": "25–29",
+    "30 to 34 years": "30–34", "35 to 39 years": "35–39", "40 to 44 years": "40–44",
+    "45 to 49 years": "45–49", "50 to 54 years": "50–54", "55 to 59 years": "55–59",
+    "60 to 64 years": "60–64", "65 to 69 years": "65–69", "70 to 74 years": "70–74",
+    "75 to 79 years": "75–79", "80 to 84 years": "80–84", "85 to 89 years": "85–89",
+    "90 years and over": "90+",
+}
+
+
+def fetch_suicide_by_age():
+    """Suicide (intentional self-harm) age-specific mortality rate per 100,000, by
+    age group and sex, Canada (StatCan 13-10-0392-01). The descriptive by-age/sex
+    pattern behind the headline rate: rates among men run roughly three times those
+    among women and peak in midlife. Ages 15+ only (younger groups are near zero and
+    largely suppressed). Tidy: year, age_group, sex, rate."""
+    logger.info("fetch_suicide_by_age (13-10-0392-01)")
+    try:
+        d = _get_table("13-10-0392-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    CAUSE, AGE = "Cause of death (ICD-10)", "Age at time of death"
+    RATE = "Age-specific mortality rate per 100,000 population"
+    SUICIDE = "Intentional self-harm (suicide) [X60-X84, Y87.0]"
+    ages = {f"Age at time of death, {a}": lab for a, lab in _SUICIDE_AGES.items()}
+    d = d[(d[CAUSE] == SUICIDE) & (d["Characteristics"] == RATE)
+          & (d["Sex"].isin(["Males", "Females"])) & (d[AGE].isin(ages))].copy()
+    d["year"] = pd.to_numeric(d["REF_DATE"], errors="coerce")
+    d["rate"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    d["age_group"] = d[AGE].map(ages)
+    d["sex"] = d["Sex"].map({"Males": "Men", "Females": "Women"})
+    out = (d.dropna(subset=["year", "rate"])[["year", "age_group", "sex", "rate"]]
+             .sort_values(["year", "sex", "age_group"]).reset_index(drop=True))
+    out["year"] = out["year"].astype(int)
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "health" / "statcan_suicide_by_age.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
+        source_table="Statistics Canada 13-10-0392-01",
+        frequency="annual", unit="age-specific deaths per 100,000 population",
+        transformations=["Canada; intentional self-harm (suicide); age-specific rate "
+                         "by age group and sex; ages 15+"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out

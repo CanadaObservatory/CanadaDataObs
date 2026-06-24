@@ -66,15 +66,16 @@ Canada's population has grown since the mid-20th century. This chart shows quart
 #| echo: false
 df = pd.read_csv("data/population/statcan_population_quarterly.csv", parse_dates=["date"])
 
-# National total — Canada. Plot in millions for readability; open on the full record.
+# National total — Canada. Plot in millions for readability. Bars (matching the
+# growth-rate companion below); the range slider spans the full record.
 canada = df[df["geography"] == "Canada"].copy()
 canada["pop_m"] = canada["population"] / 1e6
 
-fig = single_line(canada, "date", "pop_m", title="", yaxis_title="Population (millions)",
-                  rangeslider=True, initial_full=True, yaxis_tickformat=".0f",
-                  customdata=canada["date"].dt.quarter,
-                  hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Population: %{y:.2f} million<extra></extra>",
-                  source_note=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}")
+fig = single_bar(canada, "date", "pop_m", title="", yaxis_title="Population (millions)",
+                 rangeslider=True,
+                 customdata=canada["date"].dt.quarter,
+                 hovertemplate="<b>%{x|%Y} Q%{customdata}</b><br>Population: %{y:.2f} million<extra></extra>",
+                 source_note=f"Source: Statistics Canada, Table 17-10-0009-01 | Data as of: {get_data_date('data/population/statcan_population_quarterly.csv')}")
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
 
@@ -157,6 +158,132 @@ fig.update_layout(
 )
 fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 ```
+
+## Age structure
+
+How old is Canada? The pyramid below shows the full age distribution — every single
+year of age, men to the left, women to the right. **Drag the slider** to watch half a
+century of change: the wide base of the early 1970s (the tail of the baby boom)
+narrows as births decline, and the boomer bulge climbs the pyramid into retirement.
+The white line traces the **net difference between women and men** at each age.
+
+```{python}
+#| echo: false
+ages_path = "data/population/statcan_age_structure.csv"
+if os.path.exists(ages_path):
+    agedf = pd.read_csv(ages_path)
+    sy = agedf[(agedf["uom"] == "Persons") & agedf["gender"].isin(["Men", "Women"])].copy()
+
+    def _age_num(s):
+        s = str(s).strip()
+        if s == "90 years and older":      # consistent top bucket across all years
+            return 90
+        m = re.fullmatch(r"(\d+) years?", s)
+        a = int(m.group(1)) if m else None
+        return a if a is not None and a <= 89 else None
+
+    sy["age"] = sy["age_group"].map(_age_num)
+    sy = sy.dropna(subset=["age"])
+    fig = population_pyramid(sy,
+        source_note=f"Source: Statistics Canada, Table 17-10-0005-01; ages 90+ grouped | Data as of: {get_data_date(ages_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Age-structure data not yet available. Run the data pipeline.")
+```
+
+### Median age
+
+Half of Canadians are older than this line. The median age rose from about 26 in 1971
+to about 41 today — driven by longer lives and smaller families. The slight dip in
+recent years is due to immigration.
+
+```{python}
+#| echo: false
+if os.path.exists(ages_path):
+    med = agedf[(agedf["uom"] == "Years") & (agedf["age_group"] == "Median age")
+                & (agedf["gender"] == "Total")].copy()
+    med["date"] = pd.to_datetime(med["year"].astype(int).astype(str), format="%Y")
+    fig = single_line(med, "date", "value", title="", yaxis_title="Median age (years)",
+        rangeslider=True, initial_full=True,
+        hovertemplate="<b>%{x|%Y}</b><br>Median age: %{y:.1f} years<extra></extra>",
+        source_note=f"Source: Statistics Canada, Table 17-10-0005-01 | Data as of: {get_data_date(ages_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+```
+
+### Aging among peer countries
+
+The old-age dependency ratio — people 65 and over per 100 people of working age
+(15–64) — is the standard gauge of how the population's weight is shifting onto
+fewer working-age shoulders. Every peer country is aging; Canada sits in the middle
+of the pack, well below Japan and Italy.
+
+```{python}
+#| echo: false
+dep_path = "data/population/worldbank_old_age_dependency.csv"
+if os.path.exists(dep_path):
+    dep = pd.read_csv(dep_path)
+    fig = peer_comparison_line(dep, "year", "old_age_dependency", "",
+        "People 65+ per 100 aged 15–64", show_average=True, topical=["JPN", "ITA"],
+        source_note=f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(dep_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Old-age dependency data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(dep_path):
+    fig = ranked_bar(dep, "old_age_dependency", "People 65+ per 100 aged 15–64",
+        f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(dep_path)}",
+        hover_template="%{y}: %{x:.1f}<extra></extra>", xtitle_top=True)
+    fig.show(config={"displaylogo": False})
+```
+
+### Fertility
+
+The total fertility rate is the average number of children a woman would have over
+her lifetime at current age-specific rates. A rate of about 2.1 keeps a population
+stable without immigration — the dashed line below. Canada fell below that level in
+the early 1970s and has set new record lows in recent years; immigration is now the
+engine of population growth. Most peer countries are on the same path.
+
+```{python}
+#| echo: false
+fert_path = "data/population/worldbank_fertility_rate.csv"
+if os.path.exists(fert_path):
+    fert = pd.read_csv(fert_path)
+    fig = peer_comparison_line(fert, "year", "fertility_rate", "",
+        "Births per woman", show_average=True, initial_visible=["USA"],
+        source_note=f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(fert_path)}")
+    fig.add_hline(y=2.1, line_dash="dash", line_color="#555", line_width=1,
+                  annotation_text="Replacement level (≈2.1)",
+                  annotation_position="top right",
+                  annotation_font=dict(size=10, color="#555"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Fertility data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(fert_path):
+    fig = ranked_bar(fert, "fertility_rate", "Births per woman",
+        f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(fert_path)}",
+        hover_template="%{y}: %{x:.2f}<extra></extra>", xtitle_top=True)
+    fig.show(config={"displaylogo": False})
+```
+
+### Median age by neighbourhood
+
+Where do the young and the old actually live? A census-tract map of **median age**
+— with each neighbourhood's full age breakdown in the hover — is on its own page
+(it carries ~3 MB of boundary data):
+
+**[Median age by neighbourhood →](age-neighbourhoods.qmd)**
+
+It pairs naturally with the [median household income](../income/neighbourhoods.qmd)
+and [home value](../housing/neighbourhoods.qmd) maps — the same census tracts, so
+you can flip between who lives somewhere and what living there costs.
 
 ## Population growth rate
 
@@ -285,132 +412,6 @@ if os.path.exists(nprs_path):
 else:
     print("NPR share data not yet available. Run the data pipeline.")
 ```
-
-## Age structure
-
-How old is Canada? The pyramid below shows the full age distribution — every single
-year of age, men to the left, women to the right. **Drag the slider** to watch half a
-century of change: the wide base of the early 1970s (the tail of the baby boom)
-narrows as births decline, and the boomer bulge climbs the pyramid into retirement.
-The white line traces the **net difference between women and men** at each age.
-
-```{python}
-#| echo: false
-ages_path = "data/population/statcan_age_structure.csv"
-if os.path.exists(ages_path):
-    agedf = pd.read_csv(ages_path)
-    sy = agedf[(agedf["uom"] == "Persons") & agedf["gender"].isin(["Men", "Women"])].copy()
-
-    def _age_num(s):
-        s = str(s).strip()
-        if s == "90 years and older":      # consistent top bucket across all years
-            return 90
-        m = re.fullmatch(r"(\d+) years?", s)
-        a = int(m.group(1)) if m else None
-        return a if a is not None and a <= 89 else None
-
-    sy["age"] = sy["age_group"].map(_age_num)
-    sy = sy.dropna(subset=["age"])
-    fig = population_pyramid(sy,
-        source_note=f"Source: Statistics Canada, Table 17-10-0005-01; ages 90+ grouped | Data as of: {get_data_date(ages_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Age-structure data not yet available. Run the data pipeline.")
-```
-
-### Median age
-
-Half of Canadians are older than this line. The median age rose from about 26 in 1971
-to about 41 today — driven by longer lives and smaller families. The slight dip in
-recent years is due to immigration.
-
-```{python}
-#| echo: false
-if os.path.exists(ages_path):
-    med = agedf[(agedf["uom"] == "Years") & (agedf["age_group"] == "Median age")
-                & (agedf["gender"] == "Total")].copy()
-    med["date"] = pd.to_datetime(med["year"].astype(int).astype(str), format="%Y")
-    fig = single_line(med, "date", "value", title="", yaxis_title="Median age (years)",
-        rangeslider=True, initial_full=True,
-        hovertemplate="<b>%{x|%Y}</b><br>Median age: %{y:.1f} years<extra></extra>",
-        source_note=f"Source: Statistics Canada, Table 17-10-0005-01 | Data as of: {get_data_date(ages_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-```
-
-### Aging among peer countries
-
-The old-age dependency ratio — people 65 and over per 100 people of working age
-(15–64) — is the standard gauge of how the population's weight is shifting onto
-fewer working-age shoulders. Every peer country is aging; Canada sits in the middle
-of the pack, well below Japan and Italy.
-
-```{python}
-#| echo: false
-dep_path = "data/population/worldbank_old_age_dependency.csv"
-if os.path.exists(dep_path):
-    dep = pd.read_csv(dep_path)
-    fig = peer_comparison_line(dep, "year", "old_age_dependency", "",
-        "People 65+ per 100 aged 15–64", show_average=True, topical=["JPN", "ITA"],
-        source_note=f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(dep_path)}")
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Old-age dependency data not yet available. Run the data pipeline.")
-```
-
-```{python}
-#| echo: false
-if os.path.exists(dep_path):
-    fig = ranked_bar(dep, "old_age_dependency", "People 65+ per 100 aged 15–64",
-        f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(dep_path)}",
-        hover_template="%{y}: %{x:.1f}<extra></extra>", xtitle_top=True)
-    fig.show(config={"displaylogo": False})
-```
-
-### Fertility
-
-The total fertility rate is the average number of children a woman would have over
-her lifetime at current age-specific rates. A rate of about 2.1 keeps a population
-stable without immigration — the dashed line below. Canada fell below that level in
-the early 1970s and has set new record lows in recent years; immigration is now the
-engine of population growth. Most peer countries are on the same path.
-
-```{python}
-#| echo: false
-fert_path = "data/population/worldbank_fertility_rate.csv"
-if os.path.exists(fert_path):
-    fert = pd.read_csv(fert_path)
-    fig = peer_comparison_line(fert, "year", "fertility_rate", "",
-        "Births per woman", show_average=True, initial_visible=["USA"],
-        source_note=f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(fert_path)}")
-    fig.add_hline(y=2.1, line_dash="dash", line_color="#555", line_width=1,
-                  annotation_text="Replacement level (≈2.1)",
-                  annotation_position="top right",
-                  annotation_font=dict(size=10, color="#555"))
-    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
-else:
-    print("Fertility data not yet available. Run the data pipeline.")
-```
-
-```{python}
-#| echo: false
-if os.path.exists(fert_path):
-    fig = ranked_bar(fert, "fertility_rate", "Births per woman",
-        f"Source: World Bank WDI (UN World Population Prospects) | Data as of: {get_data_date(fert_path)}",
-        hover_template="%{y}: %{x:.2f}<extra></extra>", xtitle_top=True)
-    fig.show(config={"displaylogo": False})
-```
-
-### Median age by neighbourhood
-
-Where do the young and the old actually live? A census-tract map of **median age**
-— with each neighbourhood's full age breakdown in the hover — is on its own page
-(it carries ~3 MB of boundary data):
-
-**[Median age by neighbourhood →](age-neighbourhoods.qmd)**
-
-It pairs naturally with the [median household income](../income/neighbourhoods.qmd)
-and [home value](../housing/neighbourhoods.qmd) maps — the same census tracts, so
-you can flip between who lives somewhere and what living there costs.
 
 ## Moving within Canada
 

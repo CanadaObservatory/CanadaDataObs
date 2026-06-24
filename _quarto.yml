@@ -58,16 +58,21 @@ website:
         menu:
           - href: economics/overview.qmd
             text: Overview
+          - text: "The economy"
           - href: economics/index.qmd
             text: Economy & Jobs
+          - href: economics/living-standards.qmd
+            text: Living Standards
+          - text: "---"
+          - text: "Cost of living & affordability"
           - href: economics/cost-of-living.qmd
             text: Cost of Living
-          - href: economics/borrowing-costs.qmd
-            text: Borrowing Costs
           - href: housing/index.qmd
             text: Housing
           - href: income/index.qmd
             text: Income & Inequality
+          - href: economics/borrowing-costs.qmd
+            text: Borrowing Costs
       - text: Government
         menu:
           - href: fiscal/overview.qmd

@@ -712,7 +712,12 @@ but **as charts only, not as a redistributable dataset**. Rules that preserve th
 - **Every CREA figure carries `crea.ATTRIB`**: "Source: CREA MLS® Home Price Index,
   © The Canadian Real Estate Association. Used with permission for educational purposes."
 - Housing page CREA charts: benchmark price by city × dwelling type; detached price
-  over time by city; national price-to-income over time (≈5.7×→9.3×, 2005→2024 — CREA
+  over time by city; **"Condos vs. detached houses: the widening gap" (§193, 2026-06-24 —
+  `fig_price_by_type_over_time`: detached/townhouse/apartment on ONE chart with a CITY
+  selector [Canada default + 8 metros], the inverse of the by-city/type-dropdown chart;
+  the "cost of moving up the ladder" — national detached/apt ratio 1.45→1.6, $ gap ~$85k→$270k;
+  widest Vancouver/Toronto/Calgary/Edmonton ~2–3×, narrowest Halifax/Montréal)**;
+  national price-to-income over time (≈5.7×→9.3×, 2005→2024 — CREA
   composite deflated to 2024 $ via CPI ÷ real median income); **starter-home affordability
   by city (`fig_entry_level_affordability` — each city's latest apartment/condo benchmark ÷
   its 2021-Census CMA median household income aged forward by national AWE; ranked bar of

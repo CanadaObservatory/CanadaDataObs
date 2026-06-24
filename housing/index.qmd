@@ -180,7 +180,8 @@ This first chart shows the latest **benchmark price by city and dwelling type** 
 crea_ok = False
 try:
     from pipeline.crea import (load_crea, fig_price_by_type, fig_price_time_series,
-                               fig_price_to_income, fig_entry_level_affordability)
+                               fig_price_to_income, fig_entry_level_affordability,
+                               fig_price_by_type_over_time)
     _sheets, _agg, _month = load_crea(".")
     crea_ok = True
     fig_price_by_type(_sheets, _month).show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -196,6 +197,18 @@ How the benchmark price of a typical home has moved in each major market, by dwe
 #| echo: false
 if crea_ok:
     fig_price_time_series(_sheets).show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("CREA price data temporarily unavailable.")
+```
+
+## Condos vs. detached houses: the widening gap
+
+The same dwelling types, seen a different way — all three on one chart, so the **gap between a condo and a detached house** is visible. That gap is the cost of moving "up the ladder," and it has grown: nationally, a detached home was worth about 1.4× an apartment in 2005 and roughly 1.6× today, while the *dollar* gap between them widened from under $90,000 to more than a quarter-million. **Use the selector to switch cities.** The spread is widest in Vancouver and Toronto — and, because their condos are comparatively cheap, in Calgary and Edmonton too — where a detached house runs roughly **two to three times** the price of a condo; it is narrowest in Halifax and Montréal.
+
+```{python}
+#| echo: false
+if crea_ok:
+    fig_price_by_type_over_time(_sheets, _agg).show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("CREA price data temporarily unavailable.")
 ```

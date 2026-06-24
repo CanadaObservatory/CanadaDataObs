@@ -644,6 +644,14 @@ INDICATORS = [
               value_col="defence_pct_gdp", chart_recipe="ranked_bar",
               wb_indicator="MS.MIL.XPND.GD.ZS",
               source_table="World Bank (data from SIPRI)"),
+    # Official development assistance (foreign aid) as % of GNI vs OECD-DAC peers —
+    # parallel to defence (vs the UN 0.7% target, as defence is vs NATO 2%). Bespoke
+    # DAC1 fetcher (grant-equivalent ODA, MEASURE 11002). No scorecard valence.
+    Indicator("oda", "fiscal", "custom",
+              "Official development assistance (% of GNI, vs OECD-DAC peers)",
+              "% of GNI", "annual", value_col="oda_gni", chart_recipe="ranked_bar",
+              fetch_fn="fetch_oda", output_subpath="oecd_oda.csv",
+              source_table="OECD DAC1 (grant-equivalent ODA, % of GNI)"),
     # Tax structure (revenue mix): the six standard categories as % of GDP, so the
     # composition shows alongside the total burden. Bespoke OECD fetcher (Revenue
     # Statistics comparative tables) — tidy long format (country, year, tax_type).

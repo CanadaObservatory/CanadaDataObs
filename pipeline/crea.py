@@ -244,3 +244,43 @@ def fig_entry_level_affordability(sheets, month, root="."):
         source_note=f"{ATTRIB} Apartment/condo benchmark ({month}) ÷ 2021-Census median "
                     f"household income by metro, grown to {byear} by average weekly earnings.")
     return fig
+
+
+def fig_price_by_type_over_time(sheets, agg):
+    """Benchmark price over time by dwelling type — detached, townhouse, apartment —
+    on ONE chart, with a city selector, so the gap between a detached house and a
+    condo (the cost of moving up the property ladder) is visible. Opens on the
+    national aggregate; the spread is far wider in Vancouver and Toronto. Each city
+    option restyles the three type traces' x/y to that market. (Complements the
+    existing by-city chart, which switches one type at a time.)"""
+    geos = [("Canada", agg)] + [(label, sheets[sheet]) for sheet, label in MARKETS]
+
+    def series(frame, col):
+        d = frame[["Date", col]].dropna()
+        return d["Date"], d[col]
+
+    fig = go.Figure()
+    for col, name, color in TYPES:
+        x, y = series(agg, col)
+        fig.add_trace(go.Scatter(x=x, y=y, name=name, mode="lines",
+            line=dict(color=color, width=2.5),
+            hovertemplate=f"{name}: $%{{y:,.0f}}<extra>%{{x|%b %Y}}</extra>"))
+    buttons = []
+    for label, frame in geos:
+        xs, ys = [], []
+        for col, name, color in TYPES:
+            x, y = series(frame, col)
+            xs.append(x)
+            ys.append(y)
+        buttons.append(dict(method="update", label=label, args=[{"x": xs, "y": ys}]))
+    fig.update_layout(plot_bgcolor="white", height=480, hovermode="x unified",
+        yaxis=dict(title="Benchmark price", tickprefix="$", tickformat=",",
+                   gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        margin=dict(t=72, b=95, r=20),
+        updatemenus=[dict(buttons=buttons, active=0, x=0, xanchor="left", y=1.12,
+            yanchor="bottom", bgcolor="white", bordercolor="#ccc", borderwidth=1,
+            showactive=True)])
+    _src(fig, ATTRIB, y=-0.22)
+    return fig

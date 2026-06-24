@@ -86,6 +86,7 @@ CUSTOM_FETCHERS = {
     "fetch_wages_by_province": fetch_wages_by_province,
     "fetch_cma_rent": fetch_cma_rent,
     "fetch_wealth_by_age": fetch_wealth_by_age,
+    "fetch_npr_share": fetch_npr_share,
     "fetch_suicide_by_age": fetch_suicide_by_age,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,

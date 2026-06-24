@@ -44,6 +44,28 @@ def fetch_energy_mix():
     # Filter to our peer countries
     df = df[df["iso_code"].isin(PEER_CODES)].copy()
 
+    # Side output: electricity generation per capita (kWh/person) — a physical proxy
+    # for material living standards (the "energy ladder"). Emitted independently of the
+    # primary-energy `dropna` below, because the most recent year usually carries
+    # electricity data before the full primary-energy series is finalised.
+    if "per_capita_electricity" in df.columns:
+        epc = df[["iso_code", "country", "year", "per_capita_electricity"]].copy()
+        epc["per_capita_electricity"] = pd.to_numeric(epc["per_capita_electricity"], errors="coerce")
+        epc = epc.dropna(subset=["per_capita_electricity"]).rename(
+            columns={"iso_code": "country_code", "country": "country_name"})
+        epc["year"] = epc["year"].astype(int)
+        epc["country_name"] = epc["country_code"].map(PEER_COUNTRIES)
+        epc = epc.sort_values(["country_code", "year"]).reset_index(drop=True)
+        epc_path = DATA_DIR / "environment" / "owid_electricity_per_capita.csv"
+        epc_path.parent.mkdir(parents=True, exist_ok=True)
+        epc.to_csv(epc_path, index=False)
+        save_metadata(epc_path, df=epc, date_column="year",
+            source="Our World in Data (Energy Institute, Ember, EIA)",
+            source_table="owid-energy-data (per_capita_electricity)",
+            frequency="annual", unit="kWh per person",
+            transformations=["electricity generation per capita; OECD peer group"])
+        logger.info(f"  side output: {len(epc)} rows -> {epc_path.name}")
+
     # Keep relevant columns — both primary-energy shares (full energy incl.
     # transport & heating) and electricity-generation shares (the grid, where
     # nuclear/hydro are properly sized and the low-carbon story is clearest).

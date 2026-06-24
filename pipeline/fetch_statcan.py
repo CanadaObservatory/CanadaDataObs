@@ -1060,6 +1060,80 @@ def fetch_age_structure():
     return df
 
 
+def fetch_npr_share():
+    """Non-permanent residents as a share of Canada's population, quarterly, from 2000.
+
+    StatCan publishes the NPR *stock* on a consistent basis only from 2021
+    (17-10-0121-01). The longer view reconstructs the stock from StatCan's own
+    quarterly net-NPR *flows* (17-10-0040-01) via the demographic-accounting identity
+    (stock_t = stock_{t-1} + net_flow_t), anchored to the 2021 published stock and
+    cumulated backward — all StatCan-sourced. Divided by the quarterly population
+    estimate (17-10-0009-01), which itself includes NPRs. From 2021 the published
+    stock is used directly; earlier quarters are the reconstruction. The share is the
+    normalised companion to the NPR-by-type counts and the net-NPR growth component."""
+    logger.info("Building NPR share of population (17-10-0040 + 17-10-0121 + 17-10-0009)...")
+    try:
+        flow = _get_table("17-10-0040-01")
+        stock = _get_table("17-10-0121-01")
+        pop = _get_table("17-10-0009-01")
+    except Exception as e:
+        logger.error(f"  failed to fetch NPR-share inputs: {e}")
+        return None
+    # net NPR flows (Canada, quarterly)
+    f = flow[(flow["GEO"] == "Canada")
+             & (flow["Components of population growth"] == "Net non-permanent residents")].copy()
+    f["date"] = pd.to_datetime(f["REF_DATE"], format="%Y-%m", errors="coerce")
+    f["net"] = pd.to_numeric(f["VALUE"], errors="coerce")
+    f = f.dropna(subset=["date", "net"]).sort_values("date").set_index("date")["net"]
+    # published NPR stock (Canada, total) — the modern consistent benchmark
+    s = stock[(stock["GEO"] == "Canada")
+              & (stock["Non-permanent resident types"] == "Total, non-permanent residents")].copy()
+    s["date"] = pd.to_datetime(s["REF_DATE"], format="%Y-%m", errors="coerce")
+    s["stock"] = pd.to_numeric(s["VALUE"], errors="coerce")
+    s = s.dropna(subset=["date", "stock"]).sort_values("date").set_index("date")["stock"]
+    if f.empty or s.empty:
+        return None
+    # Reconstruct the stock over the flow's quarters: published where available, else
+    # cumulate net flows backward from the earliest published benchmark (anchor).
+    npr = pd.Series(index=f.index, dtype=float)
+    for d in s.index:
+        if d in npr.index:
+            npr.loc[d] = s.loc[d]
+    dates = list(f.index)
+    anchor = s.index.min()
+    for i in range(len(dates) - 1, -1, -1):           # backward fill below the anchor
+        d = dates[i]
+        if d < anchor and pd.isna(npr.loc[d]):
+            npr.loc[d] = npr.loc[dates[i + 1]] - f.loc[dates[i + 1]]
+    for i in range(1, len(dates)):                     # forward fill above published max
+        d = dates[i]
+        if d > s.index.max() and pd.isna(npr.loc[d]):
+            npr.loc[d] = npr.loc[dates[i - 1]] + f.loc[d]
+    # population (Canada, quarterly) — includes NPRs, so NPR ÷ population is the share
+    p = pop[pop["GEO"] == "Canada"].copy()
+    p["date"] = pd.to_datetime(p["REF_DATE"], format="%Y-%m", errors="coerce")
+    p["pop"] = pd.to_numeric(p["VALUE"], errors="coerce")
+    p = p.dropna(subset=["date", "pop"]).set_index("date")["pop"]
+    out = pd.DataFrame({"npr": npr, "population": p}).dropna()
+    out["npr_share"] = out["npr"] / out["population"] * 100
+    out = out[out.index >= "2000-01-01"].sort_index()
+    out.index.name = "date"
+    out = out.reset_index()
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "population" / "statcan_npr_share.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out[["date", "npr", "population", "npr_share"]].to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="date", source="Statistics Canada",
+        source_table="17-10-0121-01, 17-10-0040-01, 17-10-0009-01",
+        frequency="quarterly", unit="% of population",
+        transformations=["NPR stock: published (17-10-0121) from 2021, reconstructed earlier "
+                         "from cumulated net-NPR flows (17-10-0040) anchored to the 2021 stock; "
+                         "share = NPR / quarterly population (17-10-0009); from 2000"])
+    logger.info(f"  saved {len(out)} quarters -> {out_path.name}")
+    return out
+
+
 def fetch_interprovincial_migration():
     """
     Net interprovincial migration by province/territory — quarterly in- and

@@ -375,6 +375,14 @@ INDICATORS = [
               source_table="Statistics Canada 17-10-0121-01"),
     # NPR broken out by permit type (work / study / asylum / other) for the stacked
     # composition on the Population page — the five types tile to the total above.
+    # NPR as a % of population over time — the normalised view of the count chart;
+    # reconstructed stock (17-10-0040 net flows anchored to the 2021 17-10-0121 stock)
+    # ÷ population (17-10-0009). Descriptive; no government-target benchmark line.
+    Indicator("npr_share", "population", "custom",
+              "Non-permanent residents, share of population", "% of population", "quarterly",
+              value_col="npr_share", chart_recipe="line",
+              fetch_fn="fetch_npr_share", output_subpath="statcan_npr_share.csv",
+              source_table="Statistics Canada 17-10-0121-01, 17-10-0040-01, 17-10-0009-01"),
     Indicator("npr_by_type", "population", "custom",
               "Non-permanent residents by type", "persons", "quarterly",
               fetch_fn="fetch_npr_by_type",

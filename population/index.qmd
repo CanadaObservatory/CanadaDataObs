@@ -266,6 +266,26 @@ else:
     print("Non-permanent residents data not yet available. Run the data pipeline.")
 ```
 
+## Non-permanent residents as a share of the population
+
+The chart above counts non-permanent residents; this shows their **weight relative to the population as a whole** — the measure at the centre of the current debate. Through the 2000s and 2010s, non-permanent residents were a small, slowly-rising share of around 2%. From 2022 it climbed steeply, reaching a peak of about **7.6% in late 2024** — more than triple its pre-pandemic level — before edging down as more temporary residents began to leave than arrive. (Statistics Canada publishes the non-permanent-resident count on a consistent basis from 2021; earlier quarters are reconstructed from its own quarterly net non-permanent-resident flows, anchored to the 2021 estimate.)
+
+```{python}
+#| echo: false
+nprs_path = "data/population/statcan_npr_share.csv"
+if os.path.exists(nprs_path):
+    ns = pd.read_csv(nprs_path, parse_dates=["date"])
+    fig = single_line(ns, "date", "npr_share", title="",
+        yaxis_title="Non-permanent residents (% of population)",
+        rangeslider=True, initial_full=True,
+        hovertemplate="<b>%{x|%b %Y}</b>: %{y:.1f}%<extra></extra>",
+        source_note=f"Source: Statistics Canada, Tables 17-10-0121-01, 17-10-0040-01 and 17-10-0009-01 | Data as of: {get_data_date(nprs_path)}")
+    fig.update_yaxes(ticksuffix="%")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("NPR share data not yet available. Run the data pipeline.")
+```
+
 ## Age structure
 
 How old is Canada? The pyramid below shows the full age distribution — every single
@@ -420,6 +440,7 @@ else:
 
 - [Population Quarterly Estimates (CSV)](../data/population/statcan_population_quarterly.csv) — Statistics Canada Table 17-10-0009-01
 - [Non-Permanent Residents (CSV)](../data/population/statcan_temp_residents.csv) — Statistics Canada Table 17-10-0121-01
+- [Non-Permanent Residents, share of population, 2000– (CSV)](../data/population/statcan_npr_share.csv) — Statistics Canada Tables 17-10-0121-01, 17-10-0040-01, 17-10-0009-01
 - [Population by Age & Gender, 1971– (CSV)](../data/population/statcan_age_structure.csv) — Statistics Canada Table 17-10-0005-01
 - [Net Interprovincial Migration (CSV)](../data/population/statcan_interprovincial_migration.csv) — Statistics Canada Table 17-10-0020-01
 - [Total Fertility Rate, 17 peers (CSV)](../data/population/worldbank_fertility_rate.csv) — World Bank WDI (UN World Population Prospects)

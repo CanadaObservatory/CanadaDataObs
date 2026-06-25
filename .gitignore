@@ -25,3 +25,12 @@ internal/
 # for design history; this zip is a byte-for-byte duplicate of it (1.5 MB).
 visual_assets/initial_drafts/*.zip
 social/
+
+# Copernicus CDS credentials — never commit
+CDS_key.rtf
+CDS_key*
+.cdsapirc
+*.cdsapirc
+
+# ERA5 climate-map dev previews (not shipped)
+data/geo/_preview_*.png

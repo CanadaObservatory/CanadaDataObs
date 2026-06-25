@@ -198,6 +198,16 @@ def _sample(field, idx):
     return [round(float(field[j, i]), 1) for j, i in idx]
 
 
+def _recent_anom(ds, means, n):
+    """Mean of the last n months (actual) minus the 1991–2020 normal for those calendar months —
+    answers 'how did the latest period compare to normal?'. Returns (anomaly field, the n timestamps)."""
+    last = list(ds.valid_time.values)[-n:]
+    actual = ds["t2m"].sel(valid_time=last).mean("valid_time").values.astype("float32") - 273.15
+    cal = sorted({int(str(t)[5:7]) for t in last})
+    normal = np.nanmean(np.stack([means[f"{m:02d}"] for m in cal]), axis=0)
+    return (actual - normal).astype("float32"), last
+
+
 def build():
     pull()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -252,6 +262,34 @@ def build():
         corners=_corners(corners), vmin=-amax, vmax=amax, cmap="RdBu_r", units="°C"))
     _preview(anom, lon, lat, "RdBu_r", -amax, amax,
              "Warming — annual mean, 2016–2025 vs 1961–1990 (ERA5-Land)", OUT / "_preview_warming.png", prov)
+
+    # ---- recent anomalies: how the latest 1 / 3 / 12 months compare to the 1991–2020 normal ----
+    def _span(ts):
+        f = lambda t: f"{calendar.month_abbr[int(str(t)[5:7])]} {str(t)[:4]}"
+        a, b = f(ts[0]), f(ts[-1])
+        return a if a == b else f"{a} – {b}"
+    rec = [(key, lab) + _recent_anom(ds, means, n)
+           for n, key, lab in [(1, "recent_1", "Past month"), (3, "recent_3", "Past 3 months"),
+                               (12, "recent_12", "Past 12 months")]]
+    ramax = max(2.0, _nice(np.nanpercentile(np.abs(rec[0][2]), 98), 1.0, np.ceil))
+    logger.info(f"recent-anomaly scale: ±{ramax} °C; latest month = {_span(rec[0][3])}")
+    for key, lab, af, last in rec:
+        r3857, dst_t, corners = _reproject_3857(af, lon, lat, F=4)
+        _webp(r3857, "RdBu_r", -ramax, ramax, OUT / f"era5_{key}.webp", mask)
+        if src_mask is not None:
+            points["vals"][key] = _sample(af, pidx)
+        manifest["layers"].append(dict(key=key, kind="recent", label=lab, span=_span(last),
+            webp=f"era5_{key}.webp", corners=_corners(corners), vmin=-ramax, vmax=ramax,
+            cmap="RdBu_r", units="°C"))
+
+    # ---- recent-anomaly strip: Canada-land mean monthly anomaly, last 24 months ----
+    if src_mask is not None:
+        mbool = src_mask.astype(bool)
+        with open(OUT / "era5_recent_anomaly.csv", "w") as fh:
+            fh.write("month,anomaly\n")
+            for t in list(ds.valid_time.values)[-24:]:
+                af = ds["t2m"].sel(valid_time=t).values.astype("float32") - 273.15 - means[f"{int(str(t)[5:7]):02d}"]
+                fh.write(f"{str(t)[:7]},{round(float(np.nanmean(af[mbool])), 2)}\n")
 
     json.dump(manifest, open(OUT / "era5_climate_manifest.json", "w"), indent=0)
     json.dump(points, open(OUT / "era5_climate_points.json", "w"))

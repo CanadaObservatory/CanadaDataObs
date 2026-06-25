@@ -56,8 +56,8 @@ The national average hides the geography. These continuous maps fill it in, draw
 **ERA5-Land** — the European Centre's high-resolution (~9 km) reanalysis, which blends weather
 observations with a physical model into a gap-free temperature field over the land (oceans and
 large lakes are left blank). The first map shows the **typical temperature for each month**
-(the 1991–2020 normal) — pick a month to see what it's usually like where you live. The second is the
-**change since the mid-century**: warming that reaches the whole country and runs deepest across the North.
+(the 1991–2020 normal) — pick a month to see what it's usually like where you live. Then: **how the most
+recent months compare to that normal** (has it been unusual lately?), and the **change since the mid-century**.
 Hover anywhere for the value at that spot.
 
 ```{python}
@@ -121,7 +121,31 @@ def _month_map(src):
     fig.update_layout(updatemenus=list(fig.layout.updatemenus) + [menu])
     fig.show(config=_CFG)
     display(_legend("Average temperature by month (1991–2020 normal)", L0["cmap"], L0["vmin"], L0["vmax"], False))
+
+def _recent_map(src):
+    """Recent-anomaly map (latest 1 / 3 / 12 months vs the 1991–2020 normal) with a window selector,
+    opening on the past month. Shared diverging scale, so the fixed legend reads across all windows."""
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
+    rec = [l for l in man["layers"] if l.get("kind") == "recent"]
+    vals = _pts.get("vals") or {}
+    L0 = rec[0]
+    fig = relief_map(_uri(L0["webp"]), L0["corners"], boundary_geojson=prov, zoom=2.2,
+                     source_note=f"{src} {man['attribution']}.",
+                     hover_lon=_pts.get("lon"), hover_lat=_pts.get("lat"), hover_val=vals.get(L0["key"]),
+                     hover_label="vs 1991–2020 normal", hover_fmt="+.1f", hover_suffix=" °C")
+    btns = [dict(label=f'{l["label"]} ({l["span"]})', method="update",
+                 args=[{"customdata": [vals.get(l["key"])]},
+                       {"mapbox.layers[1].source": _uri(l["webp"])}]) for l in rec]
+    menu = dict(type="dropdown", direction="down", active=0, showactive=True,
+                x=0.01, y=0.99, xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc",
+                borderwidth=1, font=dict(size=12), pad=dict(t=2, b=2, l=4, r=4), buttons=btns)
+    fig.update_layout(updatemenus=list(fig.layout.updatemenus) + [menu])
+    fig.show(config=_CFG)
+    display(_legend("Temperature vs the 1991–2020 average (warmer = red, cooler = blue)",
+                    L0["cmap"], L0["vmin"], L0["vmax"], True))
 ```
+
+### Typical temperature, month by month
 
 ```{python}
 #| echo: false
@@ -130,6 +154,44 @@ if os.path.exists(_man_p):
 else:
     print("Climate map not yet available — run python -m pipeline.build_era5_climate.")
 ```
+
+### Has it been unusual lately?
+
+How the most recent months compare to the **1991–2020 average** — red where it has run warmer than normal,
+blue where cooler. Switch the window between the past month, three months, and year, and hover for the value
+where you live. A single warm or cool month is **weather**, not a trend; for the long-term signal, see the
+warming map below.
+
+```{python}
+#| echo: false
+if os.path.exists(_man_p):
+    _recent_map("Source: ECMWF Copernicus Climate Change Service — ERA5-Land monthly means vs the 1991–2020 normal.")
+```
+
+The map is a snapshot; the run of recent months shows whether it is a one-off or a pattern — the
+Canada-wide average for each of the last two years:
+
+```{python}
+#| echo: false
+import pandas as pd
+import plotly.graph_objects as go
+_rec_p = "data/geo/era5_recent_anomaly.csv"
+if os.path.exists(_rec_p):
+    rs = pd.read_csv(_rec_p)
+    rs["date"] = pd.to_datetime(rs["month"] + "-01")
+    bar_colors = ["#c0392b" if v >= 0 else "#2c7fb8" for v in rs["anomaly"]]
+    figs = go.Figure(go.Bar(x=rs["date"], y=rs["anomaly"], marker_color=bar_colors,
+        hovertemplate="<b>%{x|%b %Y}</b>: %{y:+.1f} °C vs normal<extra></extra>"))
+    figs.add_hline(y=0, line_width=1, line_color="#888")
+    figs.update_layout(plot_bgcolor="white", height=300, margin=dict(l=10, r=10, t=10, b=44),
+        yaxis_title="°C vs 1991–2020 average", showlegend=False,
+        xaxis=dict(showgrid=False), yaxis=dict(gridcolor="#eee", zeroline=False))
+    figs.add_annotation(text="Source: ECMWF Copernicus Climate Change Service — ERA5-Land.",
+        xref="paper", yref="paper", x=0, y=-0.26, showarrow=False, font=dict(size=10, color="#888"), align="left")
+    figs.show(config={"displaylogo": False})
+```
+
+### How much it has warmed
 
 ```{python}
 #| echo: false

@@ -1,0 +1,181 @@
+{
+"layers": [
+{
+"key": "mean_annual",
+"kind": "mean",
+"season": "annual",
+"label": "Mean temperature \u2014 annual (1991\u20132020 normal)",
+"webp": "era5_mean_annual.webp",
+"corners": [
+[
+-141.04999999999998,
+84.05
+],
+[
+-51.969000930121986,
+84.05
+],
+[
+-51.969000930121986,
+40.9281885210963
+],
+[
+-141.04999999999998,
+40.9281885210963
+]
+],
+"vmin": -35.0,
+"vmax": 25.0,
+"cmap": "RdYlBu_r",
+"units": "\u00b0C"
+},
+{
+"key": "mean_winter",
+"kind": "mean",
+"season": "winter",
+"label": "Mean temperature \u2014 winter (1991\u20132020 normal)",
+"webp": "era5_mean_winter.webp",
+"corners": [
+[
+-141.04999999999998,
+84.05
+],
+[
+-51.969000930121986,
+84.05
+],
+[
+-51.969000930121986,
+40.9281885210963
+],
+[
+-141.04999999999998,
+40.9281885210963
+]
+],
+"vmin": -35.0,
+"vmax": 25.0,
+"cmap": "RdYlBu_r",
+"units": "\u00b0C"
+},
+{
+"key": "mean_spring",
+"kind": "mean",
+"season": "spring",
+"label": "Mean temperature \u2014 spring (1991\u20132020 normal)",
+"webp": "era5_mean_spring.webp",
+"corners": [
+[
+-141.04999999999998,
+84.05
+],
+[
+-51.969000930121986,
+84.05
+],
+[
+-51.969000930121986,
+40.9281885210963
+],
+[
+-141.04999999999998,
+40.9281885210963
+]
+],
+"vmin": -35.0,
+"vmax": 25.0,
+"cmap": "RdYlBu_r",
+"units": "\u00b0C"
+},
+{
+"key": "mean_summer",
+"kind": "mean",
+"season": "summer",
+"label": "Mean temperature \u2014 summer (1991\u20132020 normal)",
+"webp": "era5_mean_summer.webp",
+"corners": [
+[
+-141.04999999999998,
+84.05
+],
+[
+-51.969000930121986,
+84.05
+],
+[
+-51.969000930121986,
+40.9281885210963
+],
+[
+-141.04999999999998,
+40.9281885210963
+]
+],
+"vmin": -35.0,
+"vmax": 25.0,
+"cmap": "RdYlBu_r",
+"units": "\u00b0C"
+},
+{
+"key": "mean_autumn",
+"kind": "mean",
+"season": "autumn",
+"label": "Mean temperature \u2014 autumn (1991\u20132020 normal)",
+"webp": "era5_mean_autumn.webp",
+"corners": [
+[
+-141.04999999999998,
+84.05
+],
+[
+-51.969000930121986,
+84.05
+],
+[
+-51.969000930121986,
+40.9281885210963
+],
+[
+-141.04999999999998,
+40.9281885210963
+]
+],
+"vmin": -35.0,
+"vmax": 25.0,
+"cmap": "RdYlBu_r",
+"units": "\u00b0C"
+},
+{
+"key": "warming_annual",
+"kind": "anomaly",
+"season": "annual",
+"label": "Warming \u2014 annual mean, 2016\u20132025 vs 1961\u20131990",
+"webp": "era5_warming_annual.webp",
+"corners": [
+[
+-141.04999999999998,
+84.05
+],
+[
+-51.969000930121986,
+84.05
+],
+[
+-51.969000930121986,
+40.9281885210963
+],
+[
+-141.04999999999998,
+40.9281885210963
+]
+],
+"vmin": -3.0,
+"vmax": 3.0,
+"cmap": "RdBu_r",
+"units": "\u00b0C"
+}
+],
+"latest_month": "2026-05",
+"source": "ECMWF Copernicus Climate Change Service \u2014 ERA5-Land",
+"attribution": "Generated using Copernicus Climate Change Service information"
+}

@@ -50,6 +50,65 @@ else:
     print("Temperature data not yet available. Run the data pipeline.")
 ```
 
+## Mapped: the temperature, and how much it has warmed
+
+The national average hides the geography. These continuous maps fill it in, drawn from
+**ERA5-Land** — the European Centre's high-resolution (~9 km) reanalysis, which blends weather
+observations with a physical model into a gap-free temperature field over the land (oceans and
+large lakes are left blank). The first map is the recent climate — average temperatures over the
+**1991–2020** normal. The second is the **change since the mid-century**: warming that reaches the
+whole country and runs deepest across the North.
+
+```{python}
+#| echo: false
+import json, base64
+from IPython.display import display, HTML
+from pipeline.charts import relief_map
+
+_man_p = "data/geo/era5_climate_manifest.json"
+_CFG = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+# CSS gradients matching the WebP colour scales (ColorBrewer RdYlBu / RdBu, reversed) — kept
+# inline so the render needs no matplotlib (it's a builder-only dep, not in requirements.txt).
+_CMAP_CSS = {
+    "RdYlBu_r": "#313695,#4575b4,#74add1,#abd9e9,#e0f3f8,#ffffbf,#fee090,#fdae61,#f46d43,#d73027,#a50026",
+    "RdBu_r": "#053061,#2166ac,#4393c3,#92c5de,#d1e5f0,#f7f7f7,#fddbc7,#f4a582,#d6604d,#b2182b,#67001f"}
+
+def _uri(webp):
+    return "data:image/webp;base64," + base64.b64encode(open(f"data/geo/{webp}", "rb").read()).decode()
+
+def _legend(title, cmap, vmin, vmax, diverging):
+    mid = "0 °C" if diverging else f"{(vmin+vmax)/2:+.0f} °C"
+    return HTML(f'<div style="max-width:480px;margin:-4px 0 18px;font-size:12px;color:#555">'
+        f'<div style="font-weight:600;margin-bottom:3px">{title}</div>'
+        f'<div style="height:12px;border-radius:3px;background:linear-gradient(to right,{_CMAP_CSS[cmap]})"></div>'
+        f'<div style="display:flex;justify-content:space-between"><span>{vmin:+.0f} °C</span>'
+        f'<span>{mid}</span><span>{vmax:+.0f} °C</span></div></div>')
+
+def _climate_map(key, title, src, diverging=False):
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/prov_2021.geojson"))
+    L = next(l for l in man["layers"] if l["key"] == key)
+    fig = relief_map(_uri(L["webp"]), L["corners"], boundary_geojson=prov, zoom=2.2,
+                     source_note=f"{src} {man['attribution']}.")
+    fig.show(config=_CFG)
+    display(_legend(title, L["cmap"], L["vmin"], L["vmax"], diverging))
+```
+
+```{python}
+#| echo: false
+if os.path.exists(_man_p):
+    _climate_map("mean_annual", "Average annual temperature (1991–2020)",
+        "Source: ECMWF Copernicus Climate Change Service — ERA5-Land monthly means, 1991–2020 normal.")
+else:
+    print("Climate map not yet available — run python -m pipeline.build_era5_climate.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(_man_p):
+    _climate_map("warming_annual", "Change in annual temperature, 2016–2025 vs 1961–1990",
+        "Source: ECMWF Copernicus Climate Change Service — ERA5-Land, 2016–2025 minus 1961–1990.", diverging=True)
+```
+
 ## The North is warming fastest
 
 Warming is not even across the country. The bars below are Environment and Climate

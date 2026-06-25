@@ -89,10 +89,10 @@ def _legend(title, cmap, vmin, vmax, diverging):
 def _climate_map(key, title, src, diverging=False, hover_label=None):
     man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
     L = next(l for l in man["layers"] if l["key"] == key)
-    P = _pts.get(key, {})
+    vals = (_pts.get("vals") or {}).get(key)
     fig = relief_map(_uri(L["webp"]), L["corners"], boundary_geojson=prov, zoom=2.2,
                      source_note=f"{src} {man['attribution']}.",
-                     hover_lon=P.get("lon"), hover_lat=P.get("lat"), hover_val=P.get("val"),
+                     hover_lon=_pts.get("lon"), hover_lat=_pts.get("lat"), hover_val=vals,
                      hover_label=hover_label or ("Warming" if diverging else "Average temperature"),
                      hover_fmt="+.1f" if diverging else ".1f", hover_suffix=" °C")
     fig.show(config=_CFG)

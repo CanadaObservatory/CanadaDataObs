@@ -1007,12 +1007,13 @@ def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color=
             customdata=hover_val,
             hovertemplate=f"{hover_label}: %{{customdata:{hover_fmt}}}{hover_suffix}<extra></extra>",
             showlegend=False))
-        hovermode, menus = "closest", [_hover_toggle()]
+        hovermode, menus, hdist = "closest", [_hover_toggle()], 35   # wider catch so the tooltip tracks the cursor
     else:
         fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
-        hovermode, menus = False, []
+        hovermode, menus, hdist = False, [], 20
     fig.update_layout(mapbox_style="white-bg", mapbox_layers=layers,
                       mapbox_zoom=zoom, mapbox_center=center, hovermode=hovermode, updatemenus=menus,
+                      hoverdistance=hdist,
                       margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white")
     if source_note:
         _map_source_note(fig, source_note)

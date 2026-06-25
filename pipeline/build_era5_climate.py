@@ -47,7 +47,7 @@ AREA = [84, -141, 41, -52]                        # Canada bbox N,W,S,E
 LATEST_YEAR, LATEST_MONTH = 2026, 5               # newest available ERA5-Land month — BUMP each refresh
 NORMAL = range(1991, 2021)                        # WMO current normal (fixed)
 RECENT, BASE = range(2016, 2026), range(1961, 1991)   # warming: latest 10 full years vs the 1961–1990 reference (matches the page baseline)
-HOVER_STEP = 7                                    # hover-point grid downsample (~0.7° ≈ 75 km on visible land)
+HOVER_STEP = 3                                    # hover-point grid downsample (~0.3° ≈ 32 km on visible land)
 SEASONS = {"annual": None, "winter": [12, 1, 2], "spring": [3, 4, 5],
            "summer": [6, 7, 8], "autumn": [9, 10, 11]}
 
@@ -179,17 +179,23 @@ def _source_landmask(land_gj, lakes_gj, lat, lon):
     return land
 
 
-def _hover_points(field, lon, lat, src_mask, step):
-    """Downsampled (lon, lat, value) on visible land → the relief_map invisible hover grid."""
-    lons, lats, vals = [], [], []
+def _hover_grid(src_mask, lat, lon, field0, step):
+    """Shared downsampled point grid (indices + lon/lat) on visible land where field0 is finite.
+    Every layer samples the SAME points, so the sidecar stores lon/lat ONCE + per-layer values —
+    which keeps a dense grid (and many seasonal layers) affordable."""
+    idx, plon, plat = [], [], []
     for j in range(0, len(lat), step):
         for i in range(0, len(lon), step):
-            v = field[j, i]
-            if src_mask[j, i] and np.isfinite(v):
-                lons.append(round(float(lon[i]), 3))
-                lats.append(round(float(lat[j]), 3))
-                vals.append(round(float(v), 1))
-    return {"lon": lons, "lat": lats, "val": vals}
+            if src_mask[j, i] and np.isfinite(field0[j, i]):
+                idx.append((j, i))
+                plon.append(round(float(lon[i]), 3))
+                plat.append(round(float(lat[j]), 3))
+    return idx, plon, plat
+
+
+def _sample(field, idx):
+    """Values at the shared grid points (°C, 1 dp)."""
+    return [round(float(field[j, i]), 1) for j, i in idx]
 
 
 def build():
@@ -215,6 +221,9 @@ def build():
     lo = _nice(np.nanpercentile(allvals, 1), 5, np.floor)
     hi = _nice(np.nanpercentile(allvals, 99), 5, np.ceil)
     logger.info(f"mean-temp scale: {lo}..{hi} °C")
+    if src_mask is not None:
+        pidx, plon, plat = _hover_grid(src_mask, lat, lon, means["annual"], HOVER_STEP)
+        points = {"lon": plon, "lat": plat, "vals": {}}
     mask = None
     for key, f in means.items():
         f3857, dst_t, corners = _reproject_3857(f, lon, lat)
@@ -222,7 +231,7 @@ def build():
             mask = _land_mask(prov, lakes, f3857.shape, dst_t)
         _webp(f3857, "RdYlBu_r", lo, hi, OUT / f"era5_mean_{key}.webp", mask)
         if src_mask is not None:
-            points[f"mean_{key}"] = _hover_points(f, lon, lat, src_mask, HOVER_STEP)
+            points["vals"][f"mean_{key}"] = _sample(f, pidx)
         manifest["layers"].append(dict(key=f"mean_{key}", kind="mean", season=key,
             label=f"Mean temperature — {key} (1991–2020 normal)", webp=f"era5_mean_{key}.webp",
             corners=_corners(corners), vmin=lo, vmax=hi, cmap="RdYlBu_r", units="°C"))
@@ -237,7 +246,7 @@ def build():
     a3857, dst_t, corners = _reproject_3857(anom, lon, lat)
     _webp(a3857, "RdBu_r", -amax, amax, OUT / "era5_warming_annual.webp", mask)
     if src_mask is not None:
-        points["warming_annual"] = _hover_points(anom, lon, lat, src_mask, HOVER_STEP)
+        points["vals"]["warming_annual"] = _sample(anom, pidx)
     manifest["layers"].append(dict(key="warming_annual", kind="anomaly", season="annual",
         label="Warming — annual mean, 2016–2025 vs 1961–1990", webp="era5_warming_annual.webp",
         corners=_corners(corners), vmin=-amax, vmax=amax, cmap="RdBu_r", units="°C"))
@@ -246,8 +255,8 @@ def build():
 
     json.dump(manifest, open(OUT / "era5_climate_manifest.json", "w"), indent=0)
     json.dump(points, open(OUT / "era5_climate_points.json", "w"))
-    npts = sum(len(p["val"]) for p in points.values())
-    logger.info(f"wrote {len(manifest['layers'])} layers + manifest + {npts} hover points (data through {latest}) -> {OUT}")
+    npts = len(points.get("lon", []))
+    logger.info(f"wrote {len(manifest['layers'])} layers + manifest + {npts}-point hover grid (data through {latest}) -> {OUT}")
 
 
 if __name__ == "__main__":

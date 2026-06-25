@@ -32,7 +32,9 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import rasterio
 from rasterio.transform import from_origin, array_bounds
-from rasterio.warp import reproject, Resampling, transform_bounds, calculate_default_transform
+from rasterio.warp import reproject, Resampling, transform_bounds, calculate_default_transform, transform_geom
+from rasterio.features import rasterize
+from rasterio.fill import fillnodata
 
 from pipeline.config import DATA_DIR
 
@@ -89,16 +91,37 @@ def _reproject_3857(field, lon, lat):
     src_t = from_origin(west, north, dx, dy)
     h, w = field.shape
     dst_t, dw, dh = calculate_default_transform("EPSG:4326", "EPSG:3857", w, h, west, south, east, north)
+    F = 6                                            # refine ×F: bilinear-upsample the coarse 0.1° field to a smooth display raster
+    dst_t = rasterio.Affine(dst_t.a / F, dst_t.b, dst_t.c, dst_t.d, dst_t.e / F, dst_t.f)
+    dw, dh = dw * F, dh * F
     dst = np.full((dh, dw), np.nan, "float32")
     reproject(field, dst, src_transform=src_t, src_crs="EPSG:4326", dst_transform=dst_t,
               dst_crs="EPSG:3857", resampling=Resampling.bilinear, src_nodata=np.nan, dst_nodata=np.nan)
     W, S, E, N = transform_bounds("EPSG:3857", "EPSG:4326", *array_bounds(dh, dw, dst_t))
-    return dst, (W, S, E, N)
+    return dst, dst_t, (W, S, E, N)
 
 
-def _webp(field3857, cmap, vmin, vmax, path):
-    rgba = matplotlib.colormaps[cmap](mcolors.Normalize(vmin, vmax)(np.ma.masked_invalid(field3857)))
-    rgba[..., 3] = np.where(np.isfinite(field3857), 1.0, 0.0)        # transparent where no land
+def _province_mask(prov, shape, dst_t):
+    """Rasterize the province/coastline polygons (reprojected to 3857) → a land mask on the dst grid.
+
+    Clipping the coloured field to this mask gives crisp real coastlines instead of the blocky
+    0.1° land/ocean edge of the source grid."""
+    geoms = [transform_geom("EPSG:4326", "EPSG:3857", f["geometry"]) for f in prov["features"]]
+    return rasterize(geoms, out_shape=shape, transform=dst_t, fill=0, default_value=1,
+                     dtype="uint8", all_touched=True)
+
+
+def _webp(field3857, cmap, vmin, vmax, path, mask=None):
+    f = field3857
+    if mask is not None:
+        # bridge the ~1-cell coastal NaN strip so colour reaches the shore (open water stays NaN →
+        # transparent, since it's beyond max_search_distance), then clip alpha to the coastline mask.
+        f = fillnodata(f.copy(), mask=np.isfinite(f).astype("uint8"), max_search_distance=12.0)
+        alpha = mask.astype(bool) & np.isfinite(f)
+    else:
+        alpha = np.isfinite(f)
+    rgba = matplotlib.colormaps[cmap](mcolors.Normalize(vmin, vmax)(np.ma.masked_invalid(f)))
+    rgba[..., 3] = alpha.astype("float32")                          # transparent off-land / no-data
     Image.fromarray((rgba * 255).astype("uint8")).save(path, "WEBP", quality=88, method=6)
 
 
@@ -153,9 +176,12 @@ def build():
     lo = _nice(np.nanpercentile(allvals, 1), 5, np.floor)
     hi = _nice(np.nanpercentile(allvals, 99), 5, np.ceil)
     logger.info(f"mean-temp scale: {lo}..{hi} °C")
+    mask = None
     for key, f in means.items():
-        f3857, corners = _reproject_3857(f, lon, lat)
-        _webp(f3857, "RdYlBu_r", lo, hi, OUT / f"era5_mean_{key}.webp")
+        f3857, dst_t, corners = _reproject_3857(f, lon, lat)
+        if mask is None and prov:                        # same grid for every layer → rasterize once
+            mask = _province_mask(prov, f3857.shape, dst_t)
+        _webp(f3857, "RdYlBu_r", lo, hi, OUT / f"era5_mean_{key}.webp", mask)
         manifest["layers"].append(dict(key=f"mean_{key}", kind="mean", season=key,
             label=f"Mean temperature — {key} (1991–2020 normal)", webp=f"era5_mean_{key}.webp",
             corners=_corners(corners), vmin=lo, vmax=hi, cmap="RdYlBu_r", units="°C"))
@@ -167,8 +193,8 @@ def build():
     anom = _mean_c(ds, RECENT) - _mean_c(ds, BASE)
     amax = max(1.0, _nice(np.nanpercentile(np.abs(anom), 98), 0.5, np.ceil))
     logger.info(f"warming anomaly scale: ±{amax} °C; Canada-land mean Δ = {np.nanmean(anom):.2f} °C")
-    a3857, corners = _reproject_3857(anom, lon, lat)
-    _webp(a3857, "RdBu_r", -amax, amax, OUT / "era5_warming_annual.webp")
+    a3857, dst_t, corners = _reproject_3857(anom, lon, lat)
+    _webp(a3857, "RdBu_r", -amax, amax, OUT / "era5_warming_annual.webp", mask)
     manifest["layers"].append(dict(key="warming_annual", kind="anomaly", season="annual",
         label="Warming — annual mean, 2016–2025 vs 1961–1990", webp="era5_warming_annual.webp",
         corners=_corners(corners), vmin=-amax, vmax=amax, cmap="RdBu_r", units="°C"))

@@ -19,6 +19,7 @@ LATEST_YEAR/LATEST_MONTH** to the newest available month:
 Heavy CDS pull (75 yr × 12 mo) → not weekly. Deps: cdsapi, xarray, rasterio, matplotlib, Pillow.
 Attribution required on every map: "Generated using Copernicus Climate Change Service information".
 """
+import calendar
 import json
 import logging
 from pathlib import Path
@@ -47,9 +48,8 @@ AREA = [84, -141, 41, -52]                        # Canada bbox N,W,S,E
 LATEST_YEAR, LATEST_MONTH = 2026, 5               # newest available ERA5-Land month — BUMP each refresh
 NORMAL = range(1991, 2021)                        # WMO current normal (fixed)
 RECENT, BASE = range(2016, 2026), range(1961, 1991)   # warming: latest 10 full years vs the 1961–1990 reference (matches the page baseline)
-HOVER_STEP = 3                                    # hover-point grid downsample (~0.3° ≈ 32 km on visible land)
-SEASONS = {"annual": None, "winter": [12, 1, 2], "spring": [3, 4, 5],
-           "summer": [6, 7, 8], "autumn": [9, 10, 11]}
+HOVER_STEP = 4                                    # hover-point grid downsample (~0.4° ≈ 43 km on visible land)
+MONTHS = [(f"{m:02d}", calendar.month_name[m]) for m in range(1, 13)]   # 12 calendar months → monthly normals
 
 
 def pull():
@@ -85,14 +85,14 @@ def _mean_c(ds, years, months=None):
     return sub["t2m"].mean("valid_time").values.astype("float32") - 273.15
 
 
-def _reproject_3857(field, lon, lat):
-    """4326 (lat desc, lon asc) → 3857; returns (array, (W, S, E, N) WGS84 corners)."""
+def _reproject_3857(field, lon, lat, F=6):
+    """4326 (lat desc, lon asc) → 3857; returns (array, dst_transform, (W, S, E, N) corners).
+    F = ×refine: bilinear-upsample the coarse 0.1° field to a smooth raster (lower F = lighter file)."""
     dx, dy = abs(lon[1] - lon[0]), abs(lat[1] - lat[0])
     west, north, south, east = lon.min() - dx/2, lat.max() + dy/2, lat.min() - dy/2, lon.max() + dx/2
     src_t = from_origin(west, north, dx, dy)
     h, w = field.shape
     dst_t, dw, dh = calculate_default_transform("EPSG:4326", "EPSG:3857", w, h, west, south, east, north)
-    F = 6                                            # refine ×F: bilinear-upsample the coarse 0.1° field to a smooth display raster
     dst_t = rasterio.Affine(dst_t.a / F, dst_t.b, dst_t.c, dst_t.d, dst_t.e / F, dst_t.f)
     dw, dh = dw * F, dh * F
     dst = np.full((dh, dw), np.nan, "float32")
@@ -215,36 +215,36 @@ def build():
                 "source": "ECMWF Copernicus Climate Change Service — ERA5-Land",
                 "attribution": "Generated using Copernicus Climate Change Service information"}
 
-    # ---- current mean (1991–2020 normal); annual + seasons share one scale ----
-    means = {k: _mean_c(ds, NORMAL, mo) for k, mo in SEASONS.items()}
+    # ---- monthly normals (1991–2020); all 12 months share ONE scale so flipping through the
+    #      selector shows the seasonal swing as colour (and the legend stays put). F=4 keeps 12
+    #      images affordable; the warming hero map below stays F=6. ----
+    means = {mk: _mean_c(ds, NORMAL, [int(mk)]) for mk, _ in MONTHS}
     allvals = np.concatenate([f.ravel() for f in means.values()])
     lo = _nice(np.nanpercentile(allvals, 1), 5, np.floor)
     hi = _nice(np.nanpercentile(allvals, 99), 5, np.ceil)
-    logger.info(f"mean-temp scale: {lo}..{hi} °C")
+    logger.info(f"monthly-temp scale: {lo}..{hi} °C")
     if src_mask is not None:
-        pidx, plon, plat = _hover_grid(src_mask, lat, lon, means["annual"], HOVER_STEP)
+        pidx, plon, plat = _hover_grid(src_mask, lat, lon, means["07"], HOVER_STEP)   # July = full land coverage
         points = {"lon": plon, "lat": plat, "vals": {}}
     mask = None
-    for key, f in means.items():
-        f3857, dst_t, corners = _reproject_3857(f, lon, lat)
-        if mask is None and prov:                        # same grid for every layer → rasterize once
+    for mk, mlabel in MONTHS:
+        f = means[mk]
+        f3857, dst_t, corners = _reproject_3857(f, lon, lat, F=4)
+        if mask is None and prov:                        # same F=4 grid for every month → rasterize once
             mask = _land_mask(prov, lakes, f3857.shape, dst_t)
-        _webp(f3857, "RdYlBu_r", lo, hi, OUT / f"era5_mean_{key}.webp", mask)
+        _webp(f3857, "RdYlBu_r", lo, hi, OUT / f"era5_month_{mk}.webp", mask)
         if src_mask is not None:
-            points["vals"][f"mean_{key}"] = _sample(f, pidx)
-        manifest["layers"].append(dict(key=f"mean_{key}", kind="mean", season=key,
-            label=f"Mean temperature — {key} (1991–2020 normal)", webp=f"era5_mean_{key}.webp",
-            corners=_corners(corners), vmin=lo, vmax=hi, cmap="RdYlBu_r", units="°C"))
-        if key in ("annual", "summer", "winter"):
-            _preview(f, lon, lat, "RdYlBu_r", lo, hi,
-                     f"Mean 2 m temperature — {key} (ERA5-Land, 1991–2020)", OUT / f"_preview_mean_{key}.png", prov)
+            points["vals"][f"month_{mk}"] = _sample(f, pidx)
+        manifest["layers"].append(dict(key=f"month_{mk}", kind="month", month=int(mk), label=mlabel,
+            webp=f"era5_month_{mk}.webp", corners=_corners(corners), vmin=lo, vmax=hi, cmap="RdYlBu_r", units="°C"))
 
-    # ---- warming: latest 10 full years minus mid-century, annual ----
+    # ---- warming: latest 10 full years minus mid-century, annual (hero map, F=6) ----
     anom = _mean_c(ds, RECENT) - _mean_c(ds, BASE)
     amax = max(1.0, _nice(np.nanpercentile(np.abs(anom), 98), 0.5, np.ceil))
     logger.info(f"warming anomaly scale: ±{amax} °C; Canada-land mean Δ = {np.nanmean(anom):.2f} °C")
-    a3857, dst_t, corners = _reproject_3857(anom, lon, lat)
-    _webp(a3857, "RdBu_r", -amax, amax, OUT / "era5_warming_annual.webp", mask)
+    a3857, dst_t, corners = _reproject_3857(anom, lon, lat)          # F=6
+    mask_w = _land_mask(prov, lakes, a3857.shape, dst_t) if prov is not None else None
+    _webp(a3857, "RdBu_r", -amax, amax, OUT / "era5_warming_annual.webp", mask_w)
     if src_mask is not None:
         points["vals"]["warming_annual"] = _sample(anom, pidx)
     manifest["layers"].append(dict(key="warming_annual", kind="anomaly", season="annual",

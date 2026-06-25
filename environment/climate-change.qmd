@@ -55,13 +55,14 @@ else:
 The national average hides the geography. These continuous maps fill it in, drawn from
 **ERA5-Land** — the European Centre's high-resolution (~9 km) reanalysis, which blends weather
 observations with a physical model into a gap-free temperature field over the land (oceans and
-large lakes are left blank). The first map is the recent climate — average temperatures over the
-**1991–2020** normal. The second is the **change since the mid-century**: warming that reaches the
-whole country and runs deepest across the North.
+large lakes are left blank). The first map shows the **typical temperature for each month**
+(the 1991–2020 normal) — pick a month to see what it's usually like where you live. The second is the
+**change since the mid-century**: warming that reaches the whole country and runs deepest across the North.
+Hover anywhere for the value at that spot.
 
 ```{python}
 #| echo: false
-import json, base64
+import json, base64, datetime
 from IPython.display import display, HTML
 from pipeline.charts import relief_map
 
@@ -97,13 +98,35 @@ def _climate_map(key, title, src, diverging=False, hover_label=None):
                      hover_fmt="+.1f" if diverging else ".1f", hover_suffix=" °C")
     fig.show(config=_CFG)
     display(_legend(title, L["cmap"], L["vmin"], L["vmax"], diverging))
+
+def _month_map(src):
+    """Monthly-normal temperature map with a month selector (defaults to the current month).
+    The dropdown swaps the image layer's source + the hover values; all months share one scale,
+    so the legend is fixed and flipping months reads the seasonal swing as colour."""
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
+    months = [l for l in man["layers"] if l.get("kind") == "month"]
+    di = next((i for i, l in enumerate(months) if l["month"] == datetime.date.today().month), 0)
+    vals = _pts.get("vals") or {}
+    L0 = months[di]
+    fig = relief_map(_uri(L0["webp"]), L0["corners"], boundary_geojson=prov, zoom=2.2,
+                     source_note=f"{src} {man['attribution']}.",
+                     hover_lon=_pts.get("lon"), hover_lat=_pts.get("lat"), hover_val=vals.get(L0["key"]),
+                     hover_label="Average temperature", hover_fmt=".1f", hover_suffix=" °C")
+    btns = [dict(label=l["label"], method="update",
+                 args=[{"customdata": [vals.get(l["key"])]},
+                       {"mapbox.layers[1].source": _uri(l["webp"])}]) for l in months]
+    menu = dict(type="dropdown", direction="down", active=di, showactive=True,
+                x=0.01, y=0.99, xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc",
+                borderwidth=1, font=dict(size=12), pad=dict(t=2, b=2, l=4, r=4), buttons=btns)
+    fig.update_layout(updatemenus=list(fig.layout.updatemenus) + [menu])
+    fig.show(config=_CFG)
+    display(_legend("Average temperature by month (1991–2020 normal)", L0["cmap"], L0["vmin"], L0["vmax"], False))
 ```
 
 ```{python}
 #| echo: false
 if os.path.exists(_man_p):
-    _climate_map("mean_annual", "Average annual temperature (1991–2020)",
-        "Source: ECMWF Copernicus Climate Change Service — ERA5-Land monthly means, 1991–2020 normal.")
+    _month_map("Source: ECMWF Copernicus Climate Change Service — ERA5-Land monthly means, 1991–2020 normal.")
 else:
     print("Climate map not yet available — run python -m pipeline.build_era5_climate.")
 ```

@@ -47,6 +47,7 @@ AREA = [84, -141, 41, -52]                        # Canada bbox N,W,S,E
 LATEST_YEAR, LATEST_MONTH = 2026, 5               # newest available ERA5-Land month — BUMP each refresh
 NORMAL = range(1991, 2021)                        # WMO current normal (fixed)
 RECENT, BASE = range(2016, 2026), range(1961, 1991)   # warming: latest 10 full years vs the 1961–1990 reference (matches the page baseline)
+HOVER_STEP = 7                                    # hover-point grid downsample (~0.7° ≈ 75 km on visible land)
 SEASONS = {"annual": None, "winter": [12, 1, 2], "spring": [3, 4, 5],
            "summer": [6, 7, 8], "autumn": [9, 10, 11]}
 
@@ -165,6 +166,32 @@ def _corners(c):
     return [[W, N], [E, N], [E, S], [W, S]]          # TL, TR, BR, BL (lon, lat)
 
 
+def _source_landmask(land_gj, lakes_gj, lat, lon):
+    """Land-minus-lakes mask on the SOURCE lat/lon grid — keeps hover points on visible land."""
+    dx, dy = abs(lon[1] - lon[0]), abs(lat[1] - lat[0])
+    t = from_origin(lon.min() - dx / 2, lat.max() + dy / 2, dx, dy)   # 4326, rows north→south
+    shape = (len(lat), len(lon))
+    land = rasterize([f["geometry"] for f in land_gj["features"]], out_shape=shape, transform=t,
+                     fill=0, default_value=1, all_touched=False, dtype="uint8")
+    if lakes_gj:
+        land = land & (1 - rasterize([f["geometry"] for f in lakes_gj["features"]], out_shape=shape,
+                                     transform=t, fill=0, default_value=1, all_touched=False, dtype="uint8"))
+    return land
+
+
+def _hover_points(field, lon, lat, src_mask, step):
+    """Downsampled (lon, lat, value) on visible land → the relief_map invisible hover grid."""
+    lons, lats, vals = [], [], []
+    for j in range(0, len(lat), step):
+        for i in range(0, len(lon), step):
+            v = field[j, i]
+            if src_mask[j, i] and np.isfinite(v):
+                lons.append(round(float(lon[i]), 3))
+                lats.append(round(float(lat[j]), 3))
+                vals.append(round(float(v), 1))
+    return {"lon": lons, "lat": lats, "val": vals}
+
+
 def build():
     pull()
     OUT.mkdir(parents=True, exist_ok=True)
@@ -176,6 +203,8 @@ def build():
     prov = json.load(open(prov_path)) if prov_path.exists() else None
     lakes_path = OUT / "lakes_major.geojson"            # subtract the big lakes so they read as water
     lakes = json.load(open(lakes_path)) if lakes_path.exists() else None
+    src_mask = _source_landmask(prov, lakes, lat, lon) if prov is not None else None
+    points = {}                                         # layer key -> {lon,lat,val} for the hover overlay
     manifest = {"layers": [], "latest_month": latest,
                 "source": "ECMWF Copernicus Climate Change Service — ERA5-Land",
                 "attribution": "Generated using Copernicus Climate Change Service information"}
@@ -192,6 +221,8 @@ def build():
         if mask is None and prov:                        # same grid for every layer → rasterize once
             mask = _land_mask(prov, lakes, f3857.shape, dst_t)
         _webp(f3857, "RdYlBu_r", lo, hi, OUT / f"era5_mean_{key}.webp", mask)
+        if src_mask is not None:
+            points[f"mean_{key}"] = _hover_points(f, lon, lat, src_mask, HOVER_STEP)
         manifest["layers"].append(dict(key=f"mean_{key}", kind="mean", season=key,
             label=f"Mean temperature — {key} (1991–2020 normal)", webp=f"era5_mean_{key}.webp",
             corners=_corners(corners), vmin=lo, vmax=hi, cmap="RdYlBu_r", units="°C"))
@@ -205,6 +236,8 @@ def build():
     logger.info(f"warming anomaly scale: ±{amax} °C; Canada-land mean Δ = {np.nanmean(anom):.2f} °C")
     a3857, dst_t, corners = _reproject_3857(anom, lon, lat)
     _webp(a3857, "RdBu_r", -amax, amax, OUT / "era5_warming_annual.webp", mask)
+    if src_mask is not None:
+        points["warming_annual"] = _hover_points(anom, lon, lat, src_mask, HOVER_STEP)
     manifest["layers"].append(dict(key="warming_annual", kind="anomaly", season="annual",
         label="Warming — annual mean, 2016–2025 vs 1961–1990", webp="era5_warming_annual.webp",
         corners=_corners(corners), vmin=-amax, vmax=amax, cmap="RdBu_r", units="°C"))
@@ -212,7 +245,9 @@ def build():
              "Warming — annual mean, 2016–2025 vs 1961–1990 (ERA5-Land)", OUT / "_preview_warming.png", prov)
 
     json.dump(manifest, open(OUT / "era5_climate_manifest.json", "w"), indent=0)
-    logger.info(f"wrote {len(manifest['layers'])} layers + manifest (data through {latest}) -> {OUT}")
+    json.dump(points, open(OUT / "era5_climate_points.json", "w"))
+    npts = sum(len(p["val"]) for p in points.values())
+    logger.info(f"wrote {len(manifest['layers'])} layers + manifest + {npts} hover points (data through {latest}) -> {OUT}")
 
 
 if __name__ == "__main__":

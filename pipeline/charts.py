@@ -979,14 +979,19 @@ def add_polygon_overlay(fig, geojson, df, location_col, *, legend_name, line_col
 
 
 def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color="#8a8f96",
-               boundary_width=0.5, source_note=None, center=None, zoom=2.3, height=660):
+               boundary_width=0.5, source_note=None, center=None, zoom=2.3, height=660,
+               hover_lon=None, hover_lat=None, hover_val=None, hover_label="Value",
+               hover_fmt=".1f", hover_suffix=""):
     """Raster-image overlay map: places a pre-rendered **Web-Mercator** image (e.g. the
     elevation relief PNG, warped to EPSG:3857) over the free carto basemap as a mapbox
     `image` layer, positioned by its lon/lat **corner coordinates** (clockwise TL, TR, BR,
     BL — the order Plotly expects; the image is rendered in 3857 but the corners are WGS84).
-    `boundary_geojson` draws province/territory lines over the image; place labels stay on
-    top. The image is the surface, so there's no hover or legend — an invisible
-    Scattermapbox trace just anchors the mapbox subplot."""
+    `boundary_geojson` draws province/territory lines over the image; place labels stay on top.
+
+    An image can't be hovered, so to read precise values pass `hover_lon`/`hover_lat`/`hover_val`
+    (parallel lists, e.g. a downsampled land grid): they become an **invisible point grid** whose
+    tooltip shows the value at that spot (`hover_label: <val><hover_suffix>`, formatted `hover_fmt`),
+    with a **Hover on/off** toggle. Without them, an invisible anchor trace just holds the subplot."""
     center = center or {"lat": 62.0, "lon": -96.0}
     base = _labelled_basemap()
     layers = [base[0],
@@ -995,9 +1000,19 @@ def relief_map(image_uri, coordinates, *, boundary_geojson=None, boundary_color=
         layers.append(dict(sourcetype="geojson", source=boundary_geojson, type="line",
                            color=boundary_color, line=dict(width=boundary_width), below="traces"))
     layers.append(base[1])
-    fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
+    if hover_lon is not None and len(hover_lon):
+        fig = go.Figure(go.Scattermapbox(
+            lat=hover_lat, lon=hover_lon, mode="markers", name="",
+            marker=dict(size=11, color="rgba(0,0,0,0)"),          # invisible, but catches the cursor
+            customdata=hover_val,
+            hovertemplate=f"{hover_label}: %{{customdata:{hover_fmt}}}{hover_suffix}<extra></extra>",
+            showlegend=False))
+        hovermode, menus = "closest", [_hover_toggle()]
+    else:
+        fig = go.Figure(go.Scattermapbox(lat=[None], lon=[None], hoverinfo="skip", showlegend=False))
+        hovermode, menus = False, []
     fig.update_layout(mapbox_style="white-bg", mapbox_layers=layers,
-                      mapbox_zoom=zoom, mapbox_center=center,
+                      mapbox_zoom=zoom, mapbox_center=center, hovermode=hovermode, updatemenus=menus,
                       margin=dict(l=0, r=0, t=10, b=80), height=height, plot_bgcolor="white")
     if source_note:
         _map_source_note(fig, source_note)

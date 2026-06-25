@@ -4,12 +4,12 @@
   "source_table": "Statistics Canada 37-10-0130-01",
   "frequency": "annual",
   "unit": "% of population (tertiary education)",
-  "retrieved_at": "2026-06-24T16:30:01.932133+00:00",
+  "retrieved_at": "2026-06-25T19:51:49.848832+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [
-    "Tertiary education, both genders; Canada + OECD-average geographies; by age group"
+    "Canada + OECD-average geographies; by gender (Total/Men/Women), age group, and attainment level (tertiary total + College/CEGEP=short-cycle, Bachelor's, Master's/Doctoral)"
   ],
   "notes": null,
-  "row_count": 250
+  "row_count": 2370
 }

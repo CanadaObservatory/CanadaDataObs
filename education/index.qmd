@@ -11,7 +11,7 @@ import os
 import pandas as pd
 import plotly.graph_objects as go
 from pipeline.config import CANADA_COLOR, CATEGORICAL_COLORS, get_data_date
-from pipeline.charts import lines_over_time, category_bar, province_colors
+from pipeline.charts import lines_over_time, category_bar, province_colors, stacked_area
 
 # Load tuition and deflate to constant dollars of the latest year, using the
 # all-items CPI (annual average) — so the trend charts show *real* tuition.
@@ -38,24 +38,169 @@ By international standards Canada has one of the most highly educated population
 ta_path = "data/education/statcan_tertiary_attainment.csv"
 if os.path.exists(ta_path):
     ta = pd.read_csv(ta_path)
-    t = ta[ta["age_group"] == "25–64 (all)"]
-    ca = t[t["geo"] == "Canada"].sort_values("year")
-    oe = t[t["geo"] == "OECD average"].sort_values("year")
+    t = ta[(ta["age_group"] == "25–64 (all)") & (ta["level"] == "Tertiary (all)")
+           & (ta["gender"] == "Total")].copy()
+    t["date"] = pd.to_datetime(t["year"], format="%Y")
+    ca = t[t["geo"] == "Canada"].sort_values("date")
+    oe = t[t["geo"] == "OECD average"].sort_values("date")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=oe["year"], y=oe["tertiary_pct"], name="OECD average", mode="lines",
+    fig.add_trace(go.Scatter(x=oe["date"], y=oe["pct"], name="OECD average", mode="lines",
         line=dict(color="#555555", width=2, dash="dash"), hovertemplate="OECD average: %{y:.0f}%<extra></extra>"))
-    fig.add_trace(go.Scatter(x=ca["year"], y=ca["tertiary_pct"], name="Canada", mode="lines+markers",
+    fig.add_trace(go.Scatter(x=ca["date"], y=ca["pct"], name="Canada", mode="lines+markers",
         line=dict(color=CANADA_COLOR, width=3), marker=dict(size=5), hovertemplate="Canada: %{y:.0f}%<extra></extra>"))
-    fig.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
+    fig.update_layout(plot_bgcolor="white", height=480, hovermode="x unified",
         yaxis=dict(title="Adults 25–64 with tertiary education (%)", ticksuffix="%", gridcolor="#e0e0e0", rangemode="tozero"),
-        xaxis=dict(title="", gridcolor="#e0e0e0"),
+        xaxis=dict(title="", gridcolor="#e0e0e0", type="date", rangeslider=dict(visible=True)),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, bgcolor="rgba(255,255,255,0.6)"),
-        margin=dict(t=40, b=80, r=20))
+        margin=dict(t=40, b=70, r=20))
     fig.add_annotation(text=f"Source: Statistics Canada, Table 37-10-0130-01 | Data as of: {get_data_date(ta_path)}",
-        xref="paper", yref="paper", x=0, y=-0.18, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+        xref="paper", yref="paper", x=0, y=-0.34, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Attainment data not yet available. Run the data pipeline.")
+```
+
+### What kind of tertiary education?
+
+"Tertiary" combines two quite different paths: shorter, more applied **college and CEGEP** programs (short-cycle tertiary) and **university** degrees. Splitting Canada's 25–64 figure into its parts shows how much of the country's high attainment rests on the college and CEGEP system — roughly as large a share as bachelor's degrees — alongside a steadily growing share holding master's or doctoral qualifications.
+
+```{python}
+#| echo: false
+if os.path.exists(ta_path):
+    br = ta[(ta["age_group"] == "25–64 (all)") & (ta["geo"] == "Canada")
+            & (ta["gender"] == "Total") & (ta["level"] != "Tertiary (all)")].copy()
+    # Attainment counts the HIGHEST credential, so the bachelor's band excludes
+    # those who went on to a master's/doctorate — label it "(only)" to avoid the
+    # "bachelor's or higher" misread.
+    br["level"] = br["level"].replace({"Bachelor's": "Bachelor's (only)"})
+    order = ["College/CEGEP", "Bachelor's (only)", "Master's/Doctoral"]
+    fig = stacked_area(br, "year", "pct", "level",
+        yaxis_title="Adults 25–64 (%)", group_order=order,
+        colors={"College/CEGEP": CATEGORICAL_COLORS[0], "Bachelor's (only)": CATEGORICAL_COLORS[2],
+                "Master's/Doctoral": CATEGORICAL_COLORS[3]},
+        yticksuffix="%", hover_decimals=0, rangeslider=True,
+        source_note=f"Source: Statistics Canada, Table 37-10-0130-01 | Data as of: {get_data_date(ta_path)}")
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Attainment data not yet available. Run the data pipeline.")
+```
+
+### The gender gap
+
+Among working-age Canadians, women are now more likely than men to hold a tertiary credential, and the gap has widened over time — from about five percentage points in 2000 to roughly fourteen today. The lead shows up at every level. At the master's and doctoral level, where men were slightly ahead at the start of the century, women have since moved in front. Use the dropdown to switch between any tertiary education and its components.
+
+```{python}
+#| echo: false
+if os.path.exists(ta_path):
+    g = ta[(ta["age_group"] == "25–64 (all)") & (ta["geo"] == "Canada")
+           & (ta["gender"].isin(["Men", "Women"]))].copy()
+    g["date"] = pd.to_datetime(g["year"], format="%Y")
+    levels = ["Tertiary (all)", "College/CEGEP", "Bachelor's", "Master's/Doctoral"]
+    level_labels = {"Tertiary (all)": "Any tertiary", "College/CEGEP": "College / CEGEP",
+                    "Bachelor's": "Bachelor's (only)", "Master's/Doctoral": "Master's / doctoral"}
+    sexes = [("Men", "#4477aa"), ("Women", "#ee8866")]
+    default = "Tertiary (all)"
+    fig = go.Figure()
+    for sex, color in sexes:
+        s = g[(g["gender"] == sex) & (g["level"] == default)].sort_values("date")
+        fig.add_trace(go.Scatter(x=s["date"], y=s["pct"], name=sex, mode="lines+markers",
+            line=dict(color=color, width=3), marker=dict(size=5),
+            hovertemplate=f"{sex}: %{{y:.0f}}%<extra></extra>"))
+    buttons = []
+    for lvl in levels:
+        xs, ys = [], []
+        for sex, _ in sexes:
+            s = g[(g["gender"] == sex) & (g["level"] == lvl)].sort_values("date")
+            xs.append(s["date"].tolist()); ys.append(s["pct"].tolist())
+        buttons.append(dict(label=level_labels[lvl], method="restyle", args=[{"x": xs, "y": ys}]))
+    fig.update_layout(plot_bgcolor="white", height=480, hovermode="x unified",
+        yaxis=dict(title="Adults 25–64 (%)", ticksuffix="%", gridcolor="#e0e0e0", rangemode="tozero"),
+        xaxis=dict(title="", gridcolor="#e0e0e0", type="date", rangeslider=dict(visible=True)),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, bgcolor="rgba(255,255,255,0.6)"),
+        updatemenus=[dict(buttons=buttons, active=0, showactive=True,
+            x=1.0, xanchor="right", y=1.14, yanchor="top")],
+        margin=dict(t=66, b=70, r=20))
+    fig.add_annotation(text="Attainment level:", xref="paper", yref="paper",
+        x=0.60, y=1.15, xanchor="right", yanchor="top", showarrow=False, font=dict(size=11, color="#555"))
+    fig.add_annotation(text=f"Source: Statistics Canada, Table 37-10-0130-01 | Data as of: {get_data_date(ta_path)}",
+        xref="paper", yref="paper", x=0, y=-0.34, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Attainment data not yet available. Run the data pipeline.")
+```
+
+### Gender balance across fields of study
+
+Graduates are not spread evenly across disciplines. Women earn the majority of credentials in most fields — and a large majority in education, health, and the social sciences — while men remain the majority in only two: mathematics and computer science, and architecture and engineering. The first chart shows the split among the most recent year's graduates; the second shows how each field's balance has moved since 1992. Most fields have been broadly stable, but the share of women among computer-science graduates is lower today than it was in the early 1990s, while engineering has edged up from a low base.
+
+```{python}
+#| echo: false
+gf_path = "data/education/statcan_grads_by_field.csv"
+if os.path.exists(gf_path):
+    gf = pd.read_csv(gf_path)
+    yr = int(gf["year"].max())
+    latest = gf[gf["year"] == yr]
+    levels = ["All credentials", "College", "Bachelor's", "Master's", "Doctorate"]
+    # Fixed field order by the overall (all-credentials) women share — highest at
+    # top — kept constant so the dropdown only restyles values, not the row order.
+    fields = list(latest[latest["level"] == "All credentials"].sort_values("pct_women")["field"])
+    def _xy(lvl):
+        s = latest[latest["level"] == lvl].set_index("field").reindex(fields)
+        w = s["pct_women"].tolist()
+        return (w, [100 - v if v == v else None for v in w],
+                s["women"].tolist(), s["men"].tolist())
+    w0, m0, wc0, mc0 = _xy("All credentials")
+    fig = go.Figure()
+    fig.add_trace(go.Bar(y=fields, x=w0, name="Women", orientation="h", marker_color="#ee8866",
+        customdata=wc0, text=[f"{v:.0f}%" if v == v else "" for v in w0],
+        textposition="inside", insidetextanchor="middle", textfont=dict(color="white", size=11),
+        hovertemplate="Women: %{x:.1f}%  (%{customdata:,.0f} graduates)<extra></extra>"))
+    fig.add_trace(go.Bar(y=fields, x=m0, name="Men", orientation="h", marker_color="#4477aa",
+        customdata=mc0, hovertemplate="Men: %{x:.1f}%  (%{customdata:,.0f} graduates)<extra></extra>"))
+    buttons = []
+    for lvl in levels:
+        w, m, wc, mc = _xy(lvl)
+        buttons.append(dict(label=lvl, method="restyle", args=[{
+            "x": [w, m], "customdata": [wc, mc],
+            "text": [[f"{v:.0f}%" if v == v else "" for v in w], [""] * len(m)]}]))
+    fig.add_vline(x=50, line_dash="dash", line_color="#333", line_width=1.5)
+    fig.update_layout(barmode="stack", plot_bgcolor="white", height=480,
+        xaxis=dict(title="Share of graduates (%)", ticksuffix="%", range=[0, 100], gridcolor="#e0e0e0"),
+        yaxis=dict(title="", automargin=True),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0, bgcolor="rgba(255,255,255,0.6)"),
+        updatemenus=[dict(buttons=buttons, active=0, showactive=True,
+            x=1.0, xanchor="right", y=1.14, yanchor="top")],
+        margin=dict(t=72, b=104, r=20))
+    fig.add_annotation(text="Credential level:", xref="paper", yref="paper",
+        x=0.66, y=1.15, xanchor="right", yanchor="top", showarrow=False, font=dict(size=11, color="#555"))
+    fig.add_annotation(text="50% = equal balance", x=50, y=1.0, yref="paper", yanchor="bottom",
+        showarrow=False, font=dict(size=10, color="#666"))
+    fig.add_annotation(text=f"Source: Statistics Canada, Table 37-10-0135-01 (graduates, {yr}) | Data as of: {get_data_date(gf_path)}",
+        xref="paper", yref="paper", x=0, y=-0.20, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
+    fig.show(config={"displayModeBar": False})
+else:
+    print("Field-of-study data not yet available. Run the data pipeline.")
+```
+
+```{python}
+#| echo: false
+if os.path.exists(gf_path):
+    tot = gf[gf["level"] == "All credentials"]
+    order = list(tot[tot["year"] == yr].sort_values("pct_women", ascending=False)["field"])
+    key = ["Education", "Health", "Social sciences & law", "Humanities",
+           "Physical & life sciences", "Business & public admin",
+           "Math & computer science", "Architecture & engineering"]
+    legendonly = [f for f in order if f not in key]
+    fig = lines_over_time(tot, "year", "pct_women", "field",
+        yaxis_title="Women (% of graduates)", yticksuffix="%", hover_decimals=1,
+        group_order=order, legendonly_groups=legendonly,
+        source_note=f"Source: Statistics Canada, Table 37-10-0135-01 | Data as of: {get_data_date(gf_path)}")
+    fig.add_hline(y=50, line_dash="dash", line_color="#999", line_width=1,
+        annotation_text="Parity (50%)", annotation_position="bottom right",
+        annotation_font=dict(size=10, color="#777"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Field-of-study data not yet available. Run the data pipeline.")
 ```
 
 ## Undergraduate tuition
@@ -139,5 +284,6 @@ else:
 ## Download data
 
 - [Tertiary educational attainment, Canada vs OECD (CSV)](../data/education/statcan_tertiary_attainment.csv) — Statistics Canada 37-10-0130-01
+- [Postsecondary graduates by field of study & gender (CSV)](../data/education/statcan_grads_by_field.csv) — Statistics Canada 37-10-0135-01
 - [University tuition by level & province (CSV)](../data/education/statcan_tuition.csv) — Statistics Canada 37-10-0045-01
 - [Undergraduate tuition by field of study (CSV)](../data/education/statcan_tuition_by_field.csv) — Statistics Canada 37-10-0003-01

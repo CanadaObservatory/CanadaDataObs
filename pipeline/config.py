@@ -1156,6 +1156,12 @@ INDICATORS = [
               "Tertiary educational attainment", "% of population", "annual",
               fetch_fn="fetch_tertiary_attainment", output_subpath="statcan_tertiary_attainment.csv",
               source_table="Statistics Canada 37-10-0130-01"),
+    # Gender balance of postsecondary graduates by field of study (PSIS — the
+    # gendered-disciplines story: women majority overall, minority in CS/engineering).
+    Indicator("grads_by_field", "education", "custom",
+              "Postsecondary graduates by field & gender", "graduates / % women", "annual",
+              fetch_fn="fetch_grads_by_field", output_subpath="statcan_grads_by_field.csv",
+              source_table="Statistics Canada 37-10-0135-01"),
 
     # ----- Environment (OECD Green Growth) -----
     Indicator("co2_per_capita", "environment", "oecd",

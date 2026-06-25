@@ -1190,8 +1190,9 @@ if __name__ == "__main__":
 
 def fetch_tertiary_attainment():
     """Tertiary educational attainment (% of the population), Canada vs the OECD
-    average, over time and by age group. StatCan 37-10-0130-01 (Tertiary
-    education, both genders).
+    average, over time, by age group and by attainment level (the tertiary total
+    plus its College/CEGEP / Bachelor's / Master's-or-Doctoral components),
+    by gender (Total / Men / Women). StatCan 37-10-0130-01.
 
     The OECD-average benchmark is built into the table's geography dimension, so
     Canada is directly comparable here — unlike the OECD Education-at-a-Glance
@@ -1211,19 +1212,30 @@ def fetch_tertiary_attainment():
         "45 to 54 years": "45–54",
         "55 to 64 years": "55–64",
     }
-    d = d[(d["Education attainment level"] == "Tertiary education")
-          & (d["Gender"] == "Total - Gender")
+    # The tertiary rollup plus its three components — the college/CEGEP vs
+    # university split. The three components sum to the "Tertiary (all)" total.
+    level_map = {
+        "Tertiary education": "Tertiary (all)",
+        "Short-cycle tertiary": "College/CEGEP",
+        "Bachelor's level": "Bachelor's",
+        "Master's or Doctoral level": "Master's/Doctoral",
+    }
+    gender_map = {"Total - Gender": "Total", "Men+": "Men", "Women+": "Women"}
+    d = d[(d["Education attainment level"].isin(level_map))
+          & (d["Gender"].isin(gender_map))
           & (d["GEO"].isin(["Canada", OECD]))
           & (d["Age group"].isin(age_map))].copy()
     if d.empty:
         return None
     d["geo"] = d["GEO"].replace({OECD: "OECD average"})
     d["age_group"] = d["Age group"].map(age_map)
+    d["gender"] = d["Gender"].map(gender_map)
+    d["level"] = d["Education attainment level"].map(level_map)
     d["year"] = d["REF_DATE"].astype(str).str[:4].astype(int)
-    d["tertiary_pct"] = pd.to_numeric(d["VALUE"], errors="coerce")
-    out = (d[["year", "geo", "age_group", "tertiary_pct"]]
-           .dropna(subset=["tertiary_pct"])
-           .sort_values(["geo", "age_group", "year"]).reset_index(drop=True))
+    d["pct"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    out = (d[["year", "geo", "age_group", "gender", "level", "pct"]]
+           .dropna(subset=["pct"])
+           .sort_values(["geo", "age_group", "gender", "level", "year"]).reset_index(drop=True))
     if out.empty:
         return None
     out_path = DATA_DIR / "education" / "statcan_tertiary_attainment.csv"
@@ -1233,7 +1245,87 @@ def fetch_tertiary_attainment():
                   source="Statistics Canada",
                   source_table="Statistics Canada 37-10-0130-01",
                   frequency="annual", unit="% of population (tertiary education)",
-                  transformations=["Tertiary education, both genders; Canada + OECD-average geographies; by age group"])
+                  transformations=["Canada + OECD-average geographies; by gender (Total/Men/Women), "
+                                   "age group, and attainment level (tertiary total + College/CEGEP="
+                                   "short-cycle, Bachelor's, Master's/Doctoral)"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
+def fetch_grads_by_field():
+    """Gender balance of postsecondary graduates by field of study, Canada.
+
+    StatCan 37-10-0135-01 (Postsecondary Student Information System): graduate
+    counts by the 11 broad CIP field groupings, filtered to Canada / all ISCED
+    levels / all ages / Man+Woman, 1992–. Emits women & men counts plus the
+    women's share per field and year — drives the "gender balance by discipline"
+    snapshot (latest year) and the women's-share-over-time trend on the Education
+    page. This is a graduate FLOW (annual), not the 25–64 attainment stock.
+    """
+    logger.info("fetch_grads_by_field (37-10-0135-01)")
+    try:
+        d = _get_table("37-10-0135-01")
+    except Exception as e:
+        logger.error(f"  failed: {e}")
+        return None
+    isced_col = "International Standard Classification of Education (ISCED)"
+    # Credential levels kept for the level dropdown (drop upper-secondary,
+    # post-secondary-non-tertiary, and "not applicable").
+    level_map = {
+        "Total, International Standard Classification of Education (ISCED)": "All credentials",
+        "Short-cycle tertiary education": "College",
+        "Bachelor's or equivalent": "Bachelor's",
+        "Master's or equivalent": "Master's",
+        "Doctoral or equivalent": "Doctorate",
+    }
+    # 11 substantive CIP groupings → short display names (drop Total, Unclassified,
+    # Other, and the non-credential "Personal improvement and leisure").
+    field_short = {
+        "Education [1]": "Education",
+        "Visual and performing arts, and communications technologies [2]": "Arts & communications",
+        "Humanities [3]": "Humanities",
+        "Social and behavioural sciences and law [4]": "Social sciences & law",
+        "Business, management and public administration [5]": "Business & public admin",
+        "Physical and life sciences and technologies [6]": "Physical & life sciences",
+        "Mathematics, computer and information sciences [7]": "Math & computer science",
+        "Architecture, engineering and related technologies [8]": "Architecture & engineering",
+        "Agriculture, natural resources and conservation [9]": "Agriculture & natural resources",
+        "Health and related fields [10]": "Health",
+        "Personal, protective and transportation services [11]": "Protective & transport services",
+    }
+    d = d[(d["GEO"] == "Canada")
+          & (d["Age group"] == "Total, age group")
+          & (d[isced_col].isin(level_map))
+          & (d["UOM"] == "Number")
+          & (d["Gender"].isin(["Man", "Woman"]))
+          & (d["Field of study"].isin(field_short))].copy()
+    if d.empty:
+        return None
+    d["level"] = d[isced_col].map(level_map)
+    d["field"] = d["Field of study"].map(field_short)
+    d["year"] = d["REF_DATE"].astype(str).str[:4].astype(int)
+    d["count"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    g = (d.pivot_table(index=["year", "level", "field"], columns="Gender", values="count",
+                       aggfunc="sum").reset_index()
+         .rename(columns={"Man": "men", "Woman": "women"}))
+    g = g.dropna(subset=["men", "women"])
+    g["total"] = g["men"] + g["women"]
+    g = g[g["total"] > 0]
+    g["pct_women"] = (g["women"] / g["total"] * 100).round(1)
+    out = (g[["year", "level", "field", "women", "men", "total", "pct_women"]]
+           .sort_values(["year", "level", "field"]).reset_index(drop=True))
+    if out.empty:
+        return None
+    out_path = DATA_DIR / "education" / "statcan_grads_by_field.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+                  source="Statistics Canada",
+                  source_table="Statistics Canada 37-10-0135-01",
+                  frequency="annual", unit="graduates / % women",
+                  transformations=["PSIS graduates; Canada; all ages; by ISCED credential level "
+                                   "(All/College/Bachelor's/Master's/Doctorate) and 11 broad CIP "
+                                   "field groupings; women/men counts + women's share"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
 

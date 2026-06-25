@@ -85,7 +85,7 @@ def _legend(title, cmap, vmin, vmax, diverging):
         f'<span>{mid}</span><span>{vmax:+.0f} °C</span></div></div>')
 
 def _climate_map(key, title, src, diverging=False):
-    man = json.load(open(_man_p)); prov = json.load(open("data/geo/prov_2021.geojson"))
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
     L = next(l for l in man["layers"] if l["key"] == key)
     fig = relief_map(_uri(L["webp"]), L["corners"], boundary_geojson=prov, zoom=2.2,
                      source_note=f"{src} {man['attribution']}.")

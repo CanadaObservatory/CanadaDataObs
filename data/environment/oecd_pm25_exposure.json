@@ -4,8 +4,9 @@
   "source_table": "OECD Green Growth Indicators",
   "frequency": "annual",
   "unit": "\u00b5g/m\u00b3",
-  "retrieved_at": "2026-06-20T15:50:54.719060+00:00",
+  "retrieved_at": "2026-06-24T16:30:29.032846+00:00",
   "latest_observation_date": "2020",
+  "next_release_date": null,
   "transformations": [
     "filtered to Mean population exposure to PM2.5 for OECD peer group"
   ],

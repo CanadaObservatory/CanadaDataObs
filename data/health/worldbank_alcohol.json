@@ -4,8 +4,9 @@
   "source_table": "World Bank / WHO Global Health Observatory",
   "frequency": "annual",
   "unit": "litres per capita",
-  "retrieved_at": "2026-06-22T18:19:18.374774+00:00",
+  "retrieved_at": "2026-06-24T16:28:59.728298+00:00",
   "latest_observation_date": "2020",
+  "next_release_date": null,
   "transformations": [
     "World Bank indicator SH.ALC.PCAP.LI, filtered to 17 OECD peers"
   ],

@@ -4,8 +4,9 @@
   "source_table": "25-10-0015-01, 25-10-0084-01",
   "frequency": "annual",
   "unit": "% of provincial electricity generation",
-  "retrieved_at": "2026-06-20T15:50:44.500209+00:00",
+  "retrieved_at": "2026-06-24T16:30:19.154439+00:00",
   "latest_observation_date": "2026-03",
+  "next_release_date": null,
   "transformations": [
     "base mix 25-10-0015-01 latest 12 months (2025-04\u20132026-03); fossil split into Coal/Natural gas/Oil by 25-10-0084-01 fuel shares (2024)"
   ],

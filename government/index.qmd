@@ -27,7 +27,7 @@ with OECD peers.
 #| echo: false
 import os
 import pandas as pd
-from pipeline.config import get_data_date, CANADA_COLOR
+from pipeline.config import get_data_date, CANADA_COLOR, CATEGORICAL_COLORS
 from pipeline.charts import (peer_comparison_line, ranked_bar, single_line, single_bar,
                              single_line_multi, lines_over_time, stacked_area, category_bar)
 ```
@@ -305,10 +305,11 @@ else:
 
 ## Executives in the federal public service
 
-Over time the federal public service has shifted toward more senior,
-knowledge-intensive work. One measure available as a consistent series is the
-**executive** cadre (the EX group): it has grown faster than the workforce as a
-whole and now makes up a little over 2.5% of all employees.
+The **executive** cadre (the EX group) is available as a consistent series. As a
+share of all employees it has held fairly steady — moving within a narrow band of
+roughly 2.4% to 2.6% since 2010, with a slight uptick in the most recent year.
+Both the executive ranks and the workforce as a whole have grown over the period,
+leaving their relative size little changed.
 
 ```{python}
 #| echo: false
@@ -320,7 +321,7 @@ if os.path.exists(exe_path):
     piv["share"] = piv["Executive"] / piv["total"] * 100
     piv["date"] = pd.to_datetime(piv["year"], format="%Y")
     fig = single_bar(piv, "date", "share", title="",
-        yaxis_title="Executives (% of employees)", color=CANADA_COLOR, yticksuffix="%",
+        yaxis_title="Executives (% of employees)", color=CATEGORICAL_COLORS[0], yticksuffix="%",
         customdata=piv[["Executive", "total"]].to_numpy(),
         hovertemplate="%{x|%Y}: %{y:.2f}% — %{customdata[0]:,.0f} executives of %{customdata[1]:,.0f} employees<extra></extra>",
         source_note=f"Source: Treasury Board of Canada Secretariat (GC InfoBase), employee population by executive level | Data as of: {get_data_date(exe_path)}")
@@ -355,8 +356,8 @@ The direction of travel is, however, well documented. According to Treasury
 Board's [Demographic Snapshot of the Federal Public Service, 2017](https://www.canada.ca/en/treasury-board-secretariat/services/innovation/human-resources-statistics/demographic-snapshot-federal-public-service-2017.html),
 the five largest knowledge-intensive groups (AS, PM, CS, EC and EX) grew from
 **31.8% of the core public administration in 2000 to 42.6% in 2017**, and the
-executive workforce grew **56%** over that period — consistent with the trend in
-the chart above.
+executive headcount grew **56%** over that period — though, as the chart above
+shows, the executive *share* of all employees has stayed close to flat.
 :::
 
 ## Who works in the public service

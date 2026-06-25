@@ -8,7 +8,7 @@ description: "Area burned across Canada each year, and the record 2023 fire seas
 import os
 import pandas as pd
 import plotly.graph_objects as go
-from pipeline.config import CANADA_COLOR, get_data_date
+from pipeline.config import CANADA_COLOR, get_data_date, CATEGORICAL_COLORS
 from pipeline.charts import bubble_map
 
 MAP_CONFIG = {"displaylogo": False, "scrollZoom": True,
@@ -27,7 +27,7 @@ if os.path.exists(wf_path):
     ca = w[w["geography"] == "Canada"].sort_values("year").copy()
     ca["mha"] = ca["area_burned_ha"] / 1e6
     fig = go.Figure(go.Bar(
-        x=ca["year"], y=ca["mha"], marker_color=CANADA_COLOR,
+        x=ca["year"], y=ca["mha"], marker_color=CATEGORICAL_COLORS[0],
         hovertemplate="<b>%{x}</b><br>%{y:.1f} million ha burned<extra></extra>"))
     fig.update_layout(
         plot_bgcolor="white", height=420,

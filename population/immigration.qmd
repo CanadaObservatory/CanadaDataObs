@@ -12,7 +12,7 @@ It complements the [Population & Growth](index.qmd) page (the pace of population
 import os
 import pandas as pd
 from pipeline.config import get_data_date, CATEGORICAL_COLORS
-from pipeline.charts import stacked_area, category_bar, single_bar
+from pipeline.charts import stacked_area, category_bar, single_bar, lines_over_time
 STEEL = CATEGORICAL_COLORS[0]
 ```
 
@@ -140,6 +140,30 @@ else:
     print("Asylum-outcomes data not yet available. Run the data pipeline.")
 ```
 
+## Do immigrants who worked here first earn more?
+
+Many immigrants spend time in Canada on a temporary permit — working or studying — before they become permanent residents. Following each year's admission cohort through the tax system shows how much that prior Canadian experience matters. Immigrants who **worked in Canada before admission** earn substantially more from their very first year as permanent residents, and stay well ahead a decade later. Those admitted **directly from abroad** — with no prior Canadian experience — earn far less throughout, as do asylum claimants; those who came only to study start lowest of all (many are still early in their careers) but climb quickly. The chart follows the 2013 admission cohort, the most recent that can be tracked a full ten years.
+
+```{python}
+#| echo: false
+imdb_path = "data/population/imdb_earnings_by_preadmission.csv"
+if os.path.exists(imdb_path):
+    em = pd.read_csv(imdb_path)
+    em = em[em["admission_year"] == 2013]
+    order = ["Worked and studied in Canada", "Worked in Canada",
+             "No prior Canadian experience", "Studied in Canada", "Asylum claimant"]
+    fig = lines_over_time(em, "years_since", "median_employment_income", "pre_admission",
+        yaxis_title="Median employment income (2023 $)", group_order=order,
+        ytickprefix="$", yaxis_tickformat=",.0f", hover_decimals=0,
+        source_note="Source: Statistics Canada, Longitudinal Immigration Database (IMDB), Table 43-10-0026 — 2013 admission cohort, both sexes, all admission categories, tax-filers aged 15+, constant 2023 dollars.")
+    fig.update_xaxes(title_text="Years since admission", dtick=1)
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Earnings-by-pre-admission data not yet available. Run python -m pipeline.build_imdb_earnings.")
+```
+
+Because the immigrants who gained Canadian work experience tend to become the country's higher earners, the **retention of temporary residents** — especially highly skilled ones such as international graduates and research fellows — bears directly on the economy and the tax base. Statistics Canada's research on the [transition to permanent residency across work-permit programs](https://www150.statcan.gc.ca/n1/pub/36-28-0001/2024006/article/00001-eng.htm) finds that the share who go on to settle permanently differs widely from one program to another.
+
 ## Download data
 
 - [Permanent residents by category (CSV)](../data/population/ircc_pr_by_category.csv) — IRCC Permanent Residents – Monthly Updates
@@ -149,6 +173,7 @@ else:
 - [Asylum claims, total by year (CSV)](../data/population/ircc_asylum_total.csv) — IRCC Asylum Claimants – Monthly Updates
 - [Asylum claimants by source country (CSV)](../data/population/ircc_asylum_by_country.csv) — IRCC Asylum Claimants – Monthly Updates
 - [Asylum decision outcomes by year (CSV)](../data/population/ircc_asylum_outcomes.csv) — Immigration and Refugee Board, Refugee Protection Division
+- [Immigrant earnings by pre-admission experience (CSV)](../data/population/imdb_earnings_by_preadmission.csv) — Statistics Canada, Longitudinal Immigration Database (Table 43-10-0026)
 
 ::: {.callout-note collapse="true"}
 ## About this data

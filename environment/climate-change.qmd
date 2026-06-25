@@ -66,6 +66,8 @@ from IPython.display import display, HTML
 from pipeline.charts import relief_map
 
 _man_p = "data/geo/era5_climate_manifest.json"
+_pts_p = "data/geo/era5_climate_points.json"
+_pts = json.load(open(_pts_p)) if os.path.exists(_pts_p) else {}
 _CFG = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
 # CSS gradients matching the WebP colour scales (ColorBrewer RdYlBu / RdBu, reversed) — kept
 # inline so the render needs no matplotlib (it's a builder-only dep, not in requirements.txt).
@@ -84,11 +86,15 @@ def _legend(title, cmap, vmin, vmax, diverging):
         f'<div style="display:flex;justify-content:space-between"><span>{vmin:+.0f} °C</span>'
         f'<span>{mid}</span><span>{vmax:+.0f} °C</span></div></div>')
 
-def _climate_map(key, title, src, diverging=False):
+def _climate_map(key, title, src, diverging=False, hover_label=None):
     man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
     L = next(l for l in man["layers"] if l["key"] == key)
+    P = _pts.get(key, {})
     fig = relief_map(_uri(L["webp"]), L["corners"], boundary_geojson=prov, zoom=2.2,
-                     source_note=f"{src} {man['attribution']}.")
+                     source_note=f"{src} {man['attribution']}.",
+                     hover_lon=P.get("lon"), hover_lat=P.get("lat"), hover_val=P.get("val"),
+                     hover_label=hover_label or ("Warming" if diverging else "Average temperature"),
+                     hover_fmt="+.1f" if diverging else ".1f", hover_suffix=" °C")
     fig.show(config=_CFG)
     display(_legend(title, L["cmap"], L["vmin"], L["vmax"], diverging))
 ```

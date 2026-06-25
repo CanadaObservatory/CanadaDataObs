@@ -120,6 +120,8 @@ website:
             text: Today's Climate
           - href: environment/climate-change.qmd
             text: Climate Change
+          - href: environment/temperature-maps.qmd
+            text: Temperature Maps
           - href: geography/wildfire.qmd
             text: Wildfire
           - href: geography/ice.qmd

@@ -1,0 +1,151 @@
+---
+title: "Canada's Temperature, Mapped"
+description: "Interactive maps of Canada's temperature — the typical value for any month, how recent months compare to normal, and how much each region has warmed — from ERA5-Land."
+---
+
+Canada's temperature varies enormously by place and by season. These continuous maps are drawn from
+**ERA5-Land** — the European Centre's high-resolution (~9 km) reanalysis, which blends weather
+observations with a physical model into a gap-free temperature field over the land (oceans and large
+lakes are left blank). Pick a month for the **typical** temperature, check **how the recent months
+compare** to that normal, and see the **change since the mid-century**. Hover anywhere for the value
+at that spot.
+
+```{python}
+#| echo: false
+import os, json, base64, datetime
+from IPython.display import display, HTML
+from pipeline.charts import relief_map
+
+_man_p = "data/geo/era5_climate_manifest.json"
+_pts_p = "data/geo/era5_climate_points.json"
+_pts = json.load(open(_pts_p)) if os.path.exists(_pts_p) else {}
+_CFG = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]}
+# CSS gradients matching the WebP colour scales (ColorBrewer RdYlBu / RdBu, reversed) — kept
+# inline so the render needs no matplotlib (it's a builder-only dep, not in requirements.txt).
+_CMAP_CSS = {
+    "RdYlBu_r": "#313695,#4575b4,#74add1,#abd9e9,#e0f3f8,#ffffbf,#fee090,#fdae61,#f46d43,#d73027,#a50026",
+    "RdBu_r": "#053061,#2166ac,#4393c3,#92c5de,#d1e5f0,#f7f7f7,#fddbc7,#f4a582,#d6604d,#b2182b,#67001f"}
+
+def _uri(webp):
+    return "data:image/webp;base64," + base64.b64encode(open(f"data/geo/{webp}", "rb").read()).decode()
+
+def _legend(title, cmap, vmin, vmax, diverging):
+    mid = "0 °C" if diverging else f"{(vmin+vmax)/2:+.0f} °C"
+    return HTML(f'<div style="max-width:480px;margin:-4px 0 18px;font-size:12px;color:#555">'
+        f'<div style="font-weight:600;margin-bottom:3px">{title}</div>'
+        f'<div style="height:12px;border-radius:3px;background:linear-gradient(to right,{_CMAP_CSS[cmap]})"></div>'
+        f'<div style="display:flex;justify-content:space-between"><span>{vmin:+.0f} °C</span>'
+        f'<span>{mid}</span><span>{vmax:+.0f} °C</span></div></div>')
+
+def _climate_map(key, title, src, diverging=False, hover_label=None):
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
+    L = next(l for l in man["layers"] if l["key"] == key)
+    vals = (_pts.get("vals") or {}).get(key)
+    fig = relief_map(_uri(L["webp"]), L["corners"], boundary_geojson=prov, zoom=2.2,
+                     source_note=f"{src} {man['attribution']}.",
+                     hover_lon=_pts.get("lon"), hover_lat=_pts.get("lat"), hover_val=vals,
+                     hover_label=hover_label or ("Warming" if diverging else "Average temperature"),
+                     hover_fmt="+.1f" if diverging else ".1f", hover_suffix=" °C")
+    fig.show(config=_CFG)
+    display(_legend(title, L["cmap"], L["vmin"], L["vmax"], diverging))
+
+def _month_map(src):
+    """Monthly-normal temperature map with a month selector (defaults to the current month).
+    The dropdown swaps the image layer's source + the hover values; all months share one scale,
+    so the legend is fixed and flipping months reads the seasonal swing as colour."""
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
+    months = [l for l in man["layers"] if l.get("kind") == "month"]
+    di = next((i for i, l in enumerate(months) if l["month"] == datetime.date.today().month), 0)
+    vals = _pts.get("vals") or {}
+    L0 = months[di]
+    fig = relief_map(_uri(L0["webp"]), L0["corners"], boundary_geojson=prov, zoom=2.2,
+                     source_note=f"{src} {man['attribution']}.",
+                     hover_lon=_pts.get("lon"), hover_lat=_pts.get("lat"), hover_val=vals.get(L0["key"]),
+                     hover_label="Average temperature", hover_fmt=".1f", hover_suffix=" °C")
+    btns = [dict(label=l["label"], method="update",
+                 args=[{"customdata": [vals.get(l["key"])]},
+                       {"mapbox.layers[1].source": _uri(l["webp"])}]) for l in months]
+    menu = dict(type="dropdown", direction="down", active=di, showactive=True,
+                x=0.01, y=0.99, xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc",
+                borderwidth=1, font=dict(size=12), pad=dict(t=2, b=2, l=4, r=4), buttons=btns)
+    fig.update_layout(updatemenus=list(fig.layout.updatemenus) + [menu])
+    fig.show(config=_CFG)
+    display(_legend("Average temperature by month (1991–2020 normal)", L0["cmap"], L0["vmin"], L0["vmax"], False))
+
+def _recent_map(src):
+    """Recent-anomaly map (latest 1 / 3 / 12 months vs the 1991–2020 normal) with a window selector,
+    opening on the past month. Shared diverging scale, so the fixed legend reads across all windows."""
+    man = json.load(open(_man_p)); prov = json.load(open("data/geo/canada_provinces.geojson"))
+    rec = [l for l in man["layers"] if l.get("kind") == "recent"]
+    vals = _pts.get("vals") or {}
+    L0 = rec[0]
+    fig = relief_map(_uri(L0["webp"]), L0["corners"], boundary_geojson=prov, zoom=2.2,
+                     source_note=f"{src} {man['attribution']}.",
+                     hover_lon=_pts.get("lon"), hover_lat=_pts.get("lat"), hover_val=vals.get(L0["key"]),
+                     hover_label="vs 1991–2020 normal", hover_fmt="+.1f", hover_suffix=" °C")
+    btns = [dict(label=f'{l["label"]} ({l["span"]})', method="update",
+                 args=[{"customdata": [vals.get(l["key"])]},
+                       {"mapbox.layers[1].source": _uri(l["webp"])}]) for l in rec]
+    menu = dict(type="dropdown", direction="down", active=0, showactive=True,
+                x=0.01, y=0.99, xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc",
+                borderwidth=1, font=dict(size=12), pad=dict(t=2, b=2, l=4, r=4), buttons=btns)
+    fig.update_layout(updatemenus=list(fig.layout.updatemenus) + [menu])
+    fig.show(config=_CFG)
+    display(_legend("Temperature vs the 1991–2020 average (warmer = red, cooler = blue)",
+                    L0["cmap"], L0["vmin"], L0["vmax"], True))
+```
+
+### Typical temperature, month by month
+
+```{python}
+#| echo: false
+if os.path.exists(_man_p):
+    _month_map("Source: ECMWF Copernicus Climate Change Service — ERA5-Land monthly means, 1991–2020 normal.")
+else:
+    print("Climate map not yet available — run python -m pipeline.build_era5_climate.")
+```
+
+### Has it been unusual lately?
+
+How the most recent months compare to the **1991–2020 average** — red where it has run warmer than normal,
+blue where cooler. Switch the window between the past month, three months, and year, and hover for the value
+where you live. A single warm or cool month is **weather**, not a trend; for the long-term signal, see the
+warming map below.
+
+```{python}
+#| echo: false
+if os.path.exists(_man_p):
+    _recent_map("Source: ECMWF Copernicus Climate Change Service — ERA5-Land monthly means vs the 1991–2020 normal.")
+```
+
+The map is a snapshot; the run of recent months shows whether it is a one-off or a pattern — the
+Canada-wide average for each of the last two years:
+
+```{python}
+#| echo: false
+import pandas as pd
+import plotly.graph_objects as go
+_rec_p = "data/geo/era5_recent_anomaly.csv"
+if os.path.exists(_rec_p):
+    rs = pd.read_csv(_rec_p)
+    rs["date"] = pd.to_datetime(rs["month"] + "-01")
+    bar_colors = ["#c0392b" if v >= 0 else "#2c7fb8" for v in rs["anomaly"]]
+    figs = go.Figure(go.Bar(x=rs["date"], y=rs["anomaly"], marker_color=bar_colors,
+        hovertemplate="<b>%{x|%b %Y}</b>: %{y:+.1f} °C vs normal<extra></extra>"))
+    figs.add_hline(y=0, line_width=1, line_color="#888")
+    figs.update_layout(plot_bgcolor="white", height=300, margin=dict(l=10, r=10, t=10, b=44),
+        yaxis_title="°C vs 1991–2020 average", showlegend=False,
+        xaxis=dict(showgrid=False), yaxis=dict(gridcolor="#eee", zeroline=False))
+    figs.add_annotation(text="Source: ECMWF Copernicus Climate Change Service — ERA5-Land.",
+        xref="paper", yref="paper", x=0, y=-0.26, showarrow=False, font=dict(size=10, color="#888"), align="left")
+    figs.show(config={"displaylogo": False})
+```
+
+### How much it has warmed
+
+```{python}
+#| echo: false
+if os.path.exists(_man_p):
+    _climate_map("warming_annual", "Change in annual temperature, 2016–2025 vs 1961–1990",
+        "Source: ECMWF Copernicus Climate Change Service — ERA5-Land, 2016–2025 minus 1961–1990.", diverging=True)
+```

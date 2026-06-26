@@ -19,7 +19,7 @@ raw from the live agency REST service at build time (the authoritative, versione
 source is the archive — we don't commit raw), then write the display-ready,
 validity-repaired GeoJSON to data/geo/.
 
-GEOMETRY GOTCHA (shared with build_parks_detailed): Mapbox GL SILENTLY draws a
+GEOMETRY GOTCHA (shared with build_parks_detailed): MapLibre GL SILENTLY draws a
 BLANK layer if any polygon self-intersects. So repair with buffer(0) → topology-
 preserving simplify → buffer(0), assert .is_valid before writing, and do NOT round
 coordinates after the repair.

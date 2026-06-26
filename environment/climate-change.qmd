@@ -56,7 +56,7 @@ Canada's temperature varies enormously by place and season. The full picture liv
 interactive, hover-able page — the **typical temperature for any month**, **how the recent months
 compare** to normal (has it been unusual lately?), and **how much each region has warmed**:
 
-**[Explore Canada's temperature, mapped →](temperature-maps.html)**
+**[Explore maps of Canada's temperatures →](temperature-maps.html)**
 
 ## The North is warming fastest
 

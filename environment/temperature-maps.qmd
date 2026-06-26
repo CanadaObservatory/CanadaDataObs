@@ -1,5 +1,5 @@
 ---
-title: "Canada's Temperature, Mapped"
+title: "Maps of Canada's temperatures"
 description: "Interactive maps of Canada's temperature — the typical value for any month, how recent months compare to normal, and how much each region has warmed — from ERA5-Land."
 ---
 

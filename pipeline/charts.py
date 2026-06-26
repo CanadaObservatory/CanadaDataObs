@@ -1336,9 +1336,20 @@ def choropleth_map(geojson, df, location_col, value_col, *, name_col=None,
     if log:
         z = np.where(vals.to_numpy() > 0, np.log10(vals.where(vals > 0).to_numpy()), np.nan)
         finite = [v for v in z if v == v]
-        lo, hi = math.floor(min(finite)), math.ceil(max(finite))
-        tickvals = list(range(lo, hi + 1))
-        ticktext = [f"{10 ** t:,.0f}" if t >= 0 else f"{10 ** t:g}" for t in tickvals]
+        zlo, zhi = min(finite), max(finite)
+        # Colour-bar ticks at powers of ten that fall WITHIN the data range (ticks
+        # outside [zlo, zhi] are clipped by Plotly and never show). When fewer than
+        # two powers fit — a span under ~1 decade, e.g. the 40 largest lakes — drop
+        # to a 1-2-5 sequence so the bar never shows a single lonely label.
+        reals = [10 ** e for e in range(math.ceil(zlo), math.floor(zhi) + 1)]
+        if len(reals) < 2:
+            reals = [m * 10 ** e for e in range(math.floor(zlo), math.ceil(zhi) + 1)
+                     for m in (1, 2, 5)]
+            reals = [r for r in reals if zlo <= math.log10(r) <= zhi]
+        if len(reals) < 2:                       # still degenerate → use the endpoints
+            reals = sorted({float(f"{10 ** zlo:.3g}"), float(f"{10 ** zhi:.3g}")})
+        tickvals = [math.log10(r) for r in reals]
+        ticktext = [f"{r:,.0f}" if r >= 1 else f"{r:g}" for r in reals]
         colorbar = dict(title=colorbar_title, tickvals=tickvals, ticktext=ticktext,
                         tickprefix=value_prefix, ticksuffix=value_suffix)
         z_, zmin_, zmax_ = z, None, None

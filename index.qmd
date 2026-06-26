@@ -10,10 +10,11 @@ relevant, timely and reliable data. It provides interactive, regularly updated
 charts and downloadable data on the state of the country, organized around six themes —
 **people & society**, **economy & affordability**, **government & public
 finances**, **health & well-being**, **land & environment**, and **education,
-science & innovation**. All data comes from official sources — primarily
-[Statistics Canada](https://www.statcan.gc.ca/), the
-[OECD](https://data.oecd.org/), and other government agencies — and is updated
-automatically each week.
+science & innovation**. All data comes from authoritative primary sources —
+primarily [Statistics Canada](https://www.statcan.gc.ca/), the
+[OECD](https://data.oecd.org/), and other government and international agencies.
+Most of it refreshes automatically every week, with the rest updated on each
+source's own release schedule.
 
 Where possible, Canada is shown alongside a broad set of 17 OECD peer countries
 (not just the G7) to provide meaningful international context.
@@ -128,9 +129,9 @@ research workforce, compared with peers.
 
 ## Principles
 
-- **Official sources only** — Statistics Canada, OECD, and other authoritative agencies
+- **Authoritative sources only** — Statistics Canada, OECD, and other government, international, and research agencies
 - **Broad peer comparisons** — 17 OECD countries, not just the G7
-- **Automatically updated** — data pipelines run weekly
+- **Automatically updated** — data pipelines run weekly; update frequency varies by source
 - **Open and downloadable** — all cleaned data available as CSV
 - **No policy advocacy** — we present the data, sources, and methods to support
   informed discussion, not to push conclusions. We make

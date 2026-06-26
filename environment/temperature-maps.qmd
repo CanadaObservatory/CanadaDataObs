@@ -1,5 +1,5 @@
 ---
-title: "Canada's Temperature, Mapped"
+title: "Maps of Canada's temperatures"
 description: "Interactive maps of Canada's temperature — the typical value for any month, how recent months compare to normal, and how much each region has warmed — from ERA5-Land."
 ---
 
@@ -64,7 +64,7 @@ def _month_map(src):
                      hover_label="Average temperature", hover_fmt=".1f", hover_suffix=" °C")
     btns = [dict(label=l["label"], method="update",
                  args=[{"customdata": [vals.get(l["key"])]},
-                       {"mapbox.layers[1].source": _uri(l["webp"])}]) for l in months]
+                       {"map.layers[1].source": _uri(l["webp"])}]) for l in months]
     menu = dict(type="dropdown", direction="down", active=di, showactive=True,
                 x=0.01, y=0.99, xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc",
                 borderwidth=1, font=dict(size=12), pad=dict(t=2, b=2, l=4, r=4), buttons=btns)
@@ -85,7 +85,7 @@ def _recent_map(src):
                      hover_label="vs 1991–2020 normal", hover_fmt="+.1f", hover_suffix=" °C")
     btns = [dict(label=f'{l["label"]} ({l["span"]})', method="update",
                  args=[{"customdata": [vals.get(l["key"])]},
-                       {"mapbox.layers[1].source": _uri(l["webp"])}]) for l in rec]
+                       {"map.layers[1].source": _uri(l["webp"])}]) for l in rec]
     menu = dict(type="dropdown", direction="down", active=0, showactive=True,
                 x=0.01, y=0.99, xanchor="left", yanchor="top", bgcolor="white", bordercolor="#ccc",
                 borderwidth=1, font=dict(size=12), pad=dict(t=2, b=2, l=4, r=4), buttons=btns)

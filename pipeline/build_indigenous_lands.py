@@ -13,7 +13,7 @@ self-government agreements. They are NOT traditional or treaty territories (whic
 have no single authoritative boundary and are deliberately not mapped here).
 Descriptive only — the official boundaries, plotted, with no commentary.
 
-GEOMETRY GOTCHA (shared with build_parks): Mapbox GL silently draws a BLANK layer if
+GEOMETRY GOTCHA (shared with build_parks): MapLibre GL silently draws a BLANK layer if
 any polygon self-intersects → repair with buffer(0) → topology-preserving simplify →
 buffer(0); assert validity before writing; never round coordinates after the repair.
 """

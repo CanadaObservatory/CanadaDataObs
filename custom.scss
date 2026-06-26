@@ -251,3 +251,15 @@ $area-card-accents: (
     padding-left: 0.55rem;
   }
 }
+
+// Basemap attribution on the interactive Plotly maps (MapLibre engine). The
+// OpenStreetMap + CARTO credit is REQUIRED by the tile providers' terms, so it
+// stays visible — but MapLibre renders it more boldly than the previous engine, so
+// soften it to a small, muted caption. !important overrides the MapLibre widget's
+// own CSS regardless of stylesheet load order.
+.maplibregl-ctrl-attrib {
+  font-size: 9px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
+  .maplibregl-ctrl-attrib-inner,
+  a { color: #9aa0a6 !important; }
+}

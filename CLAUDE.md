@@ -470,7 +470,7 @@ never published).
 ## Choropleth maps (census-tract income)
 
 `charts.choropleth_map(geojson, df, location_col, value_col, ...)` — a zoomable
-Plotly `Choroplethmapbox` with the free `carto-positron` basemap (**no Mapbox
+Plotly `Choroplethmap` (MapLibre) with the free `carto-positron` basemap (**no Mapbox
 token**); GeoJSON features must carry top-level `id == df[location_col]`. First
 use: **median household income by census tract** on the income page (the
 "put yourself on the map" view). Key facts:
@@ -621,9 +621,9 @@ existing CSVs (no new data file).
 **Geography section maps** (`geography/index.qmd`, static assets from `build_geography.py` + the two
 `fetch_geography.py` series). Reuses the choropleth builders and adds one primitive:
 `charts.choropleth_categorical(geojson, df, location_col, cat_col, …)` — a discrete-colour map for
-*categories* (Plotly's Choroplethmapbox is value-based, so each category maps to an integer over a
+*categories* (Plotly's Choroplethmap is value-based, so each category maps to an integer over a
 hard-stepped colourscale, the colourbar is hidden, and the legend is drawn with zero-point
-`Scattermapbox` proxies — verified to render). Also added a `log=True` option to `choropleth_map`
+`Scattermap` proxies — verified to render). Also added a `log=True` option to `choropleth_map`
 (base-10 colour scale, colourbar ticks relabelled to real values; hover always shows the true value
 via customdata). Seven maps + two time charts, no scorecard (descriptive, like the diversity/religion
 maps); page ≈ 1.1 MB (province/ecozone/permafrost/CMA GeoJSON each < 0.2 MB, inlined):

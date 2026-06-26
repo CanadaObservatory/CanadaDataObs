@@ -163,7 +163,7 @@ def build_canada_provinces():
     Canada shape (Arctic archipelago, Newfoundland, Vancouver Island as real islands;
     bays as water). From **Natural Earth 1:50m** (public domain): pre-generalised, so
     coastlines are smooth (not feathered), and only ~0.25 MB. Keyed by PRUID so the
-    StatCan/ECCC indicators join straight on. The interactive mapbox maps keep the
+    StatCan/ECCC indicators join straight on. The interactive maps keep the
     generalised prov_2021.geojson (their tiled basemap hides the over-water boundary)."""
     import io
     r = requests.get(NE_PROV_URL, timeout=120)
@@ -340,7 +340,7 @@ def build_wildfire_points(year=WILDFIRE_YEAR):
     NRCan's National Fire Database point archive — same authoritative NFDB source
     (OGL-Canada) as the weekly area-burned series, just the per-fire locations rather
     than provincial totals. Writes a light CSV (lat, lon, size_ha, province, cause);
-    the page plots them as a Scattermapbox sized by area burned, so the few enormous
+    the page plots them as a Scattermap sized by area burned, so the few enormous
     boreal fires that drove the 17.6 Mha total stand out from the thousands of small
     ones. Point geometry is reprojected from the Atlas-Lambert source to WGS84."""
     print(f"Building {year} wildfire points (NRCan NFDB) ...")
@@ -431,7 +431,7 @@ def build_parks_detailed():
     it). Marine areas (which dwarf the land parks) and non-park designations are
     excluded. One-time build, like the other static geo assets.
 
-    NOTE: the geometry MUST be valid — Mapbox GL silently fails to draw a layer that
+    NOTE: the geometry MUST be valid — MapLibre GL silently fails to draw a layer that
     contains self-intersecting polygons (the map comes up blank). Two traps: (1)
     naive coordinate rounding introduces self-intersections — so we do NOT round; (2)
     grid-snapping (shapely set_precision) repairs validity but shatters the fragmented
@@ -451,7 +451,7 @@ def build_parks_detailed():
     r = requests.get(CPCAD_URL + "/query", params=params, timeout=300)
     g = gpd.read_file(io.BytesIO(r.content))
     g = g[~g.geometry.is_empty & g.geometry.notna()].copy()
-    # The ArcGIS output carries self-intersections, and Mapbox GL SILENTLY fails to
+    # The ArcGIS output carries self-intersections, and MapLibre GL SILENTLY fails to
     # draw a layer with invalid polygons (blank map). Grid-snapping (set_precision)
     # repairs validity but shatters the fragmented zoned parks into spiky shards, so
     # use TOPOLOGY-PRESERVING simplification instead: buffer(0) to repair, then
@@ -469,7 +469,7 @@ def build_parks_detailed():
     for ft in gj["features"]:
         ft["id"] = ft["properties"].pop("fid")
         # NB: do NOT round coordinates here — rounding after the repair re-introduces
-        # self-intersections (and a blank Mapbox layer). The simplify(0.004) above
+        # self-intersections (and a blank MapLibre layer). The simplify(0.004) above
         # already controls vertex count / file size; buffer(0) must stay the last op.
     os.makedirs(GEO_DIR, exist_ok=True)
     _write_geojson(gj, f"{GEO_DIR}/parks_detailed.geojson")
@@ -816,7 +816,7 @@ def build_elevation_relief(width=2800):
     reprojects it from EPSG:3979 to **Web-Mercator (3857)** so it aligns with Plotly's
     basemap, applies a muted hypsometric tint (green low → tan/brown → near-white peaks),
     masks to Canada (transparent elsewhere), and writes elevation_relief.webp + the image's
-    lon/lat **corner coordinates** (clockwise TL,TR,BR,BL — what a Plotly mapbox `image`
+    lon/lat **corner coordinates** (clockwise TL,TR,BR,BL — what a Plotly map `image`
     layer expects). The image is rendered in Mercator; the corners passed to the page are
     WGS84. Static; needs rasterio + matplotlib."""
     import numpy as np

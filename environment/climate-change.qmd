@@ -56,7 +56,7 @@ Canada's temperature varies enormously by place and season. The full picture liv
 interactive, hover-able page — the **typical temperature for any month**, **how the recent months
 compare** to normal (has it been unusual lately?), and **how much each region has warmed**:
 
-**[Explore Canada's temperature, mapped →](temperature-maps.html)**
+**[Explore maps of Canada's temperatures →](temperature-maps.html)**
 
 ## The North is warming fastest
 
@@ -160,7 +160,7 @@ if os.path.exists(ctvb_path):
     cm["lat"] = cm["region"].map(lambda r: REGION_POINTS[r][0])
     cm["lon"] = cm["region"].map(lambda r: REGION_POINTS[r][1])
     cm["lbl"] = cm["region"].map(lambda r: REGION_POINTS[r][2])
-    fig = go.Figure(go.Scattermapbox(
+    fig = go.Figure(go.Scattermap(
         lat=cm["lat"], lon=cm["lon"], mode="markers+text",
         marker=dict(size=16, color=cm["trend_c"], colorscale="Reds",
                     cmin=0, cmax=float(cm["trend_c"].max()), showscale=True,
@@ -169,7 +169,7 @@ if os.path.exists(ctvb_path):
         customdata=cm["trend_c"],
         hovertemplate="%{text}: +%{customdata:.1f} °C since 1948<extra></extra>"))
     fig.update_layout(
-        mapbox=dict(style="carto-positron", center=dict(lat=64, lon=-96), zoom=1.9),
+        map=dict(style="carto-positron", center=dict(lat=64, lon=-96), zoom=1.9),
         height=430, margin=dict(t=10, b=34, l=0, r=0),
         annotations=[dict(
             text="Source: ECCC Climate Trends and Variations Bulletin",

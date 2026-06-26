@@ -1,5 +1,5 @@
 pandas
-plotly
+plotly>=6.0,<7
 stats-can
 pandasdmx
 kaleido

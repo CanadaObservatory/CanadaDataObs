@@ -10,7 +10,7 @@ Store (needs ~/.cdsapirc), then builds, for the Climate Change page (environment
     full years) minus the mid-century baseline (1951–1980).
 
 Each field is reprojected to **Web-Mercator (EPSG:3857)** and rendered to a transparent WebP
-positioned by WGS84 corner coordinates, for the `charts.relief_map` mapbox overlay. A small
+positioned by WGS84 corner coordinates, for the `charts.relief_map` map overlay. A small
 PNG preview (lat-lon + province outlines + colourbar) is written alongside for review.
 
 ERA5-Land monthly means lag only ~1 month. Re-run after each refresh and **bump

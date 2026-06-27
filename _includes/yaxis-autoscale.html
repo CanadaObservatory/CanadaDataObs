@@ -59,21 +59,56 @@
     var x0 = xNum(xa.range[0], isDate), x1 = xNum(xa.range[1], isDate);
     if (x0 > x1) { var tmp = x0; x0 = x1; x1 = tmp; }
 
-    var ymin = Infinity, ymax = -Infinity;
-    (gd.data || []).forEach(function (tr) {
-      if (tr.visible === "legendonly" || tr.visible === false) return;
-      var xs = tr.x, ys = tr.y;
-      if (!xs || !ys) return;
-      for (var k = 0; k < xs.length; k++) {
-        var xv = xNum(xs[k], isDate);
-        if (!(xv >= x0 && xv <= x1)) continue;
-        var yv = ys[k];
-        if (yv === null || yv === undefined || yv !== yv) continue; // null / NaN
-        yv = +yv;
-        if (yv < ymin) ymin = yv;
-        if (yv > ymax) ymax = yv;
-      }
-    });
+    var ymin = Infinity, ymax = -Infinity, sawPoint = false;
+
+    // Prefer calcdata: Plotly stores x/y already converted to axis-numeric values
+    // there, and — crucially — decoded. In Plotly 6 the raw gd.data arrays are
+    // base64 typed-array specs ({dtype, bdata}), not plain arrays, so reading
+    // gd.data[i].y yields no usable numbers and the rescale would silently fall
+    // back to the `include` band only. calcdata sidesteps both the b64 encoding
+    // and the date-string parsing; legendonly/hidden traces carry no real points.
+    var cd = gd.calcdata;
+    if (cd && cd.length) {
+      cd.forEach(function (pts) {
+        if (!pts || !pts.length) return;
+        for (var k = 0; k < pts.length; k++) {
+          var p = pts[k];
+          var xv = p.x, yv = p.y;
+          if (typeof xv !== "number" || xv !== xv) continue;   // missing/placeholder x
+          if (!(xv >= x0 && xv <= x1)) continue;
+          if (typeof yv !== "number" || yv !== yv) continue;    // null / NaN / BADNUM
+          sawPoint = true;
+          if (yv < ymin) ymin = yv;
+          if (yv > ymax) ymax = yv;
+        }
+      });
+    }
+
+    // Fallback for any chart without calcdata: read the raw arrays (decoding a
+    // typed-array spec via its _inputArray if present).
+    if (!sawPoint) {
+      var realArr = function (a) {
+        if (!a) return null;
+        if (Array.isArray(a)) return a;
+        if (a._inputArray) return a._inputArray;            // Plotly-stashed decoded copy
+        if (typeof a.length === "number") return a;          // already a typed array
+        return null;
+      };
+      (gd.data || []).forEach(function (tr) {
+        if (tr.visible === "legendonly" || tr.visible === false) return;
+        var xs = realArr(tr.x), ys = realArr(tr.y);
+        if (!xs || !ys) return;
+        for (var k = 0; k < xs.length; k++) {
+          var xv = xNum(xs[k], isDate);
+          if (!(xv >= x0 && xv <= x1)) continue;
+          var yv = ys[k];
+          if (yv === null || yv === undefined || yv !== yv) continue; // null / NaN
+          yv = +yv;
+          if (yv < ymin) ymin = yv;
+          if (yv > ymax) ymax = yv;
+        }
+      });
+    }
     opts.include.forEach(function (v) {
       if (v < ymin) ymin = v;
       if (v > ymax) ymax = v;

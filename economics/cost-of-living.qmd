@@ -208,8 +208,8 @@ try:
                 dict(step="all", label="All")], x=0, xanchor="left", y=1.01),
             rangeslider=dict(visible=True, thickness=0.08, bgcolor="#f5f5f5",
                              yaxis=dict(rangemode="auto"))),
-        legend=dict(yanchor="top", y=0.98, xanchor="left", x=0.02, bgcolor="rgba(255,255,255,0.6)"),
-        margin=dict(t=40, b=120, r=20))
+        legend=dict(orientation="v", yanchor="top", y=1, xanchor="left", x=1.02),
+        margin=dict(t=40, b=120, r=140))
     figc.add_annotation(
         text=f"Source: Statistics Canada 18-10-0004-01 (all-items, food) and 18-10-0256-01 (CPI-trim) | Data as of: {get_data_date('data/economics/statcan_cpi_trim.csv')}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))

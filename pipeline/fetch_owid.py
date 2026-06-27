@@ -256,6 +256,58 @@ def fetch_co2_global_context():
     return out
 
 
+OWID_LIFE_EXPECTANCY_URL = (
+    "https://ourworldindata.org/grapher/life-expectancy.csv"
+    "?v=1&csvType=full&useColumnShortNames=true"
+)
+
+
+def fetch_life_expectancy_canada():
+    """Canada life expectancy at birth, long-run (OWID).
+
+    A single Canada series back to 1831 — decennial census-year estimates before
+    1921, annual from 1921 on. OWID compiles it from the Human Mortality Database,
+    the UN World Population Prospects, and historical-demography sources; it aligns
+    with the OECD modern series at the 1980+ overlap (OWID 75.06 vs OECD 75.1 in
+    1980), so it splices cleanly. Drives the Health page's "long view" chart — the
+    deep Canadian history the OECD peer-comparison series (1980-) cannot show.
+    """
+    logger.info("Fetching OWID life expectancy (Canada long-run)...")
+    try:
+        r = requests.get(OWID_LIFE_EXPECTANCY_URL,
+                         headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+        r.raise_for_status()
+        df = pd.read_csv(io.StringIO(r.text))
+    except Exception as e:
+        logger.error(f"  Failed to fetch OWID life expectancy: {e}")
+        return None
+
+    validate_columns(df, ["entity", "year", "life_expectancy_0"],
+                     "life_expectancy_canada")
+    df = df[df["entity"] == "Canada"].copy()
+    df["life_expectancy"] = pd.to_numeric(df["life_expectancy_0"], errors="coerce")
+    df["year"] = pd.to_numeric(df["year"], errors="coerce")
+    df = df.dropna(subset=["year", "life_expectancy"])
+    df["year"] = df["year"].astype(int)
+    out = (df[["year", "life_expectancy"]]
+           .sort_values("year").reset_index(drop=True))
+    if out.empty:
+        return None
+
+    out_path = DATA_DIR / "health" / "owid_life_expectancy_canada.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, index=False)
+    save_metadata(out_path, df=out, date_column="year",
+        source="Our World in Data (Human Mortality Database; UN; historical demography)",
+        source_table="life-expectancy",
+        frequency="annual (decennial before 1921)",
+        unit="years (period life expectancy at birth)",
+        transformations=["filtered to Canada; life_expectancy_0 (period LE at birth)"])
+    logger.info(f"  saved {len(out)} rows -> {out_path.name}")
+    return out
+
+
 if __name__ == "__main__":
     fetch_energy_mix()
     fetch_consumption_co2()
+    fetch_life_expectancy_canada()

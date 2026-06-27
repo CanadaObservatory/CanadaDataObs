@@ -69,6 +69,35 @@ else:
     print("Life expectancy data not yet available. Run the data pipeline.")
 ```
 
+## Canada, the long view
+
+Canada's life expectancy at birth has roughly doubled since the early nineteenth century — from under 40 years in the 1830s to about 82 today. The largest gains came in the first half of the twentieth century, as infant and infectious-disease mortality fell sharply; progress since has been slower but steady, until the recent dip. Figures before 1921 are decennial estimates.
+
+```{python}
+#| echo: false
+lc_path = "data/health/owid_life_expectancy_canada.csv"
+if os.path.exists(lc_path) and os.path.exists(le_path):
+    lc = pd.read_csv(lc_path)
+    # One continuous Canada line: deep history from OWID (Human Mortality Database /
+    # UN) before 1980, then the OECD series the rest of the page uses from 1980 on —
+    # the two agree at the 1980 join, so the modern end matches the peer and
+    # recent-decline charts exactly.
+    oecd_ca = (pd.read_csv(le_path).query("country_code == 'CAN' and year >= 1980")
+               [["year", "life_expectancy"]])
+    deep = lc[lc["year"] < 1980][["year", "life_expectancy"]]
+    ca = pd.concat([deep, oecd_ca]).sort_values("year").reset_index(drop=True)
+    ca["date"] = pd.to_datetime(ca["year"].astype(str), format="%Y")
+    fig = single_line(ca, "date", "life_expectancy", title="",
+        yaxis_title="Years", rangeslider=True, initial_full=True,
+        hovertemplate="%{y:.1f} years (%{x|%Y})<extra></extra>",
+        source_note=("Sources: Our World in Data (Human Mortality Database, UN; before 1980) "
+                     "and OECD Health Statistics (1980–). Figures before 1921 are decennial "
+                     f"estimates. | Data as of: {get_data_date(lc_path)}"))
+    fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+else:
+    print("Long-run life expectancy data not yet available. Run the data pipeline.")
+```
+
 ## Latest life expectancy: ranked
 
 ```{python}

@@ -1,4 +1,23 @@
 country_code,year,life_expectancy,country_name
+AUS,1981,74.8,Australia
+AUS,1982,74.6,Australia
+AUS,1983,75.4,Australia
+AUS,1984,75.7,Australia
+AUS,1985,75.5,Australia
+AUS,1986,76.0,Australia
+AUS,1987,76.2,Australia
+AUS,1988,76.2,Australia
+AUS,1989,76.4,Australia
+AUS,1990,76.9,Australia
+AUS,1991,77.3,Australia
+AUS,1992,77.4,Australia
+AUS,1993,77.9,Australia
+AUS,1994,77.9,Australia
+AUS,1995,77.8,Australia
+AUS,1996,78.1,Australia
+AUS,1997,78.4,Australia
+AUS,1998,78.6,Australia
+AUS,1999,78.9,Australia
 AUS,2000,79.2,Australia
 AUS,2001,79.6,Australia
 AUS,2002,79.9,Australia
@@ -23,6 +42,26 @@ AUS,2020,83.2,Australia
 AUS,2021,83.3,Australia
 AUS,2022,83.2,Australia
 AUS,2023,83.0,Australia
+CAN,1980,75.1,Canada
+CAN,1981,75.5,Canada
+CAN,1982,75.7,Canada
+CAN,1983,76.1,Canada
+CAN,1984,76.4,Canada
+CAN,1985,76.4,Canada
+CAN,1986,76.5,Canada
+CAN,1987,76.8,Canada
+CAN,1988,76.9,Canada
+CAN,1989,77.2,Canada
+CAN,1990,77.5,Canada
+CAN,1991,77.7,Canada
+CAN,1992,77.9,Canada
+CAN,1993,77.8,Canada
+CAN,1994,78.0,Canada
+CAN,1995,78.1,Canada
+CAN,1996,78.3,Canada
+CAN,1997,78.5,Canada
+CAN,1998,78.7,Canada
+CAN,1999,78.9,Canada
 CAN,2000,79.3,Canada
 CAN,2001,79.5,Canada
 CAN,2002,79.6,Canada
@@ -47,6 +86,26 @@ CAN,2020,81.6,Canada
 CAN,2021,81.6,Canada
 CAN,2022,81.3,Canada
 CAN,2023,81.7,Canada
+CHE,1980,75.7,Switzerland
+CHE,1981,75.9,Switzerland
+CHE,1982,76.3,Switzerland
+CHE,1983,76.2,Switzerland
+CHE,1984,76.9,Switzerland
+CHE,1985,77.0,Switzerland
+CHE,1986,77.2,Switzerland
+CHE,1987,77.5,Switzerland
+CHE,1988,77.5,Switzerland
+CHE,1989,77.7,Switzerland
+CHE,1990,77.5,Switzerland
+CHE,1991,77.8,Switzerland
+CHE,1992,78.1,Switzerland
+CHE,1993,78.4,Switzerland
+CHE,1994,78.7,Switzerland
+CHE,1995,78.7,Switzerland
+CHE,1996,79.2,Switzerland
+CHE,1997,79.4,Switzerland
+CHE,1998,79.6,Switzerland
+CHE,1999,79.9,Switzerland
 CHE,2000,80.0,Switzerland
 CHE,2001,80.5,Switzerland
 CHE,2002,80.6,Switzerland
@@ -71,6 +130,26 @@ CHE,2020,83.1,Switzerland
 CHE,2021,83.9,Switzerland
 CHE,2022,83.7,Switzerland
 CHE,2023,84.3,Switzerland
+DEU,1980,73.1,Germany
+DEU,1981,73.4,Germany
+DEU,1982,73.7,Germany
+DEU,1983,74.0,Germany
+DEU,1984,74.5,Germany
+DEU,1985,74.6,Germany
+DEU,1986,74.8,Germany
+DEU,1987,75.2,Germany
+DEU,1988,75.4,Germany
+DEU,1989,75.6,Germany
+DEU,1990,75.4,Germany
+DEU,1991,75.7,Germany
+DEU,1992,76.2,Germany
+DEU,1993,76.2,Germany
+DEU,1994,76.6,Germany
+DEU,1995,76.7,Germany
+DEU,1996,77.0,Germany
+DEU,1997,77.4,Germany
+DEU,1998,77.8,Germany
+DEU,1999,78.0,Germany
 DEU,2000,78.3,Germany
 DEU,2001,78.6,Germany
 DEU,2002,78.6,Germany
@@ -95,6 +174,26 @@ DEU,2020,81.1,Germany
 DEU,2021,80.8,Germany
 DEU,2022,80.7,Germany
 DEU,2023,81.1,Germany
+DNK,1980,74.2,Denmark
+DNK,1981,74.3,Denmark
+DNK,1982,74.7,Denmark
+DNK,1983,74.5,Denmark
+DNK,1984,74.7,Denmark
+DNK,1985,74.5,Denmark
+DNK,1986,74.7,Denmark
+DNK,1987,74.8,Denmark
+DNK,1988,74.9,Denmark
+DNK,1989,74.9,Denmark
+DNK,1990,74.9,Denmark
+DNK,1991,75.3,Denmark
+DNK,1992,75.3,Denmark
+DNK,1993,75.2,Denmark
+DNK,1994,75.5,Denmark
+DNK,1995,75.3,Denmark
+DNK,1996,75.7,Denmark
+DNK,1997,76.1,Denmark
+DNK,1998,76.5,Denmark
+DNK,1999,76.6,Denmark
 DNK,2000,76.9,Denmark
 DNK,2001,77.0,Denmark
 DNK,2002,77.1,Denmark
@@ -119,6 +218,26 @@ DNK,2020,81.6,Denmark
 DNK,2021,81.5,Denmark
 DNK,2022,81.3,Denmark
 DNK,2023,81.8,Denmark
+FIN,1980,73.7,Finland
+FIN,1981,74.0,Finland
+FIN,1982,74.6,Finland
+FIN,1983,74.5,Finland
+FIN,1984,74.9,Finland
+FIN,1985,74.5,Finland
+FIN,1986,74.9,Finland
+FIN,1987,74.9,Finland
+FIN,1988,74.8,Finland
+FIN,1989,75.0,Finland
+FIN,1990,75.1,Finland
+FIN,1991,75.5,Finland
+FIN,1992,75.7,Finland
+FIN,1993,75.9,Finland
+FIN,1994,76.7,Finland
+FIN,1995,76.7,Finland
+FIN,1996,77.0,Finland
+FIN,1997,77.2,Finland
+FIN,1998,77.4,Finland
+FIN,1999,77.6,Finland
 FIN,2000,77.8,Finland
 FIN,2001,78.2,Finland
 FIN,2002,78.3,Finland
@@ -143,6 +262,26 @@ FIN,2020,82.0,Finland
 FIN,2021,81.9,Finland
 FIN,2022,81.2,Finland
 FIN,2023,81.6,Finland
+FRA,1980,74.3,France
+FRA,1981,74.5,France
+FRA,1982,74.8,France
+FRA,1983,74.8,France
+FRA,1984,75.3,France
+FRA,1985,75.4,France
+FRA,1986,75.7,France
+FRA,1987,76.3,France
+FRA,1988,76.6,France
+FRA,1989,76.7,France
+FRA,1990,77.0,France
+FRA,1991,77.2,France
+FRA,1992,77.5,France
+FRA,1993,77.5,France
+FRA,1994,78.0,France
+FRA,1995,78.1,France
+FRA,1996,78.2,France
+FRA,1997,78.6,France
+FRA,1998,78.7,France
+FRA,1999,78.9,France
 FRA,2000,79.2,France
 FRA,2001,79.3,France
 FRA,2002,79.4,France
@@ -167,6 +306,26 @@ FRA,2020,82.3,France
 FRA,2021,82.4,France
 FRA,2022,82.3,France
 FRA,2023,83.0,France
+GBR,1980,73.6,United Kingdom
+GBR,1981,73.9,United Kingdom
+GBR,1982,74.0,United Kingdom
+GBR,1983,74.3,United Kingdom
+GBR,1984,74.6,United Kingdom
+GBR,1985,74.5,United Kingdom
+GBR,1986,74.8,United Kingdom
+GBR,1987,75.1,United Kingdom
+GBR,1988,75.2,United Kingdom
+GBR,1989,75.4,United Kingdom
+GBR,1990,75.7,United Kingdom
+GBR,1991,75.9,United Kingdom
+GBR,1992,76.2,United Kingdom
+GBR,1993,76.1,United Kingdom
+GBR,1994,76.7,United Kingdom
+GBR,1995,76.6,United Kingdom
+GBR,1996,76.8,United Kingdom
+GBR,1997,77.0,United Kingdom
+GBR,1998,77.2,United Kingdom
+GBR,1999,77.4,United Kingdom
 GBR,2000,77.8,United Kingdom
 GBR,2001,78.0,United Kingdom
 GBR,2002,78.2,United Kingdom
@@ -191,6 +350,26 @@ GBR,2020,80.3,United Kingdom
 GBR,2021,80.5,United Kingdom
 GBR,2022,80.9,United Kingdom
 GBR,2023,81.0,United Kingdom
+ISR,1980,73.9,Israel
+ISR,1981,74.3,Israel
+ISR,1982,74.2,Israel
+ISR,1983,74.5,Israel
+ISR,1984,75.0,Israel
+ISR,1985,75.4,Israel
+ISR,1986,75.1,Israel
+ISR,1987,75.4,Israel
+ISR,1988,75.6,Israel
+ISR,1989,76.2,Israel
+ISR,1990,76.7,Israel
+ISR,1991,76.8,Israel
+ISR,1992,76.6,Israel
+ISR,1993,77.2,Israel
+ISR,1994,77.4,Israel
+ISR,1995,77.4,Israel
+ISR,1996,78.1,Israel
+ISR,1997,78.1,Israel
+ISR,1998,78.2,Israel
+ISR,1999,78.5,Israel
 ISR,2000,78.8,Israel
 ISR,2001,79.3,Israel
 ISR,2002,79.6,Israel
@@ -215,6 +394,26 @@ ISR,2020,82.7,Israel
 ISR,2021,82.6,Israel
 ISR,2022,82.8,Israel
 ISR,2023,83.8,Israel
+ITA,1980,74.0,Italy
+ITA,1981,74.3,Italy
+ITA,1982,74.7,Italy
+ITA,1983,74.8,Italy
+ITA,1984,75.0,Italy
+ITA,1985,75.6,Italy
+ITA,1986,75.9,Italy
+ITA,1987,76.3,Italy
+ITA,1988,76.5,Italy
+ITA,1989,77.0,Italy
+ITA,1990,77.1,Italy
+ITA,1991,77.1,Italy
+ITA,1992,77.5,Italy
+ITA,1993,77.8,Italy
+ITA,1994,78.0,Italy
+ITA,1995,78.3,Italy
+ITA,1996,78.7,Italy
+ITA,1997,79.0,Italy
+ITA,1998,79.1,Italy
+ITA,1999,79.6,Italy
 ITA,2000,79.9,Italy
 ITA,2001,80.3,Italy
 ITA,2002,80.4,Italy
@@ -239,6 +438,26 @@ ITA,2020,82.3,Italy
 ITA,2021,82.7,Italy
 ITA,2022,82.8,Italy
 ITA,2023,83.5,Italy
+JPN,1980,76.1,Japan
+JPN,1981,76.5,Japan
+JPN,1982,76.9,Japan
+JPN,1983,77.0,Japan
+JPN,1984,77.4,Japan
+JPN,1985,77.6,Japan
+JPN,1986,78.1,Japan
+JPN,1987,78.5,Japan
+JPN,1988,78.4,Japan
+JPN,1989,78.8,Japan
+JPN,1990,78.9,Japan
+JPN,1991,79.1,Japan
+JPN,1992,79.2,Japan
+JPN,1993,79.4,Japan
+JPN,1994,79.8,Japan
+JPN,1995,79.6,Japan
+JPN,1996,80.3,Japan
+JPN,1997,80.5,Japan
+JPN,1998,80.6,Japan
+JPN,1999,80.5,Japan
 JPN,2000,81.2,Japan
 JPN,2001,81.5,Japan
 JPN,2002,81.8,Japan
@@ -263,6 +482,26 @@ JPN,2020,84.6,Japan
 JPN,2021,84.5,Japan
 JPN,2022,84.1,Japan
 JPN,2023,84.1,Japan
+KOR,1980,66.1,South Korea
+KOR,1981,66.7,South Korea
+KOR,1982,67.2,South Korea
+KOR,1983,67.7,South Korea
+KOR,1984,68.3,South Korea
+KOR,1985,68.9,South Korea
+KOR,1986,69.5,South Korea
+KOR,1987,70.1,South Korea
+KOR,1988,70.7,South Korea
+KOR,1989,71.2,South Korea
+KOR,1990,71.7,South Korea
+KOR,1991,72.2,South Korea
+KOR,1992,72.6,South Korea
+KOR,1993,73.1,South Korea
+KOR,1994,73.5,South Korea
+KOR,1995,73.8,South Korea
+KOR,1996,74.2,South Korea
+KOR,1997,74.7,South Korea
+KOR,1998,75.1,South Korea
+KOR,1999,75.5,South Korea
 KOR,2000,76.0,South Korea
 KOR,2001,76.5,South Korea
 KOR,2002,76.8,South Korea
@@ -287,6 +526,26 @@ KOR,2020,83.5,South Korea
 KOR,2021,83.6,South Korea
 KOR,2022,82.7,South Korea
 KOR,2023,83.5,South Korea
+NLD,1980,75.9,Netherlands
+NLD,1981,76.0,Netherlands
+NLD,1982,76.1,Netherlands
+NLD,1983,76.3,Netherlands
+NLD,1984,76.4,Netherlands
+NLD,1985,76.5,Netherlands
+NLD,1986,76.4,Netherlands
+NLD,1987,76.9,Netherlands
+NLD,1988,77.1,Netherlands
+NLD,1989,76.9,Netherlands
+NLD,1990,77.1,Netherlands
+NLD,1991,77.2,Netherlands
+NLD,1992,77.4,Netherlands
+NLD,1993,77.1,Netherlands
+NLD,1994,77.6,Netherlands
+NLD,1995,77.6,Netherlands
+NLD,1996,77.6,Netherlands
+NLD,1997,78.0,Netherlands
+NLD,1998,78.1,Netherlands
+NLD,1999,78.0,Netherlands
 NLD,2000,78.2,Netherlands
 NLD,2001,78.4,Netherlands
 NLD,2002,78.5,Netherlands
@@ -311,6 +570,26 @@ NLD,2020,81.4,Netherlands
 NLD,2021,81.4,Netherlands
 NLD,2022,81.7,Netherlands
 NLD,2023,81.9,Netherlands
+NOR,1980,75.8,Norway
+NOR,1981,76.0,Norway
+NOR,1982,76.1,Norway
+NOR,1983,76.2,Norway
+NOR,1984,76.3,Norway
+NOR,1985,76.0,Norway
+NOR,1986,76.4,Norway
+NOR,1987,76.2,Norway
+NOR,1988,76.3,Norway
+NOR,1989,76.6,Norway
+NOR,1990,76.6,Norway
+NOR,1991,77.1,Norway
+NOR,1992,77.3,Norway
+NOR,1993,77.2,Norway
+NOR,1994,77.9,Norway
+NOR,1995,77.9,Norway
+NOR,1996,78.3,Norway
+NOR,1997,78.3,Norway
+NOR,1998,78.5,Norway
+NOR,1999,78.4,Norway
 NOR,2000,78.8,Norway
 NOR,2001,79.0,Norway
 NOR,2002,79.0,Norway
@@ -335,6 +614,26 @@ NOR,2020,83.3,Norway
 NOR,2021,83.2,Norway
 NOR,2022,82.5,Norway
 NOR,2023,83.1,Norway
+NZL,1980,73.2,New Zealand
+NZL,1981,73.4,New Zealand
+NZL,1982,73.6,New Zealand
+NZL,1983,73.7,New Zealand
+NZL,1984,73.8,New Zealand
+NZL,1985,74.0,New Zealand
+NZL,1986,74.1,New Zealand
+NZL,1987,74.5,New Zealand
+NZL,1988,74.8,New Zealand
+NZL,1989,75.2,New Zealand
+NZL,1990,75.5,New Zealand
+NZL,1991,75.8,New Zealand
+NZL,1992,76.1,New Zealand
+NZL,1993,76.3,New Zealand
+NZL,1994,76.6,New Zealand
+NZL,1995,76.8,New Zealand
+NZL,1996,77.1,New Zealand
+NZL,1997,77.4,New Zealand
+NZL,1998,77.7,New Zealand
+NZL,1999,78.1,New Zealand
 NZL,2000,78.4,New Zealand
 NZL,2001,78.7,New Zealand
 NZL,2002,79.0,New Zealand
@@ -359,6 +658,26 @@ NZL,2020,82.3,New Zealand
 NZL,2021,82.3,New Zealand
 NZL,2022,82.0,New Zealand
 NZL,2023,82.0,New Zealand
+SWE,1980,75.8,Sweden
+SWE,1981,76.1,Sweden
+SWE,1982,76.4,Sweden
+SWE,1983,76.7,Sweden
+SWE,1984,76.9,Sweden
+SWE,1985,76.8,Sweden
+SWE,1986,77.0,Sweden
+SWE,1987,77.2,Sweden
+SWE,1988,77.1,Sweden
+SWE,1989,77.8,Sweden
+SWE,1990,77.7,Sweden
+SWE,1991,77.8,Sweden
+SWE,1992,78.2,Sweden
+SWE,1993,78.2,Sweden
+SWE,1994,78.9,Sweden
+SWE,1995,79.0,Sweden
+SWE,1996,79.2,Sweden
+SWE,1997,79.4,Sweden
+SWE,1998,79.5,Sweden
+SWE,1999,79.6,Sweden
 SWE,2000,79.8,Sweden
 SWE,2001,79.9,Sweden
 SWE,2002,80.0,Sweden
@@ -383,6 +702,26 @@ SWE,2020,82.4,Sweden
 SWE,2021,83.1,Sweden
 SWE,2022,83.1,Sweden
 SWE,2023,83.4,Sweden
+USA,1980,73.7,United States
+USA,1981,74.1,United States
+USA,1982,74.5,United States
+USA,1983,74.6,United States
+USA,1984,74.7,United States
+USA,1985,74.7,United States
+USA,1986,74.7,United States
+USA,1987,74.9,United States
+USA,1988,74.9,United States
+USA,1989,75.1,United States
+USA,1990,75.4,United States
+USA,1991,75.5,United States
+USA,1992,75.8,United States
+USA,1993,75.5,United States
+USA,1994,75.7,United States
+USA,1995,75.8,United States
+USA,1996,76.1,United States
+USA,1997,76.5,United States
+USA,1998,76.7,United States
+USA,1999,76.7,United States
 USA,2000,76.8,United States
 USA,2001,77.0,United States
 USA,2002,77.0,United States

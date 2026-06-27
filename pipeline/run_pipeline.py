@@ -34,7 +34,8 @@ from pipeline.fetch_statcan import (
     fetch_grads_by_field,
 )
 from pipeline.fetch_owid import (fetch_energy_mix, fetch_consumption_co2,
-                                  fetch_co2_per_gdp, fetch_co2_global_context)
+                                  fetch_co2_per_gdp, fetch_co2_global_context,
+                                  fetch_life_expectancy_canada)
 from pipeline.fetch_whr import fetch_happiness
 from pipeline.fetch_worldbank import (fetch_worldbank_indicator, fetch_world_population,
                                        fetch_pm25_global_context, fetch_world_gdp,
@@ -92,6 +93,7 @@ CUSTOM_FETCHERS = {
     "fetch_suicide_by_age": fetch_suicide_by_age,
     "fetch_energy_mix": fetch_energy_mix,
     "fetch_consumption_co2": fetch_consumption_co2,
+    "fetch_life_expectancy_canada": fetch_life_expectancy_canada,
     "fetch_co2_per_gdp": fetch_co2_per_gdp,
     "fetch_co2_global_context": fetch_co2_global_context,
     "fetch_world_population": fetch_world_population,

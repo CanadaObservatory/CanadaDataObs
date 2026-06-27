@@ -4,12 +4,12 @@
   "source_table": "OECD Health Statistics",
   "frequency": "annual",
   "unit": "years",
-  "retrieved_at": "2026-06-27T15:22:52.366044+00:00",
+  "retrieved_at": "2026-06-27T22:54:16.833349+00:00",
   "latest_observation_date": "2023",
   "next_release_date": null,
   "transformations": [
     "filtered to Life expectancy at birth for OECD peer group"
   ],
   "notes": null,
-  "row_count": 408
+  "row_count": 747
 }

@@ -920,7 +920,19 @@ INDICATORS = [
               # 13 dims: REF_AREA.FREQ.MEASURE.UNIT.AGE.SEX + 7 wildcards
               dataflow="OECD.ELS.HD,DSD_HEALTH_STAT@DF_LE,1.1",
               key=f"{_C}.A.LFEXP.Y.Y0._T.......",
+              # All 17 peers (incl. Canada) report continuously from 1980 in this
+              # series; the long rise is part of the story, so open the window wide.
+              start_period=1980,
               source_table="OECD Health Statistics"),
+    # Canada-only deep history (1831-, decennial before 1921) — the OECD peer series
+    # can't go before 1980; OWID compiles the long run from HMD/UN/historical
+    # demography and aligns with OECD at the overlap. Drives the "long view" chart.
+    Indicator("life_expectancy_canada", "health", "custom",
+              "Life expectancy at birth, Canada (long-run)", "years", "annual",
+              value_col="life_expectancy", chart_recipe="single_line",
+              fetch_fn="fetch_life_expectancy_canada",
+              output_subpath="owid_life_expectancy_canada.csv",
+              source_table="Our World in Data (HMD; UN; historical demography)"),
     Indicator("health_spending_gdp", "health", "oecd",
               "Health spending", "% of GDP", "annual",
               value_col="health_pct_gdp", chart_recipe="ranked_bar",

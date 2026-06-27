@@ -37,6 +37,18 @@ page); light inks carry a disc.
 - `star12-outline-cells.svg` — the lighter **outer-edge** colour option (12 chevrons, no
   inner structure).
 
+### Use — fine / sharp (crystalline) alternative
+A finer, sharpened rendering of the full outline, recorded 2026-06-26 (owner): the points
+are **mitred to crisp crystalline tips** (vs the workhorses' round joins) at a lighter
+**1.1** stroke, with a small filled centre (a "twinkle"). It reads more delicate and more
+overtly snowflake — reach for it at display/secondary sizes where the round outline feels
+heavy. Files: `star12-sharp-navy.svg`, `-maroon.svg` (dark ink, drop on light) and
+`-offwhite-on-navy.svg` (on a navy disc); any palette colour regenerates the same way.
+**Constellation use:** at tiny sizes the same sharp rendering is drawn with a
+**non-scaling stroke** (constant ~0.8px) so it survives below the ~20px line-collapse
+floor — this is how the faint star field on the navy social banners is built
+(`social/*-star-cells-navy-constellation.svg`).
+
 ### Keep — reference only (`reference-only/`, not for current use)
 Liked and on file, but with no practical use identified yet:
 - **`star12-fulloutline-cells.svg`** — white inner spikes + the six area colours on an
@@ -57,8 +69,9 @@ Liked and on file, but with no practical use identified yet:
    disc. The colour versions need a light/off-white ground (the dark points must read); the
    white-inner cells carries its own off-white disc so it reads on any page.
 5. **Palette.** Locked 8-colour set only; gold → deep ochre for thin strokes on light.
-6. **Not on the site yet.** Adopted into the brand kit as the secondary-mark set, but not
-   placed on any page. See `studies/snowflake-star/STUDY.md` §13 for the full assessment and
+6. **First real use = the social banners (2026-06-26).** The sharp/crystalline variant is the
+   faint constellation field beside the hero leaf-cells on the navy X/LinkedIn/Facebook
+   banners; still not on a *site page*. See `studies/snowflake-star/STUDY.md` §13 for the full assessment and
    the proposed home (an About → "Our marks" page).
 
 `secondary-star-overview.png` is the visual index of this folder. Full history, every

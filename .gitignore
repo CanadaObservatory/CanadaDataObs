@@ -24,7 +24,11 @@ internal/
 # Brand archive: the extracted folder in visual_assets/initial_drafts/ is committed
 # for design history; this zip is a byte-for-byte duplicate of it (1.5 MB).
 visual_assets/initial_drafts/*.zip
-social/
+
+# Pipeline-generated CPI/social cards at the repo root (derived artifacts). Anchored
+# with a leading slash so it does NOT also swallow the tracked brand kit in
+# visual_assets/brand/social/ (a bare `social/` matched that dir at any depth).
+/social/
 
 # Copernicus CDS credentials — never commit
 CDS_key.rtf

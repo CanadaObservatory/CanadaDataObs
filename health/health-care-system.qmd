@@ -38,8 +38,8 @@ hs_path = "data/health/oecd_health_spending_gdp.csv"
 if os.path.exists(hs_path):
     df = pd.read_csv(hs_path)
     fig = peer_comparison_line(df, "year", "health_pct_gdp",
-        title="", yaxis_title="% of GDP", show_average=True)
-    fig.update_layout(annotations=[dict(
+        title="", yaxis_title="% of GDP", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Health Expenditure (SHA) | Data as of: {get_data_date(hs_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -73,9 +73,9 @@ hspc_path = "data/health/oecd_health_spending_pc.csv"
 if os.path.exists(hspc_path):
     df = pd.read_csv(hspc_path)
     fig = peer_comparison_line(df, "year", "health_pc_usd",
-        title="", yaxis_title="US$ PPP per person", show_average=True)
+        title="", yaxis_title="US$ PPP per person", show_average=True, initial_start=2000)
     fig.update_yaxes(tickprefix="$", tickformat=",")
-    fig.update_layout(annotations=[dict(
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Health Expenditure (SHA), USD PPP | Data as of: {get_data_date(hspc_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -111,8 +111,9 @@ rx_path = "data/health/oecd_pharma_spending_pc.csv"
 if os.path.exists(rx_path):
     rx = pd.read_csv(rx_path)
     fig = peer_comparison_line(rx, "year", "pharma_pc_usd", "",
-        "US$ PPP per person", show_average=True,
+        "US$ PPP per person", show_average=True, initial_start=2000,
         source_note=f"Source: OECD Health Expenditure (SHA), retail pharmaceuticals (HC.5.1), USD PPP | Data as of: {get_data_date(rx_path)}")
+    fig.update_layout(meta=dict(autoscaleY=True))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Pharmaceutical-spending data not yet available. Run the data pipeline.")
@@ -162,8 +163,8 @@ beds_path = "data/health/oecd_hospital_beds.csv"
 if os.path.exists(beds_path):
     df = pd.read_csv(beds_path)
     fig = peer_comparison_line(df, "year", "hospital_beds",
-        title="", yaxis_title="Beds per 1,000 population", show_average=True)
-    fig.update_layout(annotations=[dict(
+        title="", yaxis_title="Beds per 1,000 population", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Health Statistics | Data as of: {get_data_date(beds_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -194,8 +195,8 @@ phys_path = "data/health/oecd_physicians.csv"
 if os.path.exists(phys_path):
     df = pd.read_csv(phys_path)
     fig = peer_comparison_line(df, "year", "physicians",
-        title="", yaxis_title="Physicians per 1,000 population", show_average=True)
-    fig.update_layout(annotations=[dict(
+        title="", yaxis_title="Physicians per 1,000 population", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Health Statistics | Data as of: {get_data_date(phys_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -226,8 +227,8 @@ nurses_path = "data/health/oecd_nurses.csv"
 if os.path.exists(nurses_path):
     df = pd.read_csv(nurses_path)
     fig = peer_comparison_line(df, "year", "nurses",
-        title="", yaxis_title="Nurses per 1,000 population", show_average=True)
-    fig.update_layout(annotations=[dict(
+        title="", yaxis_title="Nurses per 1,000 population", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Health Statistics | Data as of: {get_data_date(nurses_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -257,8 +258,9 @@ mri_path = "data/health/oecd_mri_units.csv"
 if os.path.exists(mri_path):
     df = pd.read_csv(mri_path)
     fig = peer_comparison_line(df, "year", "mri_units",
-        title="", yaxis_title="MRI units per million population", show_average=True)
-    fig.update_layout(annotations=[dict(
+        title="", yaxis_title="MRI units per million population", show_average=True,
+        initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Health Statistics | Data as of: {get_data_date(mri_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -294,8 +296,9 @@ ltc_path = "data/health/oecd_ltc_beds.csv"
 if os.path.exists(ltc_path):
     ltc = pd.read_csv(ltc_path)
     fig = peer_comparison_line(ltc, "year", "ltc_beds_per_1k_65plus", "",
-        "Beds per 1,000 aged 65+", show_average=True,
+        "Beds per 1,000 aged 65+", show_average=True, initial_start=2000,
         source_note=f"Source: OECD Health Statistics (Long-Term Care Resources) | Data as of: {get_data_date(ltc_path)}")
+    fig.update_layout(meta=dict(autoscaleY=True))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("Long-term-care data not yet available. Run the data pipeline.")

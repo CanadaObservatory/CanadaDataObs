@@ -1,4 +1,41 @@
 country_code,year,hospital_beds,country_name
+AUS,1960,9.65,Australia
+AUS,1961,9.48,Australia
+AUS,1962,9.38,Australia
+AUS,1963,9.36,Australia
+AUS,1964,9.23,Australia
+AUS,1965,9.13,Australia
+AUS,1966,8.93,Australia
+AUS,1967,8.84,Australia
+AUS,1968,8.61,Australia
+AUS,1969,8.4,Australia
+AUS,1970,8.25,Australia
+AUS,1971,7.98,Australia
+AUS,1972,7.9,Australia
+AUS,1973,7.88,Australia
+AUS,1974,8.0,Australia
+AUS,1975,7.94,Australia
+AUS,1976,7.97,Australia
+AUS,1977,8.1,Australia
+AUS,1978,8.05,Australia
+AUS,1979,8.0,Australia
+AUS,1980,7.84,Australia
+AUS,1981,7.65,Australia
+AUS,1982,7.43,Australia
+AUS,1983,7.2,Australia
+AUS,1984,6.94,Australia
+AUS,1985,6.24,Australia
+AUS,1987,5.82,Australia
+AUS,1989,5.43,Australia
+AUS,1991,4.92,Australia
+AUS,1992,4.65,Australia
+AUS,1993,4.68,Australia
+AUS,1994,4.59,Australia
+AUS,1995,4.58,Australia
+AUS,1996,4.38,Australia
+AUS,1997,4.28,Australia
+AUS,1998,4.17,Australia
+AUS,1999,4.07,Australia
 AUS,2000,4.04,Australia
 AUS,2001,3.95,Australia
 AUS,2002,3.93,Australia
@@ -15,6 +52,29 @@ AUS,2013,3.74,Australia
 AUS,2014,3.79,Australia
 AUS,2015,3.82,Australia
 AUS,2016,3.84,Australia
+CAN,1976,6.92,Canada
+CAN,1977,6.88,Canada
+CAN,1978,6.87,Canada
+CAN,1979,6.79,Canada
+CAN,1980,6.75,Canada
+CAN,1981,6.86,Canada
+CAN,1982,6.83,Canada
+CAN,1983,6.84,Canada
+CAN,1984,6.82,Canada
+CAN,1985,6.75,Canada
+CAN,1986,6.7,Canada
+CAN,1987,6.61,Canada
+CAN,1988,6.49,Canada
+CAN,1989,6.34,Canada
+CAN,1990,5.99,Canada
+CAN,1991,5.76,Canada
+CAN,1992,5.51,Canada
+CAN,1993,5.41,Canada
+CAN,1995,4.7,Canada
+CAN,1996,4.57,Canada
+CAN,1997,4.55,Canada
+CAN,1998,4.38,Canada
+CAN,1999,3.92,Canada
 CAN,2000,3.77,Canada
 CAN,2001,3.69,Canada
 CAN,2002,3.64,Canada
@@ -39,6 +99,8 @@ CAN,2020,2.55,Canada
 CAN,2021,2.58,Canada
 CAN,2022,2.53,Canada
 CAN,2023,2.49,Canada
+CHE,1998,6.63,Switzerland
+CHE,1999,6.61,Switzerland
 CHE,2000,6.29,Switzerland
 CHE,2001,6.04,Switzerland
 CHE,2002,5.95,Switzerland
@@ -63,6 +125,15 @@ CHE,2020,4.48,Switzerland
 CHE,2021,4.43,Switzerland
 CHE,2022,4.42,Switzerland
 CHE,2023,4.37,Switzerland
+DEU,1991,10.12,Germany
+DEU,1992,9.88,Germany
+DEU,1993,9.66,Germany
+DEU,1994,9.71,Germany
+DEU,1995,9.68,Germany
+DEU,1996,9.57,Germany
+DEU,1997,9.38,Germany
+DEU,1998,9.29,Germany
+DEU,1999,9.19,Germany
 DEU,2000,9.12,Germany
 DEU,2001,9.01,Germany
 DEU,2002,8.87,Germany
@@ -87,6 +158,9 @@ DEU,2020,7.82,Germany
 DEU,2021,7.76,Germany
 DEU,2022,7.72,Germany
 DEU,2023,7.66,Germany
+DNK,1997,4.64,Denmark
+DNK,1998,4.54,Denmark
+DNK,1999,4.37,Denmark
 DNK,2000,4.26,Denmark
 DNK,2001,4.19,Denmark
 DNK,2002,4.26,Denmark
@@ -109,6 +183,13 @@ DNK,2021,2.41,Denmark
 DNK,2022,2.38,Denmark
 DNK,2023,2.33,Denmark
 DNK,2024,2.23,Denmark
+FIN,1993,8.25,Finland
+FIN,1994,8.19,Finland
+FIN,1995,8.12,Finland
+FIN,1996,8.12,Finland
+FIN,1997,7.9,Finland
+FIN,1998,7.77,Finland
+FIN,1999,7.61,Finland
 FIN,2000,7.54,Finland
 FIN,2001,7.46,Finland
 FIN,2002,7.35,Finland
@@ -133,6 +214,9 @@ FIN,2020,2.75,Finland
 FIN,2021,2.79,Finland
 FIN,2022,2.62,Finland
 FIN,2023,2.6,Finland
+FRA,1997,8.49,France
+FRA,1998,8.34,France
+FRA,1999,8.2,France
 FRA,2000,7.97,France
 FRA,2001,7.83,France
 FRA,2002,7.71,France
@@ -181,6 +265,18 @@ GBR,2020,2.44,United Kingdom
 GBR,2021,2.43,United Kingdom
 GBR,2022,2.44,United Kingdom
 GBR,2023,2.44,United Kingdom
+ISR,1988,4.95,Israel
+ISR,1989,4.89,Israel
+ISR,1990,4.8,Israel
+ISR,1991,4.56,Israel
+ISR,1992,4.46,Israel
+ISR,1993,4.41,Israel
+ISR,1994,4.32,Israel
+ISR,1995,4.17,Israel
+ISR,1996,4.11,Israel
+ISR,1997,3.99,Israel
+ISR,1998,3.97,Israel
+ISR,1999,3.89,Israel
 ISR,2000,3.79,Israel
 ISR,2001,3.81,Israel
 ISR,2002,3.76,Israel
@@ -230,6 +326,13 @@ ITA,2020,3.19,Italy
 ITA,2021,3.12,Italy
 ITA,2022,3.09,Italy
 ITA,2023,3.04,Italy
+JPN,1993,15.58,Japan
+JPN,1994,15.48,Japan
+JPN,1995,15.36,Japan
+JPN,1996,15.19,Japan
+JPN,1997,15.06,Japan
+JPN,1998,14.96,Japan
+JPN,1999,14.78,Japan
 JPN,2000,14.69,Japan
 JPN,2001,14.58,Japan
 JPN,2002,14.43,Japan
@@ -254,6 +357,16 @@ JPN,2020,12.63,Japan
 JPN,2021,12.62,Japan
 JPN,2022,12.59,Japan
 JPN,2023,12.52,Japan
+KOR,1990,2.33,South Korea
+KOR,1991,2.48,South Korea
+KOR,1992,2.63,South Korea
+KOR,1993,2.85,South Korea
+KOR,1994,3.16,South Korea
+KOR,1995,3.34,South Korea
+KOR,1996,3.53,South Korea
+KOR,1997,3.7,South Korea
+KOR,1998,3.89,South Korea
+KOR,1999,4.25,South Korea
 KOR,2000,4.65,South Korea
 KOR,2001,4.45,South Korea
 KOR,2002,4.83,South Korea
@@ -279,6 +392,41 @@ KOR,2021,12.77,South Korea
 KOR,2022,12.83,South Korea
 KOR,2023,12.62,South Korea
 KOR,2024,12.5,South Korea
+NLD,1965,7.5,Netherlands
+NLD,1966,7.63,Netherlands
+NLD,1967,7.64,Netherlands
+NLD,1968,7.58,Netherlands
+NLD,1969,7.66,Netherlands
+NLD,1970,7.6,Netherlands
+NLD,1971,7.68,Netherlands
+NLD,1972,7.75,Netherlands
+NLD,1973,7.66,Netherlands
+NLD,1974,7.52,Netherlands
+NLD,1975,7.38,Netherlands
+NLD,1976,7.25,Netherlands
+NLD,1977,7.19,Netherlands
+NLD,1978,7.1,Netherlands
+NLD,1979,7.01,Netherlands
+NLD,1980,6.91,Netherlands
+NLD,1981,6.86,Netherlands
+NLD,1982,6.62,Netherlands
+NLD,1983,6.57,Netherlands
+NLD,1984,6.47,Netherlands
+NLD,1985,6.4,Netherlands
+NLD,1986,6.34,Netherlands
+NLD,1987,6.28,Netherlands
+NLD,1988,6.19,Netherlands
+NLD,1989,6.06,Netherlands
+NLD,1990,5.95,Netherlands
+NLD,1991,5.85,Netherlands
+NLD,1992,5.79,Netherlands
+NLD,1993,5.69,Netherlands
+NLD,1994,5.49,Netherlands
+NLD,1995,5.38,Netherlands
+NLD,1996,5.33,Netherlands
+NLD,1997,5.3,Netherlands
+NLD,1998,5.21,Netherlands
+NLD,1999,5.14,Netherlands
 NLD,2000,4.92,Netherlands
 NLD,2001,4.75,Netherlands
 NLD,2002,4.69,Netherlands
@@ -341,6 +489,46 @@ NZL,2021,2.68,New Zealand
 NZL,2022,2.59,New Zealand
 NZL,2023,2.49,New Zealand
 NZL,2024,2.48,New Zealand
+SWE,1960,14.18,Sweden
+SWE,1961,14.54,Sweden
+SWE,1962,14.6,Sweden
+SWE,1963,14.61,Sweden
+SWE,1964,14.88,Sweden
+SWE,1965,14.95,Sweden
+SWE,1966,14.95,Sweden
+SWE,1967,14.75,Sweden
+SWE,1968,14.87,Sweden
+SWE,1969,15.24,Sweden
+SWE,1970,15.32,Sweden
+SWE,1971,15.34,Sweden
+SWE,1972,15.54,Sweden
+SWE,1973,15.64,Sweden
+SWE,1974,15.63,Sweden
+SWE,1975,15.48,Sweden
+SWE,1976,15.35,Sweden
+SWE,1977,15.24,Sweden
+SWE,1978,15.45,Sweden
+SWE,1979,15.2,Sweden
+SWE,1980,15.15,Sweden
+SWE,1981,15.48,Sweden
+SWE,1982,14.99,Sweden
+SWE,1983,14.97,Sweden
+SWE,1984,14.89,Sweden
+SWE,1985,14.6,Sweden
+SWE,1986,14.18,Sweden
+SWE,1987,13.7,Sweden
+SWE,1988,13.29,Sweden
+SWE,1989,12.92,Sweden
+SWE,1990,12.44,Sweden
+SWE,1991,11.85,Sweden
+SWE,1992,6.67,Sweden
+SWE,1993,6.08,Sweden
+SWE,1994,5.19,Sweden
+SWE,1995,4.8,Sweden
+SWE,1996,4.31,Sweden
+SWE,1997,3.94,Sweden
+SWE,1998,3.75,Sweden
+SWE,1999,3.7,Sweden
 SWE,2000,3.58,Sweden
 SWE,2001,3.27,Sweden
 SWE,2002,3.13,Sweden
@@ -365,6 +553,38 @@ SWE,2020,2.05,Sweden
 SWE,2021,2.0,Sweden
 SWE,2022,1.9,Sweden
 SWE,2023,1.87,Sweden
+USA,1960,9.18,United States
+USA,1965,8.77,United States
+USA,1970,7.88,United States
+USA,1971,7.49,United States
+USA,1972,7.38,United States
+USA,1973,7.24,United States
+USA,1974,7.07,United States
+USA,1975,6.79,United States
+USA,1976,6.58,United States
+USA,1977,6.39,United States
+USA,1978,6.2,United States
+USA,1979,6.1,United States
+USA,1980,6.01,United States
+USA,1981,5.94,United States
+USA,1982,5.87,United States
+USA,1983,5.77,United States
+USA,1984,5.68,United States
+USA,1985,5.54,United States
+USA,1986,5.37,United States
+USA,1987,5.23,United States
+USA,1988,5.1,United States
+USA,1989,4.97,United States
+USA,1990,4.86,United States
+USA,1991,4.75,United States
+USA,1992,4.59,United States
+USA,1993,4.48,United States
+USA,1994,4.29,United States
+USA,1995,4.06,United States
+USA,1996,3.94,United States
+USA,1997,3.8,United States
+USA,1998,3.67,United States
+USA,1999,3.56,United States
 USA,2000,3.49,United States
 USA,2001,3.47,United States
 USA,2002,3.39,United States

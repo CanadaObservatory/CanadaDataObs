@@ -25,6 +25,7 @@ if os.path.exists(gdp_path):
     fig = peer_comparison_line(df, "year", "gdp_per_capita", title="",
         yaxis_title="GDP per capita (USD, PPP)", show_average=True, initial_start=2000,
         source_note=f"Source: OECD National Accounts (PPP, current prices) | Data as of: {get_data_date(gdp_path)}")
+    fig.update_layout(meta=dict(autoscaleY=True))
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 else:
     print("GDP per capita data not yet available. Run the data pipeline.")

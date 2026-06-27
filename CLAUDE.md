@@ -738,6 +738,21 @@ and NHPI tracks new-build builder prices, which understate the resale run-up.
 
 ## Known issues / gotchas
 
+- **OECD `start_period` default = 2000 (config.py `Indicator` dataclass).** Most OECD
+  series go back FAR earlier than 2000 — a chart starting at 2000 is usually the fetch
+  cap, not missing data. **2026-06-27 sweep extended ~25 indicators** to their true
+  floors (gdp_per_capita/govt-finance/house-prices/beds/physicians 1960; health & pharma
+  spending 1970; gini/poverty 1976; nurses 1980; R&D 1981; mri 1982; ltc 1988; avg_wage
+  1990). Pattern = **load deep, open recent**: extend `start_period` in config, and on the
+  line chart pass `initial_start=<recent year, usually 2000>` + `fig.update_layout(meta=dict(autoscaleY=True))`
+  (or `autoscaleY=dict(include=[0])` for zero-crossing series) so the default VIEW stays
+  recent while the slider/"All" reaches the full history (y rescales to the window via
+  `_includes/yaxis-autoscale.html`). **STILL PENDING (OECD hourly 429 during the sweep —
+  ride STALE at 2000 until refetched): `ltc_beds`, `rd_expenditure`, `berd`, `researchers`**
+  (config floors set; ltc_beds view already done; science rd/researchers + innovation berd
+  chart views still need the `initial_start`+autoscaleY edit when their data refetches).
+  Probe earliest year with `_fetch_oecd_csv(dataflow, key, start_period=1950)`; space probes
+  (~25/run) to avoid the hourly cap.
 - `window.Plotly` undefined under Quarto's bundled Plotly → CPI rescale JS may not
   fire (pre-existing; chart renders fine).
 - OECD Economic Outlook `DSD_EO` returns ~2 forecast years; capped by

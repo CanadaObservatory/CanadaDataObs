@@ -45,7 +45,7 @@ if os.path.exists(path):
     fig = peer_comparison_line(df, "year", "house_price_real",
         title="", yaxis_title="Real house price index (2015 = 100)",
         show_average=True, initial_start=2014)
-    fig.update_layout(annotations=[dict(
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -82,7 +82,7 @@ if os.path.exists(path2):
     fig = peer_comparison_line(df, "year", "price_to_income",
         title="", yaxis_title="Price-to-income ratio (2015 = 100)",
         show_average=True, initial_start=2014)
-    fig.update_layout(annotations=[dict(
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Analytical House Prices | Data as of: {get_data_date(path2)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])

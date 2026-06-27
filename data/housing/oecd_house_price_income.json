@@ -4,12 +4,12 @@
   "source_table": "OECD Analytical House Prices",
   "frequency": "annual",
   "unit": "index (2015=100)",
-  "retrieved_at": "2026-06-27T15:21:54.910445+00:00",
+  "retrieved_at": "2026-06-27T23:13:44.724660+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [
     "filtered to House-price-to-income ratio for OECD peer group"
   ],
   "notes": null,
-  "row_count": 432
+  "row_count": 826
 }

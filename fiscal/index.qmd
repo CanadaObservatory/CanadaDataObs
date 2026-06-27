@@ -38,8 +38,8 @@ debt_path = "data/fiscal/oecd_govt_debt.csv"
 if os.path.exists(debt_path):
     df = pd.read_csv(debt_path)
     fig = peer_comparison_line(df, "year", "govt_debt",
-        title="", yaxis_title="Gross debt (% of GDP)", show_average=True)
-    fig.update_layout(annotations=[dict(
+        title="", yaxis_title="Gross debt (% of GDP)", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(debt_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -82,9 +82,9 @@ bal_path = "data/fiscal/oecd_govt_balance.csv"
 if os.path.exists(bal_path):
     df = pd.read_csv(bal_path)
     fig = peer_comparison_line(df, "year", "govt_balance",
-        title="", yaxis_title="Budget balance (% of GDP)", show_average=True)
+        title="", yaxis_title="Budget balance (% of GDP)", show_average=True, initial_start=2000)
     fig.add_hline(y=0, line_dash="dot", line_color="#888", opacity=0.5)
-    fig.update_layout(annotations=[dict(
+    fig.update_layout(meta=dict(autoscaleY=dict(include=[0])), annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(bal_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
         showarrow=False, font=dict(size=10, color="#999"))])
@@ -115,8 +115,8 @@ rev_path = "data/fiscal/oecd_govt_revenue.csv"
 if os.path.exists(rev_path):
     df = pd.read_csv(rev_path)
     fig = peer_comparison_line(df, "year", "govt_revenue", title="",
-        yaxis_title="% of GDP", show_average=True)
-    fig.update_layout(annotations=[dict(
+        yaxis_title="% of GDP", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(rev_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
@@ -189,8 +189,8 @@ int_path = "data/fiscal/oecd_govt_interest.csv"
 if os.path.exists(int_path):
     df = pd.read_csv(int_path)
     fig = peer_comparison_line(df, "year", "govt_interest", title="",
-        yaxis_title="% of GDP", show_average=True)
-    fig.update_layout(annotations=[dict(
+        yaxis_title="% of GDP", show_average=True, initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True), annotations=[dict(
         text=f"Source: OECD Economic Outlook (recent years are projections) | Data as of: {get_data_date(int_path)}",
         xref="paper", yref="paper", x=0, y=-0.34, showarrow=False, font=dict(size=10, color="#999"))])
     fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})

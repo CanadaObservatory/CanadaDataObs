@@ -125,32 +125,39 @@ except FileNotFoundError:
 
 ## Has pay kept up?
 
-The other half of cost-of-living pressure is whether earnings keep pace. This compares the **average weekly wage** with the all-items price level, both rebased to 2019 = 100. On average, wages have slightly outpaced prices since the pandemic — but that average hides a lot: pay rose unevenly across workers, and it lagged behind the price surge of 2021–22 before catching up, which is much of why the squeeze felt acute even as the totals roughly balanced.
+The other half of cost-of-living pressure is whether earnings keep pace — and the answer depends on *which* prices you measure against. This compares the **median weekly wage** (the typical worker, rather than an average that a handful of high earners and shifts in who is employed can pull upward) with three price benchmarks, all rebased to 2019 = 100: the headline **all-items** index and its two heaviest, most-felt components, **shelter** and **food**. Against the all-items index, the median wage edged ahead. But shelter and food — which dominate the squeeze most households describe — rose faster than pay. So "did wages keep up?" is *yes against the headline basket, no against the costs people feel most.* One caveat reads across all of it: wage figures jumped in 2020 partly because lower-paid workers were the ones who lost jobs, lifting the typical-worker figure without anyone getting a raise; the gains since have been uneven, and pay lagged the 2021–22 price surge before catching up.
 
 ```{python}
 #| echo: false
 try:
     wp = pd.read_csv("data/income/statcan_wages_by_province.csv")
-    wp = wp[wp["geo"] == "Canada"].set_index("year")["avg_weekly_wage"]
-    ci = pd.read_csv("data/economics/statcan_cpi.csv", parse_dates=["date"])
-    if "product_group" in ci.columns:
-        ci = ci[ci["product_group"] == "All-items"]
-    ci = ci.assign(yr=ci["date"].dt.year).groupby("yr")["cpi_value"].mean()
+    wp = wp[wp["geo"] == "Canada"].set_index("year")["median_weekly_wage"]
+    cc = pd.read_csv("data/economics/statcan_cpi_components.csv", parse_dates=["date"])
+    cc = cc[cc["geography"] == "Canada"].assign(yr=lambda d: d["date"].dt.year)
+    def _cpi(group):
+        return cc[cc["product_group"] == group].groupby("yr")["cpi_value"].mean()
+    allp, shelter, food = _cpi("All-items"), _cpi("Shelter"), _cpi("Food")
     base = 2019
-    yrs = [y for y in wp.index if y >= base and y in ci.index]
+    yrs = [y for y in wp.index if y >= base and y in allp.index]
+    def _reb(s):
+        return [s[y] / s[base] * 100 for y in yrs]
     figw = go.Figure()
-    figw.add_trace(go.Scatter(x=yrs, y=[ci[y] / ci[base] * 100 for y in yrs], name="Prices (all-items)",
-        mode="lines", line=dict(color=CATEGORICAL_COLORS[1], width=2.5), hovertemplate="Prices: %{y:.0f}<extra></extra>"))
-    figw.add_trace(go.Scatter(x=yrs, y=[wp[y] / wp[base] * 100 for y in yrs], name="Average weekly wage",
-        mode="lines+markers", line=dict(color=CATEGORICAL_COLORS[0], width=3), marker=dict(size=6),
+    figw.add_trace(go.Scatter(x=yrs, y=_reb(food), name="Food prices",
+        mode="lines", line=dict(color=CATEGORICAL_COLORS[1], width=2.2), hovertemplate="Food: %{y:.0f}<extra></extra>"))
+    figw.add_trace(go.Scatter(x=yrs, y=_reb(shelter), name="Shelter prices",
+        mode="lines", line=dict(color=CATEGORICAL_COLORS[0], width=2.2), hovertemplate="Shelter: %{y:.0f}<extra></extra>"))
+    figw.add_trace(go.Scatter(x=yrs, y=_reb(allp), name="Prices (all-items)",
+        mode="lines", line=dict(color="#888888", width=2.2, dash="dash"), hovertemplate="All-items: %{y:.0f}<extra></extra>"))
+    figw.add_trace(go.Scatter(x=yrs, y=_reb(wp), name="Median weekly wage",
+        mode="lines+markers", line=dict(color=CANADA_COLOR, width=3.4), marker=dict(size=7),
         hovertemplate="Wage: %{y:.0f}<extra></extra>"))
     figw.add_hline(y=100, line_dash="dot", line_color="#aaa")
-    figw.update_layout(plot_bgcolor="white", height=440, hovermode="x unified",
+    figw.update_layout(plot_bgcolor="white", height=460, hovermode="x unified",
         yaxis=dict(title="Index (2019 = 100)", gridcolor="#e0e0e0"),
         xaxis=dict(title="", gridcolor="#e0e0e0", dtick=1),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
         margin=dict(t=40, b=80, r=20))
-    figw.add_annotation(text=f"Source: Statistics Canada, Tables 14-10-0064-01 (wages) and 18-10-0004-01 (CPI) | Data as of: {get_data_date('data/income/statcan_wages_by_province.csv')}",
+    figw.add_annotation(text=f"Source: Statistics Canada, Tables 14-10-0064-01 (median weekly wage) and 18-10-0004-01 (CPI) | Data as of: {get_data_date('data/income/statcan_wages_by_province.csv')}",
         xref="paper", yref="paper", x=0, y=-0.2, xanchor="left", showarrow=False, font=dict(size=10, color="#999"))
     figw.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
 except FileNotFoundError:

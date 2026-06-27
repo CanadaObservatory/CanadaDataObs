@@ -3,12 +3,12 @@
   "source": "Statistics Canada",
   "source_table": "Statistics Canada 14-10-0064-01",
   "frequency": "annual",
-  "unit": "average weekly wage ($)",
-  "retrieved_at": "2026-06-27T15:22:48.498538+00:00",
+  "unit": "weekly wage ($)",
+  "retrieved_at": "2026-06-27T21:59:47.541856+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [
-    "Canada + provinces; all industries; both genders; 15+; both full/part-time; average weekly wage"
+    "Canada + provinces; all industries; both genders; 15+; both full/part-time; average and median weekly wage"
   ],
   "notes": null,
   "row_count": 319

@@ -1466,15 +1466,24 @@ def fetch_wages_by_province():
         logger.error(f"  failed: {e}")
         return None
     naics = next(c for c in d.columns if "NAICS" in c)
-    d = d[(d["Wages"] == "Average weekly wage rate")
+    # Keep BOTH the average and the median weekly wage. The average is pulled up by
+    # top earners and by composition shifts (e.g. the 2020 COVID layoffs of low-paid
+    # workers mechanically raised the mean); the median tracks the typical worker and
+    # is the honest series for the "did pay keep up with prices" comparison.
+    wage_map = {"Average weekly wage rate": "avg_weekly_wage",
+                "Median weekly wage rate": "median_weekly_wage"}
+    d = d[(d["Wages"].isin(wage_map))
           & (d["Type of work"] == "Both full- and part-time employees")
           & (d[naics] == "Total employees, all industries")
           & (d["Gender"] == "Total - Gender")
           & (d["Age group"] == "15 years and over")].copy()
     d["year"] = pd.to_numeric(d["REF_DATE"], errors="coerce")
-    d["avg_weekly_wage"] = pd.to_numeric(d["VALUE"], errors="coerce")
-    out = (d[["year", "GEO", "avg_weekly_wage"]].rename(columns={"GEO": "geo"})
-           .dropna(subset=["year", "avg_weekly_wage"]))
+    d["value"] = pd.to_numeric(d["VALUE"], errors="coerce")
+    d["measure"] = d["Wages"].map(wage_map)
+    out = (d.dropna(subset=["year", "value"])
+            .pivot_table(index=["year", "GEO"], columns="measure", values="value")
+            .reset_index().rename(columns={"GEO": "geo"}))
+    out.columns.name = None
     out["year"] = out["year"].astype(int)
     out = out.sort_values(["year", "geo"]).reset_index(drop=True)
     if out.empty:
@@ -1484,8 +1493,8 @@ def fetch_wages_by_province():
     out.to_csv(out_path, index=False)
     save_metadata(out_path, df=out, date_column="year", source="Statistics Canada",
         source_table="Statistics Canada 14-10-0064-01",
-        frequency="annual", unit="average weekly wage ($)",
-        transformations=["Canada + provinces; all industries; both genders; 15+; both full/part-time; average weekly wage"])
+        frequency="annual", unit="weekly wage ($)",
+        transformations=["Canada + provinces; all industries; both genders; 15+; both full/part-time; average and median weekly wage"])
     logger.info(f"  saved {len(out)} rows -> {out_path.name}")
     return out
 

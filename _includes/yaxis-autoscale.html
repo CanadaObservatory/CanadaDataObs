@@ -128,32 +128,53 @@
   }
 
   function wire(gd, P) {
-    if (gd._yAutoWired) return;
     if (typeof gd.on !== "function" || !gd.data) return;   // not initialised yet
+    if (gd._yAutoSkip) return;                             // known not-opted-in
     var opts = cfg(gd);
-    gd._yAutoWired = true;
-    if (!opts) return;                                     // not opted in — skip
+    if (!opts) { gd._yAutoSkip = true; return; }           // not opted in — skip for good
 
-    var pending = false;
-    function schedule() {
-      if (pending) return;
-      pending = true;
-      window.requestAnimationFrame(function () {
-        pending = false;
-        rescale(gd, P, opts);
-      });
+    // Build the handlers ONCE and stash them on gd. We then (re)bind them on EVERY sweep
+    // tick (see below) — Quarto/Plotly can hand us a graph div whose event emitter isn't
+    // ready yet (or gets recreated on first full draw), silently dropping a one-time
+    // binding; the listeners would then never fire (the dropdown/slider refit just
+    // wouldn't happen). Re-adding each tick, after removing the prior copy, guarantees
+    // exactly one live binding once Plotly has settled, with no duplicates.
+    if (!gd._yAuto) {
+      var timer = null;
+      // Debounce via setTimeout, NOT requestAnimationFrame: rAF is throttled (or never
+      // fires) in background/inactive tabs, which would leave the timer stuck and kill
+      // every later rescale. A short timer coalesces rapid slider events just as well.
+      var schedule = function () {
+        if (timer) return;
+        timer = setTimeout(function () { timer = null; rescale(gd, P, opts); }, 60);
+      };
+      var onRelayout = function (ev) {
+        if (gd._yAutoBusy) return;                          // ignore our own y relayout
+        if (!ev) return;
+        var xChanged = ("xaxis.autorange" in ev) || ("xaxis.range" in ev) ||
+                       ("xaxis.range[0]" in ev) || ("xaxis.range[1]" in ev);
+        if (!xChanged) return;
+        schedule();
+      };
+      // Refit when the VISIBLE DATA changes within the same x-window: an age/category
+      // dropdown swaps each trace's y via Plotly.restyle (Youth unemployment runs higher
+      // than the Total), and legend clicks toggle visibility — both fire restyle/update,
+      // not relayout. No _yAutoBusy guard: our refit uses Plotly.relayout (emits
+      // plotly_relayout, never restyle/update), so a data change can't self-trigger.
+      gd._yAuto = { schedule: schedule, onRelayout: onRelayout, onData: schedule };
     }
 
-    gd.on("plotly_relayout", function (ev) {
-      if (gd._yAutoBusy) return;                           // ignore our own y relayout
-      if (!ev) return;
-      var xChanged = ("xaxis.autorange" in ev) || ("xaxis.range" in ev) ||
-                     ("xaxis.range[0]" in ev) || ("xaxis.range[1]" in ev);
-      if (!xChanged) return;
-      schedule();
-    });
+    var h = gd._yAuto;
+    if (typeof gd.removeListener === "function") {
+      gd.removeListener("plotly_relayout", h.onRelayout);
+      gd.removeListener("plotly_restyle", h.onData);
+      gd.removeListener("plotly_update", h.onData);
+    }
+    gd.on("plotly_relayout", h.onRelayout);
+    gd.on("plotly_restyle", h.onData);
+    gd.on("plotly_update", h.onData);
 
-    schedule();                                            // fit the opening window on load
+    if (!gd._yAutoFit) { gd._yAutoFit = true; h.schedule(); }   // fit the opening window once
   }
 
   function sweep() {

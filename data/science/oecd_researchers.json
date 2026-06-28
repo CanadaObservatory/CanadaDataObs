@@ -4,12 +4,12 @@
   "source_table": "OECD MSTI",
   "frequency": "annual",
   "unit": "per 1,000 employment",
-  "retrieved_at": "2026-06-27T15:23:50.576390+00:00",
+  "retrieved_at": "2026-06-28T00:01:13.364022+00:00",
   "latest_observation_date": "2024",
   "next_release_date": null,
   "transformations": [
     "filtered to Researchers per 1,000 employed for OECD peer group"
   ],
   "notes": null,
-  "row_count": 333
+  "row_count": 527
 }

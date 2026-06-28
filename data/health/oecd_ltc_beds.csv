@@ -1,4 +1,14 @@
 country_code,year,ltc_beds_per_1k_65plus,country_name
+AUS,1990,38.4,Australia
+AUS,1991,37.5,Australia
+AUS,1992,37.0,Australia
+AUS,1993,36.3,Australia
+AUS,1994,35.4,Australia
+AUS,1995,34.9,Australia
+AUS,1996,34.2,Australia
+AUS,1997,33.2,Australia
+AUS,1998,34.8,Australia
+AUS,1999,36.1,Australia
 AUS,2000,36.2,Australia
 AUS,2001,36.2,Australia
 AUS,2002,36.4,Australia
@@ -69,6 +79,7 @@ CHE,2020,62.7,Switzerland
 CHE,2021,61.9,Switzerland
 CHE,2022,60.6,Switzerland
 CHE,2023,59.5,Switzerland
+DEU,1999,49.4,Germany
 DEU,2001,49.2,Germany
 DEU,2003,49.4,Germany
 DEU,2005,49.3,Germany
@@ -82,6 +93,16 @@ DEU,2019,54.2,Germany
 DEU,2021,53.9,Germany
 DEU,2022,53.5,Germany
 DEU,2023,53.5,Germany
+DNK,1990,63.9,Denmark
+DNK,1991,60.0,Denmark
+DNK,1992,57.5,Denmark
+DNK,1993,55.6,Denmark
+DNK,1994,58.7,Denmark
+DNK,1995,58.7,Denmark
+DNK,1996,60.5,Denmark
+DNK,1997,59.0,Denmark
+DNK,1998,61.2,Denmark
+DNK,1999,58.3,Denmark
 DNK,2000,58.3,Denmark
 DNK,2001,58.5,Denmark
 DNK,2002,58.0,Denmark
@@ -107,6 +128,10 @@ DNK,2021,36.8,Denmark
 DNK,2022,36.4,Denmark
 DNK,2023,36.2,Denmark
 DNK,2024,35.6,Denmark
+FIN,1996,38.7,Finland
+FIN,1997,41.3,Finland
+FIN,1998,41.9,Finland
+FIN,1999,43.9,Finland
 FIN,2000,44.5,Finland
 FIN,2001,46.5,Finland
 FIN,2002,48.7,Finland
@@ -131,6 +156,13 @@ FIN,2020,54.8,Finland
 FIN,2021,51.2,Finland
 FIN,2022,49.7,Finland
 FIN,2023,50.2,Finland
+FRA,1993,47.4,France
+FRA,1994,47.9,France
+FRA,1995,48.4,France
+FRA,1996,47.4,France
+FRA,1997,47.7,France
+FRA,1998,47.8,France
+FRA,1999,47.3,France
 FRA,2000,46.9,France
 FRA,2001,46.3,France
 FRA,2002,46.1,France
@@ -176,6 +208,18 @@ GBR,2020,42.4,United Kingdom
 GBR,2021,41.7,United Kingdom
 GBR,2022,40.8,United Kingdom
 GBR,2023,41.3,United Kingdom
+ISR,1988,15.3,Israel
+ISR,1989,15.5,Israel
+ISR,1990,15.9,Israel
+ISR,1991,15.2,Israel
+ISR,1992,16.3,Israel
+ISR,1993,17.7,Israel
+ISR,1994,18.8,Israel
+ISR,1995,18.9,Israel
+ISR,1996,19.5,Israel
+ISR,1997,20.8,Israel
+ISR,1998,21.7,Israel
+ISR,1999,22.8,Israel
 ISR,2000,24.0,Israel
 ISR,2001,24.0,Israel
 ISR,2002,23.9,Israel
@@ -225,6 +269,13 @@ ITA,2020,20.0,Italy
 ITA,2021,20.2,Italy
 ITA,2022,21.3,Italy
 ITA,2023,21.3,Italy
+JPN,1993,15.5,Japan
+JPN,1994,16.6,Japan
+JPN,1995,17.7,Japan
+JPN,1996,19.4,Japan
+JPN,1997,21.0,Japan
+JPN,1998,22.3,Japan
+JPN,1999,23.4,Japan
 JPN,2000,24.2,Japan
 JPN,2001,24.4,Japan
 JPN,2002,24.8,Japan
@@ -273,6 +324,16 @@ KOR,2020,24.9,South Korea
 KOR,2021,25.1,South Korea
 KOR,2022,25.9,South Korea
 KOR,2023,25.8,South Korea
+NLD,1990,100.7,Netherlands
+NLD,1991,98.4,Netherlands
+NLD,1992,96.5,Netherlands
+NLD,1993,94.8,Netherlands
+NLD,1994,92.6,Netherlands
+NLD,1995,90.1,Netherlands
+NLD,1996,87.2,Netherlands
+NLD,1997,83.7,Netherlands
+NLD,1998,81.4,Netherlands
+NLD,1999,79.7,Netherlands
 NLD,2000,78.4,Netherlands
 NLD,2001,77.9,Netherlands
 NLD,2002,76.8,Netherlands
@@ -335,6 +396,16 @@ NZL,2021,51.0,New Zealand
 NZL,2022,49.8,New Zealand
 NZL,2023,49.7,New Zealand
 NZL,2024,49.2,New Zealand
+SWE,1990,58.9,Sweden
+SWE,1991,60.3,Sweden
+SWE,1992,79.5,Sweden
+SWE,1993,84.9,Sweden
+SWE,1994,87.4,Sweden
+SWE,1995,98.9,Sweden
+SWE,1996,96.9,Sweden
+SWE,1997,99.3,Sweden
+SWE,1998,92.0,Sweden
+SWE,1999,95.9,Sweden
 SWE,2000,98.5,Sweden
 SWE,2001,99.4,Sweden
 SWE,2002,97.9,Sweden
@@ -359,6 +430,8 @@ SWE,2020,64.4,Sweden
 SWE,2021,64.6,Sweden
 SWE,2022,64.2,Sweden
 SWE,2023,64.5,Sweden
+USA,1998,44.1,United States
+USA,1999,43.4,United States
 USA,2000,43.6,United States
 USA,2001,43.2,United States
 USA,2002,44.3,United States

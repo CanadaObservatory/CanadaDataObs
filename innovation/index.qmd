@@ -35,8 +35,10 @@ The clearest gauge of business-led innovation is how much the private sector its
 #| echo: false
 berd_path = "data/science/oecd_berd.csv"
 if os.path.exists(berd_path):
-    _peer_line(berd_path, "berd_pct_gdp", "Business R&D (% of GDP)",
-               "Source: OECD MSTI", topical=["KOR"]).show(config=_CFG)
+    fig = _peer_line(berd_path, "berd_pct_gdp", "Business R&D (% of GDP)",
+                     "Source: OECD MSTI", topical=["KOR"], initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True))
+    fig.show(config=_CFG)
 else:
     print("Business R&D data not yet available. Run the data pipeline.")
 ```

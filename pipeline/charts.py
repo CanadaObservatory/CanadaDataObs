@@ -339,7 +339,12 @@ def peer_comparison_line(df, x_col, y_col, title, yaxis_title,
                .groupby(x_col)[y_col].mean().reset_index())
         fig.add_trace(go.Scatter(
             x=_year_to_dt(avg[x_col]), y=avg[y_col], name=avg_name, mode="lines",
-            line=dict(color=OECD_AVG_COLOR, width=2, dash="dash"),
+            # Explicit short px dash (not the named "dash"): Plotly scales a NAMED dash to
+            # the legend's fixed 5px stroke → a 15px period, and the legend line is exactly
+            # 30px, so the swatch showed a single dash + gap ("half line"). A fixed 6/4 px
+            # pattern isn't width-scaled, so the 30px swatch shows ~3 dashes and reads clearly
+            # as dashed, while the on-chart line looks the same.
+            line=dict(color=OECD_AVG_COLOR, width=2, dash="6px,4px"),
             legendrank=300,
             hovertemplate=f"{avg_name}: %{{y:.2f}}<extra></extra>",
         ))
@@ -549,7 +554,12 @@ def peer_comparison_line_by_age(df, x_col, y_col, age_col, yaxis_title, *,
             oi += 1
         elif kind == "avg":
             fig.add_trace(go.Scatter(x=x, y=y, name=avg_name, mode="lines",
-                line=dict(color=OECD_AVG_COLOR, width=2, dash="dash"),
+                # Explicit short px dash (not the named "dash"): Plotly scales a NAMED dash to
+            # the legend's fixed 5px stroke → a 15px period, and the legend line is exactly
+            # 30px, so the swatch showed a single dash + gap ("half line"). A fixed 6/4 px
+            # pattern isn't width-scaled, so the 30px swatch shows ~3 dashes and reads clearly
+            # as dashed, while the on-chart line looks the same.
+            line=dict(color=OECD_AVG_COLOR, width=2, dash="6px,4px"),
                 legendrank=300, hovertemplate=_hov(avg_name)))
         elif kind == "cmp":
             name = _name(code)

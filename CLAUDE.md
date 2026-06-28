@@ -747,12 +747,14 @@ and NHPI tracks new-build builder prices, which understate the resale run-up.
   line chart pass `initial_start=<recent year, usually 2000>` + `fig.update_layout(meta=dict(autoscaleY=True))`
   (or `autoscaleY=dict(include=[0])` for zero-crossing series) so the default VIEW stays
   recent while the slider/"All" reaches the full history (y rescales to the window via
-  `_includes/yaxis-autoscale.html`). **STILL PENDING (OECD hourly 429 during the sweep —
-  ride STALE at 2000 until refetched): `ltc_beds`, `rd_expenditure`, `berd`, `researchers`**
-  (config floors set; ltc_beds view already done; science rd/researchers + innovation berd
-  chart views still need the `initial_start`+autoscaleY edit when their data refetches).
+  `_includes/yaxis-autoscale.html`). All ~25 done (the sweep tripped the OECD hourly 429
+  partway — `ltc_beds`/`rd_expenditure`/`berd`/`researchers` were refetched on a later pass).
   Probe earliest year with `_fetch_oecd_csv(dataflow, key, start_period=1950)`; space probes
-  (~25/run) to avoid the hourly cap.
+  (~25/run) to avoid the hourly cap. **NOT extended (no earlier data / already at floor):**
+  `co2_*`/`pm25_*` (1990), `govt_employment`/`household_debt`/`disposable_income` (2007),
+  `venture_capital` (2002, Canada only 2007), `labour_productivity`/`labour_utilisation`
+  (PDB_LV source 500s). Unemployment/employment by-age use the bespoke `fetch_labour_by_age`
+  (hardcoded start 2000) — not yet extended; the DF_IALFS_INDIC flow would need its own probe.
 - `window.Plotly` undefined under Quarto's bundled Plotly → CPI rescale JS may not
   fire (pre-existing; chart renders fine).
 - OECD Economic Outlook `DSD_EO` returns ~2 forecast years; capped by

@@ -753,8 +753,10 @@ and NHPI tracks new-build builder prices, which understate the resale run-up.
   (~25/run) to avoid the hourly cap. **NOT extended (no earlier data / already at floor):**
   `co2_*`/`pm25_*` (1990), `govt_employment`/`household_debt`/`disposable_income` (2007),
   `venture_capital` (2002, Canada only 2007), `labour_productivity`/`labour_utilisation`
-  (PDB_LV source 500s). Unemployment/employment by-age use the bespoke `fetch_labour_by_age`
-  (hardcoded start 2000) — not yet extended; the DF_IALFS_INDIC flow would need its own probe.
+  (PDB_LV source 500s). Unemployment/employment by-age (bespoke `fetch_labour_by_age`,
+  DF_IALFS_INDIC) were also extended to **1955** (Canada from 1976; only the US et al.
+  reach 1955) — the two economics by-age charts open 2000 with autoscaleY, and the slider
+  reveals Canada's 1982/1991 unemployment peaks.
 - `window.Plotly` undefined under Quarto's bundled Plotly → CPI rescale JS may not
   fire (pre-existing; chart renders fine).
 - OECD Economic Outlook `DSD_EO` returns ~2 forecast years; capped by

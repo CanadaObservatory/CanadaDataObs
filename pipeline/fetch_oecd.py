@@ -140,7 +140,10 @@ def fetch_labour_by_age():
     ages = "+".join(LABOUR_AGE_LABELS)
     # dims: REF_AREA.MEASURE.UNIT.TRANSFORMATION.ADJUSTMENT.SEX.AGE.ACTIVITY.FREQ
     key = (f"{peers}.UNE_LF+EMP_WAP.PT_LF_SUB+PT_WAP_SUB..Y._T.{ages}..A")
-    df = _fetch_oecd_csv("OECD.SDD.TPS,DSD_LFS@DF_IALFS_INDIC", key, start_period=2000)
+    # The flow runs back to 1955 (Canada from 1976; a few peers, e.g. the US, to
+    # 1955). Load the full depth — the charts open on a recent window but the slider
+    # reaches the whole history.
+    df = _fetch_oecd_csv("OECD.SDD.TPS,DSD_LFS@DF_IALFS_INDIC", key, start_period=1955)
     if df is None or df.empty:
         return None
     validate_columns(df, ["REF_AREA", "MEASURE", "AGE", "TIME_PERIOD", "OBS_VALUE"],

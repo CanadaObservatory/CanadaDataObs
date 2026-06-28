@@ -341,7 +341,8 @@ if os.path.exists(unemp_path):
     fig = peer_comparison_line_by_age(
         unemp, x_col="year", y_col="unemployment_rate", age_col="age",
         yaxis_title="% of labour force", ages=LABOUR_AGES, default_age=LABOUR_AGES[0],
-        initial_visible=["USA"])
+        initial_visible=["USA"], initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True))
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(unemp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,
@@ -405,7 +406,8 @@ if os.path.exists(emp_path):
         df, x_col="year", y_col="employment_rate", age_col="age",
         yaxis_title="% of population in age group",
         ages=LABOUR_AGES, default_age=LABOUR_AGES[0], show_average=True,
-        initial_visible=["USA"])
+        initial_visible=["USA"], initial_start=2000)
+    fig.update_layout(meta=dict(autoscaleY=True))
     fig.add_annotation(
         text=f"Source: OECD Labour Force Statistics (harmonised, by age) | Data as of: {get_data_date(emp_path)}",
         xref="paper", yref="paper", x=0, y=-0.34,

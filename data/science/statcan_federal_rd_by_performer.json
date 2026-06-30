@@ -4,13 +4,13 @@
   "source_table": "Statistics Canada 27-10-0026-01",
   "frequency": "annual",
   "unit": "$ millions, R&D",
-  "retrieved_at": "2026-06-27T15:23:50.954704+00:00",
-  "latest_observation_date": "2025/26",
+  "retrieved_at": "2026-06-30T16:28:54.316716+00:00",
+  "latest_observation_date": "2026/27",
   "next_release_date": null,
   "transformations": [
     "GEO=Canada; Component=Research and development; agency=Total departments and agencies",
     "Type of expenditures: Intramural (in-house) vs Extramural (granted out); share = % of federal R&D"
   ],
   "notes": null,
-  "row_count": 52
+  "row_count": 54
 }

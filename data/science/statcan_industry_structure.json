@@ -4,8 +4,8 @@
   "source_table": "Statistics Canada 36-10-0434-01",
   "frequency": "monthly",
   "unit": "% of GDP (chained 2017 $)",
-  "retrieved_at": "2026-06-27T15:24:14.444866+00:00",
-  "latest_observation_date": "2026-03",
+  "retrieved_at": "2026-06-30T16:29:17.089621+00:00",
+  "latest_observation_date": "2026-04",
   "next_release_date": null,
   "transformations": [
     "GEO=Canada, SA at annual rates, chained dollars; each 2-digit NAICS sector / All industries [T001]"

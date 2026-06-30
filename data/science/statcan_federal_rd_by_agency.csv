@@ -400,37 +400,54 @@ year,fiscal_year,agency,agency_full,nominal
 2023,2023/24,Fisheries & Oceans,Fisheries and Oceans Canada,45.0
 2023,2023/24,Global Affairs Canada,Global Affairs Canada,45.0
 2023,2023/24,Statistics Canada,Statistics Canada,22.0
-2024,2024/25,National Research Council,National Research Council Canada,1513.0
-2024,2024/25,CIHR,Canadian Institutes of Health Research,1293.0
-2024,2024/25,NSERC,Natural Sciences and Engineering Research Council of Canada,1233.0
-2024,2024/25,SSHRC,Social Sciences and Humanities Research Council of Canada,1139.0
-2024,2024/25,Other departments & agencies,Other departments and agencies,988.0
-2024,2024/25,"Innovation, Science & Econ. Dev.","Innovation, Science and Economic Development Canada",944.0
-2024,2024/25,CFI,Canada Foundation for Innovation,564.0
-2024,2024/25,National Defence,National Defence,561.0
-2024,2024/25,Agriculture & Agri-Food,Agriculture and Agri-Food Canada,455.0
-2024,2024/25,Natural Resources Canada,Natural Resources Canada,376.0
-2024,2024/25,Environment & Climate Change,Environment and Climate Change Canada,212.0
-2024,2024/25,Canadian Space Agency,Canadian Space Agency,205.0
-2024,2024/25,Public Health Agency,Public Health Agency of Canada,89.0
-2024,2024/25,Health Canada,Health Canada,59.0
-2024,2024/25,Global Affairs Canada,Global Affairs Canada,49.0
+2024,2024/25,National Research Council,National Research Council Canada,1602.0
+2024,2024/25,CIHR,Canadian Institutes of Health Research,1320.0
+2024,2024/25,NSERC,Natural Sciences and Engineering Research Council of Canada,1290.0
+2024,2024/25,SSHRC,Social Sciences and Humanities Research Council of Canada,1105.0
+2024,2024/25,"Innovation, Science & Econ. Dev.","Innovation, Science and Economic Development Canada",1027.0
+2024,2024/25,Other departments & agencies,Other departments and agencies,1016.0
+2024,2024/25,CFI,Canada Foundation for Innovation,567.0
+2024,2024/25,National Defence,National Defence,513.0
+2024,2024/25,Agriculture & Agri-Food,Agriculture and Agri-Food Canada,508.0
+2024,2024/25,Canadian Space Agency,Canadian Space Agency,401.0
+2024,2024/25,Natural Resources Canada,Natural Resources Canada,386.0
+2024,2024/25,Environment & Climate Change,Environment and Climate Change Canada,234.0
+2024,2024/25,Public Health Agency,Public Health Agency of Canada,134.0
+2024,2024/25,Health Canada,Health Canada,127.0
+2024,2024/25,Statistics Canada,Statistics Canada,51.0
 2024,2024/25,Fisheries & Oceans,Fisheries and Oceans Canada,41.0
-2024,2024/25,Statistics Canada,Statistics Canada,25.0
-2025,2025/26,National Research Council,National Research Council Canada,1665.0
-2025,2025/26,CIHR,Canadian Institutes of Health Research,1291.0
-2025,2025/26,NSERC,Natural Sciences and Engineering Research Council of Canada,1242.0
-2025,2025/26,Other departments & agencies,Other departments and agencies,1212.0
-2025,2025/26,SSHRC,Social Sciences and Humanities Research Council of Canada,1160.0
-2025,2025/26,"Innovation, Science & Econ. Dev.","Innovation, Science and Economic Development Canada",735.0
-2025,2025/26,Canadian Space Agency,Canadian Space Agency,612.0
-2025,2025/26,CFI,Canada Foundation for Innovation,560.0
-2025,2025/26,National Defence,National Defence,560.0
-2025,2025/26,Agriculture & Agri-Food,Agriculture and Agri-Food Canada,458.0
-2025,2025/26,Natural Resources Canada,Natural Resources Canada,380.0
-2025,2025/26,Environment & Climate Change,Environment and Climate Change Canada,194.0
-2025,2025/26,Public Health Agency,Public Health Agency of Canada,66.0
-2025,2025/26,Health Canada,Health Canada,54.0
-2025,2025/26,Global Affairs Canada,Global Affairs Canada,42.0
-2025,2025/26,Fisheries & Oceans,Fisheries and Oceans Canada,41.0
-2025,2025/26,Statistics Canada,Statistics Canada,25.0
+2024,2024/25,Global Affairs Canada,Global Affairs Canada,18.0
+2025,2025/26,National Research Council,National Research Council Canada,1657.0
+2025,2025/26,NSERC,Natural Sciences and Engineering Research Council of Canada,1323.0
+2025,2025/26,CIHR,Canadian Institutes of Health Research,1276.0
+2025,2025/26,Other departments & agencies,Other departments and agencies,1167.0
+2025,2025/26,SSHRC,Social Sciences and Humanities Research Council of Canada,1133.0
+2025,2025/26,"Innovation, Science & Econ. Dev.","Innovation, Science and Economic Development Canada",1050.0
+2025,2025/26,National Defence,National Defence,620.0
+2025,2025/26,CFI,Canada Foundation for Innovation,575.0
+2025,2025/26,Canadian Space Agency,Canadian Space Agency,568.0
+2025,2025/26,Agriculture & Agri-Food,Agriculture and Agri-Food Canada,510.0
+2025,2025/26,Natural Resources Canada,Natural Resources Canada,469.0
+2025,2025/26,Environment & Climate Change,Environment and Climate Change Canada,163.0
+2025,2025/26,Health Canada,Health Canada,152.0
+2025,2025/26,Public Health Agency,Public Health Agency of Canada,101.0
+2025,2025/26,Statistics Canada,Statistics Canada,57.0
+2025,2025/26,Fisheries & Oceans,Fisheries and Oceans Canada,39.0
+2025,2025/26,Global Affairs Canada,Global Affairs Canada,18.0
+2026,2026/27,National Research Council,National Research Council Canada,1611.0
+2026,2026/27,Other departments & agencies,Other departments and agencies,1365.0
+2026,2026/27,NSERC,Natural Sciences and Engineering Research Council of Canada,1341.0
+2026,2026/27,CIHR,Canadian Institutes of Health Research,1332.0
+2026,2026/27,SSHRC,Social Sciences and Humanities Research Council of Canada,1164.0
+2026,2026/27,"Innovation, Science & Econ. Dev.","Innovation, Science and Economic Development Canada",828.0
+2026,2026/27,National Defence,National Defence,629.0
+2026,2026/27,CFI,Canada Foundation for Innovation,620.0
+2026,2026/27,Canadian Space Agency,Canadian Space Agency,536.0
+2026,2026/27,Agriculture & Agri-Food,Agriculture and Agri-Food Canada,475.0
+2026,2026/27,Natural Resources Canada,Natural Resources Canada,433.0
+2026,2026/27,Environment & Climate Change,Environment and Climate Change Canada,161.0
+2026,2026/27,Health Canada,Health Canada,113.0
+2026,2026/27,Public Health Agency,Public Health Agency of Canada,108.0
+2026,2026/27,Statistics Canada,Statistics Canada,71.0
+2026,2026/27,Fisheries & Oceans,Fisheries and Oceans Canada,39.0
+2026,2026/27,Global Affairs Canada,Global Affairs Canada,14.0

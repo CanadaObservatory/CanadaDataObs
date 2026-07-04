@@ -4,8 +4,9 @@
   "source_table": "ECCC AHCCD (homogenized) + MSC daily observations (raw), via GeoMet",
   "frequency": "annual",
   "unit": "\u00b0C annual mean temperature",
-  "retrieved_at": "2026-06-20T15:51:08.012060+00:00",
+  "retrieved_at": "2026-07-04T15:14:54.723583+00:00",
   "latest_observation_date": "2025",
+  "next_release_date": null,
   "transformations": [
     "homogenized AHCCD annual mean (to 2020) + raw daily\u2192annual tail",
     "tidy long: city, year, temp, series (homogenized vs raw)"

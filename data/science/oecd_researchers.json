@@ -4,7 +4,7 @@
   "source_table": "OECD MSTI",
   "frequency": "annual",
   "unit": "per 1,000 employment",
-  "retrieved_at": "2026-06-30T16:28:53.902381+00:00",
+  "retrieved_at": "2026-07-04T15:13:46.724170+00:00",
   "latest_observation_date": "2024",
   "next_release_date": null,
   "transformations": [

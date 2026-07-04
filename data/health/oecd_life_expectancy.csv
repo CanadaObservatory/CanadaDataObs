@@ -42,6 +42,7 @@ AUS,2020,83.2,Australia
 AUS,2021,83.3,Australia
 AUS,2022,83.2,Australia
 AUS,2023,83.0,Australia
+AUS,2024,83.0,Australia
 CAN,1980,75.1,Canada
 CAN,1981,75.5,Canada
 CAN,1982,75.7,Canada
@@ -83,9 +84,10 @@ CAN,2017,81.9,Canada
 CAN,2018,81.9,Canada
 CAN,2019,82.2,Canada
 CAN,2020,81.6,Canada
-CAN,2021,81.6,Canada
-CAN,2022,81.3,Canada
+CAN,2021,81.5,Canada
+CAN,2022,81.1,Canada
 CAN,2023,81.7,Canada
+CAN,2024,82.2,Canada
 CHE,1980,75.7,Switzerland
 CHE,1981,75.9,Switzerland
 CHE,1982,76.3,Switzerland
@@ -120,16 +122,17 @@ CHE,2010,82.7,Switzerland
 CHE,2011,82.8,Switzerland
 CHE,2012,82.8,Switzerland
 CHE,2013,82.9,Switzerland
-CHE,2014,83.3,Switzerland
-CHE,2015,83.0,Switzerland
-CHE,2016,83.7,Switzerland
-CHE,2017,83.7,Switzerland
-CHE,2018,83.8,Switzerland
-CHE,2019,84.0,Switzerland
+CHE,2014,83.1,Switzerland
+CHE,2015,82.9,Switzerland
+CHE,2016,83.4,Switzerland
+CHE,2017,83.4,Switzerland
+CHE,2018,83.6,Switzerland
+CHE,2019,83.8,Switzerland
 CHE,2020,83.1,Switzerland
-CHE,2021,83.9,Switzerland
-CHE,2022,83.7,Switzerland
-CHE,2023,84.3,Switzerland
+CHE,2021,83.6,Switzerland
+CHE,2022,83.5,Switzerland
+CHE,2023,84.1,Switzerland
+CHE,2024,84.2,Switzerland
 DEU,1980,73.1,Germany
 DEU,1981,73.4,Germany
 DEU,1982,73.7,Germany
@@ -164,16 +167,17 @@ DEU,2010,80.5,Germany
 DEU,2011,80.6,Germany
 DEU,2012,80.7,Germany
 DEU,2013,80.6,Germany
-DEU,2014,81.2,Germany
-DEU,2015,80.7,Germany
-DEU,2016,81.0,Germany
-DEU,2017,81.1,Germany
-DEU,2018,81.0,Germany
-DEU,2019,81.3,Germany
-DEU,2020,81.1,Germany
-DEU,2021,80.8,Germany
-DEU,2022,80.7,Germany
-DEU,2023,81.1,Germany
+DEU,2014,80.9,Germany
+DEU,2015,80.6,Germany
+DEU,2016,80.9,Germany
+DEU,2017,81.0,Germany
+DEU,2018,80.9,Germany
+DEU,2019,81.2,Germany
+DEU,2020,81.0,Germany
+DEU,2021,80.7,Germany
+DEU,2022,80.5,Germany
+DEU,2023,80.9,Germany
+DEU,2024,81.2,Germany
 DNK,1980,74.2,Denmark
 DNK,1981,74.3,Denmark
 DNK,1982,74.7,Denmark
@@ -208,16 +212,17 @@ DNK,2010,79.3,Denmark
 DNK,2011,79.9,Denmark
 DNK,2012,80.2,Denmark
 DNK,2013,80.4,Denmark
-DNK,2014,80.7,Denmark
-DNK,2015,80.8,Denmark
+DNK,2014,80.6,Denmark
+DNK,2015,80.7,Denmark
 DNK,2016,80.9,Denmark
 DNK,2017,81.1,Denmark
 DNK,2018,81.0,Denmark
-DNK,2019,81.5,Denmark
-DNK,2020,81.6,Denmark
-DNK,2021,81.5,Denmark
+DNK,2019,81.4,Denmark
+DNK,2020,81.5,Denmark
+DNK,2021,81.4,Denmark
 DNK,2022,81.3,Denmark
-DNK,2023,81.8,Denmark
+DNK,2023,81.7,Denmark
+DNK,2024,82.0,Denmark
 FIN,1980,73.7,Finland
 FIN,1981,74.0,Finland
 FIN,1982,74.6,Finland
@@ -252,16 +257,17 @@ FIN,2010,80.2,Finland
 FIN,2011,80.6,Finland
 FIN,2012,80.7,Finland
 FIN,2013,81.1,Finland
-FIN,2014,81.3,Finland
-FIN,2015,81.6,Finland
-FIN,2016,81.5,Finland
-FIN,2017,81.7,Finland
-FIN,2018,81.8,Finland
-FIN,2019,82.1,Finland
-FIN,2020,82.0,Finland
-FIN,2021,81.9,Finland
+FIN,2014,81.1,Finland
+FIN,2015,81.4,Finland
+FIN,2016,81.3,Finland
+FIN,2017,81.5,Finland
+FIN,2018,81.6,Finland
+FIN,2019,81.9,Finland
+FIN,2020,81.8,Finland
+FIN,2021,81.8,Finland
 FIN,2022,81.2,Finland
 FIN,2023,81.6,Finland
+FIN,2024,82.2,Finland
 FRA,1980,74.3,France
 FRA,1981,74.5,France
 FRA,1982,74.8,France
@@ -296,16 +302,17 @@ FRA,2010,81.8,France
 FRA,2011,82.3,France
 FRA,2012,82.1,France
 FRA,2013,82.4,France
-FRA,2014,82.9,France
-FRA,2015,82.4,France
-FRA,2016,82.7,France
-FRA,2017,82.7,France
-FRA,2018,82.8,France
-FRA,2019,83.0,France
-FRA,2020,82.3,France
-FRA,2021,82.4,France
-FRA,2022,82.3,France
-FRA,2023,83.0,France
+FRA,2014,82.4,France
+FRA,2015,82.1,France
+FRA,2016,82.4,France
+FRA,2017,82.4,France
+FRA,2018,82.6,France
+FRA,2019,82.7,France
+FRA,2020,82.2,France
+FRA,2021,82.2,France
+FRA,2022,82.2,France
+FRA,2023,82.9,France
+FRA,2024,83.0,France
 GBR,1980,73.6,United Kingdom
 GBR,1981,73.9,United Kingdom
 GBR,1982,74.0,United Kingdom
@@ -341,15 +348,16 @@ GBR,2011,80.7,United Kingdom
 GBR,2012,80.8,United Kingdom
 GBR,2013,80.9,United Kingdom
 GBR,2014,81.1,United Kingdom
-GBR,2015,80.9,United Kingdom
+GBR,2015,80.8,United Kingdom
 GBR,2016,81.0,United Kingdom
 GBR,2017,81.1,United Kingdom
 GBR,2018,81.0,United Kingdom
-GBR,2019,81.4,United Kingdom
+GBR,2019,81.3,United Kingdom
 GBR,2020,80.3,United Kingdom
 GBR,2021,80.5,United Kingdom
 GBR,2022,80.9,United Kingdom
 GBR,2023,81.0,United Kingdom
+GBR,2024,81.3,United Kingdom
 ISR,1980,73.9,Israel
 ISR,1981,74.3,Israel
 ISR,1982,74.2,Israel
@@ -393,7 +401,8 @@ ISR,2019,82.9,Israel
 ISR,2020,82.7,Israel
 ISR,2021,82.6,Israel
 ISR,2022,82.8,Israel
-ISR,2023,83.8,Israel
+ISR,2023,83.3,Israel
+ISR,2024,83.3,Israel
 ITA,1980,74.0,Italy
 ITA,1981,74.3,Italy
 ITA,1982,74.7,Italy
@@ -428,16 +437,17 @@ ITA,2010,82.2,Italy
 ITA,2011,82.4,Italy
 ITA,2012,82.4,Italy
 ITA,2013,82.9,Italy
-ITA,2014,83.2,Italy
-ITA,2015,82.7,Italy
-ITA,2016,83.4,Italy
-ITA,2017,83.1,Italy
-ITA,2018,83.4,Italy
-ITA,2019,83.6,Italy
-ITA,2020,82.3,Italy
-ITA,2021,82.7,Italy
+ITA,2014,82.8,Italy
+ITA,2015,82.4,Italy
+ITA,2016,83.0,Italy
+ITA,2017,82.8,Italy
+ITA,2018,83.1,Italy
+ITA,2019,83.4,Italy
+ITA,2020,82.2,Italy
+ITA,2021,82.6,Italy
 ITA,2022,82.8,Italy
-ITA,2023,83.5,Italy
+ITA,2023,83.3,Italy
+ITA,2024,83.7,Italy
 JPN,1980,76.1,Japan
 JPN,1981,76.5,Japan
 JPN,1982,76.9,Japan
@@ -482,6 +492,7 @@ JPN,2020,84.6,Japan
 JPN,2021,84.5,Japan
 JPN,2022,84.1,Japan
 JPN,2023,84.1,Japan
+JPN,2024,84.1,Japan
 KOR,1980,66.1,South Korea
 KOR,1981,66.7,South Korea
 KOR,1982,67.2,South Korea
@@ -526,6 +537,7 @@ KOR,2020,83.5,South Korea
 KOR,2021,83.6,South Korea
 KOR,2022,82.7,South Korea
 KOR,2023,83.5,South Korea
+KOR,2024,83.7,South Korea
 NLD,1980,75.9,Netherlands
 NLD,1981,76.0,Netherlands
 NLD,1982,76.1,Netherlands
@@ -560,16 +572,17 @@ NLD,2010,81.0,Netherlands
 NLD,2011,81.3,Netherlands
 NLD,2012,81.2,Netherlands
 NLD,2013,81.4,Netherlands
-NLD,2014,81.8,Netherlands
-NLD,2015,81.6,Netherlands
-NLD,2016,81.7,Netherlands
-NLD,2017,81.8,Netherlands
-NLD,2018,81.9,Netherlands
-NLD,2019,82.2,Netherlands
+NLD,2014,81.6,Netherlands
+NLD,2015,81.5,Netherlands
+NLD,2016,81.5,Netherlands
+NLD,2017,81.7,Netherlands
+NLD,2018,81.8,Netherlands
+NLD,2019,82.1,Netherlands
 NLD,2020,81.4,Netherlands
-NLD,2021,81.4,Netherlands
-NLD,2022,81.7,Netherlands
-NLD,2023,81.9,Netherlands
+NLD,2021,81.3,Netherlands
+NLD,2022,81.6,Netherlands
+NLD,2023,81.8,Netherlands
+NLD,2024,81.9,Netherlands
 NOR,1980,75.8,Norway
 NOR,1981,76.0,Norway
 NOR,1982,76.1,Norway
@@ -604,16 +617,17 @@ NOR,2010,81.2,Norway
 NOR,2011,81.4,Norway
 NOR,2012,81.5,Norway
 NOR,2013,81.8,Norway
-NOR,2014,82.2,Norway
-NOR,2015,82.4,Norway
-NOR,2016,82.5,Norway
-NOR,2017,82.7,Norway
+NOR,2014,82.1,Norway
+NOR,2015,82.3,Norway
+NOR,2016,82.4,Norway
+NOR,2017,82.6,Norway
 NOR,2018,82.8,Norway
 NOR,2019,83.0,Norway
-NOR,2020,83.3,Norway
+NOR,2020,83.2,Norway
 NOR,2021,83.2,Norway
-NOR,2022,82.5,Norway
-NOR,2023,83.1,Norway
+NOR,2022,82.6,Norway
+NOR,2023,83.0,Norway
+NOR,2024,83.2,Norway
 NZL,1980,73.2,New Zealand
 NZL,1981,73.4,New Zealand
 NZL,1982,73.6,New Zealand
@@ -653,11 +667,12 @@ NZL,2015,81.5,New Zealand
 NZL,2016,81.6,New Zealand
 NZL,2017,81.7,New Zealand
 NZL,2018,81.7,New Zealand
-NZL,2019,82.1,New Zealand
-NZL,2020,82.3,New Zealand
-NZL,2021,82.3,New Zealand
-NZL,2022,82.0,New Zealand
-NZL,2023,82.0,New Zealand
+NZL,2019,81.7,New Zealand
+NZL,2020,81.7,New Zealand
+NZL,2021,81.8,New Zealand
+NZL,2022,81.8,New Zealand
+NZL,2023,81.8,New Zealand
+NZL,2024,82.1,New Zealand
 SWE,1980,75.8,Sweden
 SWE,1981,76.1,Sweden
 SWE,1982,76.4,Sweden
@@ -692,16 +707,17 @@ SWE,2010,81.6,Sweden
 SWE,2011,81.9,Sweden
 SWE,2012,81.8,Sweden
 SWE,2013,82.0,Sweden
-SWE,2014,82.3,Sweden
+SWE,2014,82.2,Sweden
 SWE,2015,82.2,Sweden
-SWE,2016,82.4,Sweden
-SWE,2017,82.5,Sweden
-SWE,2018,82.6,Sweden
-SWE,2019,83.2,Sweden
+SWE,2016,82.3,Sweden
+SWE,2017,82.4,Sweden
+SWE,2018,82.5,Sweden
+SWE,2019,83.1,Sweden
 SWE,2020,82.4,Sweden
-SWE,2021,83.1,Sweden
-SWE,2022,83.1,Sweden
-SWE,2023,83.4,Sweden
+SWE,2021,83.0,Sweden
+SWE,2022,83.0,Sweden
+SWE,2023,83.2,Sweden
+SWE,2024,83.8,Sweden
 USA,1980,73.7,United States
 USA,1981,74.1,United States
 USA,1982,74.5,United States
@@ -746,3 +762,4 @@ USA,2020,77.0,United States
 USA,2021,76.4,United States
 USA,2022,77.5,United States
 USA,2023,78.4,United States
+USA,2024,79.0,United States

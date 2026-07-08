@@ -34,6 +34,7 @@ AUS,2021,48.7,Australia
 AUS,2022,46.5,Australia
 AUS,2023,46.5,Australia
 AUS,2024,45.6,Australia
+AUS,2025,44.7,Australia
 CAN,2003,56.4,Canada
 CAN,2004,58.0,Canada
 CAN,2005,59.0,Canada
@@ -54,7 +55,8 @@ CAN,2019,51.5,Canada
 CAN,2021,47.0,Canada
 CAN,2022,45.4,Canada
 CAN,2023,44.2,Canada
-CAN,2024,43.8,Canada
+CAN,2024,43.7,Canada
+CAN,2025,43.2,Canada
 CHE,2000,76.8,Switzerland
 CHE,2001,76.1,Switzerland
 CHE,2002,75.5,Switzerland
@@ -78,7 +80,8 @@ CHE,2019,63.6,Switzerland
 CHE,2020,62.7,Switzerland
 CHE,2021,61.9,Switzerland
 CHE,2022,60.6,Switzerland
-CHE,2023,59.5,Switzerland
+CHE,2023,59.6,Switzerland
+CHE,2024,58.3,Switzerland
 DEU,1999,49.4,Germany
 DEU,2001,49.2,Germany
 DEU,2003,49.4,Germany
@@ -93,6 +96,7 @@ DEU,2019,54.2,Germany
 DEU,2021,53.9,Germany
 DEU,2022,53.5,Germany
 DEU,2023,53.5,Germany
+DEU,2024,53.0,Germany
 DNK,1990,63.9,Denmark
 DNK,1991,60.0,Denmark
 DNK,1992,57.5,Denmark
@@ -128,6 +132,7 @@ DNK,2021,36.8,Denmark
 DNK,2022,36.4,Denmark
 DNK,2023,36.2,Denmark
 DNK,2024,35.6,Denmark
+DNK,2025,35.0,Denmark
 FIN,1996,38.7,Finland
 FIN,1997,41.3,Finland
 FIN,1998,41.9,Finland
@@ -155,7 +160,8 @@ FIN,2019,54.2,Finland
 FIN,2020,54.8,Finland
 FIN,2021,51.2,Finland
 FIN,2022,49.7,Finland
-FIN,2023,50.2,Finland
+FIN,2023,51.2,Finland
+FIN,2024,51.6,Finland
 FRA,1993,47.4,France
 FRA,1994,47.9,France
 FRA,1995,48.4,France
@@ -187,6 +193,7 @@ FRA,2020,48.0,France
 FRA,2021,47.5,France
 FRA,2022,46.8,France
 FRA,2023,46.2,France
+FRA,2024,45.1,France
 GBR,2003,57.6,United Kingdom
 GBR,2004,56.9,United Kingdom
 GBR,2005,56.2,United Kingdom
@@ -208,6 +215,7 @@ GBR,2020,42.4,United Kingdom
 GBR,2021,41.7,United Kingdom
 GBR,2022,40.8,United Kingdom
 GBR,2023,41.3,United Kingdom
+GBR,2024,41.0,United Kingdom
 ISR,1988,15.3,Israel
 ISR,1989,15.5,Israel
 ISR,1990,15.9,Israel
@@ -244,7 +252,8 @@ ISR,2020,17.3,Israel
 ISR,2021,16.5,Israel
 ISR,2022,16.3,Israel
 ISR,2023,15.8,Israel
-ISR,2024,15.0,Israel
+ISR,2024,15.3,Israel
+ISR,2025,14.8,Israel
 ITA,2000,12.2,Italy
 ITA,2001,12.8,Italy
 ITA,2002,13.8,Italy
@@ -268,7 +277,8 @@ ITA,2019,20.2,Italy
 ITA,2020,20.0,Italy
 ITA,2021,20.2,Italy
 ITA,2022,21.3,Italy
-ITA,2023,21.3,Italy
+ITA,2023,21.4,Italy
+ITA,2024,21.8,Italy
 JPN,1993,15.5,Japan
 JPN,1994,16.6,Japan
 JPN,1995,17.7,Japan
@@ -300,6 +310,7 @@ JPN,2020,26.4,Japan
 JPN,2021,26.5,Japan
 JPN,2022,26.6,Japan
 JPN,2023,26.7,Japan
+JPN,2024,26.9,Japan
 KOR,2000,2.8,South Korea
 KOR,2001,3.5,South Korea
 KOR,2002,3.5,South Korea
@@ -324,6 +335,7 @@ KOR,2020,24.9,South Korea
 KOR,2021,25.1,South Korea
 KOR,2022,25.9,South Korea
 KOR,2023,25.8,South Korea
+KOR,2024,25.2,South Korea
 NLD,1990,100.7,Netherlands
 NLD,1991,98.4,Netherlands
 NLD,1992,96.5,Netherlands
@@ -357,7 +369,8 @@ NLD,2019,72.1,Netherlands
 NLD,2020,70.6,Netherlands
 NLD,2021,73.9,Netherlands
 NLD,2022,71.3,Netherlands
-NLD,2023,69.5,Netherlands
+NLD,2023,69.6,Netherlands
+NLD,2024,68.0,Netherlands
 NOR,2002,62.6,Norway
 NOR,2003,61.9,Norway
 NOR,2004,61.4,Norway
@@ -380,6 +393,7 @@ NOR,2020,42.1,Norway
 NOR,2021,40.7,Norway
 NOR,2022,39.8,Norway
 NOR,2023,39.5,Norway
+NOR,2024,38.6,Norway
 NZL,2009,60.2,New Zealand
 NZL,2010,61.9,New Zealand
 NZL,2011,62.5,New Zealand
@@ -396,6 +410,7 @@ NZL,2021,51.0,New Zealand
 NZL,2022,49.8,New Zealand
 NZL,2023,49.7,New Zealand
 NZL,2024,49.2,New Zealand
+NZL,2025,48.0,New Zealand
 SWE,1990,58.9,Sweden
 SWE,1991,60.3,Sweden
 SWE,1992,79.5,Sweden
@@ -430,6 +445,7 @@ SWE,2020,64.4,Sweden
 SWE,2021,64.6,Sweden
 SWE,2022,64.2,Sweden
 SWE,2023,64.5,Sweden
+SWE,2024,63.1,Sweden
 USA,1998,44.1,United States
 USA,1999,43.4,United States
 USA,2000,43.6,United States
@@ -443,15 +459,15 @@ USA,2007,42.7,United States
 USA,2008,42.5,United States
 USA,2009,42.0,United States
 USA,2010,41.1,United States
-USA,2011,39.9,United States
-USA,2012,38.3,United States
-USA,2013,37.0,United States
-USA,2014,35.5,United States
-USA,2015,34.7,United States
-USA,2016,33.4,United States
-USA,2017,32.2,United States
-USA,2018,31.1,United States
-USA,2019,29.9,United States
-USA,2020,29.7,United States
-USA,2021,28.9,United States
-USA,2022,28.0,United States
+USA,2011,39.8,United States
+USA,2012,38.2,United States
+USA,2013,36.9,United States
+USA,2014,35.4,United States
+USA,2015,34.6,United States
+USA,2016,33.2,United States
+USA,2017,32.0,United States
+USA,2018,30.9,United States
+USA,2019,29.7,United States
+USA,2020,28.9,United States
+USA,2021,28.1,United States
+USA,2022,27.2,United States

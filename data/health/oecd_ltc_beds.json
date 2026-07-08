@@ -4,12 +4,12 @@
   "source_table": "OECD Health Statistics (Long-Term Care Resources)",
   "frequency": "annual",
   "unit": "per 1,000 aged 65+",
-  "retrieved_at": "2026-07-05T15:22:12.298017+00:00",
-  "latest_observation_date": "2024",
+  "retrieved_at": "2026-07-08T16:07:57.379187+00:00",
+  "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [
     "filtered to Long-term care beds for OECD peer group"
   ],
   "notes": null,
-  "row_count": 456
+  "row_count": 472
 }

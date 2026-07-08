@@ -4,7 +4,7 @@
   "source_table": "Bank of Canada (Bank Rate, V122530)",
   "frequency": "monthly",
   "unit": "%",
-  "retrieved_at": "2026-07-07T16:39:01.575845+00:00",
+  "retrieved_at": "2026-07-08T16:04:45.201825+00:00",
   "latest_observation_date": "2026-06-01",
   "next_release_date": null,
   "transformations": [

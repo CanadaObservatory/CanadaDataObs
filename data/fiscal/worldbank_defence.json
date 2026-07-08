@@ -4,7 +4,7 @@
   "source_table": "World Bank (data from SIPRI)",
   "frequency": "annual",
   "unit": "% of GDP",
-  "retrieved_at": "2026-07-07T16:39:52.751949+00:00",
+  "retrieved_at": "2026-07-08T16:05:12.394205+00:00",
   "latest_observation_date": "2024",
   "next_release_date": null,
   "transformations": [

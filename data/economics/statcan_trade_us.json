@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 12-10-0011-01",
   "frequency": "monthly",
   "unit": "$ millions (Customs basis, seasonally adjusted)",
-  "retrieved_at": "2026-07-08T16:04:39.547735+00:00",
+  "retrieved_at": "2026-07-09T16:33:41.335910+00:00",
   "latest_observation_date": "2026-05-01",
   "next_release_date": null,
   "transformations": [

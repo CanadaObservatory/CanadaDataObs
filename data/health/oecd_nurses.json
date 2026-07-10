@@ -4,7 +4,7 @@
   "source_table": "OECD Health Statistics",
   "frequency": "annual",
   "unit": "per 1,000 population",
-  "retrieved_at": "2026-07-08T16:07:46.443536+00:00",
+  "retrieved_at": "2026-07-10T16:32:18.645405+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [

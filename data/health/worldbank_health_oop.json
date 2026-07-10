@@ -4,7 +4,7 @@
   "source_table": "World Bank / WHO Global Health Expenditure Database",
   "frequency": "annual",
   "unit": "% of health spending",
-  "retrieved_at": "2026-07-08T16:07:49.657556+00:00",
+  "retrieved_at": "2026-07-10T16:32:24.978651+00:00",
   "latest_observation_date": "2024",
   "next_release_date": null,
   "transformations": [

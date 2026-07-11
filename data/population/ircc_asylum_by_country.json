@@ -4,7 +4,7 @@
   "source_table": "IRCC ODP-Asylum-Top25CitzProv",
   "frequency": "annual",
   "unit": "persons (rounded to nearest 5)",
-  "retrieved_at": "2026-07-10T16:28:02.665834+00:00",
+  "retrieved_at": "2026-07-11T14:59:33.069082+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [

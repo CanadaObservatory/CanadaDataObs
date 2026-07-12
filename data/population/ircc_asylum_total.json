@@ -4,7 +4,7 @@
   "source_table": "IRCC ODP-Asylum-PT_OfficeType",
   "frequency": "annual",
   "unit": "persons (rounded to nearest 5)",
-  "retrieved_at": "2026-07-11T14:59:33.074814+00:00",
+  "retrieved_at": "2026-07-12T15:01:42.491180+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [

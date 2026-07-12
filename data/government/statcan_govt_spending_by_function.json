@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 10-10-0005-01 (CCOFOG)",
   "frequency": "annual",
   "unit": "$ millions",
-  "retrieved_at": "2026-07-10T16:30:20.242427+00:00",
+  "retrieved_at": "2026-07-12T15:03:55.792579+00:00",
   "latest_observation_date": "2024",
   "next_release_date": null,
   "transformations": [

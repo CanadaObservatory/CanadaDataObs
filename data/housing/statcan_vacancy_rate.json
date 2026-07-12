@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 34-10-0127-01 (CMHC)",
   "frequency": "annual",
   "unit": "% of rental units",
-  "retrieved_at": "2026-07-10T16:30:42.427827+00:00",
+  "retrieved_at": "2026-07-12T15:04:18.947823+00:00",
   "latest_observation_date": "2025-01-01",
   "next_release_date": null,
   "transformations": [

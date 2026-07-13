@@ -26,6 +26,23 @@ needed before work can finish.
 > The workflow fix + `check_freshness.py` close it; the first post-fix scheduled run
 > should be watched (G9-verify), and the standing health issue will list anything
 > still stale.
+>
+> **G9-verify DONE (scheduled run 29267145336, 2026-07-13 16:37 UTC — all green):**
+> the full registry completed inside the 25-min budget; the frozen tail
+> (crime-severity/homicide/wildfire/sea-ice/happiness) re-stamped to 2026-07-13 —
+> **incident closed.** The freshness check + health-issue step also worked as
+> designed: they opened standing [issue #2] flagging real stragglers. Two are the
+> **known OECD Productivity-DB (DSD_PDB) outage** (`labour_productivity` 111 d,
+> `labour_utilisation` never-fetched) → now allow-listed in `check_freshness.py`
+> so the alert stays high-signal. **One genuine open item: the 3 OECD SHA
+> health-spending series** (`pharma_spending_pc`, `health_spending_gdp`,
+> `health_spending_pc`) fetched fine until ~2026-07-05 then broke — isolated to the
+> `DSD_SHA` dataflow (every other OECD dataflow refreshed 07-13). Data is safe on
+> STALE (2024 = the real latest, so charts are correct); **kept alerting (NOT
+> allow-listed) until the SHA fetch is fixed or confirmed recovered** — a pre-launch
+> data-health item, see §2c/Data-blocked. (The G1 og:image fix also verified live in
+> the same deploy: `check_site.py` site-guards step passed; every page's og:image is
+> now the raster card.)
 
 ---
 

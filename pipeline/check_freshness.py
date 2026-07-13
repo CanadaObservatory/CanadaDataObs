@@ -33,10 +33,20 @@ REPORT_PATH = "/tmp/freshness-report.txt"
 # Indicators with a KNOWN long-running upstream outage, so the daily issue stays
 # high-signal. Each entry needs a reason and should be removed when the source
 # recovers (the check still lists them, marked "allowed", so they aren't forgotten).
+# Applies to BOTH the stale and the missing-sidecar cases (a dead source can leave
+# an old sidecar OR never produce one at all).
 ALLOW_STALE = {
-    # OECD PDB has returned HTTP 500 since 2026-03; documented in CLAUDE.md
-    # ("labour_productivity … rides the STALE fallback").
+    # OECD Productivity Database (DSD_PDB) has returned HTTP 500 since 2026-03
+    # (documented in CLAUDE.md). labour_productivity rides an old STALE CSV;
+    # labour_utilisation never fetched (no CSV/sidecar), and its page handles the
+    # absence. Remove both when PDB recovers.
     "labour_productivity": "OECD DSD_PDB upstream HTTP 500 outage",
+    "labour_utilisation": "OECD DSD_PDB upstream HTTP 500 outage (never fetched)",
+    # NOTE: the 3 OECD SHA health-spending series (pharma_spending_pc,
+    # health_spending_gdp, health_spending_pc) are DELIBERATELY NOT allow-listed —
+    # they fetched fine until ~2026-07-05 then broke (isolated to DSD_SHA; every
+    # other OECD dataflow still refreshes). Keep them alerting until that fetch is
+    # fixed or confirmed recovered. Data is safe on STALE (2024 = the real latest).
 }
 
 
@@ -47,7 +57,8 @@ def main():
     for ind in INDICATORS:
         sidecar = ind.out_path.with_suffix(".json")
         if not sidecar.exists():
-            missing.append(ind.id)
+            (allowed.append((ind.id, None, ALLOW_STALE[ind.id]))
+             if ind.id in ALLOW_STALE else missing.append(ind.id))
             continue
         try:
             retrieved = json.loads(sidecar.read_text()).get("retrieved_at")
@@ -80,9 +91,10 @@ def main():
     if missing:
         lines.append(f"\nMISSING sidecar ({len(missing)}): " + ", ".join(sorted(missing)))
     if allowed:
-        lines.append(f"\nAllow-listed (known upstream outages, still stale):")
+        lines.append(f"\nAllow-listed (known upstream outages):")
         for iid, age, why in allowed:
-            lines.append(f"  {iid:32s} {age} days — {why}")
+            state = "missing" if age is None else f"{age} days stale"
+            lines.append(f"  {iid:32s} {state} — {why}")
     if unknown:
         lines.append(f"\nNo readable retrieved_at ({len(unknown)}): " + ", ".join(sorted(unknown)))
     if not stale and not missing:

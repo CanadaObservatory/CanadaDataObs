@@ -4,8 +4,9 @@
   "source_table": "Statistics Canada 35-10-0068-01",
   "frequency": "annual",
   "unit": "per 100,000 population",
-  "retrieved_at": "2026-06-20T15:51:52.966512+00:00",
+  "retrieved_at": "2026-07-13T16:59:10.552610+00:00",
   "latest_observation_date": "2024-01-01",
+  "next_release_date": null,
   "transformations": [
     "filtered to {'GEO': 'Canada', 'Homicides': 'Homicide rates per 100,000 population'}"
   ],

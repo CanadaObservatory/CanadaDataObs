@@ -288,7 +288,7 @@ else:
 
 ## Who is buying: first-time buyers vs investors
 
-Behind the price story is a question of *who* is buying. The Bank of Canada tracks the share of mortgaged home purchases made by **first-time buyers**, **repeat buyers**, and **investors** (buyers acquiring a property they don't intend to occupy). Since 2014 the investor share has climbed from about a fifth to roughly **three in ten** purchases, while the first-time-buyer share has slipped — a shift at the centre of recent debate about housing demand. (Cash purchases aren't captured, and the most recent quarters lag.)
+Behind the price story is a question of *who* is buying. The Bank of Canada tracks the share of mortgaged home purchases made by **first-time buyers**, **repeat buyers**, and **investors** (buyers acquiring a property they don't intend to occupy). Since 2014 the investor share has climbed from about a fifth to roughly **three in ten** purchases, while the first-time-buyer share has slipped — a much-discussed shift in housing demand. (Cash purchases aren't captured, and the most recent quarters lag.)
 
 ```{python}
 #| echo: false
@@ -335,7 +335,7 @@ else:
 
 ## Typical rent by city
 
-The index above shows how rents have *moved*; this shows the **dollar levels** today. It maps the average monthly rent for a purpose-built rental in each major metropolitan area, by unit size. The two-bedroom apartment — CMHC's standard reference unit — shows first; use the selector for bachelor, one-bedroom, and three-bedroom-plus units. Rents are highest in Vancouver, Victoria, and Toronto and lowest across much of Quebec and the Prairies; Canada's largest metros are highlighted.
+The index above shows how rents have *moved*; this shows the **dollar levels** today. It maps the average monthly rent for a purpose-built rental in each major metropolitan area, by unit size. The two-bedroom apartment — CMHC's standard reference unit — shows first; use the selector for bachelor, one-bedroom, and three-bedroom-plus units. Rents are highest in Vancouver, Victoria, and Toronto and lowest across much of Quebec and the Prairies; Canada's largest metros are highlighted. One caveat: the survey covers **purpose-built rental buildings only** — rented condos and other secondary-market units, which often rent for more and carry much of the rental market in the biggest cities, are not counted, so these averages understate what a new tenant there typically pays.
 
 ```{python}
 #| echo: false
@@ -441,6 +441,11 @@ else:
 ```
 
 ## Latest household debt: ranked
+
+Canadian households carry among the heaviest debt loads in the peer group — well over
+one and a half times their annual disposable income, and roughly double the US level —
+with only a few peers, led by the Netherlands and Australia, ranking higher among the
+countries that report.
 
 **Data current to `{python} get_data_date("data/housing/oecd_household_debt.csv")`.**
 

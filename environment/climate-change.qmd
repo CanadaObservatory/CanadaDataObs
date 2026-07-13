@@ -326,7 +326,9 @@ else:
 The famous climate spirals (NASA, Ed Hawkins) keep every month of data and still
 look smooth because they average the whole globe. A single station can't be that
 smooth — so these two, **Toronto** and **Eureka** on the **same scale**, keep the
-full **month-to-month** detail and stay deliberately jagged. Each month sits at its
+full **month-to-month** detail and stay deliberately jagged. (The pairing is chosen
+for the records: Toronto holds one of the country's longest continuous series, and
+Eureka is among the High Arctic's most complete.) Each month sits at its
 position around the circle; the further out, the further above the 1961–1990 average
 (the green ring is that normal; faint rings every 4 °C). Each year is one coloured
 loop — blue if the year ran below normal, red if above. Press ▶ to build either up

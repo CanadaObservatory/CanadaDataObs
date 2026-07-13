@@ -1,0 +1,13 @@
+# Page metadata for ROOT-level .qmd files (index, about). NOTE: Quarto directory
+# metadata does NOT inherit into subdirectories (verified 2026-07-12) — every content
+# directory carries its own _metadata.yml with the same `image:` line (../-relative).
+#
+# `image:` — the explicit social-share card for every page. Without an explicit page
+# image, Quarto auto-discovers the first <img> in the body and uses it as og:image /
+# twitter:image; on the landing + overview pages that first image is a brand-leaf SVG,
+# which X/Slack/iMessage/LinkedIn will not rasterize (shares render blank). The
+# site-level `website.image` in _quarto.yml does NOT beat that discovery — this
+# page-level default does. Keep the path RELATIVE (no leading slash: that concatenates
+# with the trailing-slash site-url into a `//` URL). Per-theme PNG cards can later
+# override per directory. (Launch gate G1, _strategy/launch-plan-2026-09.md.)
+image: visual_assets/brand/social/og-card.png

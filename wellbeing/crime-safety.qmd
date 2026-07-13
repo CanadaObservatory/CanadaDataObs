@@ -28,6 +28,16 @@ authoritative sources are Statistics Canada's incident-based crime
 statistics (the UCR) and, for the local view, the Toronto Police Service open-data
 portal.
 
+One caveat frames everything below: these are **police-reported** figures, and most
+crime is never reported. Statistics Canada's victimization survey — which asks
+Canadians directly about their experiences — found that about **three in ten (29%)
+criminal incidents came to the attention of police** in 2019, with wide variation by
+offence: roughly half of motor-vehicle thefts and break-and-enters were reported,
+but only 6% of sexual assaults. Reporting rates also shift over time, so a change in
+a police-reported series can reflect changes in *reporting* as well as in crime
+itself — the same caution flagged for hate crime below. (Source: Statistics Canada,
+*Criminal victimization in Canada, 2019*, Juristat 85-002-X.)
+
 ## The headline measures: severity and homicide
 
 Two measures summarise the long-run picture. The **Crime Severity Index** weights
@@ -160,7 +170,7 @@ fig.show(config={"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "se
 ```
 
 **Fraud and identity theft have roughly doubled; shoplifting is up about two-thirds**
-— the categories driving public anxiety — while traditional property crimes like
+— the categories most prominent in public discussion — while traditional property crimes like
 break-and-enter and theft from vehicles have fallen substantially. Among violent
 offences, **assault involving a weapon or injury has climbed about three times faster
 than common assault**. This split is why "is crime up or down?" has no single answer.
@@ -343,7 +353,9 @@ rests on small annual counts in any one metro, so read it cautiously.)
 
 For the everyday, local scale — the texture of crime in one's own area — the Toronto
 Police Service publishes rates per 100,000 for each of the city's **158
-neighbourhoods**. **Switch the offence with the dropdown**; hover any neighbourhood for
+neighbourhoods**. Toronto is shown because its police service publishes the most
+complete open neighbourhood-level data of any Canadian city; other cities can be
+added as their open-data portals allow. **Switch the offence with the dropdown**; hover any neighbourhood for
 its rate and population. These are the Toronto Police's own categories and counting
 rules — a *different* body from Statistics Canada — so this map isn't directly
 comparable to the national and metro figures above; read it as a **local texture** on

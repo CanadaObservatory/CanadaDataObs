@@ -16,6 +16,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  issues: write  # pipeline-health notifications (see "Report pipeline health" below)
 
 jobs:
   update-data:
@@ -33,9 +34,25 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run data pipeline
+        id: pipeline
         run: python -m pipeline.run_pipeline
-        timeout-minutes: 5
+        # A full ~149-indicator run takes well over 5 minutes; the old 5-minute limit
+        # KILLED the run mid-registry every day for weeks in 2026-07 while
+        # continue-on-error kept the job green — the tail indicators (crime severity,
+        # homicide, wildfire, sea ice, happiness…) silently froze on the STALE
+        # fallback. Keep this comfortably above the observed full-run time, and rely
+        # on the freshness check below — not this timeout — to bound damage.
+        timeout-minutes: 25
         continue-on-error: true  # Don't fail deploy if one source is down
+
+      - name: Check data freshness
+        # Fails if any registry indicator's sidecar hasn't been re-stamped in 4+ days
+        # (i.e. its fetch keeps failing or the run keeps dying before reaching it).
+        # continue-on-error so a stale source never blocks the deploy — the failure
+        # surfaces through the issue below instead.
+        id: freshness
+        run: python -m pipeline.check_freshness
+        continue-on-error: true
 
       - name: Check NRCan elevation tile service (Elevation-page basemap)
         # The Elevation page streams NRCan's live CBME hillshade as its relief base. NRCan has
@@ -59,6 +76,27 @@ jobs:
           git diff --staged --quiet || git commit -m "Update data files [automated]"
           git push
 
+      - name: Report pipeline health (issue on failure)
+        # One standing issue, commented on each unhealthy day — never a new issue per
+        # run, so a long outage stays one thread. Fires when the pipeline step failed
+        # or was killed, or when the freshness check found stale indicators.
+        if: steps.pipeline.outcome != 'success' || steps.freshness.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Pipeline health: failed run or stale data"
+          BODY="Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          - pipeline step outcome: \`${{ steps.pipeline.outcome }}\` (a 'failure' here usually means a crash or the step timeout)
+          - freshness check outcome: \`${{ steps.freshness.outcome }}\`
+
+          $(cat /tmp/freshness-report.txt 2>/dev/null || echo '(no freshness report written)')"
+          NUM=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number' || true)
+          if [ -n "$NUM" ]; then
+            gh issue comment "$NUM" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY"
+          fi
+
   deploy:
     needs: update-data
     # Run deploy even if update-data was skipped (on push) or failed
@@ -80,6 +118,12 @@ jobs:
 
       - name: Render site
         run: quarto render
+
+      - name: Site guards (og:image raster, navbar consistency, placeholder warn)
+        # Blocks the deploy if any page's og:image resolves to an SVG (blank share
+        # cards on X/Slack/iMessage — launch gate G1) or if navbars diverge across
+        # pages. Placeholder-prose findings are warn-only.
+        run: python -m pipeline.check_site _site
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,5 +1,11 @@
 # Remaining-work plan — Canada Observatory site review
 
+> **SUPERSEDED 2026-07-12 as the active list by `launch-plan-2026-09.md`** (the
+> pre-launch master plan for the Sept 1 launch). Most Tier 3–5 items below shipped in
+> late June; the still-open remainder (housing dashboard §169/§192, Cost-of-Living
+> follow-ons, data-blocked items) is folded into the launch plan's §2c queue and
+> owner-decision table. Kept for the §N item-number cross-reference.
+
 *Written 2026-06-21, after a full line-by-line audit of all 516 numbered review items
 (`review-extract.md`) against the current code on branch `site-review-2026-06` (tip `257843f`).
 This supersedes the day-by-day batch log in `site-review-action-plan.md` for planning purposes.

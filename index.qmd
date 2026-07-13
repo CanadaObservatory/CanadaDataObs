@@ -1,6 +1,6 @@
 ---
 title: "Canada Observatory"
-subtitle: "Interactive metrics for informed civic conversations"
+subtitle: "Data and charts for informed civic conversations"
 ---
 
 ![](visual_assets/brand/botanical/leaf-botanical-cells.svg){.hero-leaf fig-alt="The Canada Observatory mark: a sugar-maple leaf divided into six colour cells"}
@@ -13,8 +13,8 @@ finances**, **health & well-being**, **land & environment**, and **education,
 science & innovation**. All data comes from authoritative primary sources —
 primarily [Statistics Canada](https://www.statcan.gc.ca/), the
 [OECD](https://data.oecd.org/), and other government and international agencies.
-Most of it refreshes automatically every week, with the rest updated on each
-source's own release schedule.
+Most of it refreshes automatically — the pipeline checks its sources daily — with
+the rest updated on each source's own release schedule.
 
 Where possible, Canada is shown alongside a broad set of 17 OECD peer countries
 (not just the G7) to provide meaningful international context.
@@ -39,6 +39,8 @@ links to the section behind it:
 - [**How big is government, and what does it spend on?**](fiscal/) — debt, deficits, the public-service workforce, and federal spending
 - [**Is crime going up?**](wellbeing/crime-safety.qmd) — everyday crime, hate crime, and your city, over time
 - [**How fast is Canada warming?**](environment/climate-change.qmd) — national, regional, and city-level temperature trends
+- [**How long do Canadians live?**](health/) — a century of life expectancy, the peer comparison, and the recent dip
+- [**How many children are Canadians having?**](population/index.qmd#fertility) — fertility over the long run, here and among peers
 - [**What does my neighbourhood look like?**](population/diversity.qmd) — diversity, religion, incomes, and home values, mapped to the census tract
 
 ---
@@ -131,7 +133,7 @@ research workforce, compared with peers.
 
 - **Authoritative sources only** — Statistics Canada, OECD, and other government, international, and research agencies
 - **Broad peer comparisons** — 17 OECD countries, not just the G7
-- **Automatically updated** — data pipelines run weekly; update frequency varies by source
+- **Automatically updated** — the data pipeline checks its sources daily; update frequency varies by source
 - **Open and downloadable** — all cleaned data available as CSV
 - **No policy advocacy** — we present the data, sources, and methods to support
   informed discussion, not to push conclusions. We make

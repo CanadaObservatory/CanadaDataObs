@@ -20,7 +20,7 @@ project:
 website:
   title: "Canada Observatory"
   site-url: https://canadaobservatory.github.io/CanadaDataObs/
-  description: "Interactive metrics about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
+  description: "Data and charts for informed civic conversations about Canada — its people, economy and affordability, government finances, health and well-being, land and environment, and education and science"
   favicon: visual_assets/brand/favicon/favicon-32.png
   image: visual_assets/brand/social/og-card.png
   open-graph: true
@@ -147,7 +147,7 @@ website:
           - href: about.qmd
             text: Mission & Method
           - href: about/people.qmd
-            text: People
+            text: Who We Are
           - href: about/data-sources.qmd
             text: Data Sources
           - href: about/open-data.qmd

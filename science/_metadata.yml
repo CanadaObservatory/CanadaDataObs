@@ -1,3 +1,9 @@
 # Area identity (science → education): tags every page in this directory with the
 # area body class so custom.scss draws the area-colour title rule.
 body-classes: area-education
+
+# Explicit social-share card: without this, Quarto uses the first body image as
+# og:image — an SVG leaf on some pages, which share platforms will not rasterize.
+# ../-relative (a leading slash would double-slash against the trailing-slash
+# site-url). Launch gate G1 — see _strategy/launch-plan-2026-09.md.
+image: ../visual_assets/brand/social/og-card.png

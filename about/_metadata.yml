@@ -1,7 +1,4 @@
-# Area identity (population → people): tags every page in this directory with the
-# area body class so custom.scss draws the area-colour title rule.
-body-classes: area-people
-
+# Shared metadata for the About sub-pages.
 # Explicit social-share card: without this, Quarto uses the first body image as
 # og:image — an SVG leaf on some pages, which share platforms will not rasterize.
 # ../-relative (a leading slash would double-slash against the trailing-slash

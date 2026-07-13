@@ -695,10 +695,23 @@ expose (the chart still renders correctly; only the rescale-on-button is affecte
 
 ## GitHub Actions (update-data.yml)
 
-Push to main, weekly cron (Mon 6am UTC), or manual. Data fetch runs on
-schedule/manual only; deploy runs on every push (renders from latest code + data).
-`continue-on-error` + the STALE fallback mean a transient source outage won't
-fail the build or blank a chart.
+Push to main, **daily cron (14:00 UTC — after StatCan's 08:30 ET release window)**,
+or manual (`workflow_dispatch` = the release-morning "refresh now" button). Data
+fetch runs on schedule/manual only; deploy runs on every push (renders from latest
+code + data). `continue-on-error` + the STALE fallback mean a transient source
+outage won't fail the build or blank a chart — **which is also why failures were
+invisible: for ~3 weeks in 2026-06/07 a 5-minute step timeout KILLED the ~149-
+indicator run mid-registry every day while the job stayed green, freezing the
+registry tail (crime severity, homicide, wildfire, sea ice, happiness…) on the
+STALE fallback since June 20.** Fixed 2026-07-13: `timeout-minutes: 25` (full runs
+were exceeding 5), plus `pipeline/check_freshness.py` after each fetch (fails if
+any registry sidecar's `retrieved_at` is ≥4 days old; allow-list for known upstream
+outages like the OECD PDB 500s) and a "Report pipeline health" step that comments
+on ONE standing GitHub issue rather than failing the deploy. The deploy job runs
+`pipeline/check_site.py _site` after render — **blocks the deploy** if any page's
+og:image isn't a raster (the SVG-share-card bug) or navbars diverge across pages;
+warn-only for prose-less sections ("Latest…: ranked" companion bars excluded as an
+idiom until the accessibility pass adds per-chart takeaways).
 
 ## Licensing note (CREA — published as charts only, with permission)
 
@@ -819,6 +832,14 @@ and NHPI tracks new-build builder prices, which understate the resale run-up.
   StatCan discontinued in 2011 (that table is no longer used).
 
 ## Status & what's deferred
+
+**LAUNCH: Sept 1, 2026** — the ACTIVE pre-launch work plan (gates, data queue, comms,
+calendar) is **`_strategy/launch-plan-2026-09.md`** (2026-07-12; supersedes
+`remaining-work-plan-2026-06-21.md`); the comms system (social strategy, 12-month
+timeline, three article drafts with verified figures) is in **`_strategy/comms/`**.
+Highest-priority verified bugs there: SVG og:images on homepage/overview pages (Quarto
+first-image discovery beats the site og-card.png — fix via per-dir `_metadata.yml`),
+and four stale "weekly" prose claims (the Actions cron is **daily**, 14:00 UTC).
 
 Done: registry + generic fetchers (was the v2 plan), metadata sidecars, STALE
 fallback, the four new domains (Housing, Income, Health, Public Finances),

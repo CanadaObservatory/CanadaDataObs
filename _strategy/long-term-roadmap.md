@@ -2,8 +2,9 @@
 
 Ideas worth doing but **parked** — blocked on an authoritative data source, an owner
 decision, or a future milestone (e.g. the next census, a site launch). This is distinct
-from the **active** near-term list in `remaining-work-plan-2026-06-21.md`; promote an item
-from here into that plan once it is unblocked.
+from the **active** list, which since 2026-07-12 is **`launch-plan-2026-09.md`** (the
+Sept-1 pre-launch master plan; it superseded `remaining-work-plan-2026-06-21.md`);
+promote an item from here into that plan once it is unblocked.
 
 **Project data rules that gate these:** authoritative *primary* sources only (StatCan /
 OECD / World Bank / OWID / Bank of Canada / official agencies — never Wikipedia or

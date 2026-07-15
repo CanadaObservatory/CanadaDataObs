@@ -4,7 +4,7 @@
   "source_table": "ECCC AHCCD monthly (homogenized), via GeoMet",
   "frequency": "monthly",
   "unit": "\u00b0C monthly mean temperature (homogenized)",
-  "retrieved_at": "2026-07-14T15:38:03.702934+00:00",
+  "retrieved_at": "2026-07-15T15:47:35.448329+00:00",
   "latest_observation_date": "2020",
   "next_release_date": null,
   "transformations": [

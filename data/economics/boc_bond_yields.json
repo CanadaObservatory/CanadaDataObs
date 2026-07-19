@@ -4,7 +4,7 @@
   "source_table": "Bank of Canada (Government of Canada benchmark bond yields)",
   "frequency": "daily",
   "unit": "%",
-  "retrieved_at": "2026-07-18T15:02:29.609454+00:00",
+  "retrieved_at": "2026-07-19T15:04:55.643930+00:00",
   "latest_observation_date": "2026-07-16",
   "next_release_date": null,
   "transformations": [

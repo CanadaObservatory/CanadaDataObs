@@ -4,7 +4,7 @@
   "source_table": "Statistics Canada 35-10-0068-01",
   "frequency": "annual",
   "unit": "per 100,000 population",
-  "retrieved_at": "2026-07-19T15:11:37.580654+00:00",
+  "retrieved_at": "2026-07-21T16:04:23.070833+00:00",
   "latest_observation_date": "2024-01-01",
   "next_release_date": null,
   "transformations": [

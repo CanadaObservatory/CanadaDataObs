@@ -4,7 +4,7 @@
   "source_table": "Substance-Related Harms (apparent opioid toxicity deaths & hospitalizations)",
   "frequency": "quarterly",
   "unit": "number / per 100,000",
-  "retrieved_at": "2026-07-21T15:53:48.687825+00:00",
+  "retrieved_at": "2026-07-22T15:57:09.506755+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [

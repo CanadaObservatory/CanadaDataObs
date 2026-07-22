@@ -4,12 +4,12 @@
   "source_table": "18-10-0004-01",
   "frequency": "monthly",
   "unit": "index (2002=100)",
-  "retrieved_at": "2026-07-19T15:04:29.860341+00:00",
-  "latest_observation_date": "2026-05-01",
+  "retrieved_at": "2026-07-22T15:50:06.963460+00:00",
+  "latest_observation_date": "2026-06-01",
   "next_release_date": null,
   "transformations": [
     "Canada; major food sub-components (grocery categories + restaurants)"
   ],
   "notes": null,
-  "row_count": 5092
+  "row_count": 5100
 }

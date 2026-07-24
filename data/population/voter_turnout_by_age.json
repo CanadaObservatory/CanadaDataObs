@@ -4,7 +4,7 @@
   "source_table": "open.canada.ca b545fe25",
   "frequency": "per election",
   "unit": "% of eligible electors",
-  "retrieved_at": "2026-07-23T15:58:39.455837+00:00",
+  "retrieved_at": "2026-07-24T15:28:40.740565+00:00",
   "latest_observation_date": "2025",
   "next_release_date": null,
   "transformations": [
